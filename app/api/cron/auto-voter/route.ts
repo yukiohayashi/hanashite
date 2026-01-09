@@ -311,7 +311,7 @@ export async function POST(request: Request) {
     console.error('CRON auto-voter error:', error);
     const errorMessage = error instanceof Error ? error.message : '実行に失敗しました';
 
-    await logExecution('error', undefined, undefined, undefined, errorMessage);
+    await logExecution('error', undefined, errorMessage);
 
     return NextResponse.json(
       { success: false, error: errorMessage },
