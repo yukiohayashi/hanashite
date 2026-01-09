@@ -301,13 +301,17 @@ export async function POST(request: Request) {
         let { data: keyword } = await supabase
           .from('keywords')
           .select('id')
-          .eq('name', keywordName)
+          .eq('keyword', keywordName)
           .single();
 
         if (!keyword) {
           const { data: newKeyword } = await supabase
             .from('keywords')
-            .insert({ name: keywordName, created_at: new Date().toISOString() })
+            .insert({ 
+              keyword: keywordName, 
+              slug: keywordName.toLowerCase().replace(/\s+/g, '-'),
+              created_at: new Date().toISOString() 
+            })
             .select()
             .single();
           keyword = newKeyword;

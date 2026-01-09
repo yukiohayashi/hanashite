@@ -58,7 +58,7 @@ export default async function PostPage({ params }: { params: Promise<{ id: strin
   // キーワードを取得
   const { data: postKeywords } = await supabase
     .from('post_keywords')
-    .select('keyword_id, keywords(id, name)')
+    .select('keyword_id, keywords(id, keyword)')
     .eq('post_id', id);
 
   const keywords = postKeywords?.map(pk => (pk as any).keywords).filter(Boolean) || [];
@@ -374,7 +374,7 @@ export default async function PostPage({ params }: { params: Promise<{ id: strin
                           href={`/keyword/${keyword.id}`}
                           className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-gray-100 text-gray-700 hover:bg-gray-200 transition-colors"
                         >
-                          #{keyword.name}
+                          #{keyword.keyword}
                         </Link>
                       ))}
                     </div>
