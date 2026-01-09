@@ -16,7 +16,11 @@ export default async function MyProfilePage() {
     .eq('id', parseInt(session.user.id))
     .single();
 
-  if (user?.profile_slug) {
+  if (!user) {
+    redirect('/');
+  }
+
+  if (user.profile_slug) {
     redirect(`/user/${user.profile_slug}`);
   } else {
     redirect(`/user/${user.id}`);
