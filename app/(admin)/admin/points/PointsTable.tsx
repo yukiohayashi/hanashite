@@ -7,8 +7,8 @@ interface Point {
   user_id: number;
   points: number;
   type: string;
-  description: string;
-  related_id: number;
+  description?: string;
+  related_id?: number;
   created_at: string;
   user: {
     id: number;
