@@ -16,7 +16,7 @@ export default async function AdminLayout({
   // 管理者権限チェック（status: 2=編集者, 3=管理者、または一時的にuser_id=33も許可）
   const hasAccess = session && (
     (session.user?.status && session.user.status >= 2) ||
-    session.user?.id === 33
+    (session.user?.id && Number(session.user.id) === 33)
   );
 
   if (!hasAccess) {
