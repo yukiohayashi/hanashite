@@ -35,6 +35,9 @@ yarn-error.log*
 !.env.example
 scripts/cron/.env.cron
 
+# logs
+logs/
+
 # vercel
 .vercel
 
