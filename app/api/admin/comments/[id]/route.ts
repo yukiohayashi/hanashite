@@ -11,13 +11,14 @@ async function isAdmin() {
 // コメント削除
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
+  const { id } = await params;
   if (!await isAdmin()) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
 
-  const commentId = parseInt(params.id);
+  const commentId = parseInt(id);
 
   try {
     const { error } = await supabase

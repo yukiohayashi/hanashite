@@ -11,13 +11,14 @@ async function isAdmin() {
 // ユーザーBAN/BAN解除、status変更
 export async function PATCH(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
+  const { id } = await params;
   if (!await isAdmin()) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
 
-  const userId = parseInt(params.id);
+  const userId = parseInt(id);
   const body = await request.json();
   const { is_banned, status } = body;
 

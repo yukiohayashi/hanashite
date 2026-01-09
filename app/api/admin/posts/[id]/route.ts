@@ -11,13 +11,14 @@ async function isAdmin() {
 // 投稿削除
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
+  const { id } = await params;
   if (!await isAdmin()) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
 
-  const postId = parseInt(params.id);
+  const postId = parseInt(id);
 
   try {
     const { error } = await supabase
@@ -40,13 +41,14 @@ export async function DELETE(
 // 投稿ステータス更新
 export async function PATCH(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
+  const { id } = await params;
   if (!await isAdmin()) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
 
-  const postId = parseInt(params.id);
+  const postId = parseInt(id);
   const body = await request.json();
   const { status } = body;
 
