@@ -55,6 +55,14 @@ export default async function PostPage({ params }: { params: Promise<{ id: strin
     category = categoryData;
   }
 
+  // キーワードを取得
+  const { data: postKeywords } = await supabase
+    .from('post_keywords')
+    .select('keyword_id, keywords(id, name)')
+    .eq('post_id', id);
+
+  const keywords = postKeywords?.map(pk => (pk as any).keywords).filter(Boolean) || [];
+
   // 投票オプション（締切日時など）を取得
   const { data: voteOptions } = await supabase
     .from('vote_options')
@@ -346,16 +354,29 @@ export default async function PostPage({ params }: { params: Promise<{ id: strin
                   </div>
                 )}
 
-                {/* カテゴリ表示 */}
-                {category && (
+                {/* カテゴリとキーワード表示 */}
+                {(category || keywords.length > 0) && (
                   <div className="mt-4 pt-4 border-t border-gray-200">
                     <div className="flex flex-wrap gap-2">
-                      <Link
-                        href={`/category/${category.id}`}
-                        className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-blue-100 text-blue-800 hover:bg-blue-200 transition-colors"
-                      >
-                        {category.name}
-                      </Link>
+                      {/* カテゴリ */}
+                      {category && (
+                        <Link
+                          href={`/category/${category.id}`}
+                          className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-blue-100 text-blue-800 hover:bg-blue-200 transition-colors"
+                        >
+                          {category.name}
+                        </Link>
+                      )}
+                      {/* キーワード */}
+                      {keywords.map((keyword: any) => (
+                        <Link
+                          key={keyword.id}
+                          href={`/keyword/${keyword.id}`}
+                          className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-gray-100 text-gray-700 hover:bg-gray-200 transition-colors"
+                        >
+                          #{keyword.name}
+                        </Link>
+                      ))}
                     </div>
                   </div>
                 )}

@@ -291,6 +291,40 @@ export async function POST(request: Request) {
       });
     }
 
+    // キーワードを保存
+    if (ankeData.keywords && ankeData.keywords.length > 0) {
+      const maxKeywords = parseInt(settings.max_keywords || '3');
+      const keywordsToSave = ankeData.keywords.slice(0, maxKeywords);
+      
+      for (const keywordName of keywordsToSave) {
+        // キーワードを検索または作成
+        let { data: keyword } = await supabase
+          .from('keywords')
+          .select('id')
+          .eq('name', keywordName)
+          .single();
+
+        if (!keyword) {
+          const { data: newKeyword } = await supabase
+            .from('keywords')
+            .insert({ name: keywordName, created_at: new Date().toISOString() })
+            .select()
+            .single();
+          keyword = newKeyword;
+        }
+
+        if (keyword) {
+          // post_keywordsテーブルに関連付け
+          await supabase.from('post_keywords').insert({
+            post_id: post.id,
+            keyword_id: keyword.id,
+          });
+        }
+      }
+      
+      console.log(`キーワードを${keywordsToSave.length}個保存しました:`, keywordsToSave);
+    }
+
     try {
       const taggerResponse = await fetch(`${process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000'}/api/posts/${post.id}/ai-tag`, {
         method: 'POST',
