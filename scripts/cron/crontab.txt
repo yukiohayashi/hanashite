@@ -6,8 +6,8 @@
 SHELL=/bin/bash
 PATH=/usr/local/sbin:/usr/local/bin:/sbin:/bin:/usr/sbin:/usr/bin
 
-# AI自動投稿生成（1時間ごと）
-0 * * * * /var/www/anke-nextjs/scripts/cron/auto-creator.sh
+# AI自動投稿生成（10分ごとにチェック、実際の実行は管理画面の設定による）
+*/10 * * * * /var/www/anke-nextjs/scripts/cron/auto-creator.sh
 
 # AI自動タグ付け（30分ごと）
 */30 * * * * /var/www/anke-nextjs/scripts/cron/auto-tagger.sh
@@ -23,6 +23,7 @@ PATH=/usr/local/sbin:/usr/local/bin:/sbin:/bin:/usr/sbin:/usr/bin
 
 # 注意事項:
 # - スクリプトのパスは実際のデプロイ先に合わせて変更してください
-# - 実行間隔は管理画面の設定に応じて調整してください
+# - AI自動投稿は10分ごとにチェックされますが、実際の実行は管理画面の設定（実行間隔±ゆらぎ）に従います
+# - 実行ゆらぎにより、投稿タイミングがランダム化されます
 # - ログは /var/log/anke/ に出力されます
 # - 各機能の開始/停止は管理画面のボタンで制御できます

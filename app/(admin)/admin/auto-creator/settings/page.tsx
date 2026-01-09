@@ -99,8 +99,9 @@ export default function AutoCreatorSettings() {
       const interval = parseInt(settingsMap.execution_interval || '60');
       const variance = parseInt(settingsMap.execution_variance || '15');
       const now = new Date();
-      const nextRun = new Date(now.getTime() + (interval + variance) * 60000);
-      setNextRunTime(nextRun.toLocaleString('ja-JP'));
+      const minTime = new Date(now.getTime() + (interval - variance) * 60000);
+      const maxTime = new Date(now.getTime() + (interval + variance) * 60000);
+      setNextRunTime(`${minTime.toLocaleString('ja-JP', { hour: '2-digit', minute: '2-digit' })} ～ ${maxTime.toLocaleString('ja-JP', { hour: '2-digit', minute: '2-digit' })}`);
     } else {
       setNextRunTime('');
     }
