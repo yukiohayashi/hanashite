@@ -46,3 +46,15 @@ logs/
 next-env.d.ts
 
 /src/generated/prisma
+
+# バックアップとデータベースファイル
+backups/
+*.sql
+*.sql.gz
+*.tar.gz
+backup.sql
+data_only.sql
+
+# 移行元データ
+wordpress/
+anke_db/

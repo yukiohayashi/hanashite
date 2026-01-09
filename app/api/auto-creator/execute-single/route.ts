@@ -173,19 +173,19 @@ export async function POST(request: Request) {
     }
     console.log('=== 選択肢保存完了 ===');
 
-    // カテゴリを設定
-    for (const categoryName of ankeData.categories) {
+    // カテゴリを設定（最初のカテゴリのみをposts.category_idに設定）
+    if (ankeData.categories && ankeData.categories.length > 0) {
       const { data: category } = await supabase
         .from('categories')
         .select('id')
-        .eq('name', categoryName)
+        .eq('name', ankeData.categories[0])
         .single();
 
       if (category) {
-        await supabase.from('post_categories').insert({
-          post_id: post.id,
-          category_id: category.id,
-        });
+        await supabase
+          .from('posts')
+          .update({ category_id: category.id })
+          .eq('id', post.id);
       }
     }
 
@@ -194,13 +194,13 @@ export async function POST(request: Request) {
       let { data: keyword } = await supabase
         .from('keywords')
         .select('id')
-        .eq('name', keywordName)
+        .eq('keyword', keywordName)
         .single();
 
       if (!keyword) {
         const { data: newKeyword } = await supabase
           .from('keywords')
-          .insert({ name: keywordName, created_at: new Date().toISOString() })
+          .insert({ keyword: keywordName, created_at: new Date().toISOString() })
           .select()
           .single();
         keyword = newKeyword;
