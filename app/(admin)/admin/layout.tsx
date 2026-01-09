@@ -1,0 +1,325 @@
+import Link from 'next/link';
+import { LayoutDashboard, FileText, Users, MessageSquare, Heart, Coins, Mail, Bot, LogOut, Search, Trash2, Settings } from 'lucide-react';
+
+export default function AdminPanelLayout({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
+  return (
+    <div className="flex h-screen bg-gray-100">
+      {/* サイドバー */}
+      <aside className="w-64 bg-gray-900 text-white flex flex-col">
+        <nav className="flex-1 overflow-y-auto py-2">
+          <Link
+            href="/admin"
+            className="flex items-center gap-2 px-3 py-1 text-gray-300 hover:bg-gray-800 hover:text-white transition-colors"
+          >
+            <LayoutDashboard className="w-4 h-4" />
+            <span className="text-sm">ダッシュボード</span>
+          </Link>
+
+          <Link
+            href="/admin/cleanup"
+            className="flex items-center gap-2 px-3 py-1 text-gray-300 hover:bg-gray-800 hover:text-white transition-colors"
+          >
+            <Trash2 className="w-5 h-5" />
+            <span className="text-sm">クリーンアップ</span>
+          </Link>
+
+          <div>
+            <Link
+              href="/admin/auto-creator"
+              className="flex items-center gap-2 px-3 py-1 text-gray-300 hover:bg-gray-800 hover:text-white transition-colors"
+            >
+              <Bot className="w-4 h-4" />
+              <span className="text-sm">AI自動投稿</span>
+            </Link>
+            <div className="ml-11 space-y-1">
+              <Link
+                href="/admin/auto-creator"
+                className="block px-3 py-1 text-sm text-gray-400 hover:bg-gray-800 hover:text-white transition-colors"
+              >
+                ダッシュボード
+              </Link>
+              <Link
+                href="/admin/auto-creator/rss"
+                className="block px-3 py-1 text-sm text-gray-400 hover:bg-gray-800 hover:text-white transition-colors"
+              >
+                RSS記事一覧
+              </Link>
+              <Link
+                href="/admin/auto-creator/logs"
+                className="block px-3 py-1 text-sm text-gray-400 hover:bg-gray-800 hover:text-white transition-colors"
+              >
+                実行履歴
+              </Link>
+              <Link
+                href="/admin/auto-creator/settings"
+                className="block px-3 py-1 text-sm text-gray-400 hover:bg-gray-800 hover:text-white transition-colors"
+              >
+                設定
+              </Link>
+            </div>
+          </div>
+
+          <div>
+            <Link
+              href="/admin/posts"
+              className="flex items-center gap-2 px-3 py-1 text-gray-300 hover:bg-gray-800 hover:text-white transition-colors"
+            >
+              <FileText className="w-5 h-5" />
+              <span className="text-sm">投稿管理</span>
+            </Link>
+            <div className="ml-11 space-y-1">
+              <Link
+                href="/admin/posts"
+                className="block px-3 py-1 text-sm text-gray-400 hover:bg-gray-800 hover:text-white transition-colors"
+              >
+                投稿一覧
+              </Link>
+              <Link
+                href="/admin/posts/ai-tagger"
+                className="block px-3 py-1 text-sm text-gray-400 hover:bg-gray-800 hover:text-white transition-colors"
+              >
+                AI自動タグ付け
+              </Link>
+              <Link
+                href="/admin/posts/ai-tagger/settings"
+                className="block px-3 py-1 text-sm text-gray-400 hover:bg-gray-800 hover:text-white transition-colors"
+              >
+                設定
+              </Link>
+            </div>
+          </div>
+
+          <div>
+            <Link
+              href="/admin/keywords"
+              className="flex items-center gap-2 px-3 py-1 text-gray-300 hover:bg-gray-800 hover:text-white transition-colors"
+            >
+              <Search className="w-5 h-5" />
+              <span className="text-sm">キーワード検索</span>
+            </Link>
+            <div className="ml-11 space-y-1">
+              <Link
+                href="/admin/keywords"
+                className="block px-3 py-1 text-sm text-gray-400 hover:bg-gray-800 hover:text-white transition-colors"
+              >
+                キーワード一覧
+              </Link>
+              <Link
+                href="/admin/categories"
+                className="block px-3 py-1 text-sm text-gray-400 hover:bg-gray-800 hover:text-white transition-colors"
+              >
+                カテゴリ管理
+              </Link>
+              <Link
+                href="/admin/ng-words"
+                className="block px-3 py-1 text-sm text-gray-400 hover:bg-gray-800 hover:text-white transition-colors"
+              >
+                NGワード管理
+              </Link>
+              <Link
+                href="/admin/keywords/history"
+                className="block px-3 py-1 text-sm text-gray-400 hover:bg-gray-800 hover:text-white transition-colors"
+              >
+                検索履歴
+              </Link>
+              <Link
+                href="/admin/keywords/stats"
+                className="block px-3 py-1 text-sm text-gray-400 hover:bg-gray-800 hover:text-white transition-colors"
+              >
+                統計
+              </Link>
+            </div>
+          </div>
+
+          {/* 自動投票・コメント・いいね */}
+          <div>
+            <Link
+              href="/admin/auto-voter"
+              className="flex items-center gap-2 px-3 py-1 text-gray-300 hover:bg-gray-800 hover:text-white transition-colors"
+            >
+              <MessageSquare className="w-5 h-5" />
+              <span className="text-sm">自動投票・コメント・いいね</span>
+            </Link>
+            <div className="ml-11 space-y-1">
+              <Link
+                href="/admin/auto-voter"
+                className="block px-3 py-1 text-sm text-gray-400 hover:bg-gray-800 hover:text-white transition-colors"
+              >
+                ダッシュボード
+              </Link>
+              <Link
+                href="/admin/auto-voter/manual"
+                className="block px-3 py-1 text-sm text-gray-400 hover:bg-gray-800 hover:text-white transition-colors"
+              >
+                手動実行
+              </Link>
+              <Link
+                href="/admin/auto-voter/logs"
+                className="block px-3 py-1 text-sm text-gray-400 hover:bg-gray-800 hover:text-white transition-colors"
+              >
+                実行履歴
+              </Link>
+              <Link
+                href="/admin/auto-voter/settings"
+                className="block px-3 py-1 text-sm text-gray-400 hover:bg-gray-800 hover:text-white transition-colors"
+              >
+                設定
+              </Link>
+            </div>
+          </div>
+
+          <Link
+            href="/admin/comments"
+            className="flex items-center gap-2 px-3 py-1 text-gray-300 hover:bg-gray-800 hover:text-white transition-colors"
+          >
+            <MessageSquare className="w-5 h-5" />
+            <span className="text-sm">コメント管理</span>
+          </Link>
+<div>
+            <Link
+              href="/admin/likes"
+              className="flex items-center gap-2 px-3 py-1 text-gray-300 hover:bg-gray-800 hover:text-white transition-colors"
+            >
+              <Heart className="w-5 h-5" />
+              <span className="text-sm">いいね管理</span>
+            </Link>
+            <div className="ml-11 space-y-1">
+              <Link
+                href="/admin/likes/stats"
+                className="block px-3 py-1 text-sm text-gray-400 hover:bg-gray-800 hover:text-white transition-colors"
+              >
+                統計
+              </Link>
+              <Link
+                href="/admin/likes"
+                className="block px-3 py-1 text-sm text-gray-400 hover:bg-gray-800 hover:text-white transition-colors"
+              >
+                いいね一覧
+              </Link>
+              <Link
+                href="/admin/likes/settings"
+                className="block px-3 py-1 text-sm text-gray-400 hover:bg-gray-800 hover:text-white transition-colors"
+              >
+                設定
+              </Link>
+            </div>
+          </div>
+          <div>
+            <Link
+              href="/admin/users"
+              className="flex items-center gap-2 px-3 py-1 text-gray-300 hover:bg-gray-800 hover:text-white transition-colors"
+            >
+              <Users className="w-5 h-5" />
+              <span className="text-sm">ユーザー管理</span>
+            </Link>
+            <div className="ml-11 space-y-1">
+              <Link
+                href="/admin/users"
+                className="block px-3 py-1 text-sm text-gray-400 hover:bg-gray-800 hover:text-white transition-colors"
+              >
+                ユーザー一覧
+              </Link>
+              <Link
+                href="/admin/users/ai-generator"
+                className="block px-3 py-1 text-sm text-gray-400 hover:bg-gray-800 hover:text-white transition-colors"
+              >
+                AI会員生成
+              </Link>
+            </div>
+          </div>
+
+          
+
+          <div>
+            <Link
+              href="/admin/points"
+              className="flex items-center gap-2 px-3 py-1 text-gray-300 hover:bg-gray-800 hover:text-white transition-colors"
+            >
+              <Coins className="w-5 h-5" />
+              <span className="text-sm">ポイント管理</span>
+            </Link>
+            <div className="ml-11 space-y-1">
+              <Link
+                href="/admin/points/stats"
+                className="block px-3 py-1 text-sm text-gray-400 hover:bg-gray-800 hover:text-white transition-colors"
+              >
+                統計
+              </Link>
+              <Link
+                href="/admin/points"
+                className="block px-3 py-1 text-sm text-gray-400 hover:bg-gray-800 hover:text-white transition-colors"
+              >
+                ポイント履歴
+              </Link>
+              <Link
+                href="/admin/points/settings"
+                className="block px-3 py-1 text-sm text-gray-400 hover:bg-gray-800 hover:text-white transition-colors"
+              >
+                設定
+              </Link>
+            </div>
+          </div>
+
+          <div>
+            <Link
+              href="/admin/mail"
+              className="flex items-center gap-2 px-3 py-1 text-gray-300 hover:bg-gray-800 hover:text-white transition-colors"
+            >
+              <Mail className="w-5 h-5" />
+              <span className="text-sm">メール管理</span>
+            </Link>
+            <div className="ml-11 space-y-1">
+              <Link
+                href="/admin/mail/templates"
+                className="block px-3 py-1 text-sm text-gray-400 hover:bg-gray-800 hover:text-white transition-colors"
+              >
+                テンプレート
+              </Link>
+              <Link
+                href="/admin/mail/logs"
+                className="block px-3 py-1 text-sm text-gray-400 hover:bg-gray-800 hover:text-white transition-colors"
+              >
+                送信履歴
+              </Link>
+              <Link
+                href="/admin/mail/settings"
+                className="block px-3 py-1 text-sm text-gray-400 hover:bg-gray-800 hover:text-white transition-colors"
+              >
+                SMTP設定
+              </Link>
+            </div>
+          </div>
+
+          <Link
+            href="/admin/api-settings"
+            className="flex items-center gap-2 px-3 py-1 text-gray-300 hover:bg-gray-800 hover:text-white transition-colors"
+          >
+            <Settings className="w-5 h-5" />
+            <span className="text-sm">API設定</span>
+          </Link>
+
+          <div className="border-t border-gray-700 mt-3 pt-3">
+            <Link
+              href="/" target="blank"
+              className="flex items-center gap-2 px-3 py-1 text-gray-300 hover:bg-gray-800 hover:text-white transition-colors"
+            >
+              <LogOut className="w-5 h-5" />
+              <span className="text-sm">サイトに戻る</span>
+            </Link>
+          </div>
+        </nav>
+      </aside>
+
+      {/* メインコンテンツ */}
+      <main className="flex-1 overflow-y-auto">
+        <div className="p-4">
+          {children}
+        </div>
+      </main>
+    </div>
+  );
+}

@@ -1,0 +1,16 @@
+# アンケNextJS CRON設定
+# このファイルの内容をcrontabに登録してください
+# 登録方法: crontab -e で編集モードに入り、以下の内容を貼り付け
+
+# 環境変数
+SHELL=/bin/bash
+PATH=/usr/local/sbin:/usr/local/bin:/sbin:/bin:/usr/sbin:/usr/bin
+
+# AI自動投稿生成（1時間ごと、ゆらぎは設定画面で管理）
+0 * * * * /var/www/anke-nextjs/scripts/cron/auto-creator.sh
+
+# 注意事項:
+# - スクリプトのパスは実際のデプロイ先に合わせて変更してください
+# - 実行間隔は管理画面の設定に応じて調整してください
+# - ログは /var/log/anke/ に出力されます
+# - 開始/停止は管理画面のボタンで制御できます（is_enabled設定）

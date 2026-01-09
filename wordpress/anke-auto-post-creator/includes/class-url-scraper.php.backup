@@ -1,0 +1,271 @@
+<?php
+/**
+ * URLスクレイピングクラス
+ */
+
+if (!defined('ABSPATH')) {
+    exit;
+}
+
+class Anke_Auto_Creator_URL_Scraper {
+    
+    /**
+     * URLから記事一覧を取得
+     */
+    public function fetch_articles($url, $limit = 5) {
+        $articles = array();
+        
+        // まずRSSフィードとして試行
+        $articles = $this->fetch_rss_feed($url, $limit);
+        
+        // RSSで取得できなかった場合、HTMLとして試行
+        if (empty($articles)) {
+            if (strpos($url, 'news.yahoo.co.jp') !== false) {
+                $articles = $this->fetch_yahoo_news($url, $limit);
+            } else {
+                $articles = $this->fetch_generic_html($url, $limit);
+            }
+        }
+        
+        return $articles;
+    }
+    
+    /**
+     * Yahoo!ニュースから記事を取得
+     */
+    private function fetch_yahoo_news($url, $limit) {
+        $articles = array();
+        
+        $response = wp_remote_get($url, array(
+            'timeout' => 30,
+            'user-agent' => 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'
+        ));
+        
+        if (is_wp_error($response)) {
+            error_log('Yahoo News fetch error: ' . $response->get_error_message());
+            return $articles;
+        }
+        
+        $html = wp_remote_retrieve_body($response);
+        
+        // DOMDocumentでパース
+        libxml_use_internal_errors(true);
+        $dom = new DOMDocument();
+        $dom->loadHTML(mb_convert_encoding($html, 'HTML-ENTITIES', 'UTF-8'));
+        libxml_clear_errors();
+        
+        $xpath = new DOMXPath($dom);
+        
+        // Yahoo!ニュースの記事リンクを取得
+        $links = $xpath->query('//a[contains(@class, "newsFeed_item_link")]');
+        
+        $count = 0;
+        foreach ($links as $link) {
+            if ($count >= $limit) break;
+            
+            $article_url = $link->getAttribute('href');
+            if (strpos($article_url, 'http') !== 0) {
+                $article_url = 'https://news.yahoo.co.jp' . $article_url;
+            }
+            
+            // 記事の詳細を取得
+            $article = $this->fetch_article_details($article_url);
+            if ($article) {
+                $articles[] = $article;
+                $count++;
+            }
+            
+            // 待機時間（30秒～2分）
+            sleep(rand(30, 120));
+        }
+        
+        return $articles;
+    }
+    
+    /**
+     * RSSフィードから記事を取得
+     */
+    private function fetch_rss_feed($url, $limit) {
+        $articles = array();
+        
+        $rss = fetch_feed($url);
+        
+        if (is_wp_error($rss)) {
+            error_log('RSS fetch error: ' . $rss->get_error_message());
+            return $articles;
+        }
+        
+        $maxitems = $rss->get_item_quantity($limit);
+        $rss_items = $rss->get_items(0, $maxitems);
+        
+        foreach ($rss_items as $item) {
+            $article_url = $item->get_permalink();
+            // URLからクエリパラメータを削除
+            $article_url = preg_replace('/\?.*$/', '', $article_url);
+            
+            // 記事の詳細を取得（本文とOGP画像、OGPタイトル）
+            $article_details = $this->fetch_article_content($article_url);
+            
+            // RSSタイトルが空の場合はOGPタイトルを使用
+            $rss_title = $item->get_title();
+            $title = !empty($rss_title) ? $rss_title : $article_details['title'];
+            
+            $article = array(
+                'url' => $article_url,
+                'title' => $title,
+                'content' => $article_details['content'],
+                'published_date' => $item->get_date('Y-m-d H:i:s'),
+                'image' => $article_details['image']
+            );
+            
+            $articles[] = $article;
+        }
+        
+        return $articles;
+    }
+    
+    /**
+     * 汎用HTMLから記事を取得
+     */
+    private function fetch_generic_html($url, $limit) {
+        $articles = array();
+        
+        $response = wp_remote_get($url, array(
+            'timeout' => 30,
+            'user-agent' => 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'
+        ));
+        
+        if (is_wp_error($response)) {
+            error_log('HTML fetch error: ' . $response->get_error_message());
+            return $articles;
+        }
+        
+        $html = wp_remote_retrieve_body($response);
+        
+        libxml_use_internal_errors(true);
+        $dom = new DOMDocument();
+        $dom->loadHTML(mb_convert_encoding($html, 'HTML-ENTITIES', 'UTF-8'));
+        libxml_clear_errors();
+        
+        $xpath = new DOMXPath($dom);
+        
+        // 一般的な記事リンクのパターンを検索
+        $links = $xpath->query('//article//a | //h2//a | //h3//a');
+        
+        $count = 0;
+        foreach ($links as $link) {
+            if ($count >= $limit) break;
+            
+            $article_url = $link->getAttribute('href');
+            if (strpos($article_url, 'http') !== 0) {
+                continue;
+            }
+            
+            $article = $this->fetch_article_details($article_url);
+            if ($article) {
+                $articles[] = $article;
+                $count++;
+            }
+            
+            sleep(rand(30, 120));
+        }
+        
+        return $articles;
+    }
+    
+    /**
+     * 記事の詳細を取得
+     */
+    private function fetch_article_details($url) {
+        $response = wp_remote_get($url, array(
+            'timeout' => 30,
+            'user-agent' => 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'
+        ));
+        
+        if (is_wp_error($response)) {
+            return null;
+        }
+        
+        $html = wp_remote_retrieve_body($response);
+        
+        libxml_use_internal_errors(true);
+        $dom = new DOMDocument();
+        $dom->loadHTML(mb_convert_encoding($html, 'HTML-ENTITIES', 'UTF-8'));
+        libxml_clear_errors();
+        
+        $xpath = new DOMXPath($dom);
+        
+        // タイトルを取得
+        $title_nodes = $xpath->query('//h1 | //title');
+        $title = $title_nodes->length > 0 ? $title_nodes->item(0)->textContent : '';
+        
+        // 本文を取得
+        $content_nodes = $xpath->query('//article//p | //div[contains(@class, "article")]//p');
+        $content = '';
+        foreach ($content_nodes as $node) {
+            $content .= $node->textContent . "\n";
+        }
+        
+        // 画像を取得
+        $image_nodes = $xpath->query('//article//img | //div[contains(@class, "article")]//img');
+        $image = $image_nodes->length > 0 ? $image_nodes->item(0)->getAttribute('src') : '';
+        
+        return array(
+            'url' => $url,
+            'title' => trim($title),
+            'content' => trim($content),
+            'image' => $image,
+            'published_date' => current_time('mysql')
+        );
+    }
+    
+    /**
+     * 記事の本文とOGP画像を取得
+     */
+    public function fetch_article_content($url) {
+        $response = wp_remote_get($url, array(
+            'timeout' => 15,
+            'user-agent' => 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'
+        ));
+        
+        if (is_wp_error($response)) {
+            error_log('Article fetch error: ' . $response->get_error_message());
+            return array('content' => '', 'image' => '');
+        }
+        
+        $html = wp_remote_retrieve_body($response);
+        
+        // OGP画像URLを取得（ダウンロードはset_featured_imageで実施）
+        $image = '';
+        if (preg_match('/<meta[^>]+property=["\']og:image["\'][^>]+content=["\']([^"\']+)["\']/', $html, $matches)) {
+            $image = $matches[1];
+        } elseif (preg_match('/<meta[^>]+content=["\']([^"\']+)["\'][^>]+property=["\']og:image["\']/', $html, $matches)) {
+            $image = $matches[1];
+        }
+        
+        if (!empty($image)) {
+            error_log('URL Scraper: Found OG image URL: ' . $image);
+        } else {
+            // UTF-8として読み込み、文字化けを防ぐ
+            @$dom->loadHTML('<?xml encoding="UTF-8">' . $html, LIBXML_HTML_NOIMPLIED | LIBXML_HTML_NODEFDTD);
+            libxml_clear_errors();
+            
+            $xpath = new DOMXPath($dom);
+            
+            // Yahoo!ニュースの本文を取得
+            $content_nodes = $xpath->query('//div[contains(@class, "article_body")]//p | //article//p');
+            foreach ($content_nodes as $node) {
+                $text = html_entity_decode(trim($node->textContent), ENT_QUOTES | ENT_HTML5, 'UTF-8');
+                if (!empty($text) && mb_strlen($text) > 20) {
+                    $content .= $text . "\n";
+                }
+            }
+        }
+        
+        return array(
+            'title' => trim($title),
+            'content' => trim($content),
+            'image' => $image
+        );
+    }
+}
