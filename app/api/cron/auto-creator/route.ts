@@ -210,6 +210,20 @@ export async function POST(request: Request) {
 
     const contentText = articleDescription.substring(0, 200);
 
+    // カテゴリIDを取得（最初のカテゴリのみ）
+    let categoryId = null;
+    if (ankeData.categories && ankeData.categories.length > 0) {
+      const { data: category } = await supabase
+        .from('categories')
+        .select('id')
+        .eq('name', ankeData.categories[0])
+        .single();
+      
+      if (category) {
+        categoryId = category.id;
+      }
+    }
+
     const { data: post, error: postError } = await supabase
       .from('posts')
       .insert({
@@ -219,6 +233,7 @@ export async function POST(request: Request) {
         source_url: article.link,
         thumbnail_url: ogImageUrl || null,
         og_image: ogImageUrl || null,
+        category_id: categoryId,
         status: 'published',
         created_at: new Date().toISOString(),
         updated_at: new Date().toISOString(),
@@ -236,45 +251,6 @@ export async function POST(request: Request) {
         choice: ankeData.choices[i],
         vote_count: 0,
       });
-    }
-
-    for (const categoryName of ankeData.categories) {
-      const { data: category } = await supabase
-        .from('categories')
-        .select('id')
-        .eq('name', categoryName)
-        .single();
-
-      if (category) {
-        await supabase.from('post_categories').insert({
-          post_id: post.id,
-          category_id: category.id,
-        });
-      }
-    }
-
-    for (const keywordName of ankeData.keywords) {
-      let { data: keyword } = await supabase
-        .from('keywords')
-        .select('id')
-        .eq('name', keywordName)
-        .single();
-
-      if (!keyword) {
-        const { data: newKeyword } = await supabase
-          .from('keywords')
-          .insert({ name: keywordName, created_at: new Date().toISOString() })
-          .select()
-          .single();
-        keyword = newKeyword;
-      }
-
-      if (keyword) {
-        await supabase.from('post_keywords').insert({
-          post_id: post.id,
-          keyword_id: keyword.id,
-        });
-      }
     }
 
     try {

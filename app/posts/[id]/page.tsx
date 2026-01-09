@@ -20,7 +20,7 @@ export default async function PostPage({ params }: { params: Promise<{ id: strin
   
   const { data: post, error: postError } = await supabase
     .from('posts')
-    .select('id, title, content, created_at, user_id, og_image, thumbnail_url, source_url, og_title, og_description, status')
+    .select('id, title, content, created_at, user_id, og_image, thumbnail_url, source_url, og_title, og_description, status, category_id')
     .eq('id', id)
     .single();
 
@@ -43,6 +43,17 @@ export default async function PostPage({ params }: { params: Promise<{ id: strin
     .select('id, choice, vote_count')
     .eq('post_id', id)
     .order('id');
+
+  // カテゴリを取得（posts.category_idから）
+  let category = null;
+  if (post?.category_id) {
+    const { data: categoryData } = await supabase
+      .from('categories')
+      .select('id, name')
+      .eq('id', post.category_id)
+      .single();
+    category = categoryData;
+  }
 
   // 投票オプション（締切日時など）を取得
   const { data: voteOptions } = await supabase
@@ -332,6 +343,20 @@ export default async function PostPage({ params }: { params: Promise<{ id: strin
                       commentCount={totalCommentCount || 0}
                       createdAt={post.created_at}
                     />
+                  </div>
+                )}
+
+                {/* カテゴリ表示 */}
+                {category && (
+                  <div className="mt-4 pt-4 border-t border-gray-200">
+                    <div className="flex flex-wrap gap-2">
+                      <Link
+                        href={`/category/${category.id}`}
+                        className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-blue-100 text-blue-800 hover:bg-blue-200 transition-colors"
+                      >
+                        {category.name}
+                      </Link>
+                    </div>
                   </div>
                 )}
               </div>
