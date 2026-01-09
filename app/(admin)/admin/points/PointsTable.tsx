@@ -198,7 +198,7 @@ export default function PointsTable({ points: initialPoints }: PointsTableProps)
                 </td>
                 <td className="px-6 py-4 text-sm text-gray-900">
                   {point.description || '—'}
-                  {point.related_id > 0 && (
+                  {point.related_id && point.related_id > 0 && (
                     <span className="text-xs text-gray-500 ml-2">
                       (関連ID: {point.related_id})
                     </span>
