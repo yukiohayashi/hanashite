@@ -51,6 +51,49 @@ export async function POST(request: Request) {
       });
     }
 
+    // 実行間隔チェック（ゆらぎを含む）
+    const executionInterval = 1440; // 24時間（毎日）
+    const executionVariance = 60; // ±60分
+    
+    const { data: lastExecution } = await supabase
+      .from('points_aggregate_logs')
+      .select('executed_at')
+      .eq('status', 'success')
+      .order('executed_at', { ascending: false })
+      .limit(1)
+      .single();
+
+    if (lastExecution) {
+      const lastExecutedAt = new Date(lastExecution.executed_at);
+      const now = new Date();
+      const minutesSinceLastExecution = (now.getTime() - lastExecutedAt.getTime()) / 60000;
+      
+      const randomVariance = Math.floor(Math.random() * (executionVariance * 2 + 1)) - executionVariance;
+      const requiredInterval = executionInterval + randomVariance;
+      
+      console.log(`最終実行: ${lastExecutedAt.toLocaleString('ja-JP')}`);
+      console.log(`経過時間: ${minutesSinceLastExecution.toFixed(1)}分`);
+      console.log(`必要間隔: ${requiredInterval}分 (基本${executionInterval}分 + ゆらぎ${randomVariance}分)`);
+      
+      if (minutesSinceLastExecution < requiredInterval) {
+        console.log('まだ実行間隔に達していません');
+        return NextResponse.json({
+          success: false,
+          message: `次回実行まで${(requiredInterval - minutesSinceLastExecution).toFixed(1)}分`,
+        });
+      }
+    }
+
+    console.log('実行間隔チェック通過 - ポイント集計を開始します');
+
+    if (settings.points_aggregate_enabled !== 'true') {
+      console.log('ポイント集計が停止中です（再チェック）');
+      return NextResponse.json({
+        success: false,
+        message: 'ポイント集計が停止中です',
+      });
+    }
+
     const { data: users } = await supabase
       .from('users')
       .select('id')

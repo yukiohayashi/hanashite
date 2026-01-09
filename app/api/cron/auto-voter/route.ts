@@ -168,18 +168,20 @@ async function executeLikePost(postId: number, userId: number) {
 
 async function logExecution(
   status: string,
-  postId?: number,
-  actionType?: string,
   message?: string,
-  errorMessage?: string
+  errorMessage?: string,
+  actionType?: string,
+  postId?: number,
+  userId?: number
 ) {
   await supabase.from('auto_voter_logs').insert({
     execution_type: 'cron',
     status,
-    post_id: postId,
-    action_type: actionType,
     message,
     error_message: errorMessage,
+    action_type: actionType,
+    post_id: postId,
+    user_id: userId,
     executed_at: new Date().toISOString(),
   });
 }
@@ -194,7 +196,50 @@ export async function POST(request: Request) {
     const settings = await getSettings();
 
     if (settings.auto_voter_enabled !== 'true') {
-      console.log('自動アクションが停止中です');
+      console.log('自動投票・コメント・いいねが停止中です');
+      return NextResponse.json({
+        success: false,
+        message: '自動投票・コメント・いいねが停止中です',
+      });
+    }
+
+    // 実行間隔チェック（ゆらぎを含む）
+    const executionInterval = 120; // 2時間固定
+    const executionVariance = 30; // ±30分
+    
+    const { data: lastExecution } = await supabase
+      .from('auto_voter_logs')
+      .select('executed_at')
+      .eq('status', 'success')
+      .order('executed_at', { ascending: false })
+      .limit(1)
+      .single();
+
+    if (lastExecution) {
+      const lastExecutedAt = new Date(lastExecution.executed_at);
+      const now = new Date();
+      const minutesSinceLastExecution = (now.getTime() - lastExecutedAt.getTime()) / 60000;
+      
+      const randomVariance = Math.floor(Math.random() * (executionVariance * 2 + 1)) - executionVariance;
+      const requiredInterval = executionInterval + randomVariance;
+      
+      console.log(`最終実行: ${lastExecutedAt.toLocaleString('ja-JP')}`);
+      console.log(`経過時間: ${minutesSinceLastExecution.toFixed(1)}分`);
+      console.log(`必要間隔: ${requiredInterval}分 (基本${executionInterval}分 + ゆらぎ${randomVariance}分)`);
+      
+      if (minutesSinceLastExecution < requiredInterval) {
+        console.log('まだ実行間隔に達していません');
+        return NextResponse.json({
+          success: false,
+          message: `次回実行まで${(requiredInterval - minutesSinceLastExecution).toFixed(1)}分`,
+        });
+      }
+    }
+
+    console.log('実行間隔チェック通過 - 自動投票・コメント・いいねを開始します');
+
+    if (settings.auto_voter_enabled !== 'true') {
+      console.log('自動投票・コメント・いいねが停止中です（再チェック）');
       return NextResponse.json({
         success: false,
         message: '自動アクションが停止中です',
