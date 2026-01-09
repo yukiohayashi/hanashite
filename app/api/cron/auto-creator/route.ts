@@ -210,17 +210,55 @@ export async function POST(request: Request) {
 
     const contentText = articleDescription.substring(0, 200);
 
-    // カテゴリIDを取得（最初のカテゴリのみ）
+    // カテゴリIDを取得（最初のカテゴリのみ、3段階マッチング）
     let categoryId = null;
     if (ankeData.categories && ankeData.categories.length > 0) {
-      const { data: category } = await supabase
+      const categoryName = ankeData.categories[0];
+      console.log('AI生成カテゴリ:', categoryName);
+      
+      // 1. 完全一致検索
+      let { data: category } = await supabase
         .from('categories')
-        .select('id')
-        .eq('name', ankeData.categories[0])
+        .select('id, name')
+        .eq('name', categoryName)
         .single();
+      
+      // 2. 部分一致検索
+      if (!category) {
+        const { data: categories } = await supabase
+          .from('categories')
+          .select('id, name')
+          .ilike('name', `%${categoryName}%`)
+          .limit(1);
+        
+        if (categories && categories.length > 0) {
+          category = categories[0];
+          console.log('部分一致でカテゴリ発見:', category.name);
+        }
+      }
+      
+      // 3. 最初の単語で検索
+      if (!category) {
+        const firstWord = categoryName.split(/[\s・、,]+/)[0];
+        if (firstWord && firstWord.length > 0) {
+          const { data: categories } = await supabase
+            .from('categories')
+            .select('id, name')
+            .ilike('name', `%${firstWord}%`)
+            .limit(1);
+          
+          if (categories && categories.length > 0) {
+            category = categories[0];
+            console.log('最初の単語でカテゴリ発見:', category.name);
+          }
+        }
+      }
       
       if (category) {
         categoryId = category.id;
+        console.log('設定されたカテゴリID:', categoryId, 'カテゴリ名:', category.name);
+      } else {
+        console.log('カテゴリが見つかりませんでした:', categoryName);
       }
     }
 
