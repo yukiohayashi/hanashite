@@ -18,7 +18,7 @@ interface Post {
     id: number;
     name: string;
   } | null;
-  categories?: { id: number; name: string } | null;
+  categories?: { id: number; name: string }[] | { id: number; name: string } | null;
   keywords?: Array<{ id: number; keyword: string }>;
   voteChoices?: Array<{ choice: string; vote_count: number }>;
 }
@@ -378,7 +378,7 @@ export default function PostsTable({ posts: initialPosts, initialCounts }: Posts
                 <td className="px-6 py-4 text-sm text-gray-900">
                   {post.categories ? (
                     <span className="inline-flex px-2 py-1 text-xs bg-blue-100 text-blue-800 rounded">
-                      {post.categories.name}
+                      {Array.isArray(post.categories) ? post.categories[0]?.name : post.categories.name}
                     </span>
                   ) : (
                     <span className="text-gray-400">—</span>
