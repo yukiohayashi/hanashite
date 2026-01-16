@@ -12,8 +12,8 @@ const notoSansJP = Noto_Sans_JP({
 });
 
 export const metadata: Metadata = {
-  title: "Anke - アンケート投票サイト",
-  description: "みんなの意見を聞いてみよう",
+  title: "アンケ｜ニュース × アンケート × コミュニティ。みんなの意見が見える新しいSNS",
+  description: "ニュース × アンケート × コミュニティ。みんなの意見が見える新しいSNS",
 };
 
 export default function RootLayout({

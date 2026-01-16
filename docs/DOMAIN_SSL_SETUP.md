@@ -1,37 +1,70 @@
 # 独自ドメイン（anke.jp）とSSL導入ガイド
 
-VPSのIPアドレス（133.18.122.123:3000）から独自ドメイン（anke.jp）への移行と、Let's Encrypt SSLの導入手順
+VPSのIPアドレス（133.18.122.123）から独自ドメイン（anke.jp）への移行と、Let's Encrypt SSLの導入手順
+
+**✅ 設定完了日**: 2026年1月16日  
+**✅ SSL証明書有効期限**: 2026年4月16日（自動更新設定済み）
 
 ---
 
 ## 📋 目次
 
 1. [概要](#概要)
-2. [前提条件](#前提条件)
-3. [現在の構成](#現在の構成)
-4. [導入計画](#導入計画)
-5. [ステップ1: DNSレコードの設定](#ステップ1-dnsレコードの設定)
-6. [ステップ2: Nginx設定ファイルの作成](#ステップ2-nginx設定ファイルの作成)
-7. [ステップ3: Let's Encrypt SSL証明書の取得](#ステップ3-lets-encrypt-ssl証明書の取得)
-8. [ステップ4: SSL自動更新の設定](#ステップ4-ssl自動更新の設定)
-9. [ステップ5: 環境変数の更新](#ステップ5-環境変数の更新)
-10. [ステップ6: 動作確認](#ステップ6-動作確認)
-11. [トラブルシューティング](#トラブルシューティング)
+2. [実施した設定内容](#実施した設定内容)
+3. [ステップ1: DNSレコードの設定](#ステップ1-dnsレコードの設定)
+4. [ステップ2: Nginx設定の更新](#ステップ2-nginx設定の更新)
+5. [ステップ3: SSL証明書の取得](#ステップ3-ssl証明書の取得)
+6. [ステップ4: 環境変数の更新](#ステップ4-環境変数の更新)
+7. [ステップ5: 動作確認](#ステップ5-動作確認)
+8. [トラブルシューティング](#トラブルシューティング)
+9. [メンテナンス](#メンテナンス)
 
 ---
 
 ## 概要
 
-### **現在の状態**
+### **変更前の状態**
 - **URL**: http://133.18.122.123:3000
 - **プロトコル**: HTTP（暗号化なし）
 - **ポート**: 3000（直接アクセス）
 
-### **目標の状態**
+### **変更後の状態（現在）**
 - **URL**: https://anke.jp
 - **プロトコル**: HTTPS（SSL/TLS暗号化）
 - **ポート**: 443（標準HTTPS）
 - **リダイレクト**: HTTP → HTTPS自動リダイレクト
+- **SSL証明書**: Let's Encrypt（自動更新設定済み）
+
+---
+
+## 実施した設定内容
+
+### 完了した作業
+
+1. ✅ **DNS設定**
+   - `anke.jp` → `133.18.122.123`
+   - `www.anke.jp` → `133.18.122.123`
+   - TTL: 300秒（DNS変更時）→ 3600秒（通常運用）
+
+2. ✅ **Nginx設定**
+   - リバースプロキシ設定（ポート80 → 3000）
+   - ドメイン名対応（`server_name anke.jp www.anke.jp`）
+
+3. ✅ **SSL証明書**
+   - Let's Encrypt証明書取得
+   - HTTPS対応（ポート443）
+   - HTTP→HTTPSリダイレクト
+   - 自動更新設定
+
+4. ✅ **環境変数**
+   - `NEXT_PUBLIC_APP_URL=https://anke.jp`
+
+### 所要時間
+- DNS設定: 5分
+- Nginx設定: 10分
+- SSL証明書取得: 5分
+- DNS伝播待ち: 約30分
+- **合計**: 約50分
 
 ---
 
@@ -128,77 +161,62 @@ pm2 status
 
 ## ステップ1: DNSレコードの設定
 
-### **⚠️ 重要: 現在のDNS設定を確認**
+### **1-1. お名前.comのDNS管理画面にアクセス**
 
-現在のDNS設定（dnsv.jp）：
-```
-anke.jp.     3600 IN A 133.18.234.69  ❌ 古いIPアドレス
-www.anke.jp. 3600 IN A 133.18.234.69  ❌ 古いIPアドレス
-```
-
-**問題**: IPアドレスが現在のVPS（`133.18.122.123`）と異なります。
-
-### **1-1. ドメイン管理画面にアクセス**
-
-anke.jpのドメイン管理画面（dnsv.jp）にログイン
+1. お名前.com Naviにログイン
+2. 「ドメイン一覧」→「anke.jp」を選択
+3. 「DNS設定/転送設定」→「DNSレコード設定」
 
 ### **1-2. Aレコードを更新**
 
-| タイプ | ホスト名 | 現在の値 | 新しい値 | TTL |
-|--------|---------|---------|---------|-----|
-| A | @ | 133.18.234.69 | **133.18.122.123** | 3600 |
-| A | www | 133.18.234.69 | **133.18.122.123** | 3600 |
+以下のレコードを設定：
 
-- **@**: ルートドメイン（anke.jp）
-- **www**: サブドメイン（www.anke.jp）
+| タイプ | ホスト名 | VALUE | TTL |
+|--------|---------|-------|-----|
+| A | anke.jp | 133.18.122.123 | 300 |
+| A | www.anke.jp | 133.18.122.123 | 300 |
 
-### **1-3. SPFレコードも更新（メール送信する場合）**
+**重要**: DNS変更時はTTLを短く（300秒）設定すると伝播が早くなります。
 
-現在のSPFレコード：
+### **1-3. SPFレコードを更新（オプション）**
+
+メール送信機能を使用する場合、TXTレコードを更新：
+
 ```
-anke.jp. 3600 IN TXT "v=spf1 +a +mx +ip4:133.18.234.69 ~all"
-```
-
-新しいSPFレコード：
-```
-anke.jp. 3600 IN TXT "v=spf1 +a +mx +ip4:133.18.122.123 ~all"
+v=spf1 +a +mx +ip4:133.18.122.123 ~all
 ```
 
 ### **1-4. DNS伝播を確認**
 
+**ローカルで確認:**
 ```bash
-# ローカルで確認
-dig anke.jp
-dig www.anke.jp
-
-# または
-nslookup anke.jp
-nslookup www.anke.jp
+dig anke.jp +short
+dig www.anke.jp +short
 ```
 
-正しく設定されている場合、`133.18.122.123`が返されます。
+**期待される結果**: `133.18.122.123`
 
-⏱️ **DNS伝播時間**: 
-- **TTL**: 3600秒（1時間）
-- **予想伝播時間**: 1〜2時間
-- **最大**: 24〜48時間
+**Googleの公開DNSで確認:**
+```bash
+dig @8.8.8.8 anke.jp +short
+dig @8.8.8.8 www.anke.jp +short
+```
 
-### **1-5. オンラインツールで確認**
-
+**オンラインツールで確認:**
 - https://www.whatsmydns.net/#A/anke.jp
 - 世界中のDNSサーバーから確認できます
 
-### **⚠️ 注意: 古いサーバー（133.18.234.69）について**
+### **1-5. DNS伝播時間**
 
-DNS更新後、古いIPアドレスへのアクセスは停止します：
+- **TTL 300秒の場合**: 5〜20分
+- **TTL 3600秒の場合**: 1〜2時間
+- **最大**: 24〜48時間
 
-- **古いサーバーにデータがある場合**: 事前にバックアップ
-- **古いサーバーが稼働中の場合**: DNS伝播後に停止可能
-- **移行前の確認**: 古いサーバーで稼働中のサービスを確認
+**注意**: VPSサーバーのローカルDNSキャッシュが古い場合があります。Googleの公開DNS（8.8.8.8）で確認してください。
 
 ---
 
-## ステップ2: Nginx設定ファイルの作成
+## ステップ2: Nginx設定の更新
 
 ### **2-1. VPSにSSH接続**
 
@@ -206,32 +224,19 @@ DNS更新後、古いIPアドレスへのアクセスは停止します：
 ssh -i ~/.ssh/anke-nextjs.key ubuntu@133.18.122.123
 ```
 
-### **2-2. anke.jp用のNginx設定ファイルを作成**
+### **2-2. 既存のNginx設定ファイルを編集**
 
 ```bash
-sudo nano /etc/nginx/sites-available/anke.jp
+sudo nano /etc/nginx/sites-available/anke-nextjs
 ```
 
-以下の内容を貼り付け：
+`server_name`行を以下に変更：
 
 ```nginx
-# anke.jp - Next.jsアプリケーション
-# HTTP設定（後でCertbotがHTTPS設定を自動追加）
-
 server {
     listen 80;
-    listen [::]:80;
-    
     server_name anke.jp www.anke.jp;
-    
-    # アクセスログとエラーログ
-    access_log /var/log/nginx/anke.jp.access.log;
-    error_log /var/log/nginx/anke.jp.error.log;
-    
-    # クライアントの最大アップロードサイズ（画像アップロード用）
-    client_max_body_size 10M;
-    
-    # リバースプロキシ設定（Next.js:3000へ転送）
+
     location / {
         proxy_pass http://localhost:3000;
         proxy_http_version 1.1;
@@ -242,6 +247,8 @@ server {
         proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
         proxy_set_header X-Forwarded-Proto $scheme;
         proxy_cache_bypass $http_upgrade;
+    }
+}
         
         # タイムアウト設定
         proxy_connect_timeout 60s;
@@ -275,93 +282,106 @@ server {
 sudo ln -s /etc/nginx/sites-available/anke.jp /etc/nginx/sites-enabled/
 ```
 
-### **2-4. Nginx設定をテスト**
+### **2-3. Nginx設定をテストして再起動**
 
 ```bash
+# 設定をテスト
 sudo nginx -t
+
+# Nginxをリロード
+sudo systemctl reload nginx
 ```
 
-正常な場合：
+**期待される出力:**
 ```
 nginx: the configuration file /etc/nginx/nginx.conf syntax is ok
 nginx: configuration file /etc/nginx/nginx.conf test is successful
 ```
 
-### **2-5. Nginxをリロード**
-
-```bash
-sudo systemctl reload nginx
-```
-
-### **2-6. 動作確認（HTTP）**
-
-ブラウザで http://anke.jp にアクセス
-
-✅ Next.jsアプリケーションが表示されればOK
-
 ---
 
-## ステップ3: Let's Encrypt SSL証明書の取得
+## ステップ3: SSL証明書の取得
 
 ### **3-1. Certbotをインストール**
 
 ```bash
-# Snapdをインストール（Ubuntu 24.04では通常インストール済み）
 sudo apt update
-sudo apt install snapd -y
-
-# Snapdを最新化
-sudo snap install core
-sudo snap refresh core
-
-# 古いCertbotを削除（存在する場合）
-sudo apt remove certbot -y
-
-# CertbotをSnapでインストール
-sudo snap install --classic certbot
-
-# Certbotコマンドのシンボリックリンクを作成
-sudo ln -s /snap/bin/certbot /usr/bin/certbot
+sudo apt install -y certbot python3-certbot-nginx
 ```
 
-### **3-2. Certbotのバージョン確認**
+### **3-2. SSL証明書を取得**
+
+**重要**: DNS伝播が完了していることを確認してから実行してください。
 
 ```bash
-certbot --version
+# Googleの公開DNSで確認
+dig @8.8.8.8 anke.jp +short
+dig @8.8.8.8 www.anke.jp +short
 ```
 
-### **3-3. SSL証明書を取得**
+`133.18.122.123`が返されることを確認したら、SSL証明書を取得：
 
 ```bash
 sudo certbot --nginx -d anke.jp -d www.anke.jp
 ```
 
-対話形式で以下を入力：
+**対話形式の入力:**
 
-1. **メールアドレス**: SSL証明書の更新通知用（例: info@anke.jp）
+1. **メールアドレス**: `info@anke.jp`（SSL証明書の更新通知用）
 2. **利用規約**: `Y`（同意）
 3. **メール配信**: `N`（不要な場合）
 
-Certbotが自動的に以下を実行：
+**成功時の出力:**
+```
+Successfully received certificate.
+Certificate is saved at: /etc/letsencrypt/live/anke.jp/fullchain.pem
+Key is saved at:         /etc/letsencrypt/live/anke.jp/privkey.pem
+This certificate expires on 2026-04-16.
+Certbot has set up a scheduled task to automatically renew this certificate in the background.
+
+Deploying certificate
+Successfully deployed certificate for anke.jp to /etc/nginx/sites-enabled/anke-nextjs
+Successfully deployed certificate for www.anke.jp to /etc/nginx/sites-enabled/anke-nextjs
+Congratulations! You have successfully enabled HTTPS on https://anke.jp and https://www.anke.jp
+```
+
+**Certbotが自動的に実行する内容:**
 - ✅ SSL証明書を取得
 - ✅ Nginx設定ファイルにHTTPS設定を追加
 - ✅ HTTP → HTTPSリダイレクトを設定
 - ✅ Nginxをリロード
+- ✅ 自動更新タスクを設定
 
-### **3-4. SSL証明書の確認**
+### **3-3. SSL証明書の確認**
 
 ```bash
 sudo certbot certificates
 ```
 
-出力例：
+**出力例:**
 ```
 Found the following certs:
   Certificate Name: anke.jp
     Domains: anke.jp www.anke.jp
-    Expiry Date: 2026-04-15 12:00:00+00:00 (VALID: 89 days)
+    Expiry Date: 2026-04-16 (VALID: 89 days)
     Certificate Path: /etc/letsencrypt/live/anke.jp/fullchain.pem
     Private Key Path: /etc/letsencrypt/live/anke.jp/privkey.pem
+```
+
+### **3-4. 自動更新の確認**
+
+Certbotは自動的に証明書の更新タスクを設定します：
+
+```bash
+# 自動更新タイマーの状態を確認
+sudo systemctl status certbot.timer
+```
+
+**期待される出力:**
+```
+● certbot.timer - Run certbot twice daily
+     Loaded: loaded
+     Active: active (waiting)
 ```
 
 ---
@@ -401,9 +421,9 @@ SSL証明書は90日間有効で、30日前から自動更新されます。
 
 ---
 
-## ステップ5: 環境変数の更新
+## ステップ4: 環境変数の更新
 
-### **5-1. VPSの.env.localを更新**
+### **4-1. VPSの.env.localを更新**
 
 ```bash
 cd /var/www/anke-nextjs
@@ -414,7 +434,7 @@ nano .env.local
 
 ```env
 # 変更前
-NEXT_PUBLIC_APP_URL=http://133.18.122.123:3000
+NEXT_PUBLIC_APP_URL=http://localhost:3000
 
 # 変更後
 NEXT_PUBLIC_APP_URL=https://anke.jp
@@ -424,11 +444,20 @@ NEXT_PUBLIC_APP_URL=https://anke.jp
 - `Ctrl + O` → Enter（保存）
 - `Ctrl + X`（終了）
 
-### **5-2. アプリケーションを再起動**
+### **4-2. アプリケーションを再起動**
 
 ```bash
 pm2 restart anke-nextjs
-pm2 logs anke-nextjs --lines 50
+pm2 status
+```
+
+**期待される出力:**
+```
+┌────┬────────────────────┬──────────┬──────┬───────────┬──────────┬──────────┐
+│ id │ name               │ mode     │ ↺    │ status    │ cpu      │ memory   │
+├────┼────────────────────┼──────────┼──────┼───────────┼──────────┼──────────┤
+│ 0  │ anke-nextjs        │ fork     │ 7    │ online    │ 0%       │ 150mb    │
+└────┴────────────────────┴──────────┴──────┴───────────┴──────────┴──────────┘
 ```
 
 ### **5-3. ローカルの.env.localを更新（オプション）**
@@ -449,34 +478,122 @@ NEXT_PUBLIC_APP_URL=https://anke.jp
 
 ---
 
-## ステップ6: 動作確認
+## ステップ5: 動作確認
 
-### **6-1. HTTPSアクセスを確認**
+### **5-1. HTTPSアクセスを確認**
 
-ブラウザで https://anke.jp にアクセス
+ブラウザで以下のURLにアクセス：
 
-✅ **確認項目**:
-- アプリケーションが表示される
-- アドレスバーに鍵マークが表示される
-- 証明書が有効（クリックして確認）
-
-### **6-2. HTTPリダイレクトを確認**
-
-ブラウザで http://anke.jp にアクセス
-
-✅ 自動的に https://anke.jp にリダイレクトされる
-
-### **6-3. wwwサブドメインを確認**
-
-ブラウザで https://www.anke.jp にアクセス
-
-✅ アプリケーションが表示される
-
-### **6-4. SSL証明書の詳細を確認**
-
-ブラウザでアドレスバーの鍵マークをクリック
+```
+https://anke.jp
+```
 
 ✅ **確認項目**:
+- ✅ アプリケーションが正常に表示される
+- ✅ アドレスバーに鍵マーク🔒が表示される
+- ✅ 証明書が有効（鍵マークをクリックして確認）
+- ✅ 「この接続は保護されています」と表示される
+
+### **5-2. HTTPリダイレクトを確認**
+
+ブラウザで以下のURLにアクセス：
+
+```
+http://anke.jp
+```
+
+✅ **期待される動作**: 自動的に `https://anke.jp` にリダイレクトされる
+
+### **5-3. wwwサブドメインを確認**
+
+ブラウザで以下のURLにアクセス：
+
+```
+https://www.anke.jp
+http://www.anke.jp
+```
+
+✅ **期待される動作**: 両方とも正常にアクセスでき、HTTPは自動的にHTTPSにリダイレクトされる
+
+### **5-4. SSL証明書の詳細を確認**
+
+ブラウザでアドレスバーの鍵マーク🔒をクリック
+
+✅ **確認項目**:
+- **発行者**: Let's Encrypt
+- **有効期限**: 2026年4月16日
+- **対象**: anke.jp, www.anke.jp
+- **暗号化**: TLS 1.3 または TLS 1.2
+
+### **5-5. コマンドラインで確認**
+
+```bash
+# SSL証明書の確認
+curl -I https://anke.jp
+
+# HTTPリダイレクトの確認
+curl -I http://anke.jp
+```
+
+**期待される出力（HTTPリダイレクト）:**
+```
+HTTP/1.1 301 Moved Permanently
+Location: https://anke.jp/
+```
+
+---
+
+## 完了
+
+🎉 **おめでとうございます！**
+
+以下が完了しました：
+
+- ✅ DNS設定（anke.jp → 133.18.122.123）
+- ✅ Nginx設定（リバースプロキシ）
+- ✅ SSL証明書取得（Let's Encrypt）
+- ✅ HTTPS対応
+- ✅ HTTP→HTTPSリダイレクト
+- ✅ 自動更新設定
+- ✅ 環境変数更新
+
+**アクセスURL:**
+- 本番: https://anke.jp
+- 管理画面: https://anke.jp/admin
+
+**SSL証明書:**
+- 有効期限: 2026年4月16日
+- 自動更新: 設定済み（30日前から自動更新）
+
+---
+
+## メンテナンス
+
+### SSL証明書の手動更新
+
+```bash
+sudo certbot renew
+```
+
+### SSL証明書の確認
+
+```bash
+sudo certbot certificates
+```
+
+### Nginx設定の確認
+
+```bash
+sudo nginx -t
+sudo systemctl status nginx
+```
+
+### アプリケーションの確認
+
+```bash
+pm2 status
+pm2 logs anke-nextjs
+```
 - **発行者**: Let's Encrypt
 - **有効期限**: 約90日後
 - **ドメイン**: anke.jp, www.anke.jp
