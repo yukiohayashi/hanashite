@@ -87,6 +87,282 @@ export type Database = {
           },
         ]
       }
+      api_settings: {
+        Row: {
+          created_at: string | null
+          description: string | null
+          id: number
+          setting_key: string
+          setting_value: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          description?: string | null
+          id?: number
+          setting_key: string
+          setting_value?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          description?: string | null
+          id?: number
+          setting_key?: string
+          setting_value?: string | null
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
+      auto_creator_logs: {
+        Row: {
+          created_at: string | null
+          error_message: string | null
+          executed_at: string | null
+          execution_type: string | null
+          id: number
+          message: string | null
+          post_id: number | null
+          source_url: string | null
+          status: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          error_message?: string | null
+          executed_at?: string | null
+          execution_type?: string | null
+          id?: number
+          message?: string | null
+          post_id?: number | null
+          source_url?: string | null
+          status?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          error_message?: string | null
+          executed_at?: string | null
+          execution_type?: string | null
+          id?: number
+          message?: string | null
+          post_id?: number | null
+          source_url?: string | null
+          status?: string | null
+        }
+        Relationships: []
+      }
+      auto_creator_processed: {
+        Row: {
+          article_title: string | null
+          article_url: string
+          created_at: string | null
+          id: number
+          post_id: number | null
+          source_url: string | null
+        }
+        Insert: {
+          article_title?: string | null
+          article_url: string
+          created_at?: string | null
+          id?: number
+          post_id?: number | null
+          source_url?: string | null
+        }
+        Update: {
+          article_title?: string | null
+          article_url?: string
+          created_at?: string | null
+          id?: number
+          post_id?: number | null
+          source_url?: string | null
+        }
+        Relationships: []
+      }
+      auto_creator_settings: {
+        Row: {
+          created_at: string | null
+          id: number
+          setting_key: string
+          setting_value: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          id?: number
+          setting_key: string
+          setting_value?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          id?: number
+          setting_key?: string
+          setting_value?: string | null
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
+      auto_tagger_logs: {
+        Row: {
+          created_at: string | null
+          error_message: string | null
+          execution_type: string | null
+          id: number
+          message: string | null
+          post_id: number | null
+          status: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          error_message?: string | null
+          execution_type?: string | null
+          id?: number
+          message?: string | null
+          post_id?: number | null
+          status?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          error_message?: string | null
+          execution_type?: string | null
+          id?: number
+          message?: string | null
+          post_id?: number | null
+          status?: string | null
+        }
+        Relationships: []
+      }
+      auto_voter_logs: {
+        Row: {
+          action_type: string | null
+          created_at: string | null
+          error_message: string | null
+          execution_type: string | null
+          id: number
+          message: string | null
+          post_id: number | null
+          status: string | null
+          user_id: string | null
+        }
+        Insert: {
+          action_type?: string | null
+          created_at?: string | null
+          error_message?: string | null
+          execution_type?: string | null
+          id?: number
+          message?: string | null
+          post_id?: number | null
+          status?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          action_type?: string | null
+          created_at?: string | null
+          error_message?: string | null
+          execution_type?: string | null
+          id?: number
+          message?: string | null
+          post_id?: number | null
+          status?: string | null
+          user_id?: string | null
+        }
+        Relationships: []
+      }
+      auto_voter_settings: {
+        Row: {
+          created_at: string | null
+          id: number
+          setting_key: string
+          setting_value: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          id?: number
+          setting_key: string
+          setting_value?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          id?: number
+          setting_key?: string
+          setting_value?: string | null
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
+      backup_logs: {
+        Row: {
+          created_at: string | null
+          error_message: string | null
+          file_path: string | null
+          file_size: number | null
+          id: number
+          message: string | null
+          status: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          error_message?: string | null
+          file_path?: string | null
+          file_size?: number | null
+          id?: number
+          message?: string | null
+          status?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          error_message?: string | null
+          file_path?: string | null
+          file_size?: number | null
+          id?: number
+          message?: string | null
+          status?: string | null
+        }
+        Relationships: []
+      }
+      categories: {
+        Row: {
+          created_at: string | null
+          description: string | null
+          display_order: number | null
+          icon: string | null
+          id: number
+          is_active: number | null
+          is_featured: number | null
+          name: string
+          parent_id: number | null
+          slug: string
+          updated_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          description?: string | null
+          display_order?: number | null
+          icon?: string | null
+          id?: number
+          is_active?: number | null
+          is_featured?: number | null
+          name: string
+          parent_id?: number | null
+          slug: string
+          updated_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          description?: string | null
+          display_order?: number | null
+          icon?: string | null
+          id?: number
+          is_active?: number | null
+          is_featured?: number | null
+          name?: string
+          parent_id?: number | null
+          slug?: string
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
       comments: {
         Row: {
           content: string
@@ -266,33 +542,331 @@ export type Database = {
         }
         Relationships: []
       }
-      points: {
+      mail_logs: {
+        Row: {
+          body: string
+          created_at: string | null
+          error_message: string | null
+          from_email: string
+          id: number
+          sent_at: string | null
+          status: string
+          subject: string
+          template_key: string | null
+          to_email: string
+        }
+        Insert: {
+          body: string
+          created_at?: string | null
+          error_message?: string | null
+          from_email: string
+          id?: number
+          sent_at?: string | null
+          status: string
+          subject: string
+          template_key?: string | null
+          to_email: string
+        }
+        Update: {
+          body?: string
+          created_at?: string | null
+          error_message?: string | null
+          from_email?: string
+          id?: number
+          sent_at?: string | null
+          status?: string
+          subject?: string
+          template_key?: string | null
+          to_email?: string
+        }
+        Relationships: []
+      }
+      mail_settings: {
+        Row: {
+          created_at: string | null
+          from_email: string
+          from_name: string
+          id: number
+          is_active: boolean | null
+          smtp_host: string
+          smtp_pass: string
+          smtp_port: number
+          smtp_user: string
+          updated_at: string | null
+          use_ssl: boolean | null
+        }
+        Insert: {
+          created_at?: string | null
+          from_email: string
+          from_name: string
+          id?: number
+          is_active?: boolean | null
+          smtp_host: string
+          smtp_pass: string
+          smtp_port: number
+          smtp_user: string
+          updated_at?: string | null
+          use_ssl?: boolean | null
+        }
+        Update: {
+          created_at?: string | null
+          from_email?: string
+          from_name?: string
+          id?: number
+          is_active?: boolean | null
+          smtp_host?: string
+          smtp_pass?: string
+          smtp_port?: number
+          smtp_user?: string
+          updated_at?: string | null
+          use_ssl?: boolean | null
+        }
+        Relationships: []
+      }
+      mail_templates: {
+        Row: {
+          body: string
+          created_at: string | null
+          description: string | null
+          id: number
+          is_active: boolean | null
+          subject: string
+          template_key: string
+          updated_at: string | null
+        }
+        Insert: {
+          body: string
+          created_at?: string | null
+          description?: string | null
+          id?: number
+          is_active?: boolean | null
+          subject: string
+          template_key: string
+          updated_at?: string | null
+        }
+        Update: {
+          body?: string
+          created_at?: string | null
+          description?: string | null
+          id?: number
+          is_active?: boolean | null
+          subject?: string
+          template_key?: string
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
+      ng_words: {
+        Row: {
+          category: string | null
+          created_at: string | null
+          created_by: string | null
+          id: number
+          is_active: number | null
+          severity: string | null
+          updated_at: string | null
+          word: string
+          word_type: string | null
+        }
+        Insert: {
+          category?: string | null
+          created_at?: string | null
+          created_by?: string | null
+          id?: number
+          is_active?: number | null
+          severity?: string | null
+          updated_at?: string | null
+          word: string
+          word_type?: string | null
+        }
+        Update: {
+          category?: string | null
+          created_at?: string | null
+          created_by?: string | null
+          id?: number
+          is_active?: number | null
+          severity?: string | null
+          updated_at?: string | null
+          word?: string
+          word_type?: string | null
+        }
+        Relationships: []
+      }
+      notifications: {
         Row: {
           created_at: string | null
           id: number
-          points: number
-          reason: string | null
-          user_id: string | null
+          is_read: boolean | null
+          link: string | null
+          message: string | null
+          read_at: string | null
+          title: string
+          type: string
+          user_id: number
         }
         Insert: {
           created_at?: string | null
           id?: number
-          points: number
-          reason?: string | null
-          user_id?: string | null
+          is_read?: boolean | null
+          link?: string | null
+          message?: string | null
+          read_at?: string | null
+          title: string
+          type: string
+          user_id: number
         }
         Update: {
           created_at?: string | null
           id?: number
+          is_read?: boolean | null
+          link?: string | null
+          message?: string | null
+          read_at?: string | null
+          title?: string
+          type?: string
+          user_id?: number
+        }
+        Relationships: []
+      }
+      point_settings: {
+        Row: {
+          created_at: string | null
+          description: string | null
+          display_order: number | null
+          id: number
+          is_active: boolean | null
+          label: string
+          point_type: string
+          point_value: number
+          updated_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          description?: string | null
+          display_order?: number | null
+          id?: number
+          is_active?: boolean | null
+          label: string
+          point_type: string
+          point_value?: number
+          updated_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          description?: string | null
+          display_order?: number | null
+          id?: number
+          is_active?: boolean | null
+          label?: string
+          point_type?: string
+          point_value?: number
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
+      points: {
+        Row: {
+          amount: number | null
+          created_at: string | null
+          description: string | null
+          id: number
+          points: number
+          reason: string | null
+          related_id: number | null
+          type: string | null
+          user_id: string | null
+        }
+        Insert: {
+          amount?: number | null
+          created_at?: string | null
+          description?: string | null
+          id?: number
+          points: number
+          reason?: string | null
+          related_id?: number | null
+          type?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          amount?: number | null
+          created_at?: string | null
+          description?: string | null
+          id?: number
           points?: number
           reason?: string | null
+          related_id?: number | null
+          type?: string | null
           user_id?: string | null
         }
         Relationships: []
       }
+      points_aggregate_logs: {
+        Row: {
+          created_at: string | null
+          error_message: string | null
+          id: number
+          message: string | null
+          status: string | null
+          users_processed: number | null
+        }
+        Insert: {
+          created_at?: string | null
+          error_message?: string | null
+          id?: number
+          message?: string | null
+          status?: string | null
+          users_processed?: number | null
+        }
+        Update: {
+          created_at?: string | null
+          error_message?: string | null
+          id?: number
+          message?: string | null
+          status?: string | null
+          users_processed?: number | null
+        }
+        Relationships: []
+      }
+      post_keywords: {
+        Row: {
+          created_at: string | null
+          id: number
+          keyword_id: number
+          post_id: number
+        }
+        Insert: {
+          created_at?: string | null
+          id?: number
+          keyword_id: number
+          post_id: number
+        }
+        Update: {
+          created_at?: string | null
+          id?: number
+          keyword_id?: number
+          post_id?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "post_keywords_keyword_id_fkey"
+            columns: ["keyword_id"]
+            isOneToOne: false
+            referencedRelation: "keywords"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "post_keywords_post_id_fkey"
+            columns: ["post_id"]
+            isOneToOne: false
+            referencedRelation: "posts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       posts: {
         Row: {
           auto_created: boolean | null
+          category_id: number | null
           content: string | null
           created_at: string | null
           id: number
@@ -303,12 +877,14 @@ export type Database = {
           status: string | null
           thumbnail_url: string | null
           title: string
+          total_votes: number | null
           updated_at: string | null
           user_id: string | null
           view_count: number | null
         }
         Insert: {
           auto_created?: boolean | null
+          category_id?: number | null
           content?: string | null
           created_at?: string | null
           id?: number
@@ -319,12 +895,14 @@ export type Database = {
           status?: string | null
           thumbnail_url?: string | null
           title: string
+          total_votes?: number | null
           updated_at?: string | null
           user_id?: string | null
           view_count?: number | null
         }
         Update: {
           auto_created?: boolean | null
+          category_id?: number | null
           content?: string | null
           created_at?: string | null
           id?: number
@@ -335,11 +913,20 @@ export type Database = {
           status?: string | null
           thumbnail_url?: string | null
           title?: string
+          total_votes?: number | null
           updated_at?: string | null
           user_id?: string | null
           view_count?: number | null
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "posts_category_id_fkey"
+            columns: ["category_id"]
+            isOneToOne: false
+            referencedRelation: "categories"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       sessions: {
         Row: {
@@ -372,29 +959,18 @@ export type Database = {
       }
       users: {
         Row: {
-          birth_year: string | null
+          birth_year: number | null
           child_count: number | null
-          consecutive_limit: number | null
           created_at: string | null
           email: string | null
           email_subscription: number | null
           email_verified: string | null
-          first_comment: number | null
-          first_survey: number | null
-          first_vote: number | null
           id: string
-          image: string | null
           interest_categories: string | null
           is_banned: boolean | null
           job: string | null
           kana_mei: string | null
           kana_sei: string | null
-          last_access_date: string | null
-          line_access_token: string | null
-          line_id: string | null
-          line_refresh_token: string | null
-          line_token_expires_at: string | null
-          line_token_updated_at: string | null
           marriage: string | null
           mei: string | null
           name: string | null
@@ -404,53 +980,30 @@ export type Database = {
           profile_slug: string | null
           profile_slug_updated_at: string | null
           reset_token: string | null
-          reset_token_expires: string | null
+          reset_token_expiry: string | null
           sei: string | null
           sex: string | null
-          show_unvoted_surveys: number | null
           sns_x: string | null
           status: number | null
           updated_at: string | null
-          user_activation_key: string | null
           user_description: string | null
+          user_img_url: string | null
           user_nicename: string | null
           user_pass: string | null
-          user_registered: string | null
-          user_url: string | null
-          warning_flag: number | null
-          worker_img_id: number | null
-          worker_img_url: string | null
-          x_access_token: string | null
-          x_profile_image: string | null
-          x_refresh_token: string | null
-          x_screen_name: string | null
-          x_token_expires: string | null
-          x_user_id: string | null
         }
         Insert: {
-          birth_year?: string | null
+          birth_year?: number | null
           child_count?: number | null
-          consecutive_limit?: number | null
           created_at?: string | null
           email?: string | null
           email_subscription?: number | null
           email_verified?: string | null
-          first_comment?: number | null
-          first_survey?: number | null
-          first_vote?: number | null
           id: string
-          image?: string | null
           interest_categories?: string | null
           is_banned?: boolean | null
           job?: string | null
           kana_mei?: string | null
           kana_sei?: string | null
-          last_access_date?: string | null
-          line_access_token?: string | null
-          line_id?: string | null
-          line_refresh_token?: string | null
-          line_token_expires_at?: string | null
-          line_token_updated_at?: string | null
           marriage?: string | null
           mei?: string | null
           name?: string | null
@@ -460,53 +1013,30 @@ export type Database = {
           profile_slug?: string | null
           profile_slug_updated_at?: string | null
           reset_token?: string | null
-          reset_token_expires?: string | null
+          reset_token_expiry?: string | null
           sei?: string | null
           sex?: string | null
-          show_unvoted_surveys?: number | null
           sns_x?: string | null
           status?: number | null
           updated_at?: string | null
-          user_activation_key?: string | null
           user_description?: string | null
+          user_img_url?: string | null
           user_nicename?: string | null
           user_pass?: string | null
-          user_registered?: string | null
-          user_url?: string | null
-          warning_flag?: number | null
-          worker_img_id?: number | null
-          worker_img_url?: string | null
-          x_access_token?: string | null
-          x_profile_image?: string | null
-          x_refresh_token?: string | null
-          x_screen_name?: string | null
-          x_token_expires?: string | null
-          x_user_id?: string | null
         }
         Update: {
-          birth_year?: string | null
+          birth_year?: number | null
           child_count?: number | null
-          consecutive_limit?: number | null
           created_at?: string | null
           email?: string | null
           email_subscription?: number | null
           email_verified?: string | null
-          first_comment?: number | null
-          first_survey?: number | null
-          first_vote?: number | null
           id?: string
-          image?: string | null
           interest_categories?: string | null
           is_banned?: boolean | null
           job?: string | null
           kana_mei?: string | null
           kana_sei?: string | null
-          last_access_date?: string | null
-          line_access_token?: string | null
-          line_id?: string | null
-          line_refresh_token?: string | null
-          line_token_expires_at?: string | null
-          line_token_updated_at?: string | null
           marriage?: string | null
           mei?: string | null
           name?: string | null
@@ -516,46 +1046,16 @@ export type Database = {
           profile_slug?: string | null
           profile_slug_updated_at?: string | null
           reset_token?: string | null
-          reset_token_expires?: string | null
+          reset_token_expiry?: string | null
           sei?: string | null
           sex?: string | null
-          show_unvoted_surveys?: number | null
           sns_x?: string | null
           status?: number | null
           updated_at?: string | null
-          user_activation_key?: string | null
           user_description?: string | null
+          user_img_url?: string | null
           user_nicename?: string | null
           user_pass?: string | null
-          user_registered?: string | null
-          user_url?: string | null
-          warning_flag?: number | null
-          worker_img_id?: number | null
-          worker_img_url?: string | null
-          x_access_token?: string | null
-          x_profile_image?: string | null
-          x_refresh_token?: string | null
-          x_screen_name?: string | null
-          x_token_expires?: string | null
-          x_user_id?: string | null
-        }
-        Relationships: []
-      }
-      verification_tokens: {
-        Row: {
-          expires: string
-          identifier: string
-          token: string
-        }
-        Insert: {
-          expires: string
-          identifier: string
-          token: string
-        }
-        Update: {
-          expires?: string
-          identifier?: string
-          token?: string
         }
         Relationships: []
       }
@@ -568,7 +1068,7 @@ export type Database = {
         }
         Insert: {
           choice: string
-          id: number
+          id?: number
           post_id?: number | null
           vote_count?: number | null
         }
@@ -608,15 +1108,7 @@ export type Database = {
           session_id?: string | null
           user_id?: string | null
         }
-        Relationships: [
-          {
-            foreignKeyName: "vote_history_post_id_fkey"
-            columns: ["post_id"]
-            isOneToOne: false
-            referencedRelation: "posts"
-            referencedColumns: ["id"]
-          },
-        ]
+        Relationships: []
       }
       vote_options: {
         Row: {
@@ -646,15 +1138,7 @@ export type Database = {
           random?: boolean | null
           vote_sum?: number | null
         }
-        Relationships: [
-          {
-            foreignKeyName: "vote_options_post_id_fkey"
-            columns: ["post_id"]
-            isOneToOne: false
-            referencedRelation: "posts"
-            referencedColumns: ["id"]
-          },
-        ]
+        Relationships: []
       }
       workers: {
         Row: {
@@ -700,7 +1184,7 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      increment_vote_count: { Args: { choice_id: number }; Returns: undefined }
     }
     Enums: {
       [_ in never]: never

@@ -80,45 +80,6 @@ export async function POST() {
       );
     }
 
-    // パスワードリセットメールテンプレート
-    const { error: resetPasswordError } = await supabase
-      .from('mail_templates')
-      .insert({
-        template_key: 'password_reset',
-        name: 'パスワードリセット',
-        description: 'パスワードリセット時に送信されるメール',
-        subject: '【Anke】パスワードリセットのご案内',
-        body: `<div style="font-family: sans-serif; max-width: 600px; margin: 0 auto;">
-  <h2>パスワードリセットのご案内</h2>
-  <p>{{userName}} 様</p>
-  <p>パスワードリセットのリクエストを受け付けました。</p>
-  <p>下記のリンクをクリックして、新しいパスワードを設定してください。</p>
-  <p style="margin: 30px 0;">
-    <a href="{{resetUrl}}" style="background-color: #ff6b35; color: white; padding: 12px 24px; text-decoration: none; border-radius: 5px; display: inline-block;">
-      パスワードをリセットする
-    </a>
-  </p>
-  <p>または、以下のURLをコピーしてブラウザに貼り付けてください：</p>
-  <p style="word-break: break-all; color: #666;">{{resetUrl}}</p>
-  <p style="color: #999; font-size: 14px; margin-top: 30px;">
-    ※このリンクの有効期限は1時間です。<br>
-    ※このメールに心当たりがない場合は、削除していただいて構いません。
-  </p>
-  <hr style="margin: 30px 0; border: none; border-top: 1px solid #ddd;">
-  <p>アンケ運営事務局</p>
-  <p><a href="https://anke.jp" style="color: #ff6b35;">Anke</a></p>
-</div>`,
-        is_active: true,
-      });
-
-    if (resetPasswordError) {
-      console.error('Password reset template error:', resetPasswordError);
-      return NextResponse.json(
-        { error: 'パスワードリセットメールテンプレートの追加に失敗しました', details: resetPasswordError },
-        { status: 500 }
-      );
-    }
-
     return NextResponse.json({
       success: true,
       message: 'メールテンプレートを追加しました',

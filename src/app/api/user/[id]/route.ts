@@ -21,7 +21,7 @@ export async function GET(
     // ユーザー情報を取得
     const { data: user, error } = await supabase
       .from('users')
-      .select('id, name, user_nicename, email, worker_img_url, user_description, sns_x, created_at, profile_slug')
+      .select('id, name, user_nicename, email, user_img_url, user_description, sns_x, created_at, profile_slug')
       .eq('id', userId)
       .single();
 

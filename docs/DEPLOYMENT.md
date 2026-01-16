@@ -7,6 +7,120 @@ Next.js + Supabase + CRON自動化をカゴヤVPSにデプロイする手順で�
 - カゴヤVPS契約済み（推奨: V4-4Gプラン、4コア/4GB/400GB SSD）
 - ドメイン取得済み（オプション）
 - GitHubアカウント
+- SSH鍵ファイル（`~/.ssh/anke-nextjs.key`）
+
+---
+
+## 🔑 SSH接続情報（既存VPS）
+
+### VPS情報
+- **IPアドレス**: `133.18.122.123`
+- **ユーザー名**: `ubuntu`
+- **SSH鍵**: `~/.ssh/anke-nextjs.key`
+- **アプリケーションパス**: `/var/www/anke-nextjs`
+
+### SSH接続コマンド
+```bash
+# 鍵認証でSSH接続
+ssh -i ~/.ssh/anke-nextjs.key ubuntu@133.18.122.123
+
+# または、~/.ssh/configに設定を追加
+# Host anke-vps
+#   HostName 133.18.122.123
+#   User ubuntu
+#   IdentityFile ~/.ssh/anke-nextjs.key
+#
+# 設定後は以下で接続可能
+# ssh anke-vps
+```
+
+### SSH鍵の権限設定
+```bash
+# SSH鍵の権限を正しく設定（重要）
+chmod 600 ~/.ssh/anke-nextjs.key
+```
+
+---
+
+## 📦 既存VPSの更新手順
+
+既にデプロイ済みのVPSを更新する場合は、以下の手順に従ってください。
+
+### 1. ローカルでの準備
+
+#### 1.1 データベースのバックアップ
+```bash
+docker exec supabase_db_anke-nextjs-dev pg_dump -U postgres -d postgres --clean --if-exists > @backups/db_full_$(date +%Y%m%d_%H%M%S).sql
+```
+
+#### 1.2 GitHubにプッシュ
+```bash
+git add .
+git commit -m "デプロイ準備完了"
+git push origin main
+```
+
+### 2. VPSでの更新作業
+
+#### 2.1 SSH接続
+```bash
+ssh -i ~/.ssh/anke-nextjs.key ubuntu@133.18.122.123
+```
+
+#### 2.2 作業ディレクトリに移動
+```bash
+cd /var/www/anke-nextjs
+```
+
+#### 2.3 データベースのバックアップ（VPS側）
+```bash
+docker exec supabase_db_anke-nextjs-dev pg_dump -U postgres -d postgres --clean --if-exists > backup_before_update_$(date +%Y%m%d_%H%M%S).sql
+```
+
+#### 2.4 アプリケーションを停止
+```bash
+pm2 stop anke-nextjs
+```
+
+#### 2.5 最新のコードを取得
+```bash
+git pull origin main
+```
+
+#### 2.6 依存関係を更新
+```bash
+npm install
+```
+
+#### 2.7 ビルドキャッシュをクリア
+```bash
+rm -rf .next
+```
+
+#### 2.8 本番ビルド
+```bash
+npm run build
+```
+
+#### 2.9 アプリケーションを再起動
+```bash
+pm2 restart anke-nextjs
+```
+
+#### 2.10 ステータス確認
+```bash
+pm2 status
+pm2 logs anke-nextjs --lines 50
+```
+
+### 3. 動作確認
+ブラウザで `http://133.18.122.123/` にアクセスして確認
+
+---
+
+## 🆕 新規VPS初期設定
+
+新しいVPSインスタンスにデプロイする場合は、以下の手順に従ってください。
 
 ## 1. VPS初期設定
 

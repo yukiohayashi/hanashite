@@ -8,7 +8,7 @@ interface User {
   name: string;
   email: string;
   user_description?: string;
-  worker_img_url?: string;
+  user_img_url?: string;
   sns_x?: string;
   created_at: string;
   profile_slug?: string;
@@ -113,9 +113,9 @@ export default function UserProfile({ user, posts, comments, isOwnProfile }: Use
     <>
       <div className="autor__container flex flex-row items-start gap-4 p-2.5">
         <div className="autor__containerPhoto flex-shrink-0">
-          {user.worker_img_url ? (
+          {user.user_img_url ? (
             <img 
-              src={user.worker_img_url} 
+              src={user.user_img_url} 
               alt={user.name} 
               className="w-20 h-20 rounded-full object-cover"
             />

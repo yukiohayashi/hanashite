@@ -32,7 +32,7 @@ export async function PATCH(
     status,
     is_banned,
     user_description,
-    image,
+    user_img_url,
     sei,
     mei,
     kana_sei,
@@ -55,7 +55,7 @@ export async function PATCH(
   }
   if (typeof is_banned === 'boolean') updateData.is_banned = is_banned;
   if (user_description !== undefined) updateData.user_description = user_description || null;
-  if (image !== undefined) updateData.image = image || null;
+  if (user_img_url !== undefined) updateData.user_img_url = user_img_url || null;
   if (sei !== undefined) updateData.sei = sei || null;
   if (mei !== undefined) updateData.mei = mei || null;
   if (kana_sei !== undefined) updateData.kana_sei = kana_sei || null;

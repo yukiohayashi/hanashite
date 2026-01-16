@@ -7,8 +7,7 @@ interface User {
   id: number;
   name: string;
   email: string;
-  image: string | null;
-  worker_img_url: string | null;
+  user_img_url: string | null;
   created_at: string;
   is_banned?: boolean;
   status?: number;
@@ -170,6 +169,7 @@ export default function UsersTable({ users: initialUsers }: UsersTableProps) {
   const getStatusColor = (status?: number) => {
     switch (status) {
       case 6: return 'bg-yellow-100 text-yellow-800';
+      case 4: return 'bg-red-100 text-red-800';
       case 3: return 'bg-purple-100 text-purple-800';
       case 2: return 'bg-blue-100 text-blue-800';
       case 1: return 'bg-green-100 text-green-800';
@@ -270,9 +270,9 @@ export default function UsersTable({ users: initialUsers }: UsersTableProps) {
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap">
                   <div className="w-10 h-10 rounded-full overflow-hidden bg-gray-200">
-                    {user.worker_img_url ? (
+                    {user.user_img_url ? (
                       <img
-                        src={user.worker_img_url}
+                        src={user.user_img_url}
                         alt={user.name}
                         className="w-full h-full object-cover"
                         onError={(e) => {
@@ -316,11 +316,11 @@ export default function UsersTable({ users: initialUsers }: UsersTableProps) {
                     disabled={loading === user.id}
                     className={`px-2 py-1 text-xs font-semibold rounded-full ${getStatusColor(user.status)} disabled:opacity-50`}
                   >
-                    <option value="0">一般</option>
-                    <option value="1">投稿者</option>
+                    <option value="1">会員</option>
                     <option value="2">編集者</option>
-                    <option value="3">管理者</option>
-                    <option value="6">AIエディター</option>
+                    <option value="3">運営者</option>
+                    <option value="4">停止</option>
+                    <option value="6">AI会員</option>
                   </select>
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap">

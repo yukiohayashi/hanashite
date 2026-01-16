@@ -14,17 +14,12 @@ export default function HeaderClient() {
       fetch(`/api/user/${session.user.id}`)
         .then(res => res.json())
         .then(data => {
-          if (data.worker_img_url) {
-            setAvatarUrl(data.worker_img_url);
-          } else if (session.user.image) {
-            setAvatarUrl(session.user.image);
+          if (data.user_img_url) {
+            setAvatarUrl(data.user_img_url);
           }
         })
         .catch(() => {
           // エラー時はデフォルトアバターを使用
-          if (session.user.image) {
-            setAvatarUrl(session.user.image);
-          }
         });
     }
   }, [session]);

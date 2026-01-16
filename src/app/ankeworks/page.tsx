@@ -12,7 +12,7 @@ interface Worker {
   users: {
     id: number;
     name: string;
-    worker_img_url: string | null;
+    user_img_url: string | null;
   } | null;
   worker_meta: {
     vote_budget: number;

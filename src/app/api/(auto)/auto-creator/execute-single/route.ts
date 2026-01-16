@@ -241,7 +241,11 @@ export async function POST(request: Request) {
       if (!keyword) {
         const { data: newKeyword } = await supabase
           .from('keywords')
-          .insert({ keyword: keywordName, created_at: new Date().toISOString() })
+          .insert({ 
+            keyword: keywordName, 
+            slug: keywordName.toLowerCase().replace(/\s+/g, '-'),
+            created_at: new Date().toISOString() 
+          })
           .select()
           .single();
         keyword = newKeyword;

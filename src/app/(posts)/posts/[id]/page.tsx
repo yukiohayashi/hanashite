@@ -30,13 +30,13 @@ export default async function PostPage({ params }: { params: Promise<{ id: strin
   if (post?.user_id) {
     const { data: user } = await supabase
       .from('users')
-      .select('name, worker_img_url')
+      .select('name, user_img_url')
       .eq('id', post.user_id)
       .single();
     
     if (user) {
       if (user.name) userName = user.name;
-      userAvatar = user.worker_img_url;
+      userAvatar = user.user_img_url;
     }
   }
 
@@ -110,13 +110,13 @@ export default async function PostPage({ params }: { params: Promise<{ id: strin
       if (comment.user_id) {
         const { data: user } = await supabase
           .from('users')
-          .select('name, worker_img_url')
+          .select('name, user_img_url')
           .eq('id', comment.user_id)
           .single();
         
         if (user) {
           if (user.name) commentUserName = user.name;
-          commentUserAvatar = user.worker_img_url;
+          commentUserAvatar = user.user_img_url;
         }
       }
       
@@ -131,7 +131,7 @@ export default async function PostPage({ params }: { params: Promise<{ id: strin
         ...comment,
         users: { 
           name: commentUserName,
-          worker_img_url: commentUserAvatar
+          user_img_url: commentUserAvatar
         },
         like_count: likeCount || 0
       };

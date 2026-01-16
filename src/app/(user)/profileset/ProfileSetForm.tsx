@@ -35,7 +35,7 @@ interface User {
   interest_categories?: string;
   profile_slug?: string;
   profile_slug_updated_at?: string;
-  worker_img_url?: string;
+  user_img_url?: string;
 }
 
 interface ProfileSetFormProps {
@@ -329,16 +329,16 @@ export default function ProfileSetForm({ user, categories, isFirstTime }: Profil
         
         <div className="mb-4">
           <label className="block mb-2 font-bold text-gray-700">プロフィール画像</label>
-          {user.worker_img_url && (
+          {user.user_img_url && (
             <div className="mb-2">
               <img
-                src={user.worker_img_url}
+                src={user.user_img_url}
                 alt="プロフィール画像"
                 className="my-2 border-2 border-green-500 rounded max-w-[150px] h-auto"
               />
             </div>
           )}
-          {!user.worker_img_url && (
+          {!user.user_img_url && (
             <div className="my-2 text-gray-600 text-sm">アバター画像: 未設定</div>
           )}
           <p className="mb-2 text-gray-600 text-xs">

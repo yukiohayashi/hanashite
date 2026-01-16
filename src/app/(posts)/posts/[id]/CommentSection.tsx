@@ -12,7 +12,7 @@ interface Comment {
   parent_id?: number;
   users?: {
     name: string;
-    worker_img_url?: string | null;
+    user_img_url?: string | null;
   };
   like_count?: number;
   is_liked?: boolean;
@@ -209,7 +209,7 @@ export default function CommentSection({ postId, initialComments, totalCount }: 
             return parentComments.map((comment) => {
               const users = comment.users;
               const userName = users?.name || 'ゲスト';
-              const hasAvatar = users?.worker_img_url;
+              const hasAvatar = users?.user_img_url;
               const timeAgo = getTimeAgo(comment.created_at);
               const replies = replyComments.filter(r => r.parent_id === comment.id);
               
@@ -221,7 +221,7 @@ export default function CommentSection({ postId, initialComments, totalCount }: 
                       <Link href={`/users/${comment.user_id}`}>
                         {hasAvatar ? (
                           <img 
-                            src={users.worker_img_url!} 
+                            src={users.user_img_url!} 
                             alt={userName} 
                             className="rounded-full w-5 h-5 object-cover hover:opacity-80 transition-opacity cursor-pointer"
                           />
@@ -235,7 +235,7 @@ export default function CommentSection({ postId, initialComments, totalCount }: 
                     ) : (
                       hasAvatar ? (
                         <img 
-                          src={users.worker_img_url!} 
+                          src={users.user_img_url!} 
                           alt={userName} 
                           className="rounded-full w-5 h-5 object-cover"
                         />
@@ -300,7 +300,7 @@ export default function CommentSection({ postId, initialComments, totalCount }: 
                   {replies.map((reply) => {
                     const replyUsers = reply.users;
                     const replyUserName = replyUsers?.name || 'ゲスト';
-                    const replyHasAvatar = replyUsers?.worker_img_url;
+                    const replyHasAvatar = replyUsers?.user_img_url;
                     const replyTimeAgo = getTimeAgo(reply.created_at);
                     
                     return (
@@ -311,7 +311,7 @@ export default function CommentSection({ postId, initialComments, totalCount }: 
                               <Link href={`/users/${reply.user_id}`}>
                                 {replyHasAvatar ? (
                                   <img 
-                                    src={replyUsers.worker_img_url!} 
+                                    src={replyUsers.user_img_url!} 
                                     alt={replyUserName} 
                                     className="rounded-full w-5 h-5 object-cover hover:opacity-80 transition-opacity cursor-pointer"
                                   />
@@ -325,7 +325,7 @@ export default function CommentSection({ postId, initialComments, totalCount }: 
                             ) : (
                               replyHasAvatar ? (
                                 <img 
-                                  src={replyUsers.worker_img_url!} 
+                                  src={replyUsers.user_img_url!} 
                                   alt={replyUserName} 
                                   className="rounded-full w-5 h-5 object-cover"
                                 />

@@ -5,6 +5,7 @@ Next.js + Supabase + Auth.jsで構築されたアンケートサイト
 ## 📚 ドキュメント
 
 - [デプロイ手順](./DEPLOYMENT.md) - カゴヤVPSへのデプロイ方法
+- [SSH接続設定](./SSH_SETUP.md) - VPSへのSSH接続方法
 - [システムアーキテクチャ](./SYSTEM_ARCHITECTURE.md) - システム構成
 - [LINE OAuth設定](./LINE_OAUTH_SETUP.md) - LINE認証の設定方法
 - [Twitter OAuth設定](./TWITTER_OAUTH_SETUP.md) - X (Twitter) 認証の設定方法

@@ -22,7 +22,7 @@ export default function MyPageMenu() {
             setProfileSlug(data.profile_slug);
           }
           setUserName(data.name || session.user.name || 'ゲスト');
-          setAvatarUrl(data.worker_img_url || '');
+          setAvatarUrl(data.user_img_url || '');
         })
         .catch(err => console.error('ユーザー情報取得エラー:', err));
 

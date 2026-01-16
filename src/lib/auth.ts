@@ -27,7 +27,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
         // Supabaseからユーザーを取得
         const { data: user, error } = await supabase
           .from('users')
-          .select('id, email, name, user_pass, user_nicename, worker_img_url, status')
+          .select('id, email, name, user_pass, user_nicename, user_img_url, status')
           .eq('email', credentials.email as string)
           .single()
 
@@ -61,7 +61,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
             id: String(user.id),
             email: user.email,
             name: user.user_nicename || user.name || 'ゲスト',
-            image: user.worker_img_url || null,
+            image: user.user_img_url || null,
             status: user.status,
           }
         }
@@ -90,7 +90,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
           id: String(user.id),
           email: user.email,
           name: user.user_nicename || user.name || 'ゲスト',
-          image: user.worker_img_url || null,
+          image: user.user_img_url || null,
           status: user.status,
         }
       },
@@ -138,7 +138,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
                   id: user.id,
                   name: user.name || '',
                   email: user.email || '',
-                  image: user.image || '',
+                  user_img_url: user.image || '',
                   status: 1,
                   created_at: new Date().toISOString(),
                 });

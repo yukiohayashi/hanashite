@@ -169,7 +169,7 @@ export async function POST(request: Request) {
     }
 
     if (avatarUrl) {
-      updateData.worker_img_url = avatarUrl;
+      updateData.user_img_url = avatarUrl;
     }
 
     const { error: updateError } = await supabase

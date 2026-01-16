@@ -12,7 +12,7 @@ interface User {
   name: string | null;
   email: string | null;
   image: string | null;
-  worker_img_url: string | null;
+  user_img_url: string | null;
   created_at: string;
   user_description: string | null;
   sns_x: string | null;
@@ -204,9 +204,9 @@ export default async function UserPage({ params }: { params: Promise<{ slug: str
             <div className="flex items-start gap-4">
               {/* アバター */}
               <div className="shrink-0">
-                {user.worker_img_url ? (
+                {user.user_img_url ? (
                   <img 
-                    src={user.worker_img_url} 
+                    src={user.user_img_url} 
                     alt={user.name || '匿名'} 
                     className="w-20 h-20 rounded-full object-cover"
                   />

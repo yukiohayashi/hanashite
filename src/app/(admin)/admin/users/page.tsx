@@ -2,8 +2,8 @@ import { supabase } from '@/lib/supabase';
 import UsersTable from './UsersTable';
 import Link from 'next/link';
 
-async function getUsers(statusFilter?: number, page: number = 1, limit: number = 100) {
-  console.log('getUsers - statusFilter:', statusFilter, 'page:', page, 'limit:', limit);
+async function getUsers(statusFilter?: number, hasImage?: boolean, page: number = 1, limit: number = 100) {
+  console.log('getUsers - statusFilter:', statusFilter, 'hasImage:', hasImage, 'page:', page, 'limit:', limit);
   
   const from = (page - 1) * limit;
   const to = from + limit - 1;
@@ -11,11 +11,16 @@ async function getUsers(statusFilter?: number, page: number = 1, limit: number =
   // ユーザーデータを取得
   let query = supabase
     .from('users')
-    .select('id, name, email, image, worker_img_url, created_at, is_banned, status, profile_slug', { count: 'exact' });
+    .select('id, name, email, user_img_url, created_at, is_banned, status, profile_slug', { count: 'exact' });
 
   // ステータスフィルター適用
   if (statusFilter !== undefined) {
     query = query.eq('status', statusFilter);
+  }
+
+  // プロフィール画像フィルター適用
+  if (hasImage) {
+    query = query.not('user_img_url', 'is', null);
   }
 
   const { data: allData, error: allError } = await query;
@@ -43,15 +48,17 @@ async function getUsers(statusFilter?: number, page: number = 1, limit: number =
 }
 
 async function getUserCounts() {
-  const { data: allUsers } = await supabase.from('users').select('status');
+  const { data: allUsers } = await supabase.from('users').select('status, user_img_url');
   
   const counts = {
     all: allUsers?.length || 0,
     admin: allUsers?.filter(u => u.status === 3).length || 0,
     editor: allUsers?.filter(u => u.status === 2).length || 0,
+    suspended: allUsers?.filter(u => u.status === 4).length || 0,
     member: allUsers?.filter(u => u.status === 1).length || 0,
     ai_editor: allUsers?.filter(u => u.status === 2).length || 0,
     ai_member: allUsers?.filter(u => u.status === 6).length || 0,
+    with_image: allUsers?.filter(u => u.user_img_url).length || 0,
   };
 
   return counts;
@@ -60,18 +67,19 @@ async function getUserCounts() {
 export default async function UsersManagementPage({
   searchParams,
 }: {
-  searchParams: Promise<{ status?: string; page?: string; limit?: string }>;
+  searchParams: Promise<{ status?: string; hasImage?: string; page?: string; limit?: string }>;
 }) {
   const params = await searchParams;
   const statusFilter = params.status ? parseInt(params.status) : undefined;
+  const hasImage = params.hasImage === 'true';
   const page = params.page ? parseInt(params.page) : 1;
   const limit = params.limit ? parseInt(params.limit) : 100;
   
   // デバッグログ
   console.log('UsersManagementPage - params:', params);
-  console.log('UsersManagementPage - statusFilter:', statusFilter, 'page:', page, 'limit:', limit);
+  console.log('UsersManagementPage - statusFilter:', statusFilter, 'hasImage:', hasImage, 'page:', page, 'limit:', limit);
   
-  const { users, total } = await getUsers(statusFilter, page, limit);
+  const { users, total } = await getUsers(statusFilter, hasImage, page, limit);
   const counts = await getUserCounts();
   
   const totalPages = Math.ceil(total / limit);
@@ -97,12 +105,39 @@ export default async function UsersManagementPage({
           </a>
           <span className="text-gray-400">|</span>
           <a
+            href="/admin/users?status=3"
+            className={`hover:text-blue-600 ${
+              statusFilter === 3 ? 'text-blue-600 font-semibold' : 'text-gray-600'
+            }`}
+          >
+            運営者 ({counts.admin})
+          </a>
+          <span className="text-gray-400">|</span>
+          <a
             href="/admin/users?status=2"
             className={`hover:text-blue-600 ${
               statusFilter === 2 ? 'text-blue-600 font-semibold' : 'text-gray-600'
             }`}
           >
-            AIエディター ({counts.ai_editor})
+            編集者({counts.ai_editor})
+          </a>
+          <span className="text-gray-400">|</span>
+          <a
+            href="/admin/users?status=4"
+            className={`hover:text-blue-600 ${
+              statusFilter === 4 ? 'text-blue-600 font-semibold' : 'text-gray-600'
+            }`}
+          >
+            停止 ({counts.suspended})
+          </a>
+          <span className="text-gray-400">|</span>
+          <a
+            href="/admin/users?status=1"
+            className={`hover:text-blue-600 ${
+              statusFilter === 1 ? 'text-blue-600 font-semibold' : 'text-gray-600'
+            }`}
+          >
+            会員 ({counts.member})
           </a>
           <span className="text-gray-400">|</span>
           <a
@@ -112,6 +147,15 @@ export default async function UsersManagementPage({
             }`}
           >
             AI会員 ({counts.ai_member})
+          </a>
+          <span className="text-gray-400">|</span>
+          <a
+            href="/admin/users?hasImage=true"
+            className={`hover:text-blue-600 ${
+              hasImage ? 'text-blue-600 font-semibold' : 'text-gray-600'
+            }`}
+          >
+            画像あり ({counts.with_image})
           </a>
         </div>
         
