@@ -21,7 +21,17 @@ async function getSettings() {
   const { data: settings, error } = await supabase
     .from('auto_creator_settings')
     .select('setting_key, setting_value')
-    .in('setting_key', ['is_active', 'scraping_urls', 'ai_user_probability', 'max_posts_per_execution']);
+    .in('setting_key', [
+      'is_active', 
+      'is_enabled',
+      'scraping_urls', 
+      'ai_user_probability', 
+      'max_posts_per_execution',
+      'execution_interval',
+      'execution_variance',
+      'no_create_start_hour',
+      'no_create_end_hour'
+    ]);
 
   if (error) {
     console.error('Supabase error:', error);
@@ -38,10 +48,14 @@ async function getSettings() {
   console.log('Settings map:', settingsMap);
 
   return {
-    isActive: settingsMap.is_active === 'true',
+    isActive: settingsMap.is_active === 'true' || settingsMap.is_enabled === 'true',
     scrapingUrls: JSON.parse(settingsMap.scraping_urls || '[]'),
     aiUserProbability: parseInt(settingsMap.ai_user_probability || '70'),
     maxPostsPerExecution: parseInt(settingsMap.max_posts_per_execution || '5'),
+    executionInterval: parseInt(settingsMap.execution_interval || '60'),
+    executionVariance: parseInt(settingsMap.execution_variance || '15'),
+    noCreateStartHour: parseInt(settingsMap.no_create_start_hour || '0'),
+    noCreateEndHour: parseInt(settingsMap.no_create_end_hour || '6'),
   };
 }
 
@@ -123,6 +137,58 @@ export async function POST() {
           scrapingUrlsCount: settings.scrapingUrls.length,
         }
       });
+    }
+
+    // 実行間隔チェック
+    const { data: lastLog } = await supabase
+      .from('auto_creator_logs')
+      .select('executed_at')
+      .eq('execution_type', 'auto')
+      .eq('status', 'success')
+      .order('executed_at', { ascending: false })
+      .limit(1)
+      .single();
+
+    if (lastLog) {
+      const lastExecutionTime = new Date(lastLog.executed_at);
+      const now = new Date();
+      const minutesSinceLastExecution = (now.getTime() - lastExecutionTime.getTime()) / 1000 / 60;
+      
+      // 最小実行間隔を計算（間隔 - ゆらぎ）
+      const minInterval = settings.executionInterval - settings.executionVariance;
+      
+      if (minutesSinceLastExecution < minInterval) {
+        console.log(`実行間隔が短すぎます: ${minutesSinceLastExecution}分 < ${minInterval}分`);
+        return NextResponse.json({
+          success: false,
+          message: `実行間隔が短すぎます（${Math.round(minutesSinceLastExecution)}分 < ${minInterval}分）`,
+          skipped: true,
+        });
+      }
+    }
+
+    // 作成しない時間帯チェック
+    const currentHour = new Date().getHours();
+    if (settings.noCreateStartHour < settings.noCreateEndHour) {
+      // 例: 0時～6時
+      if (currentHour >= settings.noCreateStartHour && currentHour < settings.noCreateEndHour) {
+        console.log(`作成しない時間帯です: ${currentHour}時`);
+        return NextResponse.json({
+          success: false,
+          message: `作成しない時間帯です（${settings.noCreateStartHour}時～${settings.noCreateEndHour}時）`,
+          skipped: true,
+        });
+      }
+    } else if (settings.noCreateStartHour > settings.noCreateEndHour) {
+      // 例: 22時～6時（日をまたぐ）
+      if (currentHour >= settings.noCreateStartHour || currentHour < settings.noCreateEndHour) {
+        console.log(`作成しない時間帯です: ${currentHour}時`);
+        return NextResponse.json({
+          success: false,
+          message: `作成しない時間帯です（${settings.noCreateStartHour}時～${settings.noCreateEndHour}時）`,
+          skipped: true,
+        });
+      }
     }
 
     if (settings.scrapingUrls.length === 0) {

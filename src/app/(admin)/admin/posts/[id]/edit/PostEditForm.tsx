@@ -57,6 +57,33 @@ export default function PostEditForm({ post }: PostEditFormProps) {
     setImageDeleted(true);
   };
 
+  const handleDelete = async () => {
+    if (!confirm('この投稿を削除してもよろしいですか？\nこの操作は取り消せません。')) {
+      return;
+    }
+
+    setLoading(true);
+
+    try {
+      const response = await fetch(`/api/admin/posts/${post.id}`, {
+        method: 'DELETE',
+      });
+
+      if (response.ok) {
+        alert('投稿を削除しました');
+        router.push('/admin/posts');
+      } else {
+        const result = await response.json();
+        alert(`削除に失敗しました: ${result.error || '不明なエラー'}`);
+      }
+    } catch (error) {
+      console.error('Error deleting post:', error);
+      alert('削除に失敗しました: ネットワークエラー');
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
@@ -264,20 +291,30 @@ export default function PostEditForm({ post }: PostEditFormProps) {
       </div>
 
       {/* 保存ボタン */}
-      <div className="flex items-center gap-4">
+      <div className="flex items-center justify-between">
+        <div className="flex items-center gap-4">
+          <button
+            type="submit"
+            disabled={loading}
+            className="px-6 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            {loading ? '保存中...' : '投稿を更新'}
+          </button>
+          <a
+            href="/admin/posts"
+            className="px-6 py-2 text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50"
+          >
+            キャンセル
+          </a>
+        </div>
         <button
-          type="submit"
+          type="button"
+          onClick={handleDelete}
           disabled={loading}
-          className="px-6 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed"
+          className="px-6 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 disabled:opacity-50 disabled:cursor-not-allowed"
         >
-          {loading ? '保存中...' : '投稿を更新'}
+          {loading ? '削除中...' : '投稿を削除'}
         </button>
-        <a
-          href="/admin/posts"
-          className="px-6 py-2 text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50"
-        >
-          キャンセル
-        </a>
       </div>
     </form>
   );

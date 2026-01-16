@@ -2,13 +2,11 @@
 
 import { useEffect } from 'react';
 import { signOut } from 'next-auth/react';
-import { useRouter } from 'next/navigation';
 
 export default function LogoutPage() {
-  const router = useRouter();
-
   useEffect(() => {
-    signOut({ callbackUrl: '/' });
+    const baseUrl = process.env.NEXT_PUBLIC_APP_URL || window.location.origin;
+    signOut({ callbackUrl: baseUrl });
   }, []);
 
   return (

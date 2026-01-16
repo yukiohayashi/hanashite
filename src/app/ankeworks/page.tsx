@@ -1,7 +1,7 @@
 import { supabase } from '@/lib/supabase';
 import Link from 'next/link';
 import AnkeworksHeader from './AnkeworksHeader';
-import AnkeworksSidebar from './AnkeworksSidebar';
+import HomeRightSidebar from '@/components/HomeRightSidebar';
 
 interface Worker {
   id: number;
@@ -175,7 +175,7 @@ export default async function AnkeworksPage() {
         </main>
 
         <aside className="hidden lg:block w-72 shrink-0">
-          <AnkeworksSidebar />
+          <HomeRightSidebar />
         </aside>
       </div>
     </>

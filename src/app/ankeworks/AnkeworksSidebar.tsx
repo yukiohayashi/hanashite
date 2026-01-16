@@ -46,10 +46,37 @@ export default function AnkeworksSidebar() {
     fetchUser();
   }, [session]);
 
-  if (loading || !user) {
+  if (loading) {
     return (
       <div className="bg-white p-4">
         <div className="text-center text-gray-500">読み込み中...</div>
+      </div>
+    );
+  }
+
+  if (!user) {
+    return (
+      <div className="bg-white p-4">
+        <div className="text-center mb-4">
+          <div className="mb-3">
+            <Image
+              src="/images/ankeworks.webp"
+              alt="アンケワークス"
+              width={100}
+              height={25}
+              className="mx-auto"
+            />
+          </div>
+          <p className="text-sm text-gray-700 mb-4">
+            ログインしてアンケワークスを利用しましょう
+          </p>
+          <Link
+            href="/login"
+            className="block w-full bg-orange-500 hover:bg-orange-600 text-white font-bold py-2 px-4 rounded transition-colors text-center text-sm"
+          >
+            ログイン
+          </Link>
+        </div>
       </div>
     );
   }

@@ -398,7 +398,7 @@ export default async function PostPage({ params }: { params: Promise<{ id: strin
                           href={`/keyword/${keyword.id}`}
                           className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-gray-100 text-gray-700 hover:bg-gray-200 transition-colors"
                         >
-                          #{keyword.keyword}
+                          {keyword.keyword}
                         </Link>
                       ))}
                     </div>
