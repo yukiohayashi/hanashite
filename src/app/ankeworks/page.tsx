@@ -3,6 +3,10 @@ import Link from 'next/link';
 import AnkeworksHeader from './AnkeworksHeader';
 import HomeRightSidebar from '@/components/HomeRightSidebar';
 
+// 動的レンダリングを強制
+export const dynamic = 'force-dynamic';
+export const revalidate = 0;
+
 interface Worker {
   id: number;
   title: string;
