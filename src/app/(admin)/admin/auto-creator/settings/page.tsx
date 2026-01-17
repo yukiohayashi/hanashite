@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { supabase } from '@/lib/supabase';
+import { usePageTitle } from '@/hooks/usePageTitle';
 
 interface Settings {
   scraping_urls: string;
@@ -20,6 +21,8 @@ interface Settings {
 }
 
 export default function AutoCreatorSettings() {
+  usePageTitle('AI自動投稿設定');
+  
   const [settings, setSettings] = useState<Settings>({
     scraping_urls: '[]',
     execution_interval: '60',
