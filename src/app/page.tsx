@@ -483,7 +483,7 @@ async function InterestCategoriesSection({ userId }: { userId: string | number |
       </h3>
       <div className="space-y-2 px-2">
         {allPosts.map((post) => {
-          const imageUrl = (post as any).og_image || (post as any).thumbnail_url || 'https://anke.jp/wp-content/themes/anke/images/anke_eye.webp';
+          const imageUrl = (post as any).og_image || (post as any).thumbnail_url || '/images/anke_eye.webp';
           const userName = (post as any).users?.name || 'ゲスト';
           return (
             <Link key={post.id} href={`/posts/${post.id}`} className="flex gap-3 bg-white hover:shadow-md p-3 border border-gray-300 rounded-md transition-all hover:-translate-y-1">

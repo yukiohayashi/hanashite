@@ -98,7 +98,7 @@ export default function MyAnkeList() {
     <div id="bbsitems_myanke">
       <ul id="related-entries" className="flex flex-col gap-2 m-0 p-0 list-none">
         {posts.map((post) => {
-          const imageUrl = post.og_image || post.thumbnail_url || 'https://anke.jp/wp-content/themes/anke/images/noimage.webp';
+          const imageUrl = post.og_image || post.thumbnail_url || '/images/noimage.webp';
           
           return (
             <li 

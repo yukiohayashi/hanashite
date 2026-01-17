@@ -181,7 +181,7 @@ export default async function PostPage({ params }: { params: Promise<{ id: strin
     );
   }
 
-  const imageUrl = (post as any).og_image || (post as any).thumbnail_url || 'https://anke.jp/wp-content/themes/anke/images/anke_eye.webp';
+  const imageUrl = (post as any).og_image || (post as any).thumbnail_url || '/images/anke_eye.webp';
   
   console.log('投稿詳細 - Post ID:', id);
   console.log('投稿詳細 - og_image:', (post as any).og_image);
@@ -304,7 +304,7 @@ export default async function PostPage({ params }: { params: Promise<{ id: strin
                 ) : (
                   // RSS自動投稿：緑エリアあり、画像右寄せ
                   <div className="bg-[#f1fbf9] m-0 mb-1.5 p-2.5 border border-[#c1dfd8] rounded min-h-[95px]">
-                    {imageUrl && imageUrl !== 'https://anke.jp/wp-content/themes/anke/images/anke_eye.webp' && (
+                    {imageUrl && imageUrl !== '/images/anke_eye.webp' && (
                       <div className="float-right w-1/5">
                         <img 
                           src={imageUrl}
