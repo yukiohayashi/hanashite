@@ -428,6 +428,76 @@ npx supabase start
 
 ## トラブルシューティング
 
+### コードが反映されない場合
+
+**症状**: GitHubにプッシュしてデプロイしても、古いコードのまま表示される
+
+**原因**:
+1. `git pull`が実行されていない
+2. ビルドキャッシュが残っている
+3. Nginxのキャッシュが残っている
+4. ブラウザキャッシュが残っている
+
+**解決方法**:
+```bash
+cd /var/www/anke-nextjs
+
+# 1. 最新のコードを強制取得
+git fetch origin
+git reset --hard origin/main
+
+# 2. ビルドキャッシュを完全削除
+pm2 stop anke-nextjs
+rm -rf .next
+rm -rf node_modules/.cache
+
+# 3. 依存関係を更新
+npm install
+
+# 4. クリーンビルド
+NODE_ENV=production npm run build
+
+# 5. アプリケーションを再起動
+pm2 restart anke-nextjs
+
+# 6. Nginxキャッシュをクリア
+sudo rm -rf /var/cache/nginx/*
+sudo systemctl restart nginx
+```
+
+**ブラウザ側の対応**:
+- ハードリフレッシュ: `Ctrl + Shift + R` (Windows) / `Cmd + Shift + R` (Mac)
+- プライベートモード/シークレットモードで確認
+- 開発者ツールで "Disable cache" を有効化
+
+### 502 Bad Gateway エラー
+
+**症状**: Nginxが502エラーを返す
+
+**原因**: PM2でNext.jsアプリケーションが起動していない、または`.next`ディレクトリがない
+
+**解決方法**:
+```bash
+cd /var/www/anke-nextjs
+
+# PM2の状態を確認
+pm2 status
+
+# ログを確認
+pm2 logs anke-nextjs --lines 30
+
+# .nextディレクトリがない場合はビルド
+npm run build
+
+# アプリケーションを再起動
+pm2 restart anke-nextjs
+
+# それでもダメなら完全に再起動
+pm2 delete anke-nextjs
+pm2 start npm --name "anke-nextjs" -- start
+pm2 save
+```
+
 ### Next.jsが起動しない
 
 ```bash
