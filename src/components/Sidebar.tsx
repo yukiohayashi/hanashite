@@ -40,7 +40,6 @@ export default function Sidebar() {
       .order('id', { ascending: false })
       .limit(1000);
 
-
     if (likesError || !likesData || likesData.length === 0) {
       return;
     }
@@ -72,11 +71,7 @@ export default function Sidebar() {
     const { data: usersData, error: usersError } = await supabase
       .from('users')
       .select('id, name')
-      .in('id', userIds)
-      .not('name', 'is', null)
-      .neq('name', '')
-      .neq('name', '匿名');
-
+      .in('id', userIds);
 
     if (!usersData) {
       return;
@@ -104,25 +99,17 @@ export default function Sidebar() {
       .order('id', { ascending: false })
       .limit(10000);
 
-    console.log('コメントいいねランキング - likesData:', likesData?.length);
-    console.log('コメントいいねランキング - likesError:', likesError);
-
     if (likesError || !likesData || likesData.length === 0) {
-      console.log('コメントいいねランキング - データなし');
       return;
     }
 
     // コメントIDからコメント投稿者を取得（最初の100件のみ）
     const commentIds = [...new Set(likesData.map(l => l.target_id))].slice(0, 100);
-    console.log('コメントいいねランキング - commentIds:', commentIds.length);
     
     const { data: commentsData, error: commentsError } = await supabase
       .from('comments')
       .select('id, user_id')
       .in('id', commentIds);
-    
-    console.log('コメントいいねランキング - commentsData:', commentsData?.length);
-    console.log('コメントいいねランキング - commentsError:', commentsError);
 
 
     if (!commentsData) {
@@ -144,10 +131,7 @@ export default function Sidebar() {
     const { data: usersData, error: usersError } = await supabase
       .from('users')
       .select('id, name')
-      .in('id', userIds)
-      .not('name', 'is', null)
-      .neq('name', '')
-      .neq('name', '匿名');
+      .in('id', userIds);
 
 
     if (!usersData) {
@@ -213,7 +197,7 @@ export default function Sidebar() {
       await fetchUserCategories();
     };
     fetchRankings();
-  }, [session]);
+  }, []);
 
   const getBadgeColor = (rank: number) => {
     if (rank === 1) return 'bg-[#f06292]';

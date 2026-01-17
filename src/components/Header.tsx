@@ -10,17 +10,28 @@ import HeaderLink from './HeaderLink';
 import MobileLeftSidebar from './MobileLeftSidebar';
 import MobileRightSidebar from './MobileRightSidebar';
 
-interface HeaderProps {
-  postsCount?: number;
-}
-
-export default function Header({ postsCount = 0 }: HeaderProps) {
+export default function Header() {
   const { data: session, status } = useSession();
   const pathname = usePathname();
+  const [postsCount, setPostsCount] = useState(0);
   const [leftSidebarOpen, setLeftSidebarOpen] = useState(false);
   const [rightSidebarOpen, setRightSidebarOpen] = useState(false);
   const [avatarUrl, setAvatarUrl] = useState('');
   const [unreadCount, setUnreadCount] = useState(0);
+
+  useEffect(() => {
+    const fetchPostsCount = async () => {
+      try {
+        const response = await fetch('/api/stats/posts-count');
+        const data = await response.json();
+        setPostsCount(data.count || 0);
+      } catch (error) {
+        console.error('Error fetching posts count:', error);
+        setPostsCount(0);
+      }
+    };
+    fetchPostsCount();
+  }, []);
 
   useEffect(() => {
     if (session?.user?.id) {

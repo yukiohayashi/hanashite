@@ -10,7 +10,6 @@ import SearchForm from '@/components/SearchForm';
 import KeywordsSection from '@/components/KeywordsSection';
 import PostImage from '@/components/PostImage';
 import { auth } from '@/lib/auth';
-import { getPostsCount } from '@/lib/getPostsCount';
 
 interface HomeProps {
   searchParams: Promise<{ s?: string; sort?: string }>;
@@ -24,9 +23,6 @@ export default async function Home({ searchParams }: HomeProps) {
   // 現在のユーザーを取得（セッションから）
   const session = await auth();
   const userId = session?.user?.id || null;
-
-  // 投稿数を取得（ISRでキャッシュ）
-  const postsCount = await getPostsCount();
 
   const params = await searchParams;
   const searchQuery = params.s || '';
@@ -191,7 +187,7 @@ export default async function Home({ searchParams }: HomeProps) {
 
   return (
     <div className="bg-gray-50 min-h-screen">
-      <Header postsCount={postsCount} />
+      <Header />
 
       <main className="md:flex md:justify-center mx-auto pt-[60px] md:pt-4 pb-4 max-w-7xl">
         {/* 左サイドバー */}

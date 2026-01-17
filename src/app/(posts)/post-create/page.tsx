@@ -5,6 +5,11 @@ import Footer from '@/components/Footer';
 import RightSidebar from '@/components/RightSidebar';
 import MyPageMenu from '@/components/MyPageMenu';
 import PostCreateForm from './PostCreateForm';
+import type { Metadata } from 'next';
+
+export const metadata: Metadata = {
+  title: 'アンケート作成',
+};
 
 export default async function AnkeCreatePage() {
   const session = await auth();

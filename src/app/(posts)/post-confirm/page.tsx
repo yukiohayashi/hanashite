@@ -5,8 +5,13 @@ import Footer from '@/components/Footer';
 import RightSidebar from '@/components/RightSidebar';
 import MyPageMenu from '@/components/MyPageMenu';
 import PostConfirmView from './PostConfirmView';
+import type { Metadata } from 'next';
 
-export default async function AnkeConfirmPage() {
+export const metadata: Metadata = {
+  title: 'アンケート確認',
+};
+
+export default async function PostConfirmPage() {
   const session = await auth();
   
   if (!session) {
