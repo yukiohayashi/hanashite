@@ -261,11 +261,10 @@ export default function PostCreateForm() {
       )}
 
       <form onSubmit={handleSubmit} className="space-y-6">
-        <Card>
-          <CardHeader>
-            <CardTitle>基本情報</CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-4">
+        <div className="bg-white border border-gray-300 rounded-md shadow-sm">
+          <div className="p-4 space-y-6">
+            {/* 基本情報 */}
+            <div className="space-y-4">
             <div className="space-y-2">
               <Label htmlFor="title">
                 アンケート内容 <span className="text-red-600">*</span>
@@ -277,6 +276,7 @@ export default function PostCreateForm() {
                 placeholder="タイトルを入力（35文字以内）"
                 maxLength={35}
                 required
+                className="border-gray-300"
               />
             </div>
 
@@ -291,6 +291,7 @@ export default function PostCreateForm() {
                 placeholder="補足内容を入力"
                 rows={6}
                 required
+                className="border-gray-300"
               />
             </div>
 
@@ -300,10 +301,10 @@ export default function PostCreateForm() {
                 value={formData.category}
                 onValueChange={(value) => setFormData({ ...formData, category: value })}
               >
-                <SelectTrigger>
+                <SelectTrigger className="border-gray-300">
                   <SelectValue />
                 </SelectTrigger>
-                <SelectContent>
+                <SelectContent className="bg-white">
                   <SelectItem value="auto">自動選択</SelectItem>
                   {categories.map((cat) => (
                     <SelectItem key={cat.id} value={cat.id.toString()}>
@@ -313,15 +314,15 @@ export default function PostCreateForm() {
                 </SelectContent>
               </Select>
             </div>
-          </CardContent>
-        </Card>
+            </div>
 
-        <Card>
-          <CardHeader>
-            <CardTitle>選択肢</CardTitle>
-            <CardDescription>※「どちらでもない」などの曖昧な選択肢は避けて、明確な回答をお選びください</CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-4">
+            {/* 区切り線 */}
+            <div className="border-t border-gray-300"></div>
+
+            {/* 選択肢 */}
+            <div className="space-y-4">
+              <h3 className="font-bold text-lg">選択肢</h3>
+              <p className="text-gray-600 text-sm">※「どちらでもない」などの曖昧な選択肢は避けて、明確な回答をお選びください</p>
             <div className="flex flex-wrap gap-2">
               <Button type="button" onClick={() => autoFillChoices('prefecture')} variant="outline" size="sm">
                 47都道府県
@@ -350,18 +351,19 @@ export default function PostCreateForm() {
                   value={choice.value}
                   onChange={(e) => updateChoice(choice.id, e.target.value)}
                   placeholder={`選択肢${index + 1}`}
+                  className="border-gray-300"
                 />
               ))}
             </div>
 
             <div className="flex justify-center gap-2">
-              <Button type="button" onClick={addChoice} variant="secondary">
+              <Button type="button" onClick={addChoice} variant="secondary" className="border-gray-300">
                 ＋ 追加
               </Button>
-              <Button type="button" onClick={removeChoice} variant="secondary" disabled={choices.length <= 2}>
+              <Button type="button" onClick={removeChoice} variant="secondary" disabled={choices.length <= 2} className="border-gray-300">
                 － 削除
               </Button>
-              <Button type="button" onClick={clearAllChoices} variant="destructive">
+              <Button type="button" onClick={clearAllChoices} variant="secondary" className="border-gray-300">
                 すべて消去
               </Button>
             </div>
@@ -372,8 +374,9 @@ export default function PostCreateForm() {
                 id="bulkInput"
                 value={bulkInput}
                 onChange={(e) => setBulkInput(e.target.value)}
-                rows={5}
-                placeholder="例：&#10;思う&#10;思わない&#10;どちらとも言えない"
+                placeholder="例：思う 思わない どちらとも言えない"
+                rows={3}
+                className="border-gray-300"
               />
               <Button type="button" onClick={applyBulkChoices} variant="secondary" size="sm">
                 一括適用
@@ -387,6 +390,7 @@ export default function PostCreateForm() {
                   id="multi"
                   checked={formData.multi}
                   onCheckedChange={(checked) => setFormData({ ...formData, multi: checked as boolean })}
+                  className="border-gray-300"
                 />
                 <Label htmlFor="multi" className="cursor-pointer">複数選択</Label>
               </div>
@@ -395,18 +399,19 @@ export default function PostCreateForm() {
                   id="random"
                   checked={formData.random}
                   onCheckedChange={(checked) => setFormData({ ...formData, random: checked as boolean })}
+                  className="border-gray-300"
                 />
                 <Label htmlFor="random" className="cursor-pointer">ランダム表示</Label>
               </div>
             </div>
-          </CardContent>
-        </Card>
+            </div>
 
-        <Card>
-          <CardHeader>
-            <CardTitle>オプション</CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-4">
+            {/* 区切り線 */}
+            <div className="border-t border-gray-300"></div>
+
+            {/* オプション */}
+            <div className="space-y-4">
+              <h3 className="font-bold text-lg">オプション</h3>
             <div className="space-y-2">
               <Label htmlFor="file_photo">
                 画像をアップロード <i className="far fa-image"></i>
@@ -416,7 +421,7 @@ export default function PostCreateForm() {
                 type="file"
                 accept="image/*"
                 onChange={handleImageChange}
-                className="cursor-pointer"
+                className="cursor-pointer border-gray-300"
               />
               {imagePreview && (
                 <div className="relative mt-2">
@@ -442,6 +447,7 @@ export default function PostCreateForm() {
                 value={formData.imageUrl}
                 onChange={(e) => setFormData({ ...formData, imageUrl: e.target.value })}
                 placeholder="画像の代わりに関連するニュースや動画等があればURLを貼ってください"
+                className="border-gray-300"
               />
             </div>
 
@@ -452,16 +458,19 @@ export default function PostCreateForm() {
                   type="date"
                   value={formData.closeDate}
                   onChange={(e) => setFormData({ ...formData, closeDate: e.target.value })}
+                  className="border-gray-300"
                 />
                 <Input
                   type="time"
                   value={formData.closeTime}
                   onChange={(e) => setFormData({ ...formData, closeTime: e.target.value })}
+                  className="border-gray-300"
                 />
               </div>
             </div>
-          </CardContent>
-        </Card>
+            </div>
+          </div>
+        </div>
 
         <div className="text-center">
           <Button

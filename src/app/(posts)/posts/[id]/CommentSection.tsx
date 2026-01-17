@@ -207,8 +207,8 @@ export default function CommentSection({ postId, initialComments, totalCount }: 
           <button
             type="submit"
             disabled={isSubmitting || !newComment.trim()}
-            className="bg-[#ff6b35] hover:bg-[#ff5722] disabled:bg-gray-300 disabled:opacity-50 px-6 py-2 rounded-lg font-medium text-white disabled:cursor-not-allowed transition-colors"
-            style={{ backgroundColor: isSubmitting || !newComment.trim() ? undefined : '#ff6b35' }}
+            className="inline-flex justify-center items-center bg-[#ff6b35] hover:bg-[#e58a2f] disabled:bg-gray-300 disabled:opacity-50 px-6 py-3 rounded font-bold text-white text-sm disabled:cursor-not-allowed transition-colors"
+            style={{ minWidth: '180px' }}
           >
             {isSubmitting ? '投稿中...' : (replyingTo ? '返信する' : 'コメントする')}
           </button>

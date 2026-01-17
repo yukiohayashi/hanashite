@@ -7,7 +7,7 @@ import crypto from 'crypto';
 export async function POST(request: Request) {
   try {
     const session = await auth();
-    const { choiceId, postId, sessionId } = await request.json();
+    const { choiceId, postId, sessionId, multi } = await request.json();
 
     if (!choiceId || !postId) {
       return NextResponse.json(
@@ -15,6 +15,9 @@ export async function POST(request: Request) {
         { status: 400 }
       );
     }
+
+    // 複数選択の場合は配列、単一選択の場合は配列に変換
+    const choiceIds = Array.isArray(choiceId) ? choiceId : [choiceId];
 
     // IPアドレスを取得
     const headersList = await headers();
@@ -82,32 +85,34 @@ export async function POST(request: Request) {
       }
     }
 
-    // 投票数を更新
-    const { data: choice, error: fetchError } = await supabase
-      .from('vote_choices')
-      .select('vote_count')
-      .eq('id', choiceId)
-      .single();
+    // 投票数を更新（複数選択対応）
+    for (const id of choiceIds) {
+      const { data: choice, error: fetchError } = await supabase
+        .from('vote_choices')
+        .select('vote_count')
+        .eq('id', id)
+        .single();
 
-    if (fetchError) {
-      return NextResponse.json(
-        { success: false, error: '選択肢が見つかりません' },
-        { status: 404 }
-      );
-    }
+      if (fetchError) {
+        return NextResponse.json(
+          { success: false, error: '選択肢が見つかりません' },
+          { status: 404 }
+        );
+      }
 
-    const newVoteCount = (choice.vote_count || 0) + 1;
+      const newVoteCount = (choice.vote_count || 0) + 1;
 
-    const { error: updateError } = await supabase
-      .from('vote_choices')
-      .update({ vote_count: newVoteCount })
-      .eq('id', choiceId);
+      const { error: updateError } = await supabase
+        .from('vote_choices')
+        .update({ vote_count: newVoteCount })
+        .eq('id', id);
 
-    if (updateError) {
-      return NextResponse.json(
-        { success: false, error: '投票の更新に失敗しました' },
-        { status: 500 }
-      );
+      if (updateError) {
+        return NextResponse.json(
+          { success: false, error: '投票の更新に失敗しました' },
+          { status: 500 }
+        );
+      }
     }
 
     // 投稿の総投票数を再計算して更新
@@ -123,13 +128,13 @@ export async function POST(request: Request) {
       .update({ total_votes: totalVotes })
       .eq('id', postId);
 
-    // 投票履歴を記録
+    // 投票履歴を記録（複数選択の場合は最初の選択肢のみ記録）
     const { error: historyError } = await supabase
       .from('vote_history')
       .insert({
         post_id: postId,
         user_id: userId,
-        choice_id: choiceId,
+        choice_id: choiceIds[0],
         ip_address: ipAddress !== 'unknown' ? ipAddress : null,
         session_id: hashedSessionId
       });
@@ -212,7 +217,6 @@ export async function POST(request: Request) {
 
     return NextResponse.json({
       success: true,
-      voteCount: newVoteCount,
       choices: updatedChoices
     });
   } catch (error) {

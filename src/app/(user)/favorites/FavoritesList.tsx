@@ -108,7 +108,7 @@ export default function FavoritesList() {
 
       <ul className="divide-y divide-gray-200">
         {posts.map((post) => {
-          const imageUrl = post.og_image || post.thumbnail_url || '/images/anke_eye.webp';
+          const imageUrl = post.og_image || post.thumbnail_url || '/images/noimage.webp';
           
           return (
             <li key={post.id} className="hover:bg-gray-50 p-4 transition-colors">

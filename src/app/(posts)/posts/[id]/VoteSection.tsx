@@ -18,6 +18,8 @@ interface VoteSectionProps {
   closeAt?: string | null;
   commentCount?: number;
   createdAt?: string;
+  multi?: boolean;
+  random?: boolean;
 }
 
 export default function VoteSection({ 
@@ -27,9 +29,23 @@ export default function VoteSection({
   initialVotedChoiceId = null,
   closeAt = null,
   commentCount = 0,
-  createdAt
+  createdAt,
+  multi = false,
+  random = false
 }: VoteSectionProps) {
-  const [choices, setChoices] = useState<VoteChoice[]>(initialChoices);
+  const [choices, setChoices] = useState<VoteChoice[]>(() => {
+    // ランダム表示の場合は選択肢をシャッフル
+    if (random) {
+      const shuffled = [...initialChoices];
+      for (let i = shuffled.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+      }
+      return shuffled;
+    }
+    return initialChoices;
+  });
+  const [selectedChoices, setSelectedChoices] = useState<number[]>([]);
   const [isVoting, setIsVoting] = useState(false);
   const [hasVoted, setHasVoted] = useState(initialHasVoted);
   const [showResults, setShowResults] = useState(false);
@@ -46,8 +62,23 @@ export default function VoteSection({
     }
   }, [initialHasVoted]);
 
-  const handleVote = async (choiceId: number) => {
+  const handleChoiceClick = (choiceId: number) => {
+    if (hasVoted || !multi) return;
+    
+    setSelectedChoices(prev => {
+      if (prev.includes(choiceId)) {
+        return prev.filter(id => id !== choiceId);
+      } else {
+        return [...prev, choiceId];
+      }
+    });
+  };
+
+  const handleVote = async (choiceId?: number) => {
     if (isVoting || hasVoted) return;
+
+    const votingChoices = multi ? selectedChoices : (choiceId ? [choiceId] : []);
+    if (votingChoices.length === 0) return;
 
     setIsVoting(true);
 
@@ -65,9 +96,10 @@ export default function VoteSection({
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          choiceId,
+          choiceId: multi ? votingChoices : choiceId,
           postId,
           sessionId,
+          multi,
         }),
       });
 
@@ -99,17 +131,39 @@ export default function VoteSection({
 
   return (
     <div className="space-y-3">
+      {multi && !hasVoted && (
+        <div className="flex justify-between items-center mb-2">
+          <p className="text-gray-600 text-sm">複数選択可能です</p>
+          <Button
+            onClick={() => handleVote()}
+            disabled={isVoting || selectedChoices.length === 0}
+            className="bg-[#ff6b35] hover:bg-[#e58a2f]"
+          >
+            投票する ({selectedChoices.length}件選択中)
+          </Button>
+        </div>
+      )}
       {!hasVoted ? (
         // 投票前：選択肢ボタン
         choices.map((choice) => (
-          <button
+          <Button
             key={choice.id}
-            onClick={() => handleVote(choice.id)}
+            onClick={() => multi ? handleChoiceClick(choice.id) : handleVote(choice.id)}
             disabled={isVoting}
-            className="group relative w-full bg-white hover:bg-[#4DB6AC] px-6 py-4 border-2 border-[#4DB6AC] rounded-lg font-medium text-[#4DB6AC] hover:text-white text-center transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
+            variant="outline"
+            className={`w-full px-6 py-4 border-2 rounded-lg font-medium text-center transition-all duration-300 ${
+              multi && selectedChoices.includes(choice.id)
+                ? 'bg-[#4DB6AC] border-[#4DB6AC] text-white hover:bg-[#4DB6AC] hover:text-white'
+                : 'bg-white hover:bg-[#4DB6AC] border-[#4DB6AC] text-[#4DB6AC] hover:text-white'
+            }`}
           >
+            {multi && (
+              <span className="mr-2">
+                {selectedChoices.includes(choice.id) ? '☑' : '☐'}
+              </span>
+            )}
             {choice.choice}
-          </button>
+          </Button>
         ))
       ) : (
         // 投票後：結果表示（横バーアニメーション）

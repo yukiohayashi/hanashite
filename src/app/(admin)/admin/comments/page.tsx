@@ -1,12 +1,20 @@
 import { supabase } from '@/lib/supabase';
 import CommentsTable from './CommentsTable';
+import SearchForm from './SearchForm';
 
-async function getComments(limit: number = 100) {
-  const { data: comments, error } = await supabase
+async function getComments(limit: number = 100, searchQuery: string = '') {
+  let query = supabase
     .from('comments')
-    .select('id, content, created_at, user_id, post_id')
-    .order('created_at', { ascending: false })
-    .limit(limit);
+    .select('id, content, created_at, user_id, post_id');
+
+  // 検索クエリがある場合はフィルタリング
+  if (searchQuery) {
+    query = query.ilike('content', `%${searchQuery}%`);
+  }
+
+  query = query.order('created_at', { ascending: false }).limit(limit);
+
+  const { data: comments, error } = await query;
 
   if (error) {
     console.error('Error fetching comments:', error);
@@ -57,11 +65,12 @@ async function getCommentCounts() {
 export default async function CommentsManagementPage({
   searchParams,
 }: {
-  searchParams: Promise<{ limit?: string }>;
+  searchParams: Promise<{ limit?: string; q?: string }>;
 }) {
   const params = await searchParams;
   const limit = params.limit ? parseInt(params.limit) : 100;
-  const comments = await getComments(limit);
+  const searchQuery = params.q || '';
+  const comments = await getComments(limit, searchQuery);
   const counts = await getCommentCounts();
 
   return (
@@ -69,6 +78,9 @@ export default async function CommentsManagementPage({
       <div>
         <h1 className="text-3xl font-bold text-gray-900">コメント管理</h1>
       </div>
+
+      {/* 検索フォーム */}
+      <SearchForm />
 
       {/* 表示件数選択 */}
       <div className="flex items-center justify-between">

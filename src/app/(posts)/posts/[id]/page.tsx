@@ -7,6 +7,7 @@ import Header from '@/components/Header';
 import Footer from '@/components/Footer';
 import Sidebar from '@/components/Sidebar';
 import RightSidebar from '@/components/RightSidebar';
+import ClickableImage from '@/components/ClickableImage';
 import LikeButton from './LikeButton';
 import FavoriteButton from './FavoriteButton';
 
@@ -68,7 +69,7 @@ export default async function PostPage({ params }: { params: Promise<{ id: strin
   // 投票オプション（締切日時など）を取得
   const { data: voteOptions } = await supabase
     .from('vote_options')
-    .select('close_at')
+    .select('close_at, multi, random')
     .eq('post_id', id)
     .single();
 
@@ -181,7 +182,7 @@ export default async function PostPage({ params }: { params: Promise<{ id: strin
     );
   }
 
-  const imageUrl = (post as any).og_image || (post as any).thumbnail_url || '/images/anke_eye.webp';
+  const imageUrl = (post as any).og_image || (post as any).thumbnail_url || '/images/noimage.webp';
   
   console.log('投稿詳細 - Post ID:', id);
   console.log('投稿詳細 - og_image:', (post as any).og_image);
@@ -283,80 +284,101 @@ export default async function PostPage({ params }: { params: Promise<{ id: strin
                     </div>
                   </div>
                 ) : imageUrl && (imageUrl.startsWith('data:image/') || imageUrl.startsWith('/uploads/')) ? (
-                  // 手動画像アップロード：緑エリアなし、画像100%幅、本文表示
+                  // 手動画像アップロード：画像を左に小さく表示、本文を回り込ませ
                   <div className="mb-1.5">
-                    <div className="font-normal text-gray-800 text-sm leading-relaxed mb-2.5">
-                      {post.content ? (
-                        <div dangerouslySetInnerHTML={{ __html: post.content }} />
-                      ) : (
-                        <p className="text-gray-500">本文はありません</p>
-                      )}
-                    </div>
-                    <div className="mb-2.5">
-                      <img 
+                    <div className="float-left mr-3 mb-2 w-24 md:w-32">
+                      <ClickableImage
                         src={imageUrl}
                         alt={post.title}
                         className="w-full rounded"
                         loading="lazy"
                       />
                     </div>
+                    <div className="font-normal text-gray-800 text-sm leading-relaxed">
+                      {post.content ? (
+                        <div dangerouslySetInnerHTML={{ __html: post.content.replace(/\\n/g, '<br>').replace(/\n/g, '<br>') }} />
+                      ) : (
+                        <p className="text-gray-500">本文はありません</p>
+                      )}
+                    </div>
+                    <div className="clear-both"></div>
                   </div>
-                ) : (
-                  // RSS自動投稿：緑エリアあり、画像右寄せ
-                  <div className="bg-[#f1fbf9] m-0 mb-1.5 p-2.5 border border-[#c1dfd8] rounded min-h-[95px]">
-                    {imageUrl && imageUrl !== '/images/anke_eye.webp' && (
-                      <div className="float-right w-1/5">
-                        <img 
-                          src={imageUrl}
-                          alt={post.title}
-                          className="float-right pb-1.5 rounded w-20 h-20 object-center object-cover"
-                          loading="lazy"
-                        />
+                ) : (() => {
+                  // RSS記事かどうかを判定（og_titleまたはsource_urlがある場合）
+                  const isRssArticle = (post as any).og_title || (post as any).source_url;
+                  
+                  if (isRssArticle) {
+                    // RSS自動投稿：緑エリアあり、画像右寄せ
+                    return (
+                      <div className="bg-[#f1fbf9] m-0 mb-1.5 p-2.5 border border-[#c1dfd8] rounded min-h-[95px]">
+                        {imageUrl && imageUrl !== '/images/noimage.webp' && (
+                          <div className="float-right w-1/5">
+                            <img 
+                              src={imageUrl}
+                              alt={post.title}
+                              className="float-right pb-1.5 rounded w-20 h-20 object-center object-cover"
+                              loading="lazy"
+                            />
+                          </div>
+                        )}
+                        <div className="block clear-none relative m-0 w-4/5 font-normal text-gray-600 text-sm break-all leading-normal">
+                          <div className="max-w-none prose prose-sm">
+                            <div className="m-0">
+                              {(post as any).og_title && <p className="m-0">{(post as any).og_title}</p>}
+                              {post.content ? (
+                                <div dangerouslySetInnerHTML={{ __html: post.content }} />
+                              ) : (
+                                <p className="text-gray-500">本文はありません</p>
+                              )}
+                              {(() => {
+                                let sourceUrl = (post as any).source_url;
+                                if (!sourceUrl && post.content) {
+                                  const urlMatch = post.content.match(/https?:\/\/[^\s\n<]+/);
+                                  if (urlMatch) {
+                                    sourceUrl = urlMatch[0].replace(/\\n.*$/, '');
+                                  }
+                                }
+                                if (sourceUrl) {
+                                  try {
+                                    const hostname = new URL(sourceUrl).hostname;
+                                    return (
+                                      <p className="m-0 text-[0.6rem]">
+                                        <a 
+                                          href={sourceUrl} 
+                                          target="_blank" 
+                                          rel="noopener external nofollow" 
+                                          className="font-black text-gray-600"
+                                        >
+                                          {hostname} 引用元：
+                                        </a>
+                                      </p>
+                                    );
+                                  } catch (e) {
+                                    return null;
+                                  }
+                                }
+                                return null;
+                              })()}
+                            </div>
+                          </div>
+                        </div>
                       </div>
-                    )}
-                    <div className="block clear-none relative m-0 w-4/5 font-normal text-gray-600 text-sm break-all leading-normal">
-                      <div className="max-w-none prose prose-sm">
-                        <div className="m-0">
-                          {(post as any).og_title && <p className="m-0">{(post as any).og_title}</p>}
+                    );
+                  } else {
+                    // 通常の投稿：緑エリアなし、本文のみ表示
+                    return (
+                      <div className="mb-1.5">
+                        <div className="font-normal text-gray-800 text-sm leading-relaxed">
                           {post.content ? (
-                            <div dangerouslySetInnerHTML={{ __html: post.content }} />
+                            <div dangerouslySetInnerHTML={{ __html: post.content.replace(/\\n/g, '<br>').replace(/\n/g, '<br>') }} />
                           ) : (
                             <p className="text-gray-500">本文はありません</p>
                           )}
-                          {(() => {
-                            let sourceUrl = (post as any).source_url;
-                            if (!sourceUrl && post.content) {
-                              const urlMatch = post.content.match(/https?:\/\/[^\s\n<]+/);
-                              if (urlMatch) {
-                                sourceUrl = urlMatch[0].replace(/\\n.*$/, '');
-                              }
-                            }
-                            if (sourceUrl) {
-                              try {
-                                const hostname = new URL(sourceUrl).hostname;
-                                return (
-                                  <p className="m-0 text-[0.6rem]">
-                                    <a 
-                                      href={sourceUrl} 
-                                      target="_blank" 
-                                      rel="noopener external nofollow" 
-                                      className="font-black text-gray-600"
-                                    >
-                                      {hostname} 引用元：
-                                    </a>
-                                  </p>
-                                );
-                              } catch (e) {
-                                return null;
-                              }
-                            }
-                            return null;
-                          })()}
                         </div>
                       </div>
-                    </div>
-                  </div>
-                )}
+                    );
+                  }
+                })()}
 
                 {/* 記事ID（右下に表示） */}
                 <div className="mb-4 text-right">
@@ -374,6 +396,8 @@ export default async function PostPage({ params }: { params: Promise<{ id: strin
                       closeAt={voteOptions?.close_at}
                       commentCount={totalCommentCount || 0}
                       createdAt={post.created_at}
+                      multi={voteOptions?.multi || false}
+                      random={voteOptions?.random || false}
                     />
                   </div>
                 )}

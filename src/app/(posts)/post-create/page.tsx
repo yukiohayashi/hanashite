@@ -17,8 +17,8 @@ export default async function AnkeCreatePage() {
     <div className="bg-gray-50 min-h-screen">
       <Header />
       
-      <div className="wrapper" style={{ display: 'flex', maxWidth: '1260px', margin: '70px auto 0', justifyContent: 'center' }}>
-        <main className="article__contents" style={{ minWidth: '690px', margin: '0 5px' }}>
+      <div className="wrapper md:flex md:max-w-full md:mx-2.5 md:mt-2 md:justify-center pt-20 md:pt-2 mx-auto">
+        <main className="article__contents md:min-w-[690px] mx-1 md:mx-1.5">
           <h1 className="mb-4 p-0 font-bold text-[#ff6b35] text-2xl">
             アンケート作成
           </h1>

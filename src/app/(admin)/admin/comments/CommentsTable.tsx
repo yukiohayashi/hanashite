@@ -66,10 +66,6 @@ export default function CommentsTable({ comments: initialComments }: CommentsTab
       return;
     }
 
-    if (!confirm(`選択した${selectedIds.length}件のコメントを削除しますか？この操作は取り消せません。`)) {
-      return;
-    }
-
     setDeleting(true);
     try {
       const response = await fetch('/api/admin/comments/bulk-delete', {
@@ -98,10 +94,6 @@ export default function CommentsTable({ comments: initialComments }: CommentsTab
   };
 
   const handleDelete = async (commentId: number) => {
-    if (!confirm('このコメントを削除しますか？この操作は取り消せません。')) {
-      return;
-    }
-
     setLoading(commentId);
     try {
       const response = await fetch(`/api/admin/comments/${commentId}`, {

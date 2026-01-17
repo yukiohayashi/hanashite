@@ -10,19 +10,23 @@ import SearchForm from '@/components/SearchForm';
 import KeywordsSection from '@/components/KeywordsSection';
 import PostImage from '@/components/PostImage';
 import { auth } from '@/lib/auth';
+import { getPostsCount } from '@/lib/getPostsCount';
 
 interface HomeProps {
   searchParams: Promise<{ s?: string; sort?: string }>;
 }
 
 // ISR（Incremental Static Regeneration）を有効化
-// 60秒ごとに再生成し、それまでは静的HTMLを配信（高速化）
-export const revalidate = 60;
+// 3600秒（1時間）ごとに再生成し、それまでは静的HTMLを配信（高速化）
+export const revalidate = 3600;
 
 export default async function Home({ searchParams }: HomeProps) {
   // 現在のユーザーを取得（セッションから）
   const session = await auth();
   const userId = session?.user?.id || null;
+
+  // 投稿数を取得（ISRでキャッシュ）
+  const postsCount = await getPostsCount();
 
   const params = await searchParams;
   const searchQuery = params.s || '';
@@ -187,7 +191,7 @@ export default async function Home({ searchParams }: HomeProps) {
 
   return (
     <div className="bg-gray-50 min-h-screen">
-      <Header />
+      <Header postsCount={postsCount} />
 
       <main className="md:flex md:justify-center mx-auto pt-[60px] md:pt-4 pb-4 max-w-7xl">
         {/* 左サイドバー */}
@@ -268,27 +272,25 @@ export default async function Home({ searchParams }: HomeProps) {
 
             {/* 最新2列（オススメ時のみ表示） */}
             {sortBy === 'recommend' && (
-              <div className="gap-[1px] grid grid-cols-2 mx-1.5 mb-4 w-auto" style={{ boxSizing: 'border-box', padding: 0, alignItems: 'stretch' }}>
+              <div className="gap-2 grid grid-cols-2 mx-1.5 mb-4 w-auto">
                 {posts && posts.slice(1, 3).map((post) => {
                   const imageUrl = (post as any).og_image || (post as any).thumbnail_url;
                   return (
-                    <Link key={post.id} href={`/posts/${post.id}`} className="block bg-white hover:shadow-md border border-gray-300 rounded-md transition-all" style={{ maxWidth: '100%', height: '100%' }}>
-                      <div className="flex flex-col p-1 h-full">
-                        <div className="mb-1 md:mb-2 rounded w-full h-20 overflow-hidden">
-                          <PostImage
-                            src={imageUrl}
-                            alt={post.title}
-                            className="w-full h-full object-cover"
-                            loading="lazy"
-                          />
+                    <Link key={post.id} href={`/posts/${post.id}`} className="flex flex-col bg-white hover:shadow-md border border-gray-300 rounded-md transition-all h-full">
+                      <div className="rounded-t-md w-full h-32 overflow-hidden">
+                        <PostImage
+                          src={imageUrl}
+                          alt={post.title}
+                          className="w-full h-full object-cover"
+                          loading="lazy"
+                        />
+                      </div>
+                      <div className="flex-1 p-2">
+                        <div className="font-normal text-gray-900 text-sm line-clamp-2 leading-tight">
+                          {post.title}
                         </div>
-                        <div className="flex-1">
-                          <div className="font-normal text-gray-900 text-sm line-clamp-2 leading-tight">
-                            {post.title.length > 28 ? post.title.substring(0, 28) + '...' : post.title}
-                          </div>
-                          <div className="mt-1 font-normal text-[10px] text-gray-400">
-                            <span>{(post as any).user_name || 'ゲスト'}さん</span>
-                          </div>
+                        <div className="mt-1 font-normal text-[10px] text-gray-400">
+                          <span>{(post as any).user_name || 'ゲスト'}さん</span>
                         </div>
                       </div>
                     </Link>
@@ -483,7 +485,7 @@ async function InterestCategoriesSection({ userId }: { userId: string | number |
       </h3>
       <div className="space-y-2 px-2">
         {allPosts.map((post) => {
-          const imageUrl = (post as any).og_image || (post as any).thumbnail_url || '/images/anke_eye.webp';
+          const imageUrl = (post as any).og_image || (post as any).thumbnail_url || '/images/noimage.webp';
           const userName = (post as any).users?.name || 'ゲスト';
           return (
             <Link key={post.id} href={`/posts/${post.id}`} className="flex gap-3 bg-white hover:shadow-md p-3 border border-gray-300 rounded-md transition-all hover:-translate-y-1">

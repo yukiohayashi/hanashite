@@ -10,7 +10,7 @@ interface PostImageProps {
 }
 
 export default function PostImage({ src, alt, className = '', loading = 'lazy' }: PostImageProps) {
-  const defaultImage = '/images/anke.webp';
+  const defaultImage = '/images/noimage.webp';
   const [imgSrc, setImgSrc] = useState(src || defaultImage);
 
   const handleError = () => {

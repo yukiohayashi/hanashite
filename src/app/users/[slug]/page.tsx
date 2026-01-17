@@ -191,14 +191,14 @@ export default async function UserPage({ params }: { params: Promise<{ slug: str
     <div className="min-h-screen bg-gray-50">
       <Header />
 
-      <main className="md:flex md:justify-center mx-auto mt-14 md:mt-[70px] md:pt-0 max-w-7xl">
+      <main className="md:flex md:justify-center mx-auto mt-14 md:mt-[70px] md:pt-0 px-2">
         {/* 左サイドバー */}
-        <aside className="hidden md:block w-[220px]">
+        <aside className="hidden md:block w-[220px] mr-2">
           <Sidebar />
         </aside>
 
         {/* メインコンテンツ */}
-        <div className="flex-1 px-4 max-w-[760px]">
+        <div className="flex-1 max-w-[760px]">
           {/* ユーザープロフィール */}
           <div className="bg-white shadow-md mb-4 p-6 border border-gray-200 rounded">
             <div className="flex items-start gap-4">

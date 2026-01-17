@@ -5,30 +5,22 @@ import { useSession } from 'next-auth/react';
 import { usePathname } from 'next/navigation';
 import Link from 'next/link';
 import Image from 'next/image';
-import { supabase } from '../lib/supabase';
 import HeaderClient from './HeaderClient';
 import HeaderLink from './HeaderLink';
 import MobileLeftSidebar from './MobileLeftSidebar';
 import MobileRightSidebar from './MobileRightSidebar';
 
-export default function Header() {
+interface HeaderProps {
+  postsCount?: number;
+}
+
+export default function Header({ postsCount = 0 }: HeaderProps) {
   const { data: session, status } = useSession();
   const pathname = usePathname();
-  const [postsCount, setPostsCount] = useState(0);
   const [leftSidebarOpen, setLeftSidebarOpen] = useState(false);
   const [rightSidebarOpen, setRightSidebarOpen] = useState(false);
   const [avatarUrl, setAvatarUrl] = useState('');
   const [unreadCount, setUnreadCount] = useState(0);
-
-  useEffect(() => {
-    const fetchPostsCount = async () => {
-      const { count } = await supabase
-        .from('posts')
-        .select('*', { count: 'exact', head: true });
-      setPostsCount(count || 0);
-    };
-    fetchPostsCount();
-  }, []);
 
   useEffect(() => {
     if (session?.user?.id) {

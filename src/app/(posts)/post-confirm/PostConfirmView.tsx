@@ -140,20 +140,16 @@ export default function PostConfirmView() {
         </AlertDescription>
       </Alert>
 
-      <Card>
-        <CardHeader>
-          <CardTitle>質問者</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <p className="font-medium">{ankeData.userName}</p>
-        </CardContent>
-      </Card>
+      <div className="bg-white border border-gray-300 rounded-md shadow-sm">
+        <div className="p-4 space-y-6">
+          {/* 質問者 */}
+          <div>
+            <h3 className="font-bold text-lg mb-2">質問者</h3>
+            <p className="font-medium">{ankeData.userName}</p>
+          </div>
 
-      <Card>
-        <CardHeader>
-          <CardTitle>アンケート内容</CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-4">
+          {/* アンケート内容 */}
+          <div className="space-y-4">
           <div>
             <p className="font-bold text-gray-700 text-sm">タイトル</p>
             <p className="mt-1 text-lg">{ankeData.title}</p>
@@ -166,14 +162,14 @@ export default function PostConfirmView() {
             <p className="font-bold text-gray-700 text-sm">カテゴリー</p>
             <p className="mt-1">{getCategoryName(ankeData.category)}</p>
           </div>
-        </CardContent>
-      </Card>
+          </div>
 
-      <Card>
-        <CardHeader>
-          <CardTitle>選択肢</CardTitle>
-        </CardHeader>
-        <CardContent>
+          {/* 区切り線 */}
+          <div className="border-t border-gray-300"></div>
+
+          {/* 選択肢 */}
+          <div>
+            <h3 className="font-bold text-lg mb-2">選択肢</h3>
           <ul className="space-y-2">
             {ankeData.choices.map((choice, index) => (
               <li key={index} className="flex items-center gap-2">
@@ -196,15 +192,15 @@ export default function PostConfirmView() {
               </span>
             )}
           </div>
-        </CardContent>
-      </Card>
+          </div>
 
-      {(ankeData.imagePreview || ankeData.imageUrl || ankeData.closeDate) && (
-        <Card>
-          <CardHeader>
-            <CardTitle>オプション</CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-4">
+          {/* 区切り線 */}
+          <div className="border-t border-gray-300"></div>
+
+          {/* オプション */}
+          {(ankeData.imagePreview || ankeData.imageUrl || ankeData.closeDate) && (
+            <div className="space-y-4">
+              <h3 className="font-bold text-lg">オプション</h3>
             {ankeData.imagePreview && (
               <div>
                 <p className="font-bold text-gray-700 text-sm mb-2">アップロード画像</p>
@@ -229,9 +225,10 @@ export default function PostConfirmView() {
                 </p>
               </div>
             )}
-          </CardContent>
-        </Card>
-      )}
+            </div>
+          )}
+        </div>
+      </div>
 
       <div className="flex justify-center gap-4">
         <Button
