@@ -135,9 +135,12 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
           if (account?.provider === 'line' || account?.provider === 'twitter') {
             const { data: existingUser } = await supabaseAdmin
               .from('users')
-              .select('id')
+              .select('id, email')
               .eq('id', user.id)
               .single();
+
+            // メールアドレスが空の場合、ユニークなダミーメールアドレスを生成
+            const emailToSave = user.email || `${account.provider}_${user.id}@anke.jp`;
 
             if (!existingUser) {
               // 新規ユーザーの場合、usersテーブルに挿入
@@ -146,7 +149,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
                 .insert({
                   id: user.id,
                   name: user.name || '',
-                  email: user.email || '',
+                  email: emailToSave,
                   user_img_url: user.image || '',
                   status: 1,
                   created_at: new Date().toISOString(),
@@ -158,14 +161,20 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
                 console.log('User inserted into Supabase:', user.id);
               }
             } else {
-              // 既存ユーザーの場合、画像とメールを更新
+              // 既存ユーザーの場合、画像を更新（メールは既存のものを保持）
+              const updateData: any = {
+                user_img_url: user.image || '',
+                updated_at: new Date().toISOString(),
+              };
+              
+              // メールアドレスが実際のメールの場合のみ更新
+              if (user.email && user.email !== existingUser.email) {
+                updateData.email = user.email;
+              }
+
               const { error: updateError } = await supabaseAdmin
                 .from('users')
-                .update({
-                  user_img_url: user.image || '',
-                  email: user.email || '',
-                  updated_at: new Date().toISOString(),
-                })
+                .update(updateData)
                 .eq('id', user.id);
 
               if (updateError) {
