@@ -666,16 +666,109 @@ cd /var/www/anke-nextjs
 tar -czf anke-nextjs-backup-$(date +%Y%m%d).tar.gz /var/www/anke-nextjs
 ```
 
+## トラブルシューティング
+
+### standaloneモードでの環境変数エラー
+
+**症状:**
+- `[auth][error] MissingSecret: Please define a secret`
+- `[auth][error] UntrustedHost: Host must be trusted`
+- サイトのレイアウトが崩れる（CSSが読み込まれない）
+
+**原因:**
+standaloneモードでは`.env.local`が自動で読み込まれないため、環境変数が反映されません。
+
+**解決方法:**
+
+1. **`ecosystem.config.js`に環境変数を設定**
+
+```javascript
+module.exports = {
+  apps: [{
+    name: 'anke-nextjs',
+    script: '.next/standalone/server.js',
+    cwd: '/var/www/anke-nextjs',
+    env: {
+      NODE_ENV: 'production',
+      PORT: 3000,
+      HOSTNAME: '0.0.0.0',
+      
+      // Auth.js設定
+      AUTH_SECRET: 'your-auth-secret',
+      AUTH_TRUST_HOST: 'true',
+      NEXTAUTH_URL: 'https://anke.jp',
+      AUTH_URL: 'https://anke.jp',
+      NEXT_PUBLIC_APP_URL: 'https://anke.jp',
+      
+      // Supabase設定
+      NEXT_PUBLIC_SUPABASE_URL: 'https://your-project.supabase.co',
+      NEXT_PUBLIC_SUPABASE_ANON_KEY: 'your-anon-key',
+      SUPABASE_SERVICE_ROLE_KEY: 'your-service-role-key',
+      
+      // その他の環境変数...
+    }
+  }]
+}
+```
+
+2. **`auth.ts`に`trustHost: true`を追加**
+
+```typescript
+export const { handlers, auth, signIn, signOut } = NextAuth({
+  trustHost: true,  // この行を追加
+  session: {
+    strategy: "jwt",
+  },
+  // ...
+})
+```
+
+3. **クリーンビルドを実行**
+
+```bash
+cd /var/www/anke-nextjs
+rm -rf .next
+npm run build
+cp -r public .next/standalone/
+cp -r .next/static .next/standalone/.next/
+pm2 restart anke-nextjs --update-env
+```
+
+**重要:** standaloneモードでは、`public`フォルダと`.next/static`を手動でコピーする必要があります。これを忘れるとCSSや画像が読み込まれません。
+
+### ビルドエラーが発生した場合
+
+**症状:**
+- `Error: Failed to find Server Action "x"`
+- `Invariant: The client reference manifest does not exist`
+
+**解決方法:**
+
+```bash
+cd /var/www/anke-nextjs
+rm -rf .next
+npm run build
+cp -r public .next/standalone/
+cp -r .next/static .next/standalone/.next/
+pm2 restart anke-nextjs --update-env
+```
+
+`.next`ディレクトリを完全に削除してから再ビルドすることで、ビルドの不整合を解消できます。
+
+---
+
 ## サポート
 
 問題が発生した場合は、以下を確認してください：
 
-1. ログファイル
-2. PM2ステータス
-3. Dockerコンテナステータス
-4. Nginxステータス
+1. ログファイル（`pm2 logs anke-nextjs`）
+2. PM2ステータス（`pm2 status`）
+3. Dockerコンテナステータス（`docker ps`）
+4. Nginxステータス（`sudo systemctl status nginx`）
 5. ファイアウォール設定
+6. 環境変数が正しく設定されているか（`ecosystem.config.js`）
 
+---
 
 重要なポイント
 デプロイスクリプト（./scripts/deploy.sh --full）はGitHubへのプッシュを含みません。
