@@ -34,59 +34,6 @@ export type Database = {
   }
   public: {
     Tables: {
-      accounts: {
-        Row: {
-          access_token: string | null
-          expires_at: number | null
-          id: string
-          id_token: string | null
-          provider: string
-          provider_account_id: string
-          refresh_token: string | null
-          scope: string | null
-          session_state: string | null
-          token_type: string | null
-          type: string
-          user_id: string
-        }
-        Insert: {
-          access_token?: string | null
-          expires_at?: number | null
-          id: string
-          id_token?: string | null
-          provider: string
-          provider_account_id: string
-          refresh_token?: string | null
-          scope?: string | null
-          session_state?: string | null
-          token_type?: string | null
-          type: string
-          user_id: string
-        }
-        Update: {
-          access_token?: string | null
-          expires_at?: number | null
-          id?: string
-          id_token?: string | null
-          provider?: string
-          provider_account_id?: string
-          refresh_token?: string | null
-          scope?: string | null
-          session_state?: string | null
-          token_type?: string | null
-          type?: string
-          user_id?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "accounts_user_id_fkey"
-            columns: ["user_id"]
-            isOneToOne: false
-            referencedRelation: "users"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
       api_settings: {
         Row: {
           created_at: string | null
