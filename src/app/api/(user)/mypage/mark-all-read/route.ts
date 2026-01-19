@@ -45,7 +45,7 @@ export async function POST(request: Request) {
           .eq('posts.user_id', userId)
           .eq('status', 'approved');
         
-        notificationIds = comments?.map(c => `/posts/${c.post_id}#comment-${c.id}`) || [];
+        notificationIds = comments?.map(c => `/posts/${c.post_id}#anke-comment-${c.id}`) || [];
       } else if (type === 'reply') {
         // 自分のコメントへの返信
         const { data: replies } = await supabaseAdmin
@@ -67,7 +67,7 @@ export async function POST(request: Request) {
           // 自分のコメントへの返信のみをフィルタ
           notificationIds = replies
             .filter(r => myCommentIds.includes(r.parent_id))
-            .map(r => `/posts/${r.post_id}#comment-${r.id}`);
+            .map(r => `/posts/${r.post_id}#anke-comment-${r.id}`);
         }
       }
 
@@ -79,8 +79,6 @@ export async function POST(request: Request) {
           notification_id: id,
           read_at: new Date().toISOString()
         }));
-
-        console.log(`${type}: ${records.length}件の通知を既読にします`);
 
         const { error } = await supabaseAdmin
           .from('notification_reads')
@@ -95,7 +93,6 @@ export async function POST(request: Request) {
       }
     }
 
-    console.log('全ての通知を既読にしました');
     return NextResponse.json({ success: true });
   } catch (error) {
     console.error('Mark all read error:', error);
