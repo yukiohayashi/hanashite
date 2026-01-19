@@ -56,3 +56,6 @@ backup.sql
 data_only.sql
 backups/
 @backups/
+
+# ドキュメント（ローカルのみ）
+docs/
