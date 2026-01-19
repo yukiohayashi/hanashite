@@ -203,17 +203,23 @@ export default function CommentsTable({ comments: initialComments }: CommentsTab
                   {comment.users?.name || 'ゲスト'}
                 </td>
                 <td className="px-6 py-4 text-sm text-gray-900 max-w-xs">
-                  <a
-                    href={`/posts/${comment.post_id}`}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="text-blue-600 hover:text-blue-800 hover:underline flex items-center gap-1"
-                  >
-                    <span className="truncate">
-                      {comment.posts?.title || `投稿 #${comment.post_id}`}
+                  {comment.posts ? (
+                    <a
+                      href={`/posts/${comment.post_id}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-blue-600 hover:text-blue-800 hover:underline flex items-center gap-1"
+                    >
+                      <span className="truncate">
+                        {comment.posts.title}
+                      </span>
+                      <ExternalLink className="w-3 h-3 flex-shrink-0" />
+                    </a>
+                  ) : (
+                    <span className="text-red-600">
+                      削除された投稿 #{comment.post_id}
                     </span>
-                    <ExternalLink className="w-3 h-3 flex-shrink-0" />
-                  </a>
+                  )}
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                   {new Date(comment.created_at).toLocaleString('ja-JP', {
