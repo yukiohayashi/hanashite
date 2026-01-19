@@ -51,29 +51,22 @@ export async function POST(request: Request) {
       });
     }
 
-    const { error } = await supabase
-      .from('auto_creator_settings')
-      .update({
-        setting_value: enabled ? 'true' : 'false',
-        updated_at: new Date().toISOString(),
-      })
-      .eq('setting_key', 'is_active');
-
-    if (error) {
-      throw new Error('設定の更新に失敗しました');
-    }
-
-    await supabase.from('auto_creator_logs').insert({
-      execution_type: 'manual',
-      status: 'success',
-      message: `自動作成を${enabled ? '開始' : '停止'}しました`,
-      executed_at: new Date().toISOString(),
+    // 実際の投稿作成処理を呼び出す
+    const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000';
+    const executeResponse = await fetch(`${baseUrl}/api/auto-creator/execute-auto`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
     });
+
+    const executeResult = await executeResponse.json();
 
     return NextResponse.json({
       success: true,
-      message: `自動作成を${enabled ? '開始' : '停止'}しました`,
-      enabled,
+      message: executeResult.message || '自動作成を開始しました',
+      enabled: true,
+      result: executeResult,
     });
   } catch (error) {
     console.error('Toggle auto-creator error:', error);

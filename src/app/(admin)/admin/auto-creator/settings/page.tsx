@@ -210,7 +210,7 @@ export default function AutoCreatorSettings() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-3xl font-bold text-gray-900">AI自動投稿 設定</h1>
+        <h1 className="text-3xl font-bold text-gray-900">AI自動投稿 設定（CRON10分ごと）:</h1>
         <p className="mt-2 text-sm text-gray-600">
           ニュース記事から自動でアンケートを作成する設定を管理します
         </p>

@@ -254,7 +254,7 @@ export default function AutoVoterSettings() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-3xl font-bold text-gray-900">AI自動投票・コメント・いいね 設定</h1>
+        <h1 className="text-3xl font-bold text-gray-900">AI自動投票・コメント・いいね 設定（CRON5分ごと）</h1>
         <p className="mt-2 text-sm text-gray-600">
           アンケートへの自動投票・コメント・返信・いいね機能の設定を管理します
         </p>
