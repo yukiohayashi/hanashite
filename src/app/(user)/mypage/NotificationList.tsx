@@ -92,34 +92,26 @@ export default function NotificationList() {
     if (!session?.user?.id) return;
 
     try {
-      // 未読の通知のみを対象にする
-      const unreadNotifications = notifications.filter(n => !n.is_read);
-      
-      if (unreadNotifications.length === 0) {
-        return;
+      // 全ての未読通知を既読にする（読み込まれていない通知も含む）
+      const response = await fetch('/api/mypage/mark-all-read', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          userId: session.user.id
+        }),
+      });
+
+      if (response.ok) {
+        // ローカル状態を更新
+        setNotifications(prev =>
+          prev.map(n => ({ ...n, is_read: true }))
+        );
+        
+        // 通知を再取得して最新の状態を反映
+        fetchNotifications(0);
       }
-
-      // すべての未読通知を既読にする
-      await Promise.all(
-        unreadNotifications.map(notification =>
-          fetch('/api/mypage/mark-read', {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({
-              userId: session.user.id,
-              notificationType: notification.type,
-              notificationId: notification.link
-            }),
-          })
-        )
-      );
-
-      // ローカル状態を更新
-      setNotifications(prev =>
-        prev.map(n => ({ ...n, is_read: true }))
-      );
     } catch (error) {
       console.error('一括既読マークエラー:', error);
     }
