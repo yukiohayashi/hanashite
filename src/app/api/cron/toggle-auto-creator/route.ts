@@ -24,8 +24,8 @@ export async function POST(request: Request) {
     const isActive = settingsMap.get('is_active') === 'true';
     const noCreateStartHour = parseInt(settingsMap.get('no_create_start_hour') || '0');
     const noCreateEndHour = parseInt(settingsMap.get('no_create_end_hour') || '6');
-    const intervalMinutes = parseInt(settingsMap.get('interval_minutes') || '30');
-    const varianceMinutes = parseInt(settingsMap.get('variance_minutes') || '10');
+    const intervalMinutes = parseInt(settingsMap.get('execution_interval') || '20');
+    const varianceMinutes = parseInt(settingsMap.get('execution_variance') || '0');
     const lastExecutedAt = settingsMap.get('last_executed_at');
 
     // 現在時刻をチェック（日本時間）
