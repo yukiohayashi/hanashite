@@ -20,6 +20,14 @@ const nextConfig: NextConfig = {
         protocol: 'https',
         hostname: 'cdnjs.cloudflare.com',
       },
+      {
+        protocol: 'https',
+        hostname: 'pbs.twimg.com',
+      },
+      {
+        protocol: 'https',
+        hostname: 'profile.line-scdn.net',
+      },
     ],
   },
   
