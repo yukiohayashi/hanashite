@@ -435,6 +435,14 @@ export default async function Home({ searchParams }: HomeProps) {
               </>
             )}
           </section>
+
+          {/* スマホビュー: 最新のコメント */}
+          <section className="md:hidden mt-6 px-2">
+            <h3 className="mb-2 px-2 font-bold text-base" style={{ color: '#ff6b35' }}>
+              最新コメント <i className="fas fa-comment"></i>
+            </h3>
+            <LatestCommentsMobile />
+          </section>
         </div>
 
         {/* 右サイドバー */}
@@ -445,6 +453,61 @@ export default async function Home({ searchParams }: HomeProps) {
       
       <Footer />
     </div>
+  );
+}
+
+// 最新のコメント（スマホビュー用）
+async function LatestCommentsMobile() {
+  const { data: commentsData } = await supabase
+    .from('comments')
+    .select('id, post_id, user_id, content, created_at')
+    .eq('status', 'approved')
+    .order('created_at', { ascending: false })
+    .limit(5);
+  
+  if (!commentsData || commentsData.length === 0) {
+    return (
+      <ul className="bg-white shadow m-0 p-0 rounded-lg list-none">
+        <li className="px-2 py-2 text-gray-600 text-sm">コメントなし</li>
+      </ul>
+    );
+  }
+  
+  const postIds = commentsData.map(c => c.post_id);
+  const { data: postsData } = await supabase
+    .from('posts')
+    .select('id, title')
+    .in('id', postIds);
+  
+  const userIds = [...new Set(commentsData.map(c => c.user_id).filter(id => id !== null))];
+  const { data: usersData } = await supabase
+    .from('users')
+    .select('id, name')
+    .in('id', userIds);
+  
+  const comments = commentsData.map(comment => ({
+    ...comment,
+    post_title: postsData?.find(p => p.id === comment.post_id)?.title || '',
+    user_name: usersData?.find(u => u.id === comment.user_id)?.name || 'ゲスト'
+  }));
+
+  const truncateText = (text: string, maxLength: number) => {
+    if (text.length <= maxLength) return text;
+    return text.substring(0, maxLength) + '...';
+  };
+
+  return (
+    <ul className="bg-white shadow m-0 p-0 rounded-lg list-none">
+      {comments.map((comment) => (
+        <li key={comment.id} className="border-gray-200 border-b last:border-b-0">
+          <Link href={`/posts/${comment.post_id}`} className="block hover:bg-gray-100 px-2 py-2 transition-colors">
+            <span className="block text-gray-900 text-sm">{truncateText(comment.content, 26)}</span>
+            <span className="block text-gray-500 text-xs">{comment.post_title}</span>
+            <span className="text-gray-400 text-xs">{comment.user_name}さん</span>
+          </Link>
+        </li>
+      ))}
+    </ul>
   );
 }
 
