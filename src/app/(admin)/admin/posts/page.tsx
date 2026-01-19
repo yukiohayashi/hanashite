@@ -146,8 +146,14 @@ export default async function PostsManagementPage({
 
   return (
     <div className="space-y-6">
-      <div>
+      <div className="flex justify-between items-center">
         <h1 className="text-3xl font-bold text-gray-900">投稿管理</h1>
+        <a
+          href="/admin/posts/new"
+          className="px-6 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors font-medium"
+        >
+          + 新規作成
+        </a>
       </div>
 
       {/* 検索フォーム */}

@@ -120,13 +120,7 @@ export default function VoteSection({
   };
 
   if (!choices || choices.length === 0) {
-    return (
-      <Card>
-        <CardContent className="py-8">
-          <p className="text-gray-500 text-center">投票選択肢がありません</p>
-        </CardContent>
-      </Card>
-    );
+    return null;
   }
 
   return (

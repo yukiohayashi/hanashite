@@ -99,6 +99,12 @@ export default function AdminPanelLayout({
                 投稿一覧
               </Link>
               <Link
+                href="/admin/posts/new"
+                className={`block px-3 py-1 text-sm text-gray-400 ${hoverBgColor} hover:text-white transition-colors`}
+              >
+                投稿新規作成
+              </Link>
+              <Link
                 href="/admin/posts/ai-tagger"
                 className={`block px-3 py-1 text-sm text-gray-400 ${hoverBgColor} hover:text-white transition-colors`}
               >

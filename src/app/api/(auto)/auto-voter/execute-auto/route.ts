@@ -110,6 +110,7 @@ export async function POST() {
       .from('posts')
       .select('id, title, content, category_id, created_at, user_id')
       .eq('status', 'published')
+      .neq('user_id', 33) // 管理者投稿を除外
       .order('created_at', { ascending: false })
       .limit(100);
 

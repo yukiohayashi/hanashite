@@ -207,7 +207,7 @@ export default async function PostPage({ params }: { params: Promise<{ id: strin
     <div className="bg-gray-50 min-h-screen">
       <Header />
 
-      <main className="md:flex md:justify-center mx-auto pt-[60px] md:pt-4 pb-4 max-w-7xl">
+      <main className="md:flex md:justify-center mx-auto pt-[60px] md:pt-4 pb-4 max-w-7xl px-4 sm:px-6 lg:px-8">
         {/* 左サイドバー */}
         <aside className="hidden md:block w-[220px]">
           <Sidebar />
@@ -446,7 +446,7 @@ export default async function PostPage({ params }: { params: Promise<{ id: strin
               </div>
 
               {/* コメントセクション */}
-              <CommentSection postId={post.id} initialComments={comments || []} totalCount={totalCommentCount || 0} />
+              <CommentSection postId={post.id} initialComments={comments || []} totalCount={totalCommentCount || 0} postUserId={post.user_id} />
             </article>
           </section>
         </div>

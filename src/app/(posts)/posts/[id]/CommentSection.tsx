@@ -22,6 +22,7 @@ interface CommentSectionProps {
   postId: number;
   initialComments: Comment[];
   totalCount: number;
+  postUserId?: number;
 }
 
 function getTimeAgo(dateString: string): string {
@@ -62,7 +63,7 @@ function TimeAgo({ dateString }: { dateString: string }) {
   return <span className="text-gray-500 text-xs">{timeAgo}前</span>;
 }
 
-export default function CommentSection({ postId, initialComments, totalCount }: CommentSectionProps) {
+export default function CommentSection({ postId, initialComments, totalCount, postUserId }: CommentSectionProps) {
   const { data: session } = useSession();
   const [comments, setComments] = useState<Comment[]>(initialComments);
   const [newComment, setNewComment] = useState('');
