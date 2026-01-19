@@ -157,6 +157,22 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
               } else {
                 console.log('User inserted into Supabase:', user.id);
               }
+            } else {
+              // 既存ユーザーの場合、画像とメールを更新
+              const { error: updateError } = await supabaseAdmin
+                .from('users')
+                .update({
+                  user_img_url: user.image || '',
+                  email: user.email || '',
+                  updated_at: new Date().toISOString(),
+                })
+                .eq('id', user.id);
+
+              if (updateError) {
+                console.error('Failed to update user in Supabase:', updateError);
+              } else {
+                console.log('User updated in Supabase:', user.id);
+              }
             }
           }
 
