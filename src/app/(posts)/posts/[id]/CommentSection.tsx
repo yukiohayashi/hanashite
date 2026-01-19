@@ -233,7 +233,7 @@ export default function CommentSection({ postId, initialComments, totalCount, po
               return (
                 <div key={comment.id}>
                   <div className="flex flex-wrap py-2.5 border-t border-gray-100 pt-2.5">
-                  <div className="flex-shrink-0 mr-2.5">
+                  <div className="flex-shrink-0 mr-1">
                     {comment.user_id ? (
                       <Link href={`/users/${comment.user_id}`}>
                         {hasAvatar ? (
@@ -265,7 +265,7 @@ export default function CommentSection({ postId, initialComments, totalCount, po
                     )}
                   </div>
                   
-                  <div className="flex-1 ml-2">
+                  <div className="flex-1 ml-0">
                     <div className="flex justify-between items-center gap-2 mb-2">
                       <div className="flex items-center gap-2">
                         {comment.user_id ? (
@@ -291,7 +291,7 @@ export default function CommentSection({ postId, initialComments, totalCount, po
                       <div dangerouslySetInnerHTML={{ __html: comment.content.replace(/\\n/g, '<br>').replace(/\n/g, '<br>') }} />
                     </div>
                     
-                    <div className="flex items-center gap-4">
+                    <div className="flex items-center gap-2">
                       <button 
                         onClick={() => handleLike(comment.id)}
                         disabled={likingComments.has(comment.id)}
@@ -322,7 +322,7 @@ export default function CommentSection({ postId, initialComments, totalCount, po
                     return (
                       <div key={reply.id} className="ml-12 mt-2">
                         <div className="flex flex-wrap py-2.5">
-                          <div className="flex-shrink-0 mr-2.5">
+                          <div className="flex-shrink-0 mr-1">
                             {reply.user_id ? (
                               <Link href={`/users/${reply.user_id}`}>
                                 {replyHasAvatar ? (
@@ -354,7 +354,7 @@ export default function CommentSection({ postId, initialComments, totalCount, po
                             )}
                           </div>
                           
-                          <div className="flex-1 ml-2">
+                          <div className="flex-1 ml-0">
                             <div className="flex justify-between items-center gap-2 mb-2">
                               <div className="flex items-center gap-2">
                                 {reply.user_id ? (
@@ -380,7 +380,7 @@ export default function CommentSection({ postId, initialComments, totalCount, po
                               <div dangerouslySetInnerHTML={{ __html: reply.content.replace(/\\n/g, '<br>').replace(/\n/g, '<br>') }} />
                             </div>
                             
-                            <div className="flex items-center gap-4">
+                            <div className="flex items-center gap-2">
                               <button 
                                 onClick={() => handleLike(reply.id)}
                                 disabled={likingComments.has(reply.id)}
