@@ -327,7 +327,7 @@ export default async function PostPage({ params }: { params: Promise<{ id: strin
                     return (
                       <div className="bg-[#f1fbf9] m-0 mb-1.5 p-2.5 border border-[#c1dfd8] rounded min-h-[95px]">
                         {imageUrl && imageUrl !== '/images/noimage.webp' && (
-                          <div className="float-right w-1/5">
+                          <div className="float-right w-1/5 ml-2">
                             <img 
                               src={imageUrl}
                               alt={post.title}
@@ -345,35 +345,6 @@ export default async function PostPage({ params }: { params: Promise<{ id: strin
                               ) : (
                                 <p className="text-gray-500">本文はありません</p>
                               )}
-                              {(() => {
-                                let sourceUrl = (post as any).source_url;
-                                if (!sourceUrl && post.content) {
-                                  const urlMatch = post.content.match(/https?:\/\/[^\s\n<]+/);
-                                  if (urlMatch) {
-                                    sourceUrl = urlMatch[0].replace(/\\n.*$/, '');
-                                  }
-                                }
-                                if (sourceUrl) {
-                                  try {
-                                    const hostname = new URL(sourceUrl).hostname;
-                                    return (
-                                      <p className="m-0 text-[0.6rem]">
-                                        <a 
-                                          href={sourceUrl} 
-                                          target="_blank" 
-                                          rel="noopener external nofollow" 
-                                          className="font-black text-gray-600"
-                                        >
-                                          {hostname} 引用元：
-                                        </a>
-                                      </p>
-                                    );
-                                  } catch (e) {
-                                    return null;
-                                  }
-                                }
-                                return null;
-                              })()}
                             </div>
                           </div>
                         </div>

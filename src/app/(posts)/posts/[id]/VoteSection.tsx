@@ -208,21 +208,23 @@ export default function VoteSection({
               </>
             )}
             {' '}<i className="fas fa-comment"></i>{commentCount}
-            {' '}調査期間：
-            {createdAt && new Date(createdAt).toLocaleDateString('ja-JP', {
-              year: '2-digit',
-              month: '2-digit',
-              day: '2-digit'
-            }).replace(/\//g, '.')}
-            ～
-            {new Date().toLocaleDateString('ja-JP', {
-              year: '2-digit',
-              month: '2-digit',
-              day: '2-digit'
-            }).replace(/\//g, '.')}
-            ／
-            <a href="/foruse/" className="underline text-gray-600" target="_parent">引用について</a>
-            ／
+            {createdAt && (
+              <>
+                {' '}調査期間：
+                {new Date(createdAt).toLocaleDateString('ja-JP', {
+                  year: '2-digit',
+                  month: '2-digit',
+                  day: '2-digit'
+                }).replace(/\//g, '.')}
+                ～
+                {new Date().toLocaleDateString('ja-JP', {
+                  year: '2-digit',
+                  month: '2-digit',
+                  day: '2-digit'
+                }).replace(/\//g, '.')}
+                ／
+              </>
+            )}
             <a href={`/report/?url=${encodeURIComponent(`/posts/${postId}`)}`} className="underline text-gray-600" target="_parent">通報</a>
           </div>
         </div>
