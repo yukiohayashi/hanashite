@@ -97,7 +97,12 @@ export async function POST(request: Request) {
 
     if (optionsError) {
       console.error('Vote options creation error:', optionsError);
-      // 投稿は作成されたので、エラーでも続行
+      // vote_options作成失敗時は投稿を削除してロールバック
+      await supabase.from('posts').delete().eq('id', post.id);
+      return NextResponse.json(
+        { success: false, error: '投票オプションの作成に失敗しました' },
+        { status: 500 }
+      );
     }
 
     // 選択肢を作成（カラム名をchoiceに修正）

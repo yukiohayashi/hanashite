@@ -87,6 +87,9 @@ export default async function PostPage({ params }: { params: Promise<{ id: strin
     .select('close_at, multi, random')
     .eq('post_id', id)
     .single();
+  
+  console.log('投稿詳細 - Post ID:', id);
+  console.log('投稿詳細 - vote_options:', voteOptions);
 
   // 投票済みかどうかをチェック
   let hasVoted = false;

@@ -188,10 +188,9 @@ export default function VoteSection({
           
           {/* 投票情報バー */}
           <div className="bg-gray-50 px-3 py-2 rounded text-gray-600 text-xs">
-            {totalVotes}票
             {closeAt && closeAt !== '0000-00-00' && (
               <>
-                {' '}締切日時：
+                {' '}締切：
                 {new Date(closeAt).toLocaleDateString('ja-JP', {
                   year: '2-digit',
                   month: '2-digit',
@@ -210,7 +209,7 @@ export default function VoteSection({
             {' '}<i className="fas fa-comment"></i>{commentCount}
             {createdAt && (
               <>
-                {' '}調査期間：
+                {' '}受付：
                 {new Date(createdAt).toLocaleDateString('ja-JP', {
                   year: '2-digit',
                   month: '2-digit',
