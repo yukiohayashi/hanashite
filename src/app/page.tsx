@@ -39,12 +39,27 @@ export default async function Home({ searchParams }: HomeProps) {
       .from('posts')
       .select('id, title, created_at, user_id, og_image, thumbnail_url, total_votes')
       .in('status', ['publish', 'published'])
+      .neq('user_id', 33)
       .gte('total_votes', 50)
       .order('total_votes', { ascending: false })
-      .limit(20);
+      .limit(100);
 
-    hallOfFamePosts = hallOfFameData || [];
-    postsData = hallOfFameData || [];
+    // 運営者の投稿を除外
+    if (hallOfFameData) {
+      const userIds = [...new Set(hallOfFameData.map(p => p.user_id).filter(id => id !== null))];
+      const { data: usersData } = await supabase
+        .from('users')
+        .select('id, status')
+        .in('id', userIds);
+      
+      const operatorIds = usersData?.filter(u => u.status === 3).map(u => u.id) || [];
+      const filtered = hallOfFameData.filter(p => !operatorIds.includes(p.user_id)).slice(0, 20);
+      hallOfFamePosts = filtered;
+      postsData = filtered;
+    } else {
+      hallOfFamePosts = [];
+      postsData = [];
+    }
   } else if (sortBy === 'comment') {
     // コメント順：最新コメントがある投稿順
     const { data: recentComments } = await supabase
@@ -61,12 +76,26 @@ export default async function Home({ searchParams }: HomeProps) {
       console.log('コメント順 - ユニークな投稿ID数:', uniquePostIds.length);
       console.log('コメント順 - 最初の20件のID:', uniquePostIds.slice(0, 20));
       
-      const { data } = await supabase
+      const { data: allPosts } = await supabase
         .from('posts')
         .select('id, title, created_at, user_id, og_image, thumbnail_url')
         .in('status', ['publish', 'published'])
+        .neq('user_id', 33)
         .order('created_at', { ascending: false })
         .limit(100);
+      
+      // 運営者の投稿を除外
+      let data = allPosts;
+      if (allPosts) {
+        const userIds = [...new Set(allPosts.map(p => p.user_id).filter(id => id !== null))];
+        const { data: usersData } = await supabase
+          .from('users')
+          .select('id, status')
+          .in('id', userIds);
+        
+        const operatorIds = usersData?.filter(u => u.status === 3).map(u => u.id) || [];
+        data = allPosts.filter(p => !operatorIds.includes(p.user_id));
+      }
       
       console.log('コメント順 - 取得した投稿数:', data?.length);
       console.log('コメント順 - 取得した投稿ID:', data?.map(p => p.id));
@@ -117,13 +146,27 @@ export default async function Home({ searchParams }: HomeProps) {
     const oneMonthAgo = new Date();
     oneMonthAgo.setMonth(oneMonthAgo.getMonth() - 1);
 
-    const { data } = await supabase
+    const { data: allPosts } = await supabase
       .from('posts')
       .select('id, title, created_at, user_id, og_image, thumbnail_url')
       .in('status', ['publish', 'published'])
+      .neq('user_id', 33)
       .gte('created_at', oneMonthAgo.toISOString())
       .order('created_at', { ascending: false })
       .limit(100);
+    
+    // 運営者の投稿を除外
+    let data = allPosts;
+    if (allPosts) {
+      const userIds = [...new Set(allPosts.map(p => p.user_id).filter(id => id !== null))];
+      const { data: usersData } = await supabase
+        .from('users')
+        .select('id, status')
+        .in('id', userIds);
+      
+      const operatorIds = usersData?.filter(u => u.status === 3).map(u => u.id) || [];
+      data = allPosts.filter(p => !operatorIds.includes(p.user_id));
+    }
 
     console.log('未投票アンケ - 取得した投稿数:', data?.length);
     console.log('未投票アンケ - 取得した投稿ID:', data?.map(p => p.id));
@@ -145,28 +188,56 @@ export default async function Home({ searchParams }: HomeProps) {
     }
   } else if (sortBy === 'top_post') {
     // 最新アンケ順
-    const { data } = await supabase
+    const { data: allPosts } = await supabase
       .from('posts')
       .select('id, title, created_at, user_id, og_image, thumbnail_url')
       .in('status', ['publish', 'published'])
+      .neq('user_id', 33)
       .order('created_at', { ascending: false })
-      .limit(20);
-    postsData = data || [];
+      .limit(100);
+    
+    // 運営者の投稿を除外
+    if (allPosts) {
+      const userIds = [...new Set(allPosts.map(p => p.user_id).filter(id => id !== null))];
+      const { data: usersData } = await supabase
+        .from('users')
+        .select('id, status')
+        .in('id', userIds);
+      
+      const operatorIds = usersData?.filter(u => u.status === 3).map(u => u.id) || [];
+      postsData = allPosts.filter(p => !operatorIds.includes(p.user_id)).slice(0, 20);
+    } else {
+      postsData = [];
+    }
   } else {
     // オススメ（デフォルト）
     let query = supabase
       .from('posts')
       .select('id, title, created_at, user_id, og_image, thumbnail_url')
-      .in('status', ['publish', 'published']);
+      .in('status', ['publish', 'published'])
+      .neq('user_id', 33);
 
     if (searchQuery) {
       query = query.or(`title.ilike.%${searchQuery}%,content.ilike.%${searchQuery}%`);
     }
 
-    const { data } = await query
+    const { data: allPosts } = await query
       .order('created_at', { ascending: false })
-      .limit(20);
-    postsData = data || [];
+      .limit(100);
+    
+    // 運営者の投稿を除外
+    if (allPosts) {
+      const userIds = [...new Set(allPosts.map(p => p.user_id).filter(id => id !== null))];
+      const { data: usersData } = await supabase
+        .from('users')
+        .select('id, status')
+        .in('id', userIds);
+      
+      const operatorIds = usersData?.filter(u => u.status === 3).map(u => u.id) || [];
+      postsData = allPosts.filter(p => !operatorIds.includes(p.user_id)).slice(0, 20);
+    } else {
+      postsData = [];
+    }
   }
 
   // ユーザー情報を別途取得して結合
