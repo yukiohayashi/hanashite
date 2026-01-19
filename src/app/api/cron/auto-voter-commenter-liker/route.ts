@@ -41,26 +41,22 @@ export async function GET(request: Request) {
     const intervalVariance = parseInt(settings.interval_variance || '30');
     const noRunStart = settings.no_run_start || '00:00';
     const noRunEnd = settings.no_run_end || '06:00';
+    const lastExecution = settings.last_execution;
 
-    // 最後の実行時刻を取得
-    const { data: lastExecution } = await supabase
-      .from('auto_voter_logs')
-      .select('executed_at')
-      .order('executed_at', { ascending: false })
-      .limit(1)
-      .single();
-
+    // 実行間隔チェック（ゆらぎを考慮）
     if (lastExecution) {
-      const lastExecutedAt = new Date(lastExecution.executed_at);
+      const lastExecutedAt = new Date(lastExecution);
       const now = new Date();
-      const minutesSinceLastExecution = (now.getTime() - lastExecutedAt.getTime()) / (1000 * 60);
+      const elapsedMinutes = (now.getTime() - lastExecutedAt.getTime()) / (1000 * 60);
+      
+      // ゆらぎを考慮した最小間隔
       const minInterval = interval - intervalVariance;
 
-      if (minutesSinceLastExecution < minInterval) {
-        console.log(`実行間隔が短すぎます: ${minutesSinceLastExecution}分 < ${minInterval}分`);
+      if (elapsedMinutes < minInterval) {
+        console.log(`実行間隔が短すぎます: ${Math.floor(elapsedMinutes)}分 < ${minInterval}分`);
         return NextResponse.json({
           success: true,
-          message: `実行間隔が短すぎます（${Math.round(minutesSinceLastExecution)}分 < ${minInterval}分）`,
+          message: `実行間隔が短すぎます（前回実行から${Math.floor(elapsedMinutes)}分、最小間隔${minInterval}分）`,
           skipped: true,
         });
       }
@@ -92,12 +88,19 @@ export async function GET(request: Request) {
 
     const executeResult = await executeResponse.json();
 
+    // last_executionを更新
+    const executedAt = new Date();
+    await supabase
+      .from('auto_voter_settings')
+      .update({ setting_value: executedAt.toISOString() })
+      .eq('setting_key', 'last_execution');
+
     // ログを記録
     await supabase.from('auto_voter_logs').insert({
       execution_type: 'cron',
       status: executeResponse.ok ? 'success' : 'error',
       message: executeResult.message || 'AI自動投票を実行しました',
-      executed_at: new Date().toISOString(),
+      executed_at: executedAt.toISOString(),
     });
 
     console.log('=== AI自動投票 CRON実行完了 ===');
