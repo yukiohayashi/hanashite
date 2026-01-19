@@ -172,10 +172,28 @@ async function executeReply(postId: number, userId: number, openaiApiKey: string
     max_tokens: 100,
   });
 
-  const replyText = response.choices[0]?.message?.content?.trim() || '';
+  let replyText = response.choices[0]?.message?.content?.trim() || '';
 
   if (!replyText) {
     throw new Error('返信生成に失敗しました');
+  }
+
+  // 投稿タイトルが含まれている場合は除去
+  const { data: post } = await supabase
+    .from('posts')
+    .select('title')
+    .eq('id', postId)
+    .single();
+
+  if (post?.title) {
+    // タイトルがそのまま含まれている場合は除去
+    const titlePattern = new RegExp(`^${post.title.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}[、。：:：\\s]*`, 'i');
+    replyText = replyText.replace(titlePattern, '').trim();
+    
+    // タイトルだけの場合は再生成せずエラー
+    if (!replyText || replyText.length < 5) {
+      throw new Error('返信生成に失敗しました（タイトルのみ）');
+    }
   }
 
   // 返信を投稿
