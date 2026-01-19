@@ -88,6 +88,43 @@ export default function NotificationList() {
     }
   };
 
+  const markAllAsRead = async () => {
+    if (!session?.user?.id) return;
+
+    try {
+      // 未読の通知のみを対象にする
+      const unreadNotifications = notifications.filter(n => !n.is_read);
+      
+      if (unreadNotifications.length === 0) {
+        return;
+      }
+
+      // すべての未読通知を既読にする
+      await Promise.all(
+        unreadNotifications.map(notification =>
+          fetch('/api/mypage/mark-read', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+              userId: session.user.id,
+              notificationType: notification.type,
+              notificationId: notification.link
+            }),
+          })
+        )
+      );
+
+      // ローカル状態を更新
+      setNotifications(prev =>
+        prev.map(n => ({ ...n, is_read: true }))
+      );
+    } catch (error) {
+      console.error('一括既読マークエラー:', error);
+    }
+  };
+
   const getNotificationText = (notification: Notification) => {
     switch (notification.type) {
       case 'admin_post':
@@ -128,8 +165,21 @@ export default function NotificationList() {
     );
   }
 
+  const unreadCount = notifications.filter(n => !n.is_read).length;
+
   return (
     <>
+      {notifications.length > 0 && unreadCount > 0 && (
+        <div className="flex justify-end mb-3">
+          <button
+            onClick={markAllAsRead}
+            className="bg-gray-600 hover:bg-gray-700 px-4 py-2 rounded-lg font-medium text-white text-sm transition-colors"
+          >
+            すべて既読にする ({unreadCount})
+          </button>
+        </div>
+      )}
+      
       <ul id="bbsitems" className="m-0 p-0 list-none">
         {notifications.map((notification, index) => (
           <li 
