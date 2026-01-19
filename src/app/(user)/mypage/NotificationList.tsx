@@ -21,6 +21,7 @@ export default function NotificationList() {
   const [loading, setLoading] = useState(true);
   const [hasMore, setHasMore] = useState(false);
   const [offset, setOffset] = useState(0);
+  const [totalUnreadCount, setTotalUnreadCount] = useState(0);
   const { data: session } = useSession();
 
   useEffect(() => {
@@ -47,6 +48,7 @@ export default function NotificationList() {
         }
         setHasMore(data.hasMore);
         setOffset(currentOffset + 15);
+        setTotalUnreadCount(data.unreadCount || 0);
       }
     } catch (error) {
       console.error('通知の取得エラー:', error);
@@ -109,6 +111,9 @@ export default function NotificationList() {
           prev.map(n => ({ ...n, is_read: true }))
         );
         
+        // 未読数を0にリセット
+        setTotalUnreadCount(0);
+        
         // 通知を再取得して最新の状態を反映
         fetchNotifications(0);
       }
@@ -157,17 +162,15 @@ export default function NotificationList() {
     );
   }
 
-  const unreadCount = notifications.filter(n => !n.is_read).length;
-
   return (
     <>
-      {notifications.length > 0 && unreadCount > 0 && (
+      {notifications.length > 0 && totalUnreadCount > 0 && (
         <div className="flex justify-end mb-3">
           <button
             onClick={markAllAsRead}
             className="bg-gray-600 hover:bg-gray-700 px-4 py-2 rounded-lg font-medium text-white text-sm transition-colors"
           >
-            すべて既読にする ({unreadCount})
+            すべて既読にする ({totalUnreadCount})
           </button>
         </div>
       )}

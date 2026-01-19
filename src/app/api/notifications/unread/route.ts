@@ -16,14 +16,13 @@ export async function GET(request: Request) {
     // 全通知を取得
     const notifications: any[] = [];
 
-    // 1. 運営スタッフからのお知らせ
+    // 1. 運営スタッフからのお知らせ（全件取得）
     const { data: adminPosts } = await supabase
       .from('posts')
       .select('id, created_at')
       .eq('user_id', 33)
       .in('status', ['publish', 'published'])
-      .order('created_at', { ascending: false })
-      .limit(20);
+      .order('created_at', { ascending: false });
 
     if (adminPosts) {
       adminPosts.forEach(post => {

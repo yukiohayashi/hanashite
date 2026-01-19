@@ -152,11 +152,15 @@ export async function GET(request: Request) {
     // ページネーション
     const total = notificationsWithReadStatus.length;
     const paginatedNotifications = notificationsWithReadStatus.slice(offset, offset + limit);
+    
+    // 未読数をカウント
+    const unreadCount = notificationsWithReadStatus.filter(n => !n.is_read).length;
 
     return NextResponse.json({
       success: true,
       notifications: paginatedNotifications,
       total,
+      unreadCount,
       hasMore: offset + limit < total
     });
   } catch (error) {
