@@ -17,12 +17,17 @@ export default function HeaderClient() {
       fetch(`/api/user/${session.user.id}`)
         .then(res => res.json())
         .then(data => {
+          console.log('HeaderClient - User data:', data);
+          console.log('HeaderClient - user_img_url:', data.user_img_url);
           if (data.user_img_url) {
             setAvatarUrl(data.user_img_url);
+            console.log('HeaderClient - Avatar URL set:', data.user_img_url);
+          } else {
+            console.log('HeaderClient - No user_img_url found');
           }
         })
-        .catch(() => {
-          // エラー時はデフォルトアバターを使用
+        .catch((error) => {
+          console.error('HeaderClient - Error fetching user:', error);
         });
     }
   }, [session]);

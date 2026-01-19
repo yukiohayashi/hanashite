@@ -8,21 +8,23 @@ export async function GET(
   try {
     const { id } = await params;
     
-    // 数値IDとして取得
-    const userId = parseInt(id);
+    // UUID形式または数値IDに対応
+    const uuidPattern = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+    const isUuid = uuidPattern.test(id);
+    const isNumeric = /^\d+$/.test(id);
     
-    if (isNaN(userId)) {
+    if (!isUuid && !isNumeric) {
       return NextResponse.json(
         { error: 'Invalid user ID' },
         { status: 400 }
       );
     }
 
-    // ユーザー情報を取得
+    // ユーザー情報を取得（UUID形式または数値IDで検索）
     const { data: user, error } = await supabase
       .from('users')
       .select('id, name, user_nicename, email, user_img_url, user_description, sns_x, created_at, profile_slug')
-      .eq('id', userId)
+      .eq('id', id)
       .single();
 
     if (error || !user) {
@@ -36,7 +38,7 @@ export async function GET(
     const { data: pointsData } = await supabase
       .from('points')
       .select('points')
-      .eq('user_id', userId.toString());
+      .eq('user_id', id);
 
     const totalPoints = pointsData?.reduce((sum, p) => sum + (p.points || 0), 0) || 0;
 
