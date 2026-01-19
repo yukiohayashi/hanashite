@@ -54,15 +54,19 @@ export async function POST(request: Request) {
       });
     }
 
-    // 実行間隔チェック
+    // 実行間隔チェック（ゆらぎを考慮）
     if (lastExecutedAt) {
       const lastExecuted = new Date(lastExecutedAt);
       const elapsedMinutes = (now.getTime() - lastExecuted.getTime()) / (1000 * 60);
+      
+      // ゆらぎを考慮した最小間隔
+      const minInterval = intervalMinutes - varianceMinutes;
+      const maxInterval = intervalMinutes + varianceMinutes;
 
-      if (elapsedMinutes < intervalMinutes) {
+      if (elapsedMinutes < minInterval) {
         return NextResponse.json({
           success: true,
-          message: `実行間隔が短すぎます（前回実行から${Math.floor(elapsedMinutes)}分、設定間隔${intervalMinutes}分）`,
+          message: `実行間隔が短すぎます（前回実行から${Math.floor(elapsedMinutes)}分、最小間隔${minInterval}分）`,
           skipped: true,
         });
       }
