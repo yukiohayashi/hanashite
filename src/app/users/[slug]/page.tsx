@@ -208,7 +208,7 @@ export default async function UserPage({ params }: { params: Promise<{ slug: str
     <div className="min-h-screen bg-gray-50">
       <Header />
 
-      <main className="md:flex md:justify-center mx-auto mt-14 md:mt-[70px] md:pt-0 px-2">
+      <main className="md:flex md:justify-center mx-auto mt-14 md:mt-[70px] md:pt-0 px-4 sm:px-6 lg:px-8">
         {/* 左サイドバー */}
         <aside className="hidden md:block w-[220px] mr-2">
           <Sidebar />
