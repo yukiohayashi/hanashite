@@ -319,10 +319,11 @@ export default function AutoCreatorSettings() {
                 value={settings.execution_interval}
                 onChange={(e) => setSettings({ ...settings, execution_interval: e.target.value })}
                 className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                min="1"
+                min="5"
                 max="1440"
               />
-              <p className="mt-1 text-xs text-gray-500">1～1440分（1～24時間）</p>
+              <p className="mt-1 text-xs text-gray-500">5～1440分（前回の成功実行からの最小間隔）</p>
+              <p className="mt-1 text-xs text-gray-400">※CRONの呼び出し頻度とは別の設定です</p>
             </div>
 
             <div>
@@ -338,7 +339,7 @@ export default function AutoCreatorSettings() {
                 min="0"
                 max="60"
               />
-              <p className="mt-1 text-xs text-gray-500">±0～60分</p>
+              <p className="mt-1 text-xs text-gray-500">±0～60分（実行タイミングにランダムな変動を加える）</p>
             </div>
 
             <div>
