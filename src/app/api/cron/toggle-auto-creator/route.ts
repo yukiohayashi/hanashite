@@ -24,6 +24,9 @@ export async function POST(request: Request) {
     const isActive = settingsMap.get('is_active') === 'true';
     const noCreateStartHour = parseInt(settingsMap.get('no_create_start_hour') || '0');
     const noCreateEndHour = parseInt(settingsMap.get('no_create_end_hour') || '6');
+    const intervalMinutes = parseInt(settingsMap.get('interval_minutes') || '30');
+    const varianceMinutes = parseInt(settingsMap.get('variance_minutes') || '10');
+    const lastExecutedAt = settingsMap.get('last_executed_at');
 
     // 現在時刻をチェック（日本時間）
     const now = new Date();
@@ -51,6 +54,21 @@ export async function POST(request: Request) {
       });
     }
 
+    // 実行間隔チェック
+    if (lastExecutedAt) {
+      const lastExecuted = new Date(lastExecutedAt);
+      const elapsedMinutes = (now.getTime() - lastExecuted.getTime()) / (1000 * 60);
+      const minInterval = intervalMinutes - varianceMinutes;
+
+      if (elapsedMinutes < minInterval) {
+        return NextResponse.json({
+          success: true,
+          message: `実行間隔が短すぎます（前回実行から${Math.floor(elapsedMinutes)}分、最小間隔${minInterval}分）`,
+          skipped: true,
+        });
+      }
+    }
+
     // 実際の投稿作成処理を呼び出す
     const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000';
     const executeResponse = await fetch(`${baseUrl}/api/auto-creator/execute-auto`, {
@@ -61,6 +79,12 @@ export async function POST(request: Request) {
     });
 
     const executeResult = await executeResponse.json();
+
+    // 実行時刻を記録
+    await supabase
+      .from('auto_creator_settings')
+      .update({ setting_value: now.toISOString() })
+      .eq('setting_key', 'last_executed_at');
 
     return NextResponse.json({
       success: true,
