@@ -80,11 +80,13 @@ export async function POST(request: Request) {
 
     const executeResult = await executeResponse.json();
 
-    // 実行時刻を記録
-    await supabase
-      .from('auto_creator_settings')
-      .update({ setting_value: now.toISOString() })
-      .eq('setting_key', 'last_executed_at');
+    // 実行成功時のみ実行時刻を記録
+    if (executeResult.success && executeResult.created_count > 0) {
+      await supabase
+        .from('auto_creator_settings')
+        .update({ setting_value: now.toISOString() })
+        .eq('setting_key', 'last_executed_at');
+    }
 
     return NextResponse.json({
       success: true,
