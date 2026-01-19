@@ -58,12 +58,11 @@ export async function POST(request: Request) {
     if (lastExecutedAt) {
       const lastExecuted = new Date(lastExecutedAt);
       const elapsedMinutes = (now.getTime() - lastExecuted.getTime()) / (1000 * 60);
-      const minInterval = intervalMinutes - varianceMinutes;
 
-      if (elapsedMinutes < minInterval) {
+      if (elapsedMinutes < intervalMinutes) {
         return NextResponse.json({
           success: true,
-          message: `実行間隔が短すぎます（前回実行から${Math.floor(elapsedMinutes)}分、最小間隔${minInterval}分）`,
+          message: `実行間隔が短すぎます（前回実行から${Math.floor(elapsedMinutes)}分、設定間隔${intervalMinutes}分）`,
           skipped: true,
         });
       }
@@ -80,13 +79,11 @@ export async function POST(request: Request) {
 
     const executeResult = await executeResponse.json();
 
-    // 実行成功時のみ実行時刻を記録
-    if (executeResult.success && executeResult.created_count > 0) {
-      await supabase
-        .from('auto_creator_settings')
-        .update({ setting_value: now.toISOString() })
-        .eq('setting_key', 'last_executed_at');
-    }
+    // 実行時刻を記録（投稿が作成されたかどうかに関わらず）
+    await supabase
+      .from('auto_creator_settings')
+      .update({ setting_value: now.toISOString() })
+      .eq('setting_key', 'last_executed_at');
 
     return NextResponse.json({
       success: true,
