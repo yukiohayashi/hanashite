@@ -231,17 +231,17 @@ export default async function PostPage({ params }: { params: Promise<{ id: strin
                           <img 
                             src={userAvatar}
                             alt={userName}
-                            className="border-2 border-gray-300 rounded-full w-5 h-5 object-cover hover:opacity-80 transition-opacity cursor-pointer"
+                            className="rounded-full w-5 h-5 object-cover hover:opacity-80 transition-opacity cursor-pointer"
                           />
                         ) : (
-                          <div className="relative bg-gray-300 rounded-full w-5 h-5 overflow-hidden border-2 border-gray-300 hover:opacity-80 transition-opacity cursor-pointer">
+                          <div className="relative bg-gray-300 rounded-full w-5 h-5 overflow-hidden hover:opacity-80 transition-opacity cursor-pointer">
                             <div className="absolute top-[4px] left-1/2 bg-white rounded-full w-[9px] h-[9px] -translate-x-1/2"></div>
                             <div className="absolute top-[11px] left-1/2 bg-white rounded-[50%_50%_50%_50%/60%_60%_40%_40%] w-[13.5px] h-[10px] -translate-x-1/2"></div>
                           </div>
                         )}
                       </Link>
                     ) : (
-                      <div className="relative bg-gray-300 rounded-full w-5 h-5 overflow-hidden border-2 border-gray-300">
+                      <div className="relative bg-gray-300 rounded-full w-5 h-5 overflow-hidden">
                         <div className="absolute top-[4px] left-1/2 bg-white rounded-full w-[9px] h-[9px] -translate-x-1/2"></div>
                         <div className="absolute top-[11px] left-1/2 bg-white rounded-[50%_50%_50%_50%/60%_60%_40%_40%] w-[13.5px] h-[10px] -translate-x-1/2"></div>
                       </div>
