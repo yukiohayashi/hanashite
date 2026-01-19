@@ -30,6 +30,7 @@ interface Settings {
   mention_other_choices_probability: string;
   comment_prompt: string;
   reply_prompt: string;
+  last_execution?: string;
 }
 
 export default function AutoVoterSettings() {
@@ -39,6 +40,8 @@ export default function AutoVoterSettings() {
   const [toggling, setToggling] = useState(false);
   const [nextRunTime, setNextRunTime] = useState<string>('');
   const [executing, setExecuting] = useState(false);
+  const [lastExecution, setLastExecution] = useState<string>('');
+  const [elapsedTime, setElapsedTime] = useState<string>('');
 
   const fetchSettings = async () => {
     const { data, error } = await supabase
@@ -94,13 +97,46 @@ export default function AutoVoterSettings() {
 - 口語的で自然な日本語（20〜100文字）
 - 短い共感、同意＋補足、異なる視点、質問などバリエーション豊かに
 - 「確かに」「おっしゃる」などAI臭い表現は避ける`,
+      last_execution: settingsMap.last_execution,
     });
+
+    if (settingsMap.last_execution) {
+      setLastExecution(settingsMap.last_execution);
+      updateElapsedTime(settingsMap.last_execution);
+    }
+  };
+
+  const updateElapsedTime = (lastExec: string) => {
+    const now = new Date();
+    const last = new Date(lastExec);
+    const diffMs = now.getTime() - last.getTime();
+    const diffMinutes = Math.floor(diffMs / (1000 * 60));
+    
+    if (diffMinutes < 60) {
+      setElapsedTime(`${diffMinutes}分前`);
+    } else if (diffMinutes < 1440) {
+      const hours = Math.floor(diffMinutes / 60);
+      const minutes = diffMinutes % 60;
+      setElapsedTime(`${hours}時間${minutes}分前`);
+    } else {
+      const days = Math.floor(diffMinutes / 1440);
+      setElapsedTime(`${days}日前`);
+    }
   };
 
   useEffect(() => {
     fetchSettings();
     fetchNextRunTime();
   }, []);
+
+  useEffect(() => {
+    if (lastExecution) {
+      const timer = setInterval(() => {
+        updateElapsedTime(lastExecution);
+      }, 60000); // 1分ごとに更新
+      return () => clearInterval(timer);
+    }
+  }, [lastExecution]);
 
   const fetchNextRunTime = async () => {
     const { data: settingsData } = await supabase
@@ -115,16 +151,22 @@ export default function AutoVoterSettings() {
     });
 
     if (settingsMap.enabled === 'true') {
-      // データベースの設定値を使用して次回実行時刻を計算
-      const now = new Date();
-      const interval = parseInt(settingsMap.interval || '4');
-      const nextTime = new Date(now.getTime() + interval * 60 * 1000);
-      
-      setNextRunTime(nextTime.toLocaleString('ja-JP', { 
-        hour: '2-digit', 
-        minute: '2-digit',
-        second: '2-digit'
-      }));
+      if (settingsMap.last_execution) {
+        const lastExec = new Date(settingsMap.last_execution);
+        const interval = parseInt(settingsMap.interval || '20');
+        const variance = parseInt(settingsMap.interval_variance || '10');
+        const minInterval = interval - variance;
+        const nextTime = new Date(lastExec.getTime() + minInterval * 60 * 1000);
+        
+        setNextRunTime(nextTime.toLocaleString('ja-JP', { 
+          month: '2-digit',
+          day: '2-digit',
+          hour: '2-digit', 
+          minute: '2-digit'
+        }));
+      } else {
+        setNextRunTime('未実行');
+      }
     } else {
       setNextRunTime('');
     }
@@ -254,7 +296,7 @@ export default function AutoVoterSettings() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-3xl font-bold text-gray-900">AI自動投票・コメント・いいね 設定（CRON5分ごと）</h1>
+        <h1 className="text-3xl font-bold text-gray-900">AI自動投票・コメント・いいね 設定</h1>
         <p className="mt-2 text-sm text-gray-600">
           アンケートへの自動投票・コメント・返信・いいね機能の設定を管理します
         </p>
@@ -309,10 +351,25 @@ export default function AutoVoterSettings() {
               </span>
             </div>
 
+            {lastExecution && (
+              <div className="border-l border-gray-300 pl-4">
+                <strong className="text-sm">最終実行:</strong>
+                <span className="ml-2 text-sm text-gray-600">
+                  {new Date(lastExecution).toLocaleString('ja-JP', {
+                    month: '2-digit',
+                    day: '2-digit',
+                    hour: '2-digit',
+                    minute: '2-digit'
+                  })}
+                  {elapsedTime && ` (${elapsedTime})`}
+                </span>
+              </div>
+            )}
+
             {settings.enabled === 'true' && nextRunTime && (
               <div className="border-l border-gray-300 pl-4">
-                <strong className="text-sm">次回実行（推定）:</strong>
-                <span className="ml-2 text-sm text-blue-600 font-medium">{nextRunTime}</span>
+                <strong className="text-sm">次回実行予定:</strong>
+                <span className="ml-2 text-sm text-blue-600 font-medium">{nextRunTime}頃</span>
               </div>
             )}
           </div>

@@ -18,6 +18,7 @@ interface Settings {
   max_categories: string;
   max_keywords: string;
   max_posts_per_execution: string;
+  last_executed_at?: string;
 }
 
 export default function AutoCreatorSettings() {
@@ -44,6 +45,8 @@ export default function AutoCreatorSettings() {
   const [toggling, setToggling] = useState(false);
   const [nextRunTime, setNextRunTime] = useState<string>('');
   const [executing, setExecuting] = useState(false);
+  const [lastExecutedAt, setLastExecutedAt] = useState<string>('');
+  const [elapsedTime, setElapsedTime] = useState<string>('');
 
   useEffect(() => {
     fetchSettings();
@@ -84,7 +87,31 @@ export default function AutoCreatorSettings() {
       max_categories: settingsMap.max_categories || '1',
       max_keywords: settingsMap.max_keywords || '3',
       max_posts_per_execution: settingsMap.max_posts_per_execution || '5',
+      last_executed_at: settingsMap.last_executed_at,
     });
+
+    if (settingsMap.last_executed_at) {
+      setLastExecutedAt(settingsMap.last_executed_at);
+      updateElapsedTime(settingsMap.last_executed_at);
+    }
+  };
+
+  const updateElapsedTime = (lastExecuted: string) => {
+    const now = new Date();
+    const last = new Date(lastExecuted);
+    const diffMs = now.getTime() - last.getTime();
+    const diffMinutes = Math.floor(diffMs / (1000 * 60));
+    
+    if (diffMinutes < 60) {
+      setElapsedTime(`${diffMinutes}分前`);
+    } else if (diffMinutes < 1440) {
+      const hours = Math.floor(diffMinutes / 60);
+      const minutes = diffMinutes % 60;
+      setElapsedTime(`${hours}時間${minutes}分前`);
+    } else {
+      const days = Math.floor(diffMinutes / 1440);
+      setElapsedTime(`${days}日前`);
+    }
   };
 
   const fetchNextRunTime = async () => {
@@ -100,20 +127,35 @@ export default function AutoCreatorSettings() {
     });
 
     if (settingsMap.is_active === 'true' || settingsMap.is_enabled === 'true') {
-      // データベースの設定値を使用して次回実行時刻を計算
-      const now = new Date();
-      const interval = parseInt(settingsMap.execution_interval || '7');
-      const nextTime = new Date(now.getTime() + interval * 60 * 1000);
-      
-      setNextRunTime(nextTime.toLocaleString('ja-JP', { 
-        hour: '2-digit', 
-        minute: '2-digit',
-        second: '2-digit'
-      }));
+      if (settingsMap.last_executed_at) {
+        const lastExecuted = new Date(settingsMap.last_executed_at);
+        const interval = parseInt(settingsMap.execution_interval || '20');
+        const variance = parseInt(settingsMap.execution_variance || '10');
+        const minInterval = interval - variance;
+        const nextTime = new Date(lastExecuted.getTime() + minInterval * 60 * 1000);
+        
+        setNextRunTime(nextTime.toLocaleString('ja-JP', { 
+          month: '2-digit',
+          day: '2-digit',
+          hour: '2-digit', 
+          minute: '2-digit'
+        }));
+      } else {
+        setNextRunTime('未実行');
+      }
     } else {
       setNextRunTime('');
     }
   };
+
+  useEffect(() => {
+    if (lastExecutedAt) {
+      const timer = setInterval(() => {
+        updateElapsedTime(lastExecutedAt);
+      }, 60000); // 1分ごとに更新
+      return () => clearInterval(timer);
+    }
+  }, [lastExecutedAt]);
 
   const handleToggle = async () => {
     setToggling(true);
@@ -265,10 +307,25 @@ export default function AutoCreatorSettings() {
               </span>
             </div>
 
+            {lastExecutedAt && (
+              <div className="border-l border-gray-300 pl-4">
+                <strong className="text-sm">最終実行:</strong>
+                <span className="ml-2 text-sm text-gray-600">
+                  {new Date(lastExecutedAt).toLocaleString('ja-JP', {
+                    month: '2-digit',
+                    day: '2-digit',
+                    hour: '2-digit',
+                    minute: '2-digit'
+                  })}
+                  {elapsedTime && ` (${elapsedTime})`}
+                </span>
+              </div>
+            )}
+
             {settings.is_enabled === 'true' && nextRunTime && (
               <div className="border-l border-gray-300 pl-4">
-                <strong className="text-sm">次回実行（推定）:</strong>
-                <span className="ml-2 text-sm text-blue-600 font-medium">{nextRunTime}</span>
+                <strong className="text-sm">次回実行予定:</strong>
+                <span className="ml-2 text-sm text-blue-600 font-medium">{nextRunTime}頃</span>
               </div>
             )}
           </div>
