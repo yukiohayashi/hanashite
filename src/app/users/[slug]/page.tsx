@@ -54,6 +54,23 @@ interface ActivityItem {
 }
 
 async function getUserById(userIdOrSlug: string) {
+  // UUID形式の場合（OAuth認証ユーザー）
+  const uuidPattern = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+  if (uuidPattern.test(userIdOrSlug)) {
+    const { data, error } = await supabase
+      .from('users')
+      .select('*')
+      .eq('id', userIdOrSlug)
+      .single();
+
+    if (error) {
+      console.error('Error fetching user by UUID:', error);
+      return null;
+    }
+
+    return data as User;
+  }
+  
   // 数値IDの場合
   if (/^\d+$/.test(userIdOrSlug)) {
     const { data, error } = await supabase
