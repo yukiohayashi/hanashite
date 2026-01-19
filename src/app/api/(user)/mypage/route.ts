@@ -17,14 +17,13 @@ export async function GET(request: Request) {
 
     const notifications: any[] = [];
 
-    // 1. 運営スタッフからのお知らせ（user_id=33の投稿）
+    // 1. 運営スタッフからのお知らせ（user_id=33の投稿）全件取得
     const { data: adminPosts } = await supabase
       .from('posts')
       .select('id, title, created_at')
       .eq('user_id', 33)
       .in('status', ['publish', 'published'])
-      .order('created_at', { ascending: false })
-      .limit(20);
+      .order('created_at', { ascending: false });
 
     // 運営スタッフのアバター画像を取得
     const { data: adminUser } = await supabase
