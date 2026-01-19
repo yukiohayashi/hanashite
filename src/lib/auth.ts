@@ -125,16 +125,12 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
       if ((user || trigger === 'update') && token.id) {
         const { data: userData } = await supabaseAdmin
           .from('users')
-          .select('user_img_url, participate_points, interest_categories')
+          .select('user_img_url')
           .eq('id', token.id as string)
           .single();
         
-        if (userData) {
-          if (userData.user_img_url) {
-            token.picture = userData.user_img_url;
-          }
-          token.participatePoints = userData.participate_points || 0;
-          token.interestCategories = userData.interest_categories || null;
+        if (userData?.user_img_url) {
+          token.picture = userData.user_img_url;
         }
       }
       
@@ -145,8 +141,6 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
         session.user.id = token.id as string
         session.user.status = token.status as number
         session.user.image = token.picture as string
-        session.user.participatePoints = token.participatePoints as number
-        session.user.interestCategories = token.interestCategories as string | null
       }
       return session
     },
