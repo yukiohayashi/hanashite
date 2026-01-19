@@ -190,7 +190,7 @@ export default function VoteSection({
           <div className="bg-gray-50 px-3 py-2 rounded text-gray-600 text-xs">
             {closeAt && closeAt !== '0000-00-00' && (
               <>
-                {' '}締切：
+                締切：
                 {new Date(closeAt).toLocaleDateString('ja-JP', {
                   year: '2-digit',
                   month: '2-digit',
@@ -200,16 +200,14 @@ export default function VoteSection({
                 {new Date(closeAt).toLocaleTimeString('ja-JP', {
                   hour: '2-digit',
                   minute: '2-digit',
-                  second: '2-digit',
                   hour12: false
                 })}
                 ／
               </>
             )}
-            {' '}<i className="fas fa-comment"></i>{commentCount}
             {createdAt && (
               <>
-                {' '}受付：
+                受付：
                 {new Date(createdAt).toLocaleDateString('ja-JP', {
                   year: '2-digit',
                   month: '2-digit',
