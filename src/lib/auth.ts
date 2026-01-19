@@ -6,6 +6,7 @@ import bcrypt from "bcryptjs"
 import { supabaseAdmin } from "@/lib/supabase"
 
 export const { handlers, auth, signIn, signOut } = NextAuth({
+  trustHost: true,
   session: {
     strategy: "jwt",
   },
