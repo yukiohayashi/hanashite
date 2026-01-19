@@ -8,29 +8,10 @@ import Link from 'next/link';
 export default function HeaderClient() {
   const { data: session, status } = useSession();
   const pathname = usePathname();
-  const [avatarUrl, setAvatarUrl] = useState('');
   const [unreadCount, setUnreadCount] = useState(0);
 
-  useEffect(() => {
-    if (session?.user?.id) {
-      // ユーザーのアバター画像を取得
-      fetch(`/api/user/${session.user.id}`)
-        .then(res => res.json())
-        .then(data => {
-          console.log('HeaderClient - User data:', data);
-          console.log('HeaderClient - user_img_url:', data.user_img_url);
-          if (data.user_img_url) {
-            setAvatarUrl(data.user_img_url);
-            console.log('HeaderClient - Avatar URL set:', data.user_img_url);
-          } else {
-            console.log('HeaderClient - No user_img_url found');
-          }
-        })
-        .catch((error) => {
-          console.error('HeaderClient - Error fetching user:', error);
-        });
-    }
-  }, [session]);
+  // セッションから直接アバター画像を取得（APIコール不要）
+  const avatarUrl = session?.user?.image || '';
 
   // 未読通知数を取得（ページ遷移時に再取得）
   useEffect(() => {

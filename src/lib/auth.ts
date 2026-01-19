@@ -114,21 +114,37 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
     }),
   ],
   callbacks: {
-    async jwt({ token, user }) {
+    async jwt({ token, user, trigger }) {
       if (user) {
         token.id = user.id
-        token.status = (user as any).status
+        token.status = (user as { status?: number }).status
+        token.picture = user.image
       }
+      
+      // セッション更新時にデータベースから最新の画像を取得
+      if (trigger === 'update' && token.id) {
+        const { data: userData } = await supabaseAdmin
+          .from('users')
+          .select('user_img_url')
+          .eq('id', token.id as string)
+          .single();
+        
+        if (userData?.user_img_url) {
+          token.picture = userData.user_img_url;
+        }
+      }
+      
       return token
     },
     async session({ session, token }) {
       if (session.user) {
         session.user.id = token.id as string
         session.user.status = token.status as number
+        session.user.image = token.picture as string
       }
       return session
     },
-    async signIn({ user, account, profile }) {
+    async signIn({ user, account }) {
       if (user?.id) {
         try {
           // LINE/X認証の場合、Supabaseのusersテーブルにユーザー情報を保存
