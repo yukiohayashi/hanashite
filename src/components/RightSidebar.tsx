@@ -25,7 +25,7 @@ interface Post {
 
 export default function RightSidebar() {
   const { data: session, status } = useSession();
-  const [totalPoints, setTotalPoints] = useState<number>(0);
+  const [totalPoints, setTotalPoints] = useState<number | null>(null);
   const [profileSlug, setProfileSlug] = useState<string | null>(null);
   const [userName, setUserName] = useState<string>('');
   const [latestComments, setLatestComments] = useState<Comment[]>([]);
@@ -164,7 +164,7 @@ export default function RightSidebar() {
           {userName || session.user?.name || 'ゲスト'}
         </Link>
         さん<br />
-        獲得ポイント: {totalPoints.toLocaleString()}pt
+        獲得ポイント: {totalPoints !== null ? totalPoints.toLocaleString() : '...'}
       </div>
       
       <div className="my-2.5 text-center">

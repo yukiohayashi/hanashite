@@ -25,7 +25,7 @@ interface Post {
 
 export default function HomeRightSidebar() {
   const { data: session, status } = useSession();
-  const [totalPoints, setTotalPoints] = useState<number>(0);
+  const [totalPoints, setTotalPoints] = useState<number | null>(null);
   const [profileSlug, setProfileSlug] = useState<string | null>(null);
   const [userName, setUserName] = useState<string>('');
   const [latestComments, setLatestComments] = useState<Comment[]>([]);
@@ -101,6 +101,7 @@ export default function HomeRightSidebar() {
     fetchPosts();
 
     if (session?.user?.id) {
+      // ポイント合計を取得
       fetch(`/api/phistory?userId=${session.user.id}`)
         .then(res => res.json())
         .then(data => {
@@ -110,13 +111,14 @@ export default function HomeRightSidebar() {
         })
         .catch(err => console.error('ポイント取得エラー:', err));
       
+      // profile_slugとuser_nicenameを取得
       fetch(`/api/user/${session.user.id}`)
         .then(res => res.json())
         .then(data => {
           if (data.profile_slug) {
             setProfileSlug(data.profile_slug);
           }
-          setUserName(data.user_nicename || data.name || session.user.name || 'ゲスト');
+          setUserName(data.user_nicename || data.user_nicename || data.name || session.user.name || 'ゲスト');
         })
         .catch(err => console.error('ユーザー情報取得エラー:', err));
     }
@@ -158,7 +160,7 @@ export default function HomeRightSidebar() {
           {userName || session.user?.name || 'ゲスト'}
         </Link>
         さん<br />
-        獲得ポイント: {totalPoints.toLocaleString()}pt
+        獲得ポイント: {totalPoints !== null ? totalPoints.toLocaleString() : '...'}pt
       </div>
       
       <div className="my-2.5 text-center">

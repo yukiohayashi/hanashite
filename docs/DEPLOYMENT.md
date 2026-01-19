@@ -675,3 +675,13 @@ tar -czf anke-nextjs-backup-$(date +%Y%m%d).tar.gz /var/www/anke-nextjs
 3. Dockerコンテナステータス
 4. Nginxステータス
 5. ファイアウォール設定
+
+
+重要なポイント
+デプロイスクリプト（./scripts/deploy.sh --full）はGitHubへのプッシュを含みません。
+
+今後のデプロイ手順：
+
+git add . → git commit -m "..." → git push origin main
+./scripts/deploy.sh --full
+詳細はdocs/DEPLOY_GUIDE.mdを参照してください。
