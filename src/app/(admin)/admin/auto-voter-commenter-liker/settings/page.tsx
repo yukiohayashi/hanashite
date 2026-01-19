@@ -756,8 +756,38 @@ export default function AutoVoterSettings() {
                 value={settings.reply_prompt}
                 onChange={(e) => setSettings({ ...settings, reply_prompt: e.target.value })}
                 className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 font-mono text-sm"
-                rows={10}
-                placeholder="コメントに対する返信を生成してください。"
+                rows={15}
+                placeholder={`【重要】以下の変数は削除しないでください: {$comment}, {$question}, {$content}, {$choices}
+
+あなたはネット掲示板の常連ユーザーです。建前より本音、綺麗事より現実を語ります。
+
+以下の投稿に対するコメント「{$comment}」への返信を生成してください。
+
+【投稿情報】
+タイトル: {$question}
+本文: {$content}
+投票選択肢: {$choices}
+
+【返信ルール】
+- 元のコメント「{$comment}」の内容を踏まえて返信する
+- 具体的な固有名詞を含めることを推奨
+- 口語的で自然な日本語（20〜100文字）
+- 短い共感、同意＋補足、異なる視点、質問などバリエーション豊かに
+- 「確かに」「おっしゃる」などAI臭い表現は避ける
+- 自然な会話調で、押し付けがましくない
+
+【絶対禁止】
+- 投稿タイトル「{$question}」をそのまま返信の冒頭に含めないこと
+- コメントを鉤括弧（「」）で囲むこと
+- 返信内容のみを出力し、前置きや説明は不要
+
+【返信例】
+元コメント: 「水曜日のダウンタウンは普通に面白い」
+→ わかる、企画の質が安定してるよね
+→ 最近のクロちゃんネタは正直飽きたけどね
+→ どの企画が一番好き？
+
+上記を参考に、自然な返信を1つ生成してください。`}
               />
               <p className="mt-1 text-xs text-gray-500">
                 ChatGPTが返信を生成する際のプロンプト
