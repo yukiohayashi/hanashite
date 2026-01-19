@@ -88,6 +88,7 @@ export default function HomeRightSidebar() {
         .from('posts')
         .select('id, title, created_at')
         .in('status', ['publish', 'published'])
+        .neq('user_id', 33) // 管理者投稿を除外
         .order('created_at', { ascending: false })
         .limit(10);
       
