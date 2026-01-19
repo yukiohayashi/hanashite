@@ -1,11 +1,30 @@
 'use client';
 
 import { usePathname } from 'next/navigation';
+import { useSession } from 'next-auth/react';
+import { useEffect, useState } from 'react';
 
 export default function HeaderLink() {
   const pathname = usePathname();
+  const { data: session } = useSession();
+  const [participatePoints, setParticipatePoints] = useState<number>(0);
   const isAnkeworks = pathname?.startsWith('/ankeworks') || pathname?.startsWith('/workers');
 
+  useEffect(() => {
+    if (session?.user?.id) {
+      // ユーザーのparticipate_pointsを取得
+      fetch(`/api/user/${session.user.id}`)
+        .then(res => res.json())
+        .then(data => {
+          setParticipatePoints(data.participate_points || 0);
+        })
+        .catch(() => {
+          setParticipatePoints(0);
+        });
+    }
+  }, [session]);
+
+  // アンケワークスページにいる場合は、アンケートへのリンクを表示
   if (isAnkeworks) {
     return (
       <a 
@@ -26,6 +45,12 @@ export default function HeaderLink() {
     );
   }
 
+  // ポイント獲得に参加していないユーザーには表示しない
+  if (participatePoints !== 1) {
+    return null;
+  }
+
+  // ポイント獲得に参加しているユーザーにはアンケワークスへのリンクを表示
   return (
     <a 
       href="/ankeworks" 
