@@ -339,7 +339,7 @@ export default async function PostPage({ params }: { params: Promise<{ id: strin
                             />
                           </div>
                         )}
-                        <div className="block clear-none relative m-0 w-4/5 font-normal text-gray-600 text-sm break-all leading-normal">
+                        <div className="block clear-none relative m-0 w-4/5 font-normal text-gray-600 text-xs md:text-sm break-all leading-normal">
                           <div className="max-w-none prose prose-sm">
                             <div className="m-0">
                               {(post as any).og_title && <p className="m-0">{(post as any).og_title}</p>}
@@ -347,6 +347,18 @@ export default async function PostPage({ params }: { params: Promise<{ id: strin
                                 <div dangerouslySetInnerHTML={{ __html: post.content }} />
                               ) : (
                                 <p className="text-gray-500">本文はありません</p>
+                              )}
+                              {(post as any).source_url && (
+                                <p className="mt-2 m-0">
+                                  <a 
+                                    href={(post as any).source_url} 
+                                    target="_blank" 
+                                    rel="noopener noreferrer"
+                                    className="text-blue-600 hover:text-blue-800 underline text-xs"
+                                  >
+                                    引用元
+                                  </a>
+                                </p>
                               )}
                             </div>
                           </div>
