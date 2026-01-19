@@ -29,13 +29,14 @@ export async function POST(request: Request) {
         
         notificationIds = posts?.map(p => `/posts/${p.id}`) || [];
       } else if (type === 'worker_post') {
-        // アンケワークス投稿
-        const { data: ankeworks } = await supabaseAdmin
-          .from('ankeworks')
-          .select('id')
-          .eq('status', 'published');
+        // 運営者投稿（users.status: 3）
+        const { data: posts } = await supabaseAdmin
+          .from('posts')
+          .select('id, users!inner(status)')
+          .eq('users.status', 3)
+          .in('status', ['publish', 'published']);
         
-        notificationIds = ankeworks?.map(a => `/ankeworks/${a.id}`) || [];
+        notificationIds = posts?.map(p => `/posts/${p.id}`) || [];
       } else if (type === 'post_comment') {
         // 自分の投稿へのコメント
         const { data: comments } = await supabaseAdmin
@@ -73,21 +74,28 @@ export async function POST(request: Request) {
       // 既読レコードを一括挿入
       if (notificationIds.length > 0) {
         const records = notificationIds.map(id => ({
-          user_id: userId,
+          user_id: parseInt(userId),
           notification_type: type,
           notification_id: id,
           read_at: new Date().toISOString()
         }));
 
-        await supabaseAdmin
+        console.log(`${type}: ${records.length}件の通知を既読にします`);
+
+        const { error } = await supabaseAdmin
           .from('notification_reads')
           .upsert(records, { 
             onConflict: 'user_id,notification_type,notification_id',
-            ignoreDuplicates: true 
+            ignoreDuplicates: false 
           });
+
+        if (error) {
+          console.error(`${type}の既読処理エラー:`, error);
+        }
       }
     }
 
+    console.log('全ての通知を既読にしました');
     return NextResponse.json({ success: true });
   } catch (error) {
     console.error('Mark all read error:', error);
