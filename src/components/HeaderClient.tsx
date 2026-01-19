@@ -13,8 +13,8 @@ export default function HeaderClient() {
   // セッションから直接アバター画像を取得（APIコール不要）
   const avatarUrl = session?.user?.image || '';
 
-  // 未読通知数を取得（ページ遷移時に再取得）
-  useEffect(() => {
+  // 未読通知数を取得
+  const fetchUnreadCount = () => {
     if (session?.user?.id) {
       fetch(`/api/notifications/unread?userId=${session.user.id}`)
         .then(res => res.json())
@@ -27,7 +27,24 @@ export default function HeaderClient() {
           setUnreadCount(0);
         });
     }
+  };
+
+  // ページ遷移時に未読数を再取得
+  useEffect(() => {
+    fetchUnreadCount();
   }, [session, pathname]);
+
+  // マイページからの既読処理を検知
+  useEffect(() => {
+    const handleNotificationsRead = () => {
+      setUnreadCount(0);
+    };
+
+    window.addEventListener('notificationsRead', handleNotificationsRead);
+    return () => {
+      window.removeEventListener('notificationsRead', handleNotificationsRead);
+    };
+  }, []);
 
   return (
     <div className="flex items-center gap-4">

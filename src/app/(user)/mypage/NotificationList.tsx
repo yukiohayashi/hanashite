@@ -65,7 +65,7 @@ export default function NotificationList() {
     if (!session?.user?.id || notification.is_read) return;
 
     try {
-      await fetch('/api/mypage/mark-read', {
+      const response = await fetch('/api/mypage/mark-read', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -77,14 +77,19 @@ export default function NotificationList() {
         }),
       });
 
-      // ローカル状態を更新
-      setNotifications(prev =>
-        prev.map(n =>
-          n.link === notification.link && n.type === notification.type
-            ? { ...n, is_read: true }
-            : n
-        )
-      );
+      if (response.ok) {
+        // ローカル状態を更新
+        setNotifications(prev =>
+          prev.map(n =>
+            n.link === notification.link && n.type === notification.type
+              ? { ...n, is_read: true }
+              : n
+          )
+        );
+        
+        // ヘッダーの未読数を更新するためのイベントを発火
+        window.dispatchEvent(new Event('notificationsRead'));
+      }
     } catch (error) {
       console.error('既読マークエラー:', error);
     }
@@ -113,6 +118,9 @@ export default function NotificationList() {
         
         // 未読数を0にリセット
         setTotalUnreadCount(0);
+        
+        // ヘッダーの未読数を更新するためのイベントを発火
+        window.dispatchEvent(new Event('notificationsRead'));
         
         // 通知を再取得して最新の状態を反映
         fetchNotifications(0);
