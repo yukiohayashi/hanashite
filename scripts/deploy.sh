@@ -31,7 +31,10 @@ fi
 echo "🔨 本番ビルド..."
 npm run build
 
-echo "🔄 アプリケーションを再起動..."
+echo "� 静的ファイルをstandaloneにコピー..."
+cp -r .next/static .next/standalone/.next/
+
+echo "�🔄 アプリケーションを再起動..."
 pm2 restart anke-nextjs
 
 echo "✅ ステータス確認..."
