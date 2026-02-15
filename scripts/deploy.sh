@@ -5,10 +5,12 @@
 
 set -e  # エラーが発生したら停止
 
+FULL_BUILD="$1"
+
 echo "🚀 デプロイを開始します..."
 
 # VPSに接続してデプロイ
-ssh -i ~/.ssh/anke-nextjs.key ubuntu@133.18.122.123 << 'ENDSSH'
+ssh -i ~/.ssh/anke-nextjs.key ubuntu@133.18.122.123 "FULL_BUILD=$FULL_BUILD bash -s" << 'ENDSSH'
 cd /var/www/anke-nextjs
 
 echo "📦 アプリケーションを停止..."
@@ -21,7 +23,7 @@ echo "📦 依存関係を確認..."
 npm install
 
 # フルビルドオプション（引数で--fullが渡された場合）
-if [ "$1" = "--full" ]; then
+if [ "$FULL_BUILD" = "--full" ]; then
   echo "🗑️  ビルドキャッシュをクリア..."
   rm -rf .next
 fi

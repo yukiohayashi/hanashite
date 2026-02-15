@@ -1,0 +1,1 @@
+/Users/yukki/Projects/_dev-env/COMMON-development-environment-mac-mini.md
