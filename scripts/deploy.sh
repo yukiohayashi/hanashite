@@ -31,10 +31,11 @@ fi
 echo "🔨 本番ビルド..."
 npm run build
 
-echo "� 静的ファイルをstandaloneにコピー..."
+echo "📁 静的ファイルをstandaloneにコピー..."
 cp -r .next/static .next/standalone/.next/
+cp -r public/* .next/standalone/public/
 
-echo "�🔄 アプリケーションを再起動..."
+echo "� アプリケーションを再起動..."
 pm2 restart anke-nextjs
 
 echo "✅ ステータス確認..."
