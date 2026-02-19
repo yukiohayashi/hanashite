@@ -50,3 +50,6 @@ next-env.d.ts
 # バックアップとデータベースファイル
 backups/
 @backups/
+UPDATE_ENV_INSTRUCTIONS.md
+docs/SUPABASE_PROJECT_SETUP.md
+.env.local
