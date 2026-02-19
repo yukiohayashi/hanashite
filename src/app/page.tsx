@@ -1,15 +1,21 @@
 import { supabase } from '@/lib/supabase';
 import Link from 'next/link';
+import Image from 'next/image';
 import Header from '@/components/Header';
 import Sidebar from '@/components/Sidebar';
 import Footer from '@/components/Footer';
 import HomeRightSidebar from '@/components/HomeRightSidebar';
-import SearchKeywords from '@/components/SearchKeywords';
 import SearchHistory from '@/components/SearchHistory';
 import SearchForm from '@/components/SearchForm';
 import KeywordsSection from '@/components/KeywordsSection';
 import PostImage from '@/components/PostImage';
+import InfinitePostList from '@/components/InfinitePostList';
 import { auth } from '@/lib/auth';
+
+// HTMLタグを除去するヘルパー関数
+function stripHtmlTags(html: string): string {
+  return html.replace(/<[^>]*>/g, '').replace(/&nbsp;/g, ' ').trim();
+}
 
 interface HomeProps {
   searchParams: Promise<{ s?: string; sort?: string }>;
@@ -26,7 +32,7 @@ export default async function Home({ searchParams }: HomeProps) {
 
   const params = await searchParams;
   const searchQuery = params.s || '';
-  const sortBy = params.sort || 'recommend';
+  const sortBy = params.sort || 'top_post';
 
   // ソート方法に応じてデータを取得
   let postsData: any[] = [];
@@ -37,7 +43,7 @@ export default async function Home({ searchParams }: HomeProps) {
     // total_votesカラムを使用して50票以上の投稿を直接取得
     const { data: hallOfFameData } = await supabase
       .from('posts')
-      .select('id, title, created_at, user_id, og_image, thumbnail_url, total_votes')
+      .select('id, title, content, created_at, user_id, og_image, thumbnail_url, total_votes')
       .in('status', ['publish', 'published'])
       .neq('user_id', 33)
       .gte('total_votes', 50)
@@ -53,7 +59,7 @@ export default async function Home({ searchParams }: HomeProps) {
         .in('id', userIds);
       
       const operatorIds = usersData?.filter(u => u.status === 3).map(u => u.id) || [];
-      const filtered = hallOfFameData.filter(p => !operatorIds.includes(p.user_id)).slice(0, 20);
+      const filtered = hallOfFameData.filter(p => !operatorIds.includes(p.user_id)).slice(0, 10);
       hallOfFamePosts = filtered;
       postsData = filtered;
     } else {
@@ -69,18 +75,16 @@ export default async function Home({ searchParams }: HomeProps) {
       .order('created_at', { ascending: false })
       .limit(1000);  // 100から1000に増やす
 
-    console.log('コメント順 - 取得したコメント数:', recentComments?.length);
-
     if (recentComments && recentComments.length > 0) {
       const uniquePostIds = [...new Set(recentComments.map(c => c.post_id))];
-      console.log('コメント順 - ユニークな投稿ID数:', uniquePostIds.length);
-      console.log('コメント順 - 最初の20件のID:', uniquePostIds.slice(0, 20));
       
       const { data: allPosts } = await supabase
         .from('posts')
-        .select('id, title, created_at, user_id, og_image, thumbnail_url')
+        .select('id, title, created_at, user_id, og_image, thumbnail_url, best_answer_id, best_answer_selected_at')
         .in('status', ['publish', 'published'])
         .neq('user_id', 33)
+        .is('best_answer_id', null)
+        .is('best_answer_selected_at', null)
         .order('created_at', { ascending: false })
         .limit(100);
       
@@ -97,49 +101,30 @@ export default async function Home({ searchParams }: HomeProps) {
         data = allPosts.filter(p => !operatorIds.includes(p.user_id));
       }
       
-      console.log('コメント順 - 取得した投稿数:', data?.length);
-      console.log('コメント順 - 取得した投稿ID:', data?.map(p => p.id));
-      
       if (data) {
         // クライアント側でフィルタリングして並べ替え
-        const postIdOrder = uniquePostIds.slice(0, 20);
+        const postIdOrder = uniquePostIds.slice(0, 10);
         postsData = postIdOrder
           .map(id => data.find(p => p.id === id))
           .filter((post): post is NonNullable<typeof post> => post !== undefined);
-        
-        console.log('コメント順 - フィルタ後の投稿数:', postsData.length);
-        console.log('コメント順 - フィルタ後の投稿ID:', postsData.map(p => p.id));
       }
     }
   } else if (sortBy === 'notvoted') {
-    // 未投票アンケ：ユーザーが投票していない投稿
+    // 未回答相談：ユーザーが投票していない投稿
     let excludedPostIds: number[] = [];
-    
-    console.log('未投票アンケ - session:', session);
-    console.log('未投票アンケ - userId (raw):', userId);
-    console.log('未投票アンケ - userId type:', typeof userId);
     
     if (userId) {
       // userIdを数値に変換
       const numericUserId = typeof userId === 'string' ? parseInt(userId) : userId;
-      
-      console.log('未投票アンケ - numericUserId:', numericUserId);
       
       const { data: votedPosts, error } = await supabase
         .from('vote_history')
         .select('post_id')
         .eq('user_id', numericUserId);
       
-      console.log('未投票アンケ - votedPosts:', votedPosts);
-      console.log('未投票アンケ - votedPosts length:', votedPosts?.length);
-      console.log('未投票アンケ - error:', error);
-      
       if (votedPosts) {
         excludedPostIds = votedPosts.map(v => v.post_id);
-        console.log('未投票アンケ - excludedPostIds:', excludedPostIds);
       }
-    } else {
-      console.log('未投票アンケ - userIdがnullまたはundefinedです');
     }
 
     // 1ヶ月前の日付を計算
@@ -148,9 +133,11 @@ export default async function Home({ searchParams }: HomeProps) {
 
     const { data: allPosts } = await supabase
       .from('posts')
-      .select('id, title, created_at, user_id, og_image, thumbnail_url')
+      .select('id, title, content, created_at, user_id, og_image, thumbnail_url, best_answer_id, best_answer_selected_at')
       .in('status', ['publish', 'published'])
       .neq('user_id', 33)
+      .is('best_answer_id', null)
+      .is('best_answer_selected_at', null)
       .gte('created_at', oneMonthAgo.toISOString())
       .order('created_at', { ascending: false })
       .limit(100);
@@ -168,31 +155,25 @@ export default async function Home({ searchParams }: HomeProps) {
       data = allPosts.filter(p => !operatorIds.includes(p.user_id));
     }
 
-    console.log('未投票アンケ - 取得した投稿数:', data?.length);
-    console.log('未投票アンケ - 取得した投稿ID:', data?.map(p => p.id));
-    console.log('未投票アンケ - 除外するID:', excludedPostIds);
-
     // クライアント側で除外（投票済みの投稿を除外）
     if (data) {
       if (excludedPostIds.length > 0) {
         postsData = data.filter(post => !excludedPostIds.includes(post.id)).slice(0, 30);
-        console.log('未投票アンケ - フィルタ後の投稿数:', postsData.length);
-        console.log('未投票アンケ - フィルタ後の投稿ID:', postsData.map(p => p.id));
       } else {
         postsData = data.slice(0, 30);
-        console.log('未投票アンケ - 除外なし（投票履歴なし）、投稿数:', postsData.length);
       }
     } else {
       postsData = [];
-      console.log('未投票アンケ - データなし');
     }
   } else if (sortBy === 'top_post') {
-    // 最新アンケ順
+    // 最新の相談順（受付中のみ）
     const { data: allPosts } = await supabase
       .from('posts')
-      .select('id, title, created_at, user_id, og_image, thumbnail_url')
+      .select('id, title, content, created_at, user_id, og_image, thumbnail_url, best_answer_id, best_answer_selected_at')
       .in('status', ['publish', 'published'])
       .neq('user_id', 33)
+      .is('best_answer_id', null)
+      .is('best_answer_selected_at', null)
       .order('created_at', { ascending: false })
       .limit(100);
     
@@ -205,17 +186,19 @@ export default async function Home({ searchParams }: HomeProps) {
         .in('id', userIds);
       
       const operatorIds = usersData?.filter(u => u.status === 3).map(u => u.id) || [];
-      postsData = allPosts.filter(p => !operatorIds.includes(p.user_id)).slice(0, 20);
+      postsData = allPosts.filter(p => !operatorIds.includes(p.user_id)).slice(0, 10);
     } else {
       postsData = [];
     }
   } else {
-    // オススメ（デフォルト）
+    // オススメ（デフォルト）（受付中のみ）
     let query = supabase
       .from('posts')
-      .select('id, title, created_at, user_id, og_image, thumbnail_url')
+      .select('id, title, content, created_at, user_id, og_image, thumbnail_url, best_answer_id, best_answer_selected_at')
       .in('status', ['publish', 'published'])
-      .neq('user_id', 33);
+      .neq('user_id', 33)
+      .is('best_answer_id', null)
+      .is('best_answer_selected_at', null);
 
     if (searchQuery) {
       query = query.or(`title.ilike.%${searchQuery}%,content.ilike.%${searchQuery}%`);
@@ -234,10 +217,85 @@ export default async function Home({ searchParams }: HomeProps) {
         .in('id', userIds);
       
       const operatorIds = usersData?.filter(u => u.status === 3).map(u => u.id) || [];
-      postsData = allPosts.filter(p => !operatorIds.includes(p.user_id)).slice(0, 20);
+      postsData = allPosts.filter(p => !operatorIds.includes(p.user_id)).slice(0, 10);
     } else {
       postsData = [];
     }
+  }
+
+  // 注目の相談を取得（受付中の投稿を3件）
+  let featuredPosts: any[] = [];
+  const { data: openPosts } = await supabase
+    .from('posts')
+    .select('id, title, content, created_at, user_id, og_image, thumbnail_url, best_answer_id')
+    .in('status', ['publish', 'published'])
+    .neq('user_id', 33)
+    .is('best_answer_id', null)
+    .order('created_at', { ascending: false })
+    .limit(100);
+
+  if (openPosts && openPosts.length > 0) {
+    // 運営者の投稿を除外
+    const userIds = [...new Set(openPosts.map(p => p.user_id).filter(id => id !== null))];
+    const { data: usersData } = await supabase
+      .from('users')
+      .select('id, status')
+      .in('id', userIds);
+    
+    const operatorIds = usersData?.filter(u => u.status === 3).map(u => u.id) || [];
+    const filteredOpenPosts = openPosts.filter(p => !operatorIds.includes(p.user_id));
+
+    // 各投稿のいいね数を取得
+    const postIds = filteredOpenPosts.map(p => p.id);
+    const { data: likeCounts } = await supabase
+      .from('like_counts')
+      .select('target_id, like_count')
+      .eq('like_type', 'post')
+      .in('target_id', postIds);
+
+    // いいね数でソート（いいね数が同じ場合は最新順）
+    const postsWithLikes = filteredOpenPosts.map(post => {
+      const likeData = likeCounts?.find(lc => lc.target_id === post.id);
+      return {
+        ...post,
+        like_count: likeData?.like_count || 0
+      };
+    });
+
+    postsWithLikes.sort((a, b) => {
+      if (b.like_count !== a.like_count) {
+        return b.like_count - a.like_count;
+      }
+      return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
+    });
+
+    // トップ3を取得
+    const top3Posts = postsWithLikes.slice(0, 3);
+    
+    // ユーザー情報を取得
+    const top3UserIds = [...new Set(top3Posts.map(p => p.user_id).filter(id => id !== null))];
+    const { data: top3UsersData } = await supabase
+      .from('users')
+      .select('id, name, avatar_style, avatar_seed, use_custom_image, user_img_url')
+      .in('id', top3UserIds);
+
+    // ユーザー情報をマージ
+    featuredPosts = top3Posts.map(post => {
+      const userData = top3UsersData?.find(u => u.id === post.user_id);
+      let avatarUrl: string;
+      if (userData?.use_custom_image && userData?.user_img_url) {
+        avatarUrl = userData.user_img_url;
+      } else {
+        const seed = userData?.avatar_seed || String(post.user_id) || 'guest';
+        const style = userData?.avatar_style || 'big-smile';
+        avatarUrl = `https://api.dicebear.com/9.x/${style}/svg?seed=${encodeURIComponent(seed)}&size=20`;
+      }
+      return {
+        ...post,
+        user_name: userData?.name || null,
+        avatar_url: avatarUrl
+      };
+    });
   }
 
   // ユーザー情報を別途取得して結合
@@ -247,13 +305,81 @@ export default async function Home({ searchParams }: HomeProps) {
     
     const { data: usersData } = await supabase
       .from('users')
-      .select('id, name')
+      .select('id, name, avatar_style, avatar_seed, use_custom_image, user_img_url')
       .in('id', userIds);
 
-    posts = postsData.map(post => ({
-      ...post,
-      user_name: usersData?.find(u => u.id === post.user_id)?.name || null
-    }));
+    posts = postsData.map(post => {
+      const user = usersData?.find(u => u.id === post.user_id);
+      let avatarUrl: string;
+      if (user?.use_custom_image && user?.user_img_url) {
+        avatarUrl = user.user_img_url;
+      } else {
+        const seed = user?.avatar_seed || String(post.user_id) || 'guest';
+        const style = user?.avatar_style || 'big-smile';
+        avatarUrl = `https://api.dicebear.com/9.x/${style}/svg?seed=${encodeURIComponent(seed)}&size=20`;
+      }
+      return {
+        ...post,
+        user_name: user?.name || null,
+        avatar_url: avatarUrl
+      };
+    });
+  }
+
+  // 最新の解決済みを取得（直近3件）
+  // postsテーブルのbest_answer_idを使用
+  const { data: postsWithBestAnswer, error: bestAnswerError } = await supabase
+    .from('posts')
+    .select('id, title, best_answer_id')
+    .not('best_answer_id', 'is', null)
+    .in('status', ['publish', 'published'])
+    .order('created_at', { ascending: false })
+    .limit(3);
+
+  let bestAnswersWithUsers: { id: number; content: string; created_at: string; post_id: number; post_title: string; user_name: string; user_id: string | null; avatar_url: string }[] = [];
+  if (postsWithBestAnswer && postsWithBestAnswer.length > 0) {
+    const bestAnswerIds = postsWithBestAnswer.map(p => p.best_answer_id).filter(id => id !== null);
+    
+    // ベストアンサーのコメントを取得
+    const { data: bestComments } = await supabase
+      .from('comments')
+      .select('id, content, created_at, post_id, user_id')
+      .in('id', bestAnswerIds)
+      .eq('status', 'approved');
+
+    if (bestComments && bestComments.length > 0) {
+      const baUserIds = [...new Set(bestComments.map(c => c.user_id).filter(id => id !== null))];
+      const { data: baUsersData } = await supabase
+        .from('users')
+        .select('id, name, avatar_style, avatar_seed, use_custom_image, user_img_url')
+        .in('id', baUserIds);
+
+      bestAnswersWithUsers = bestComments.map(comment => {
+        const post = postsWithBestAnswer.find(p => p.best_answer_id === comment.id);
+        const user = baUsersData?.find(u => u.id === comment.user_id);
+        
+        // アバターURLを生成
+        let avatarUrl: string;
+        if (user?.use_custom_image && user?.user_img_url) {
+          avatarUrl = user.user_img_url;
+        } else {
+          const seed = user?.avatar_seed || String(comment.user_id) || 'guest';
+          const style = user?.avatar_style || 'big-smile';
+          avatarUrl = `https://api.dicebear.com/9.x/${style}/svg?seed=${encodeURIComponent(seed)}&size=24`;
+        }
+        
+        return {
+          id: comment.id,
+          content: comment.content,
+          created_at: comment.created_at,
+          post_id: comment.post_id,
+          post_title: post?.title || '',
+          user_name: user?.name || 'ゲスト',
+          user_id: comment.user_id,
+          avatar_url: avatarUrl
+        };
+      });
+    }
   }
 
   return (
@@ -284,7 +410,7 @@ export default async function Home({ searchParams }: HomeProps) {
               {searchQuery && (
                 <div className="my-2.5">
                   <div className="mx-2.5 my-5 font-bold" style={{ color: '#ff6b35' }}>
-                    「{searchQuery}」が含まれるアンケート {posts?.length || 0}件
+                    「{searchQuery}」が含まれる相談 {posts?.length || 0}件
                   </div>
                   {posts && posts.length > 0 && (
                     <ul className="m-0 list-none">
@@ -304,31 +430,40 @@ export default async function Home({ searchParams }: HomeProps) {
             {/* 検索時は以下を非表示 */}
             {!searchQuery && (
               <>
-            {/* みんなのアンケート（オススメ時のみ表示） */}
-            {sortBy === 'recommend' && (
+            {/* みんなのアンケート（最新の相談順時のみ表示） */}
+            {(sortBy === 'recommend' || sortBy === 'top_post') && featuredPosts.length > 0 && (
               <>
-                <h3 className="m-1.5 mb-2 px-0 font-bold text-base" style={{ color: '#ff6b35' }}>みんなのアンケート</h3>
+                <h3 className="m-1.5 mb-2 px-0 font-bold text-base" style={{ color: '#ff6b35' }}>注目の相談</h3>
                 <div className="mx-1.5 mb-4">
-                  {posts && posts.length > 0 && (() => {
-                    const imageUrl = (posts[0] as any).og_image || (posts[0] as any).thumbnail_url;
+                  {(() => {
+                    const post = featuredPosts[0];
+                    const rawContent = (post as any).content || '';
+                    const fullContent = stripHtmlTags(rawContent);
+                    const halfLength = Math.floor(fullContent.length / 2);
+                    const contentPreview = fullContent.length > 0 
+                      ? fullContent.substring(0, Math.min(halfLength, 100)) + (fullContent.length > Math.min(halfLength, 100) ? '...' : '')
+                      : '';
                     return (
-                      <Link href={`/posts/${posts[0].id}`} className="flex gap-3 bg-white hover:shadow-md p-3 border border-gray-300 rounded-md transition-all hover:-translate-y-1">
-                        <div className="flex-shrink-0 rounded w-24 h-24 overflow-hidden">
-                          <PostImage
-                            src={imageUrl}
-                            alt={posts[0].title}
-                            className="w-full h-full object-cover"
-                            loading="lazy"
+                      <Link 
+                        href={`/posts/${post.id}`} 
+                        className="block bg-white p-3 border border-gray-300 rounded-md hover:shadow-md transition-shadow"
+                      >
+                        <h3 className="mb-2 font-extrabold text-gray-900 text-lg line-clamp-2">
+                          {post.title}
+                        </h3>
+                        {contentPreview && (
+                          <p className="mt-1 text-gray-600 text-sm">
+                            {contentPreview}
+                          </p>
+                        )}
+                        <div className="mt-2 text-gray-500 text-xs">
+                          <img 
+                            src={(post as any).avatar_url || 'https://api.dicebear.com/9.x/big-smile/svg?seed=guest&size=20'} 
+                            alt="相談者"
+                            className="w-4 h-4 rounded-full border border-gray-200 inline-block mr-1"
                           />
-                        </div>
-                        <div className="flex-1 min-w-0">
-                          <h3 className="mb-2 font-medium text-gray-900 text-base line-clamp-2">
-                            {posts[0].title}
-                          </h3>
-                          <div className="text-gray-500 text-xs">
-                            <span>投稿者: {(posts[0] as any).user_name || 'ゲスト'}</span>
-                            <span className="ml-2">{new Date(posts[0].created_at).toLocaleDateString('ja-JP')}</span>
-                          </div>
+                          <span>{(post as any).user_name || 'ゲスト'}さんからの相談</span>
+                          <span className="ml-2">{new Date(post.created_at).toLocaleDateString('ja-JP')}</span>
                         </div>
                       </Link>
                     );
@@ -337,28 +472,32 @@ export default async function Home({ searchParams }: HomeProps) {
               </>
             )}
 
-            {/* 最新2列（オススメ時のみ表示） */}
-            {sortBy === 'recommend' && (
+            {/* 最新2列（最新の相談順時のみ表示） */}
+            {(sortBy === 'recommend' || sortBy === 'top_post') && featuredPosts.length > 1 && (
               <div className="gap-2 grid grid-cols-2 mx-1.5 mb-4 w-auto">
-                {posts && posts.slice(1, 3).map((post) => {
-                  const imageUrl = (post as any).og_image || (post as any).thumbnail_url;
+                {featuredPosts.slice(1, 3).map((post) => {
+                  const rawContent = (post as any).content || '';
+                  const cleanContent = stripHtmlTags(rawContent);
+                  const contentPreview = cleanContent.length > 0
+                    ? cleanContent.substring(0, 50) + (cleanContent.length > 50 ? '...' : '')
+                    : '';
                   return (
-                    <Link key={post.id} href={`/posts/${post.id}`} className="flex flex-col bg-white hover:shadow-md border border-gray-300 rounded-md transition-all h-full">
-                      <div className="rounded-t-md w-full h-32 overflow-hidden">
-                        <PostImage
-                          src={imageUrl}
-                          alt={post.title}
-                          className="w-full h-full object-cover"
-                          loading="lazy"
-                        />
+                    <Link key={post.id} href={`/posts/${post.id}`} className="flex flex-col bg-white hover:shadow-md border border-gray-300 rounded-md transition-all h-full p-2">
+                      <div className="font-bold text-gray-900 text-sm line-clamp-2 leading-tight">
+                        {post.title}
                       </div>
-                      <div className="flex-1 p-2">
-                        <div className="font-normal text-gray-900 text-sm line-clamp-2 leading-tight">
-                          {post.title}
-                        </div>
-                        <div className="mt-1 font-normal text-[10px] text-gray-400">
-                          <span>{(post as any).user_name || 'ゲスト'}さん</span>
-                        </div>
+                      {contentPreview && (
+                        <p className="mt-1 text-gray-500 text-xs line-clamp-2">
+                          {contentPreview}
+                        </p>
+                      )}
+                      <div className="mt-1 font-normal text-[10px] text-gray-400">
+                        <img 
+                          src={(post as any).avatar_url || 'https://api.dicebear.com/9.x/big-smile/svg?seed=guest&size=20'} 
+                          alt="相談者"
+                          className="w-4 h-4 rounded-full border border-gray-200 inline-block mr-1"
+                        />
+                        <span>{(post as any).user_name || 'ゲスト'}さん</span>
                       </div>
                     </Link>
                   );
@@ -369,69 +508,89 @@ export default async function Home({ searchParams }: HomeProps) {
             {/* ニュース・話題 */}
             <NewsSection />
 
-            {/* 興味あるカテゴリ */}
+            {/* カテゴリ */}
             {session && <InterestCategoriesSection userId={userId} />}
+
+            {/* 最新の解決済み */}
+            {bestAnswersWithUsers.length > 0 && (
+              <>
+                <h3 className="m-1.5 mb-2 px-0 font-bold text-base" style={{ color: '#ff6b35' }}>
+                  <i className="fas fa-trophy mr-1"></i>最新の解決済み
+                </h3>
+                <div className="mx-1.5 mb-4 space-y-2">
+                  {bestAnswersWithUsers.map((answer) => {
+                    const contentPreview = stripHtmlTags(answer.content).substring(0, 80);
+                    return (
+                      <Link 
+                        key={answer.id} 
+                        href={`/posts/${answer.post_id}`}
+                        className="block bg-white hover:shadow-md p-3 border border-gray-300 rounded-md transition-all"
+                      >
+                        <div className="flex items-center gap-1.5 text-xs text-gray-500 mb-1">
+                          <Image 
+                            src={answer.avatar_url} 
+                            alt={answer.user_name}
+                            width={20}
+                            height={20}
+                            unoptimized
+                            className="w-5 h-5 rounded-full border border-gray-200"
+                          />
+                          <span className="font-medium text-gray-700">{answer.user_name}さんのベストアンサー</span>
+                        </div>
+                        <p className="text-gray-800 text-sm line-clamp-2">
+                          {contentPreview}...
+                        </p>
+                        <div className="mt-2 text-gray-500 text-xs">
+                          相談: {answer.post_title.substring(0, 40)}{answer.post_title.length > 40 ? '...' : ''}
+                        </div>
+                      </Link>
+                    );
+                  })}
+                </div>
+              </>
+            )}
+
+            {/* 相談受付中見出し */}
+            <h3 className="m-1.5 mb-2 px-0 font-bold text-base" style={{ color: '#ff6b35' }}>
+              <i className="fas fa-comments mr-1"></i>相談受付中
+            </h3>
 
             {/* タブメニュー */}
             <div className="px-1 py-0">
               <ul className="flex justify-center m-0 p-0 w-full list-none">
                 <li className="m-0 mx-1.5 my-1.5 w-auto text-xs">
-                  <Link href="/" className={`block w-full h-full underline ${sortBy === 'recommend' ? 'font-bold text-gray-900' : 'text-gray-600'}`}>オススメ</Link>
+                  <Link href="/" className={`block w-full h-full underline ${sortBy === 'top_post' || sortBy === 'recommend' ? 'font-bold text-gray-900' : 'text-gray-600'}`}>最新の相談順</Link>
                 </li>
                 <li className="m-0 mx-1.5 my-1.5 w-auto text-xs">
-                  <Link href="/?sort=notvoted" className={`block w-full h-full underline ${sortBy === 'notvoted' ? 'font-bold text-gray-900' : 'text-gray-600'}`}>未投票アンケ</Link>
-                </li>
-                <li className="m-0 mx-1.5 my-1.5 w-auto text-xs">
-                  <Link href="/?sort=top_post" className={`block w-full h-full underline ${sortBy === 'top_post' ? 'font-bold text-gray-900' : 'text-gray-600'}`}>最新アンケ順</Link>
-                </li>
-                <li className="m-0 mx-1.5 my-1.5 w-auto text-xs">
-                  <Link href="/?sort=comment" className={`block w-full h-full underline ${sortBy === 'comment' ? 'font-bold text-gray-900' : 'text-gray-600'}`}>コメント順</Link>
-                </li>
-                <li className="m-0 mx-1.5 my-1.5 w-auto text-xs">
-                  <Link href="/?sort=statistics" className={`block w-full h-full underline ${sortBy === 'statistics' ? 'font-bold text-gray-900' : 'text-gray-600'}`}>殿堂入り</Link>
+                  <Link href="/?sort=comment" className={`block w-full h-full underline ${sortBy === 'comment' ? 'font-bold text-gray-900' : 'text-gray-600'}`}>最新回答順</Link>
                 </li>
               </ul>
             </div>
 
-            {/* 殿堂入りヘッダー */}
-            {sortBy === 'statistics' && hallOfFamePosts.length > 0 && (
+            {/* 殿堂入りヘッダー（未使用） */}
+            {false && sortBy === 'statistics' && hallOfFamePosts.length > 0 && (
               <div className="mb-4">
                 <div className="my-4 px-2 font-bold text-xl">
                   <i className="text-yellow-500 fas fa-crown"></i>殿堂入り
                 </div>
                 <div className="mx-1.5 mb-2 text-gray-600 text-xs">
-                  50票以上獲得したら殿堂入りアンケートに認定！アンケで世の中を知りましょう！
+                  50票以上獲得したら殿堂入り相談に認定！ハナシテで悩みを解決しましょう！
                 </div>
               </div>
             )}
 
-            {/* 投稿一覧 */}
-            <div className="space-y-2 p-2">
-              {posts?.map((post) => {
-                const imageUrl = (post as any).og_image || (post as any).thumbnail_url;
-                return (
-                  <Link key={post.id} href={`/posts/${post.id}`} className="flex gap-3 bg-white hover:shadow-md p-3 border border-gray-300 rounded-md transition-all hover:-translate-y-1">
-                    <div className="flex-1 min-w-0">
-                      <h3 className="font-normal text-gray-900 text-base md:text-lg leading-relaxed">
-                        {post.title}
-                      </h3>
-                      <div className="mt-2 text-gray-500 text-xs">
-                        <span>投稿者: {(post as any).user_name || 'ゲスト'}</span>
-                        <span className="ml-2">{new Date(post.created_at).toLocaleDateString('ja-JP')}</span>
-                      </div>
-                    </div>
-                    <div className="flex-shrink-0 rounded w-20 h-20 overflow-hidden">
-                      <PostImage
-                        src={imageUrl}
-                        alt={post.title}
-                        className="w-full h-full object-cover"
-                        loading="lazy"
-                      />
-                    </div>
-                  </Link>
-                );
-              })}
-            </div>
+            {/* 投稿一覧 - 無限スクロール */}
+            <InfinitePostList 
+              initialPosts={posts?.map(post => ({
+                id: post.id,
+                title: post.title,
+                content: (post as any).content || '',
+                created_at: post.created_at,
+                user_name: (post as any).user_name || null,
+                avatar_url: (post as any).avatar_url || 'https://api.dicebear.com/9.x/big-smile/svg?seed=guest&size=20'
+              })) || []}
+              sortBy={sortBy}
+            />
               </>
             )}
           </section>
@@ -439,7 +598,7 @@ export default async function Home({ searchParams }: HomeProps) {
           {/* スマホビュー: 最新のコメント */}
           <section className="md:hidden mt-6 px-2">
             <h3 className="mb-2 px-2 font-bold text-base" style={{ color: '#ff6b35' }}>
-              最新コメント <i className="fas fa-comment"></i>
+              最新の回答<i className="fas fa-comment"></i>
             </h3>
             <LatestCommentsMobile />
           </section>
@@ -536,11 +695,11 @@ async function NewsSection() {
                   {post.title}
                 </h3>
                 <div className="mt-2 text-gray-500 text-xs">
-                  <span>投稿者: {userName}</span>
+                  <span>{userName}さんからの相談</span>
                   <span className="ml-2">{new Date(post.created_at).toLocaleDateString('ja-JP')}</span>
                 </div>
               </div>
-              <div className="flex-shrink-0 rounded w-20 h-20 overflow-hidden">
+              <div className="shrink-0 rounded w-20 h-20 overflow-hidden">
                 <PostImage
                   src={imageUrl}
                   alt={post.title}
@@ -556,11 +715,11 @@ async function NewsSection() {
   );
 }
 
-// 興味あるカテゴリセクション
+// カテゴリセクション
 async function InterestCategoriesSection({ userId }: { userId: string | number | null }) {
   if (!userId) return null;
 
-  // ユーザーの興味あるカテゴリを取得
+  // ユーザーのカテゴリを取得
   const { data: userData } = await supabase
     .from('users')
     .select('interest_categories')
@@ -608,7 +767,7 @@ async function InterestCategoriesSection({ userId }: { userId: string | number |
   return (
     <div className="mb-4">
       <h3 className="m-1.5 mb-2 px-0 font-bold text-base" style={{ color: '#ff6b35' }}>
-        興味あるカテゴリ
+        カテゴリ
         <Link href="/profileset/" className="ml-2 text-sm">
           追加 <i className="fas fa-plus-square"></i>
         </Link>
@@ -624,11 +783,11 @@ async function InterestCategoriesSection({ userId }: { userId: string | number |
                   {post.title}
                 </h3>
                 <div className="mt-2 text-gray-500 text-xs">
-                  <span>投稿者: {userName}</span>
+                  <span>{userName}さんからの相談</span>
                   <span className="ml-2">{new Date(post.created_at).toLocaleDateString('ja-JP')}</span>
                 </div>
               </div>
-              <div className="flex-shrink-0 rounded w-20 h-20 overflow-hidden">
+              <div className="shrink-0 rounded w-20 h-20 overflow-hidden">
                 <img 
                   src={imageUrl}
                   alt={post.title}

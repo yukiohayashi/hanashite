@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { useSession } from 'next-auth/react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -33,10 +33,21 @@ export default function PostCreateForm() {
   const [submitting, setSubmitting] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
   const [categories, setCategories] = useState<Category[]>([]);
+  const [showOptions, setShowOptions] = useState(false);
   const { data: session } = useSession();
   const router = useRouter();
   const searchParams = useSearchParams();
   const workid = searchParams.get('workid');
+
+  // 締切日時の最小値と最大値を計算（1週間以内）
+  const { minDate, maxDate } = useMemo(() => {
+    const today = new Date();
+    const oneWeekLater = new Date(today.getTime() + 7 * 24 * 60 * 60 * 1000);
+    return {
+      minDate: today.toISOString().split('T')[0],
+      maxDate: oneWeekLater.toISOString().split('T')[0]
+    };
+  }, []);
 
   const [formData, setFormData] = useState({
     title: '',
@@ -46,7 +57,7 @@ export default function PostCreateForm() {
     random: false,
     imageUrl: '',
     closeDate: '',
-    closeTime: ''
+    closeTime: '00:00'
   });
 
   const [imageFile, setImageFile] = useState<File | null>(null);
@@ -108,7 +119,7 @@ export default function PostCreateForm() {
           random: data.random || false,
           imageUrl: data.imageUrl || '',
           closeDate: data.closeDate || '',
-          closeTime: data.closeTime || ''
+          closeTime: '00:00'
         });
         
         if (data.choices && Array.isArray(data.choices)) {
@@ -221,19 +232,20 @@ export default function PostCreateForm() {
       return;
     }
 
-    const validChoices = choices.filter(c => c.value.trim() !== '');
-    if (validChoices.length < 2) {
-      setErrorMessage('選択肢を2つ以上入力してください');
+    if (!formData.closeDate || !formData.closeTime) {
+      setErrorMessage('締切日時を入力してください');
       setSubmitting(false);
       return;
     }
+
+    // 相談フォームでは選択肢は不要
 
     // セッションストレージに保存して確認画面へ遷移
     const ankeData = {
       userId: session?.user?.id,
       userName: session?.user?.name,
       ...formData,
-      choices: validChoices.map(c => c.value),
+      choices: [], // 相談フォームでは選択肢なし
       imagePreview: imagePreview, // 画像プレビューを保存
       workid: workid ? parseInt(workid) : undefined // workidを追加
     };
@@ -267,13 +279,13 @@ export default function PostCreateForm() {
             <div className="space-y-4">
             <div className="space-y-2">
               <Label htmlFor="title">
-                アンケート内容 <span className="text-red-600">*</span>
+                相談タイトル <span className="text-red-600">*</span>
               </Label>
               <Input
                 id="title"
                 value={formData.title}
                 onChange={(e) => setFormData({ ...formData, title: e.target.value })}
-                placeholder="タイトルを入力（35文字以内）"
+                placeholder="相談のタイトルを入力（35文字以内）"
                 maxLength={35}
                 required
                 className="border-gray-300"
@@ -282,16 +294,17 @@ export default function PostCreateForm() {
 
             <div className="space-y-2">
               <Label htmlFor="content">
-                補足内容 <span className="text-red-600">*</span>
+                相談内容 <span className="text-red-600">*</span>
               </Label>
               <Textarea
                 id="content"
                 value={formData.content}
                 onChange={(e) => setFormData({ ...formData, content: e.target.value })}
-                placeholder="補足内容を入力"
-                rows={6}
+                placeholder="相談内容を詳しく入力してください"
+                rows={30}
                 required
-                className="border-gray-300"
+                className="border-gray-300 !field-sizing-auto"
+                style={{ minHeight: '400px', height: 'auto' }}
               />
             </div>
 
@@ -314,95 +327,18 @@ export default function PostCreateForm() {
                 </SelectContent>
               </Select>
             </div>
-            </div>
-
-            {/* 区切り線 */}
-            <div className="border-t border-gray-300"></div>
-
-            {/* 選択肢 */}
-            <div className="space-y-4">
-              <h3 className="font-bold text-lg">選択肢</h3>
-              <p className="text-gray-600 text-sm">※「どちらでもない」などの曖昧な選択肢は避けて、明確な回答をお選びください</p>
-            <div className="flex flex-wrap gap-2">
-              <Button type="button" onClick={() => autoFillChoices('prefecture')} variant="outline" size="sm">
-                47都道府県
-              </Button>
-              <Button type="button" onClick={() => autoFillChoices('percent')} variant="outline" size="sm">
-                0～100％
-              </Button>
-              <Button type="button" onClick={() => autoFillChoices('frequency')} variant="outline" size="sm">
-                頻度
-              </Button>
-              <Button type="button" onClick={() => autoFillChoices('rating')} variant="outline" size="sm">
-                5段階評価
-              </Button>
-              <Button type="button" onClick={() => autoFillChoices('weekday')} variant="outline" size="sm">
-                曜日
-              </Button>
-              <Button type="button" onClick={() => autoFillChoices('agree')} variant="outline" size="sm">
-                賛成/反対
-              </Button>
-            </div>
 
             <div className="space-y-2">
-              {choices.map((choice, index) => (
-                <Input
-                  key={choice.id}
-                  value={choice.value}
-                  onChange={(e) => updateChoice(choice.id, e.target.value)}
-                  placeholder={`選択肢${index + 1}`}
-                  className="border-gray-300"
-                />
-              ))}
-            </div>
-
-            <div className="flex justify-center gap-2">
-              <Button type="button" onClick={addChoice} variant="secondary" className="border-gray-300">
-                ＋ 追加
-              </Button>
-              <Button type="button" onClick={removeChoice} variant="secondary" disabled={choices.length <= 2} className="border-gray-300">
-                － 削除
-              </Button>
-              <Button type="button" onClick={clearAllChoices} variant="secondary" className="border-gray-300">
-                すべて消去
-              </Button>
-            </div>
-
-            <div className="space-y-2 p-4 bg-gray-50 rounded-lg">
-              <Label htmlFor="bulkInput">一括入力（1行に1つの選択肢）</Label>
-              <Textarea
-                id="bulkInput"
-                value={bulkInput}
-                onChange={(e) => setBulkInput(e.target.value)}
-                placeholder="例：思う 思わない どちらとも言えない"
-                rows={3}
+              <Label>締切日時（1週間以内を選択） <span className="text-red-600">*</span></Label>
+              <Input
+                type="date"
+                value={formData.closeDate}
+                onChange={(e) => setFormData({ ...formData, closeDate: e.target.value })}
+                min={minDate}
+                max={maxDate}
+                required
                 className="border-gray-300"
               />
-              <Button type="button" onClick={applyBulkChoices} variant="secondary" size="sm">
-                一括適用
-              </Button>
-              <p className="text-gray-600 text-xs">※既存の選択肢は削除され、入力した内容で置き換わります</p>
-            </div>
-
-            <div className="flex gap-4">
-              <div className="flex items-center space-x-2">
-                <Checkbox
-                  id="multi"
-                  checked={formData.multi}
-                  onCheckedChange={(checked) => setFormData({ ...formData, multi: checked as boolean })}
-                  className="border-gray-300"
-                />
-                <Label htmlFor="multi" className="cursor-pointer">複数選択</Label>
-              </div>
-              <div className="flex items-center space-x-2">
-                <Checkbox
-                  id="random"
-                  checked={formData.random}
-                  onCheckedChange={(checked) => setFormData({ ...formData, random: checked as boolean })}
-                  className="border-gray-300"
-                />
-                <Label htmlFor="random" className="cursor-pointer">ランダム表示</Label>
-              </div>
             </div>
             </div>
 
@@ -411,63 +347,45 @@ export default function PostCreateForm() {
 
             {/* オプション */}
             <div className="space-y-4">
-              <h3 className="font-bold text-lg">オプション</h3>
-            <div className="space-y-2">
-              <Label htmlFor="file_photo">
-                画像をアップロード <i className="far fa-image"></i>
-              </Label>
-              <Input
-                id="file_photo"
-                type="file"
-                accept="image/*"
-                onChange={handleImageChange}
-                className="cursor-pointer border-gray-300"
-              />
-              {imagePreview && (
-                <div className="relative mt-2">
-                  <img src={imagePreview} alt="プレビュー" className="max-w-full h-auto max-h-64 rounded-lg" />
-                  <Button
-                    type="button"
-                    onClick={handleImageRemove}
-                    variant="destructive"
-                    size="sm"
-                    className="absolute top-2 right-2"
-                  >
-                    削除
-                  </Button>
-                </div>
+              <button
+                type="button"
+                onClick={() => setShowOptions(!showOptions)}
+                className="flex items-center gap-2 font-bold text-lg text-gray-700 hover:text-gray-900"
+              >
+                <span>{showOptions ? '▼' : '▶'}</span>
+                <span>オプション（画像アップロード）</span>
+              </button>
+              
+              {showOptions && (
+                <>
+                  <div className="space-y-2">
+                    <Label htmlFor="file_photo">
+                      画像をアップロード <i className="far fa-image"></i>
+                    </Label>
+                    <Input
+                      id="file_photo"
+                      type="file"
+                      accept="image/*"
+                      onChange={handleImageChange}
+                      className="cursor-pointer border-gray-300"
+                    />
+                    {imagePreview && (
+                      <div className="relative mt-2">
+                        <img src={imagePreview} alt="プレビュー" className="max-w-full h-auto max-h-64 rounded-lg" />
+                        <Button
+                          type="button"
+                          onClick={handleImageRemove}
+                          variant="destructive"
+                          size="sm"
+                          className="absolute top-2 right-2"
+                        >
+                          削除
+                        </Button>
+                      </div>
+                    )}
+                  </div>
+                </>
               )}
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="imageUrl">画像URL（任意）</Label>
-              <Input
-                id="imageUrl"
-                type="url"
-                value={formData.imageUrl}
-                onChange={(e) => setFormData({ ...formData, imageUrl: e.target.value })}
-                placeholder="画像の代わりに関連するニュースや動画等があればURLを貼ってください"
-                className="border-gray-300"
-              />
-            </div>
-
-            <div className="space-y-2">
-              <Label>締め切り（任意）</Label>
-              <div className="flex gap-2">
-                <Input
-                  type="date"
-                  value={formData.closeDate}
-                  onChange={(e) => setFormData({ ...formData, closeDate: e.target.value })}
-                  className="border-gray-300"
-                />
-                <Input
-                  type="time"
-                  value={formData.closeTime}
-                  onChange={(e) => setFormData({ ...formData, closeTime: e.target.value })}
-                  className="border-gray-300"
-                />
-              </div>
-            </div>
             </div>
           </div>
         </div>

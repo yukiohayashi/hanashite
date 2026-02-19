@@ -6,6 +6,7 @@ import bcrypt from "bcryptjs"
 import { supabaseAdmin } from "@/lib/supabase"
 
 export const { handlers, auth, signIn, signOut } = NextAuth({
+  secret: process.env.AUTH_SECRET,
   trustHost: true,
   session: {
     strategy: "jwt",
@@ -37,7 +38,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
         // Supabaseからユーザーを取得
         const { data: user, error } = await supabaseAdmin
           .from('users')
-          .select('id, email, name, user_pass, user_nicename, user_img_url, status')
+          .select('id, email, name, user_pass, user_img_url, status')
           .eq('email', credentials.email as string)
           .single()
 
@@ -70,7 +71,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
           return {
             id: String(user.id),
             email: user.email,
-            name: user.user_nicename || user.name || 'ゲスト',
+            name: user.name || 'ゲスト',
             image: user.user_img_url || null,
             status: user.status,
           }
@@ -99,7 +100,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
         return {
           id: String(user.id),
           email: user.email,
-          name: user.user_nicename || user.name || 'ゲスト',
+          name: user.name || 'ゲスト',
           image: user.user_img_url || null,
           status: user.status,
         }

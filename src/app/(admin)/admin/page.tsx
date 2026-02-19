@@ -111,7 +111,7 @@ export default async function AdminDashboard() {
                     {post.title}
                   </p>
                   <p className="text-sm text-gray-500">
-                    投稿者: {(post.users as any)?.[0]?.nickname || (post.users as any)?.nickname || 'ゲスト'} • {' '}
+                    相談者:{(post.users as any)?.[0]?.nickname || (post.users as any)?.nickname || 'ゲスト'} • {' '}
                     {new Date(post.created_at).toLocaleDateString('ja-JP')}
                   </p>
                 </div>

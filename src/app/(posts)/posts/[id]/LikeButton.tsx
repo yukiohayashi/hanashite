@@ -68,14 +68,19 @@ export default function LikeButton({ postId }: LikeButtonProps) {
         setIsLiked(false);
       } else {
         // いいねを追加
-        await supabase
+        const { error: insertError } = await supabase
           .from('likes')
           .insert({
-            user_id: userId,
+            user_id: String(userId),
             target_id: postId,
             like_type: 'post',
             created_at: new Date().toISOString()
           });
+        
+        if (insertError) {
+          console.error('Like insert error:', insertError);
+          throw insertError;
+        }
 
         setLikeCount(prev => prev + 1);
         setIsLiked(true);

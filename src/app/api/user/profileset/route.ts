@@ -1,0 +1,173 @@
+import { NextResponse } from 'next/server';
+import { auth } from '@/lib/auth';
+import { supabase } from '@/lib/supabase';
+
+export async function POST(request: Request) {
+  try {
+    const session = await auth();
+    
+    if (!session?.user?.id) {
+      return NextResponse.json(
+        { success: false, error: 'ログインが必要です' },
+        { status: 401 }
+      );
+    }
+
+    const formData = await request.formData();
+    
+    const nickname = formData.get('nickname') as string;
+    const profile = formData.get('profile') as string;
+    const profileSlug = formData.get('profileSlug') as string;
+    const snsX = formData.get('snsX') as string;
+    const participatePoints = formData.get('participatePoints') === '1';
+    const sex = formData.get('sex') as string;
+    const birthYear = formData.get('birthYear') as string;
+    const prefecture = formData.get('prefecture') as string;
+    const marriage = formData.get('marriage') as string;
+    const childCount = parseInt(formData.get('childCount') as string) || 0;
+    const job = formData.get('job') as string;
+    const kanaSei = formData.get('kanaSei') as string;
+    const kanaMei = formData.get('kanaMei') as string;
+    const sei = formData.get('sei') as string;
+    const mei = formData.get('mei') as string;
+    const emailSubscription = formData.get('emailSubscription') === '1';
+    const interestCategories = formData.get('interestCategories') as string;
+    const avatarFile = formData.get('avatar') as File | null;
+    
+    // DiceBearアバター関連
+    const imageMode = formData.get('imageMode') as string;
+    const avatarStyle = formData.get('avatarStyle') as string;
+    const avatarSeed = formData.get('avatarSeed') as string;
+    const useCustomImage = formData.get('useCustomImage') === '1';
+
+    if (!nickname?.trim()) {
+      return NextResponse.json(
+        { success: false, error: 'ニックネームを入力してください' },
+        { status: 400 }
+      );
+    }
+
+    if (!job) {
+      return NextResponse.json(
+        { success: false, error: '職種を選択してください' },
+        { status: 400 }
+      );
+    }
+
+    // アバター画像のアップロード処理
+    let avatarUrl = null;
+    console.log('Avatar file:', avatarFile ? {
+      name: avatarFile.name,
+      size: avatarFile.size,
+      type: avatarFile.type
+    } : 'No file');
+    
+    if (avatarFile && avatarFile.size > 0) {
+      try {
+        const maxSize = 2 * 1024 * 1024; // 2MB
+        if (avatarFile.size > maxSize) {
+          return NextResponse.json(
+            { success: false, error: 'ファイルサイズが2MBを超えています。' },
+            { status: 400 }
+          );
+        }
+
+        // ファイルをSupabase Storageにアップロード
+        const fileExt = avatarFile.name.split('.').pop();
+        const fileName = `${session.user.id}-${Date.now()}.${fileExt}`;
+        const filePath = `avatars/${fileName}`;
+
+        const arrayBuffer = await avatarFile.arrayBuffer();
+        const buffer = Buffer.from(arrayBuffer);
+
+        console.log('Uploading to Supabase Storage:', filePath);
+
+        const { data: uploadData, error: uploadError } = await supabase.storage
+          .from('user-avatars')
+          .upload(filePath, buffer, {
+            contentType: avatarFile.type,
+            upsert: true
+          });
+
+        if (uploadError) {
+          console.error('Avatar upload error:', uploadError);
+          // エラーでも続行（画像なしで保存）
+        } else {
+          console.log('Upload successful:', uploadData);
+          const { data: { publicUrl } } = supabase.storage
+            .from('user-avatars')
+            .getPublicUrl(filePath);
+          avatarUrl = publicUrl;
+          console.log('Public URL:', avatarUrl);
+        }
+      } catch (uploadErr) {
+        console.error('Upload exception:', uploadErr);
+        // エラーでも続行
+      }
+    }
+
+    // ユーザー情報を更新
+    const updateData: any = {
+      name: nickname.trim(),
+      user_description: profile.trim(),
+      participate_points: participatePoints ? 1 : 0,
+      sex: sex || null,
+      birth_year: birthYear || null,
+      prefecture: prefecture || null,
+      sns_x: snsX || null,
+      marriage: marriage || null,
+      child_count: childCount,
+      job: job || null,
+      kana_sei: kanaSei || null,
+      kana_mei: kanaMei || null,
+      sei: sei || null,
+      mei: mei || null,
+      email_subscription: emailSubscription ? 1 : 0,
+      interest_categories: interestCategories || null,
+      profile_registered: 1,
+      updated_at: new Date().toISOString(),
+      // DiceBearアバター関連
+      avatar_style: avatarStyle || 'fun-emoji',
+      avatar_seed: avatarSeed || null,
+      use_custom_image: useCustomImage ? 1 : 0
+    };
+
+    if (avatarUrl) {
+      updateData.user_img_url = avatarUrl;
+    }
+
+    console.log('Updating user:', session.user.id);
+    console.log('Image mode:', imageMode);
+    console.log('Use custom image:', useCustomImage);
+    console.log('Avatar URL:', avatarUrl);
+    console.log('Update data:', JSON.stringify(updateData, null, 2));
+
+    const { data: updateResult, error: updateError } = await supabase
+      .from('users')
+      .update(updateData)
+      .eq('id', session.user.id)
+      .select();
+
+    console.log('Update result:', updateResult);
+
+    if (updateError) {
+      console.error('Profile update error:', updateError);
+      return NextResponse.json(
+        { success: false, error: 'プロフィールの更新に失敗しました' },
+        { status: 500 }
+      );
+    }
+
+    return NextResponse.json({ 
+      success: true, 
+      user: updateResult 
+    });
+
+  } catch (error) {
+    console.error('Server error:', error);
+    return NextResponse.json({ 
+      success: false, 
+      error: 'サーバーエラーが発生しました' 
+    }, { status: 500 });
+  }
+}

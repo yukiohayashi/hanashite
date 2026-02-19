@@ -11,6 +11,7 @@ interface FavoritePost {
   user_name: string;
   og_image?: string;
   thumbnail_url?: string;
+  best_answer_id?: number | null;
 }
 
 export default function FavoritesList() {
@@ -108,39 +109,38 @@ export default function FavoritesList() {
 
       <ul className="divide-y divide-gray-200">
         {posts.map((post) => {
-          const imageUrl = post.og_image || post.thumbnail_url || '/images/noimage.webp';
-          
           return (
             <li key={post.id} className="hover:bg-gray-50 p-4 transition-colors">
-              <div className="flex gap-4">
-                <Link href={`/posts/${post.id}`} className="shrink-0">
-                  <img 
-                    src={imageUrl}
-                    alt={post.title}
-                    className="rounded w-24 h-24 object-cover"
-                  />
-                </Link>
-                
-                <div className="flex-1 min-w-0">
-                  <Link href={`/posts/${post.id}`} className="block group">
-                    <h3 className="mb-2 font-medium text-gray-900 text-base group-hover:text-[#ff6b35] line-clamp-2">
+              <div className="flex-1">
+                <Link href={`/posts/${post.id}`} className="block group">
+                  <div className="flex items-center gap-2 mb-2">
+                    <h3 className="font-medium text-gray-900 text-base group-hover:text-[#ff6b35] line-clamp-2 flex-1">
                       {post.title}
                     </h3>
-                  </Link>
-                  
-                  <div className="flex justify-between items-center">
-                    <div className="text-gray-500 text-xs">
-                      <span>投稿者: {post.user_name}</span>
-                      <span className="ml-2">{formatDate(post.created_at)}</span>
-                    </div>
-                    
-                    <button
-                      onClick={() => handleRemoveFavorite(post.id)}
-                      className="bg-gray-200 hover:bg-red-100 px-3 py-1 rounded text-gray-700 hover:text-red-600 text-xs transition-colors"
-                    >
-                      ⭐ 解除
-                    </button>
+                    {post.best_answer_id ? (
+                      <span className="inline-flex items-center px-2 py-1 text-xs font-medium bg-green-100 text-green-800 rounded whitespace-nowrap">
+                        ✓ 解決済み
+                      </span>
+                    ) : (
+                      <span className="inline-flex items-center px-2 py-1 text-xs font-medium bg-orange-100 text-orange-800 rounded whitespace-nowrap">
+                        相談受付中
+                      </span>
+                    )}
                   </div>
+                </Link>
+                
+                <div className="flex justify-between items-center">
+                  <div className="text-gray-500 text-xs">
+                    <span>相談者:{post.user_name}</span>
+                    <span className="ml-2">{formatDate(post.created_at)}</span>
+                  </div>
+                  
+                  <button
+                    onClick={() => handleRemoveFavorite(post.id)}
+                    className="bg-gray-200 hover:bg-red-100 px-3 py-1 rounded text-gray-700 hover:text-red-600 text-xs transition-colors"
+                  >
+                    ⭐ 解除
+                  </button>
                 </div>
               </div>
             </li>

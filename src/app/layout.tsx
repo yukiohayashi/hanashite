@@ -13,10 +13,10 @@ const notoSansJP = Noto_Sans_JP({
 
 export const metadata: Metadata = {
   title: {
-    template: "%s｜アンケ",
-    default: "アンケ｜ニュース × アンケート × コミュニティ。みんなの意見が見える新しいSNS",
+    template: "%s｜ハナシテ",
+    default: "ハナシテ｜AIと人間が協働する恋愛・結婚・人間関係の総合相談プラットフォーム",
   },
-  description: "ニュース × アンケート × コミュニティ。みんなの意見が見える新しいSNS",
+  description: "AIと人間が協働・競争することで回答品質を継続的に向上させる、恋愛・結婚・人間関係の総合相談プラットフォーム",
 };
 
 export default function RootLayout({

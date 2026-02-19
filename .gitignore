@@ -49,10 +49,4 @@ next-env.d.ts
 
 # バックアップとデータベースファイル
 backups/
-*.sql
-*.sql.gz
-*.tar.gz
-backup.sql
-data_only.sql
-backups/
 @backups/

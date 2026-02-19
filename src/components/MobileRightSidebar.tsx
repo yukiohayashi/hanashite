@@ -25,6 +25,7 @@ export default function MobileRightSidebar({ isOpen, onClose }: MobileRightSideb
   const [profileSlug, setProfileSlug] = useState<string | null>(null);
   const [totalPoints, setTotalPoints] = useState(0);
   const [adminPosts, setAdminPosts] = useState<AdminPost[]>([]);
+  const [participatePoints, setParticipatePoints] = useState<boolean>(false);
 
   useEffect(() => {
     if (session?.user?.id) {
@@ -37,6 +38,7 @@ export default function MobileRightSidebar({ isOpen, onClose }: MobileRightSideb
           }
           setUserName(data.name || session.user.name || 'ゲスト');
           setAvatarUrl(data.user_img_url || '');
+          setParticipatePoints(data.participate_points || false);
         })
         .catch(err => console.error('ユーザー情報取得エラー:', err));
 
@@ -179,20 +181,7 @@ export default function MobileRightSidebar({ isOpen, onClose }: MobileRightSideb
                   <Link href="/profileset" className="text-[#ff6b35]" onClick={onClose}>
                     {userName || 'ゲスト'}
                   </Link>
-                  さん<br />
-                  獲得ポイント: {totalPoints.toLocaleString()}pt
-                </div>
-                
-                <div className="my-2.5 text-center">
-                  <Link href="/ankeworks" className="inline-block" onClick={onClose}>
-                    <Image
-                      src="/images/ankeworks.webp"
-                      alt="アンケワークス"
-                      width={64}
-                      height={64}
-                      className="w-16 h-auto"
-                    />
-                  </Link>
+                  さん
                 </div>
                 
                 <div className="flex justify-center my-2.5 w-full">
@@ -208,27 +197,31 @@ export default function MobileRightSidebar({ isOpen, onClose }: MobileRightSideb
 
                 {/* メニューリスト */}
                 <ul className="p-0 overflow-hidden list-none">
-                  <Link href="/mypage" className="block hover:bg-gray-100 mr-0.5 p-2.5 border-gray-200 border-b w-auto font-normal text-black text-sm text-left no-underline" onClick={onClose}>
+                  <Link href="/notifications" className="block hover:bg-gray-100 mr-0.5 p-2.5 border-gray-200 border-b w-auto font-normal text-black text-sm text-left no-underline" onClick={onClose}>
                     <li>通知</li>
                   </Link>
-                  <Link href={profileSlug ? `/users/${profileSlug}` : `/users/${session?.user?.id}`} className="block hover:bg-gray-100 mr-0.5 p-2.5 border-gray-200 border-b w-auto font-normal text-black text-sm text-left no-underline" onClick={onClose}>
-                    <li>プロフィール</li>
+                  <Link href="/profileset" className="block hover:bg-gray-100 mr-0.5 p-2.5 border-gray-200 border-b w-auto font-normal text-black text-sm text-left no-underline" onClick={onClose}>
+                    <li>プロフィール編集</li>
                   </Link>
                   <Link href="/favorites" className="block hover:bg-gray-100 mr-0.5 p-2.5 border-gray-200 border-b w-auto font-normal text-black text-sm text-left no-underline" onClick={onClose}>
-                    <li>お気に入り</li>
+                    <li>気になる相談</li>
                   </Link>
-                  <Link href="/myanke" className="block hover:bg-gray-100 mr-0.5 p-2.5 border-gray-200 border-b w-auto font-normal text-black text-sm text-left no-underline" onClick={onClose}>
-                    <li>作成したアンケート</li>
-                  </Link>
-                  <Link href="/phistory" className="block hover:bg-gray-100 mr-0.5 p-2.5 border-gray-200 border-b w-auto font-normal text-black text-sm text-left no-underline" onClick={onClose}>
-                    <li>ポイント履歴</li>
-                  </Link>
-                  <Link href="/point" className="block hover:bg-gray-100 mr-0.5 p-2.5 border-gray-200 border-b w-auto font-normal text-black text-sm text-left no-underline" onClick={onClose}>
-                    <li>ポイント交換</li>
+                  <Link href="/my-posts" className="block hover:bg-gray-100 mr-0.5 p-2.5 border-gray-200 border-b w-auto font-normal text-black text-sm text-left no-underline" onClick={onClose}>
+                    <li>相談した記事</li>
                   </Link>
                   <Link href="/post-create" className="block hover:bg-gray-100 mr-0.5 p-2.5 border-gray-200 border-b w-auto font-normal text-black text-sm text-left no-underline" onClick={onClose}>
-                    <li>アンケート作成</li>
+                    <li>相談する</li>
                   </Link>
+                  {participatePoints && (
+                    <>
+                      <Link href="/phistory" className="block hover:bg-gray-100 mr-0.5 p-2.5 border-gray-200 border-b w-auto font-normal text-black text-sm text-left no-underline" onClick={onClose}>
+                        <li>ポイント履歴</li>
+                      </Link>
+                      <Link href="/point-exchange" className="block hover:bg-gray-100 mr-0.5 p-2.5 border-gray-200 border-b w-auto font-normal text-black text-sm text-left no-underline" onClick={onClose}>
+                        <li>ポイント交換</li>
+                      </Link>
+                    </>
+                  )}
                   <Link href="/password" className="block hover:bg-gray-100 mr-0.5 p-2.5 border-gray-200 border-b w-auto font-normal text-black text-sm text-left no-underline" onClick={onClose}>
                     <li>パスワード</li>
                   </Link>

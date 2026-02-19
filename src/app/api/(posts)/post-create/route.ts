@@ -18,9 +18,18 @@ export async function POST(request: Request) {
       workid
     } = await request.json();
 
-    if (!userId || !title || !content || !choices || choices.length < 2) {
+    // 相談記事の場合は選択肢不要、アンケートの場合は選択肢必須
+    if (!userId || !title || !content) {
       return NextResponse.json(
         { success: false, error: '必須項目が入力されていません' },
+        { status: 400 }
+      );
+    }
+
+    // アンケートの場合は選択肢が2つ以上必要
+    if (choices && choices.length > 0 && choices.length < 2) {
+      return NextResponse.json(
+        { success: false, error: '選択肢は2つ以上必要です' },
         { status: 400 }
       );
     }
@@ -45,6 +54,12 @@ export async function POST(request: Request) {
       finalImage = null;
     }
     
+    // 締切日時を設定
+    let deadlineAt = null;
+    if (closeDate && closeTime) {
+      deadlineAt = new Date(`${closeDate}T${closeTime}:00`).toISOString();
+    }
+
     const insertData: Record<string, unknown> = {
       id: nextId,
       title: title.trim(),
@@ -52,6 +67,7 @@ export async function POST(request: Request) {
       user_id: userId,
       status: 'published',
       og_image: finalImage,
+      deadline_at: deadlineAt,
       created_at: new Date().toISOString(),
       updated_at: new Date().toISOString()
     };
@@ -75,68 +91,71 @@ export async function POST(request: Request) {
         og_image: insertData.og_image
       });
       return NextResponse.json(
-        { success: false, error: 'アンケートの作成に失敗しました' },
+        { success: false, error: '投稿の作成に失敗しました' },
         { status: 500 }
       );
     }
 
-    // 投票オプションを作成
-    let closeAt = null;
-    if (closeDate && closeTime) {
-      closeAt = new Date(`${closeDate}T${closeTime}:00`).toISOString();
-    }
+    // 選択肢がある場合のみ投票オプションと選択肢を作成（アンケート用）
+    if (choices && choices.length >= 2) {
+      // 投票オプションを作成
+      let closeAt = null;
+      if (closeDate && closeTime) {
+        closeAt = new Date(`${closeDate}T${closeTime}:00`).toISOString();
+      }
 
-    const { error: optionsError } = await supabase
-      .from('vote_options')
-      .insert({
-        post_id: post.id,
-        multi: multi || false,
-        random: random || false,
-        close_at: closeAt
+      const { error: optionsError } = await supabase
+        .from('vote_options')
+        .insert({
+          post_id: post.id,
+          multi: multi || false,
+          random: random || false,
+          close_at: closeAt
+        });
+
+      if (optionsError) {
+        console.error('Vote options creation error:', optionsError);
+        // vote_options作成失敗時は投稿を削除してロールバック
+        await supabase.from('posts').delete().eq('id', post.id);
+        return NextResponse.json(
+          { success: false, error: '投票オプションの作成に失敗しました' },
+          { status: 500 }
+        );
+      }
+
+      // 選択肢を作成（カラム名をchoiceに修正）
+      // 最新のvote_choice IDを取得
+      const { data: latestChoice } = await supabase
+        .from('vote_choices')
+        .select('id')
+        .order('id', { ascending: false })
+        .limit(1)
+        .single();
+
+      let nextChoiceId = latestChoice ? latestChoice.id + 1 : 1;
+
+      const choiceInserts = choices.map((choice: string) => {
+        const insert = {
+          id: nextChoiceId,
+          post_id: post.id,
+          choice: choice,
+          vote_count: 0
+        };
+        nextChoiceId++;
+        return insert;
       });
 
-    if (optionsError) {
-      console.error('Vote options creation error:', optionsError);
-      // vote_options作成失敗時は投稿を削除してロールバック
-      await supabase.from('posts').delete().eq('id', post.id);
-      return NextResponse.json(
-        { success: false, error: '投票オプションの作成に失敗しました' },
-        { status: 500 }
-      );
-    }
+      const { error: choicesError } = await supabase
+        .from('vote_choices')
+        .insert(choiceInserts);
 
-    // 選択肢を作成（カラム名をchoiceに修正）
-    // 最新のvote_choice IDを取得
-    const { data: latestChoice } = await supabase
-      .from('vote_choices')
-      .select('id')
-      .order('id', { ascending: false })
-      .limit(1)
-      .single();
-
-    let nextChoiceId = latestChoice ? latestChoice.id + 1 : 1;
-
-    const choiceInserts = choices.map((choice: string) => {
-      const insert = {
-        id: nextChoiceId,
-        post_id: post.id,
-        choice: choice,
-        vote_count: 0
-      };
-      nextChoiceId++;
-      return insert;
-    });
-
-    const { error: choicesError } = await supabase
-      .from('vote_choices')
-      .insert(choiceInserts);
-
-    if (choicesError) {
-      console.error('Choices creation error:', choicesError);
-      return NextResponse.json(
-        { success: false, error: '選択肢の作成に失敗しました' },
-        { status: 500 }
-      );
+      if (choicesError) {
+        console.error('Choices creation error:', choicesError);
+        return NextResponse.json(
+          { success: false, error: '選択肢の作成に失敗しました' },
+          { status: 500 }
+        );
+      }
     }
 
     // カテゴリーを設定（autoでない場合）
@@ -200,12 +219,12 @@ export async function POST(request: Request) {
     return NextResponse.json({
       success: true,
       postId: post.id,
-      message: 'アンケートを作成しました'
+      message: choices && choices.length >= 2 ? 'アンケートを作成しました' : '相談記事を投稿しました'
     });
   } catch (error) {
-    console.error('Anke create error:', error);
+    console.error('Post create error:', error);
     return NextResponse.json(
-      { success: false, error: 'アンケートの作成に失敗しました' },
+      { success: false, error: '投稿の作成に失敗しました' },
       { status: 500 }
     );
   }

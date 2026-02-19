@@ -26,6 +26,9 @@ interface User {
   child_count: number | null;
   job: string | null;
   prefecture: string | null;
+  avatar_style: string | null;
+  avatar_seed: string | null;
+  use_custom_image: boolean | null;
 }
 
 interface Post {
@@ -208,7 +211,7 @@ export default async function UserPage({ params }: { params: Promise<{ slug: str
     <div className="min-h-screen bg-gray-50">
       <Header />
 
-      <main className="md:flex md:justify-center mx-auto pt-[60px] md:pt-4 pb-4 max-w-7xl px-4 sm:px-6 lg:px-8">
+      <main className="md:flex md:justify-center md:gap-4 mx-auto pt-[60px] md:pt-4 pb-4 max-w-7xl px-4 sm:px-6 lg:px-8">
         {/* 左サイドバー */}
         <aside className="hidden md:block w-[220px]">
           <Sidebar />
@@ -221,16 +224,18 @@ export default async function UserPage({ params }: { params: Promise<{ slug: str
             <div className="flex items-start gap-4">
               {/* アバター */}
               <div className="shrink-0">
-                {user.user_img_url ? (
+                {user.use_custom_image && user.user_img_url ? (
                   <img 
                     src={user.user_img_url} 
                     alt={user.name || '匿名'} 
                     className="w-20 h-20 rounded-full object-cover"
                   />
                 ) : (
-                  <div className="w-20 h-20 rounded-full bg-gray-300 flex items-center justify-center text-gray-600 text-2xl font-bold">
-                    {(user.name || '?')[0].toUpperCase()}
-                  </div>
+                  <img 
+                    src={`https://api.dicebear.com/9.x/${user.avatar_style || 'big-smile'}/svg?seed=${encodeURIComponent(user.avatar_seed || user.id)}&size=80`}
+                    alt={user.name || '匿名'} 
+                    className="w-20 h-20 rounded-full object-cover"
+                  />
                 )}
               </div>
 
@@ -264,69 +269,70 @@ export default async function UserPage({ params }: { params: Promise<{ slug: str
               {new Date(user.created_at).toLocaleDateString('ja-JP', { year: 'numeric', month: 'long' })}から利用
             </p>
 
-            {/* 統計情報 */}
-            <div className="flex gap-6 mt-4 text-sm text-gray-600">
-              <div>
-                <span className="font-bold text-gray-900">{posts.length}</span> 投稿
-              </div>
-              <div>
-                <span className="font-bold text-gray-900">{comments.length}</span> コメント
-              </div>
-            </div>
-          </div>
-
-          {/* アクティビティ一覧 */}
-          <div className="bg-white shadow-md border border-gray-200 rounded">
-            <div className="p-4 border-b border-gray-200">
-              <h2 className="text-lg font-bold text-gray-900">アクティビティ</h2>
-              <p className="text-sm text-gray-500">最大100件表示</p>
-            </div>
-
-            {limitedActivities.length > 0 ? (
-              <ul className="divide-y divide-gray-200">
-                {limitedActivities.map((activity, index) => (
-                  <li key={index} className="p-4 hover:bg-gray-50 transition-colors">
-                    <div className="flex flex-col gap-1">
-                      {/* アクティビティタイプ */}
-                      <div className="text-sm text-gray-700">
-                        {activity.type === 'post' ? (
-                          <span>
-                            <Link href={activity.link} className="text-gray-800 hover:text-orange-600 font-medium">
-                              {user.name || '匿名'}
-                            </Link>
-                            さんがアンケートを投稿しました！
-                          </span>
-                        ) : (
-                          <span>
-                            アンケートへコメント
-                          </span>
-                        )}
-                      </div>
-
-                      {/* 日付 */}
-                      <div className="text-xs text-gray-400">
-                        {new Date(activity.date).toLocaleString('ja-JP')}
-                      </div>
-
-                      {/* タイトル */}
-                      <div className="text-sm mt-1">
-                        <Link href={activity.link} className="text-gray-800 hover:text-orange-600">
-                          {activity.title}
-                          {activity.type === 'comment' && activity.postTitle && (
-                            <span className="text-gray-500"> ({activity.postTitle})</span>
-                          )}
-                        </Link>
-                      </div>
-                    </div>
-                  </li>
-                ))}
-              </ul>
-            ) : (
-              <div className="p-8 text-center text-gray-500">
-                まだアクティビティがありません
+            {/* 統計情報 - 一時的に非表示 */}
+            {false && (
+              <div className="flex gap-6 mt-4 text-sm text-gray-600">
+                <div>
+                  <span className="font-bold text-gray-900">{posts.length}</span> 投稿
+                </div>
+                <div>
+                  <span className="font-bold text-gray-900">{comments.length}</span> コメント
+                </div>
               </div>
             )}
           </div>
+
+          {/* アクティビティ一覧 - 一時的に非表示 */}
+          {false && (
+            <div className="bg-white shadow-md border border-gray-200 rounded">
+              <div className="p-4 border-b border-gray-200">
+                <h2 className="text-lg font-bold text-gray-900">アクティビティ</h2>
+                <p className="text-sm text-gray-500">最大100件表示</p>
+              </div>
+
+              {limitedActivities.length > 0 ? (
+                <ul className="divide-y divide-gray-200">
+                  {limitedActivities.map((activity, index) => (
+                    <li key={index} className="p-4 hover:bg-gray-50 transition-colors">
+                      <div className="flex flex-col gap-1">
+                        <div className="text-sm text-gray-700">
+                          {activity.type === 'post' ? (
+                            <span>
+                              <Link href={activity.link} className="text-gray-800 hover:text-orange-600 font-medium">
+                                {user.name || '匿名'}
+                              </Link>
+                              さんから相談がありました！
+                            </span>
+                          ) : (
+                            <span>
+                              相談者への回答
+                            </span>
+                          )}
+                        </div>
+
+                        <div className="text-xs text-gray-400">
+                          {new Date(activity.date).toLocaleString('ja-JP')}
+                        </div>
+
+                        <div className="text-sm mt-1">
+                          <Link href={activity.link} className="text-gray-800 hover:text-orange-600">
+                            {activity.title}
+                            {activity.type === 'comment' && activity.postTitle && (
+                              <span className="text-gray-500"> ({activity.postTitle})</span>
+                            )}
+                          </Link>
+                        </div>
+                      </div>
+                    </li>
+                  ))}
+                </ul>
+              ) : (
+                <div className="p-8 text-center text-gray-500">
+                  まだアクティビティがありません
+                </div>
+              )}
+            </div>
+          )}
         </div>
 
         {/* 右サイドバー */}

@@ -11,6 +11,7 @@ export default function MyPageMenu() {
   const [totalPoints, setTotalPoints] = useState<number>(0);
   const [userName, setUserName] = useState<string>('');
   const [avatarUrl, setAvatarUrl] = useState<string>('');
+  const [participatePoints, setParticipatePoints] = useState<boolean>(false);
 
   useEffect(() => {
     if (session?.user?.id) {
@@ -23,6 +24,7 @@ export default function MyPageMenu() {
           }
           setUserName(data.name || session.user.name || 'ゲスト');
           setAvatarUrl(data.user_img_url || '');
+          setParticipatePoints(data.participate_points || false);
         })
         .catch(err => console.error('ユーザー情報取得エラー:', err));
 
@@ -63,20 +65,7 @@ export default function MyPageMenu() {
         <Link href="/profileset" className="text-[#ff6b35]">
           {userName || 'ゲスト'}
         </Link>
-        さん<br />
-        獲得ポイント: {totalPoints.toLocaleString()}pt
-      </div>
-      
-      <div className="my-2.5 text-center">
-        <Link href="/ankeworks" className="inline-block">
-          <Image 
-            src="/images/ankeworks.webp" 
-            alt="アンケワークス" 
-            width={64}
-            height={64}
-            className="w-16 h-auto"
-          />
-        </Link>
+        さん
       </div>
       
       <div className="flex justify-center my-2.5 w-full pc">
@@ -91,27 +80,31 @@ export default function MyPageMenu() {
 
       {/* メニューリスト */}
       <ul className="p-0 overflow-hidden list-none">
-      <Link href="/mypage" className="block hover:bg-gray-100 mr-0.5 p-2.5 border-gray-200 border-b w-auto font-normal text-black text-sm text-left no-underline">
+      <Link href="/notifications" className="block hover:bg-gray-100 mr-0.5 p-2.5 border-gray-200 border-b w-auto font-normal text-black text-sm text-left no-underline">
         <li>通知</li>
       </Link>
-      <Link href={profileUrl} className="block hover:bg-gray-100 mr-0.5 p-2.5 border-gray-200 border-b w-auto font-normal text-black text-sm text-left no-underline">
-        <li>プロフィール</li>
+      <Link href="/profileset" className="block hover:bg-gray-100 mr-0.5 p-2.5 border-gray-200 border-b w-auto font-normal text-black text-sm text-left no-underline">
+        <li>プロフィール編集</li>
       </Link>
       <Link href="/favorites" className="block hover:bg-gray-100 mr-0.5 p-2.5 border-gray-200 border-b w-auto font-normal text-black text-sm text-left no-underline">
-        <li>お気に入り</li>
+        <li>気になる相談</li>
       </Link>
-      <Link href="/myanke" className="block hover:bg-gray-100 mr-0.5 p-2.5 border-gray-200 border-b w-auto font-normal text-black text-sm text-left no-underline">
-        <li>作成したアンケート</li>
-      </Link>
-      <Link href="/phistory" className="block hover:bg-gray-100 mr-0.5 p-2.5 border-gray-200 border-b w-auto font-normal text-black text-sm text-left no-underline">
-        <li>ポイント履歴</li>
-      </Link>
-      <Link href="/point" className="block hover:bg-gray-100 mr-0.5 p-2.5 border-gray-200 border-b w-auto font-normal text-black text-sm text-left no-underline">
-        <li>ポイント交換</li>
+      <Link href="/my-posts" className="block hover:bg-gray-100 mr-0.5 p-2.5 border-gray-200 border-b w-auto font-normal text-black text-sm text-left no-underline">
+        <li>相談した記事</li>
       </Link>
       <Link href="/post-create" className="block hover:bg-gray-100 mr-0.5 p-2.5 border-gray-200 border-b w-auto font-normal text-black text-sm text-left no-underline">
-        <li>アンケート作成</li>
+        <li>相談する</li>
       </Link>
+      {participatePoints && (
+        <>
+          <Link href="/phistory" className="block hover:bg-gray-100 mr-0.5 p-2.5 border-gray-200 border-b w-auto font-normal text-black text-sm text-left no-underline">
+            <li>ポイント履歴</li>
+          </Link>
+          <Link href="/point-exchange" className="block hover:bg-gray-100 mr-0.5 p-2.5 border-gray-200 border-b w-auto font-normal text-black text-sm text-left no-underline">
+            <li>ポイント交換</li>
+          </Link>
+        </>
+      )}
       <Link href="/password" className="block hover:bg-gray-100 mr-0.5 p-2.5 border-gray-200 border-b w-auto font-normal text-black text-sm text-left no-underline">
         <li>パスワード</li>
       </Link>

@@ -44,7 +44,7 @@ export default function FloatingCreateButton() {
         `}
       >
         <span className="text-xs md:text-sm font-bold text-white text-center leading-tight">
-          アンケート<br />作成
+          相談する
         </span>
         <div className="absolute bottom-0 right-0 w-6 h-6 bg-white rounded-full flex items-center justify-center shadow-md group-hover:scale-110 transition-transform">
           <PenSquare className="w-3 h-3 text-pink-500" />

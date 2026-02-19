@@ -3,7 +3,6 @@
 import { useSession } from 'next-auth/react';
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
-import Image from 'next/image';
 import { supabase } from '@/lib/supabase';
 
 interface Comment {
@@ -112,14 +111,14 @@ export default function HomeRightSidebar() {
         })
         .catch(err => console.error('ポイント取得エラー:', err));
       
-      // profile_slugとuser_nicenameを取得
+      // profile_slugとnameを取得
       fetch(`/api/user/${session.user.id}`)
         .then(res => res.json())
         .then(data => {
           if (data.profile_slug) {
             setProfileSlug(data.profile_slug);
           }
-          setUserName(data.user_nicename || data.user_nicename || data.name || session.user.name || 'ゲスト');
+          setUserName(data.name || session.user.name || 'ゲスト');
         })
         .catch(err => console.error('ユーザー情報取得エラー:', err));
     }
@@ -160,21 +159,9 @@ export default function HomeRightSidebar() {
         <Link href="/profileset" className="text-[#ff6b35]">
           {userName || session.user?.name || 'ゲスト'}
         </Link>
-        さん<br />
-        獲得ポイント: {totalPoints !== null ? totalPoints.toLocaleString() : '...'}pt
+        さん
       </div>
       
-      <div className="my-2.5 text-center">
-        <Link href="/ankeworks" className="inline-block">
-          <Image 
-            src="/images/ankeworks.webp" 
-            alt="アンケワークス" 
-            width={64}
-            height={64}
-            className="w-16 h-auto"
-          />
-        </Link>
-      </div>
       
       <div className="flex justify-center my-2.5 w-full pc">
         <Link 
@@ -244,10 +231,10 @@ export default function HomeRightSidebar() {
         </ul>
       </div>
 
-      {/* 最新コメント */}
+      {/* 最新の回答*/}
       <div>
         <h3 className="mt-4 mb-2 px-2 font-bold text-base" style={{ color: '#ff6b35' }}>
-          最新コメント <i className="fas fa-comment"></i>
+          最新の回答<i className="fas fa-comment"></i>
         </h3>
         <ul className="bg-white shadow m-0 p-0 rounded-lg list-none">
           {latestComments.length > 0 ? (
@@ -269,7 +256,7 @@ export default function HomeRightSidebar() {
       {/* 最新アンケート */}
       <div>
         <h3 className="mt-4 mb-2 px-2 font-bold text-base" style={{ color: '#ff6b35' }}>
-          最新アンケート <i className="fas fa-poll"></i>
+          最新の相談 <i className="fas fa-comments"></i>
         </h3>
         <ul className="flex flex-col gap-2 bg-white shadow m-0 p-0 rounded-lg list-none">
           {latestPosts.length > 0 ? (
@@ -282,7 +269,7 @@ export default function HomeRightSidebar() {
               </li>
             ))
           ) : (
-            <li className="px-2 py-2 text-gray-600 text-sm">アンケートなし</li>
+            <li className="px-2 py-2 text-gray-600 text-sm">相談なし</li>
           )}
         </ul>
       </div>

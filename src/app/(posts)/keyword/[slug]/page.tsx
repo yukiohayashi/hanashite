@@ -1,6 +1,7 @@
 import { supabase } from '@/lib/supabase';
 import { getKeywordBySlug } from '@/lib/keywords';
 import Link from 'next/link';
+import { redirect } from 'next/navigation';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
 import Sidebar from '@/components/Sidebar';
@@ -23,6 +24,18 @@ export default async function KeywordPage({
   const keyword = await getKeywordBySlug(slug);
 
   if (!keyword) {
+    // キーワードが見つからない場合、カテゴリを検索
+    const { data: category } = await supabase
+      .from('categories')
+      .select('id, slug')
+      .eq('slug', slug)
+      .single();
+    
+    if (category) {
+      // カテゴリが見つかった場合、カテゴリページにリダイレクト
+      redirect(`/category/${category.id}`);
+    }
+    
     return (
       <div className="flex justify-center items-center bg-gray-50 min-h-screen">
         <div className="text-center">
@@ -144,7 +157,7 @@ export default async function KeywordPage({
                         {post.title}
                       </h3>
                       <div className="mt-2 text-gray-500 text-xs">
-                        <span>投稿者: {userName}</span>
+                        <span>相談者:{userName}</span>
                         <span className="ml-2">{new Date(post.created_at).toLocaleDateString('ja-JP')}</span>
                       </div>
                     </div>

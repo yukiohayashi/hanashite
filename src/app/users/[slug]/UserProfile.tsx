@@ -12,6 +12,9 @@ interface User {
   sns_x?: string;
   created_at: string;
   profile_slug?: string;
+  avatar_style?: string;
+  avatar_seed?: string;
+  use_custom_image?: boolean;
 }
 
 interface Post {
@@ -112,18 +115,15 @@ export default function UserProfile({ user, posts, comments, isOwnProfile }: Use
   return (
     <>
       <div className="autor__container flex flex-row items-start gap-4 p-2.5">
-        <div className="autor__containerPhoto flex-shrink-0">
-          {user.user_img_url ? (
-            <img 
-              src={user.user_img_url} 
-              alt={user.name} 
-              className="w-20 h-20 rounded-full object-cover"
-            />
-          ) : (
-            <div className="w-20 h-20 rounded-full bg-gray-300 flex items-center justify-center">
-              <span className="text-gray-600 text-2xl">{user.name.charAt(0)}</span>
-            </div>
-          )}
+        <div className="autor__containerPhoto shrink-0">
+          <img 
+            src={user.use_custom_image && user.user_img_url 
+              ? user.user_img_url 
+              : `https://api.dicebear.com/9.x/${user.avatar_style || 'big-smile'}/svg?seed=${encodeURIComponent(user.avatar_seed || String(user.id))}&size=80`
+            } 
+            alt={user.name} 
+            className="w-20 h-20 rounded-full object-cover"
+          />
         </div>
         
         <div className="autor__container_name flex-1">
@@ -167,7 +167,7 @@ export default function UserProfile({ user, posts, comments, isOwnProfile }: Use
                     <Link href={activity.link} className="no-underline text-gray-800 hover:text-orange-600">
                       {activity.authorName}
                     </Link>
-                    さんがアンケートを投稿しました！
+                    さんから相談がありました！
                   </div>
                 ) : activity.commentType === '返信' ? (
                   <div className="anke_meta_nickname text-sm text-gray-700 mb-0">

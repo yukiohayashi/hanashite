@@ -31,7 +31,7 @@ export default function AnkeworksSidebar() {
           console.log('AnkeworksSidebar - User data:', userData);
           setUser({
             id: userData.id,
-            name: userData.user_nicename || userData.name || session.user.name || 'ユーザー',
+            name: userData.name || session.user.name || 'ユーザー',
             points: userData.points || 0,
             participate_points: true
           });
@@ -125,7 +125,7 @@ export default function AnkeworksSidebar() {
           </Link>
         </li>
         <li>
-          <Link href="/myanke" className="block border-b border-gray-200 text-sm p-3 hover:bg-gray-100 text-black">
+          <Link href="/my-posts" className="block border-b border-gray-200 text-sm p-3 hover:bg-gray-100 text-black">
             作成したアンケート
           </Link>
         </li>

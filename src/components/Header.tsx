@@ -39,12 +39,18 @@ export default function Header() {
       fetch(`/api/user/${session.user.id}`)
         .then(res => res.json())
         .then(data => {
-          if (data.user_img_url) {
+          if (data.use_custom_image && data.user_img_url) {
             setAvatarUrl(data.user_img_url);
+          } else {
+            // DiceBearアバターを使用
+            const seed = data.avatar_seed || session.user.id;
+            const style = data.avatar_style || 'big-smile';
+            setAvatarUrl(`https://api.dicebear.com/9.x/${style}/svg?seed=${encodeURIComponent(seed)}&size=40`);
           }
         })
         .catch(() => {
-          // エラー時はデフォルトアバターを使用
+          // エラー時はデフォルトDiceBearアバターを使用
+          setAvatarUrl(`https://api.dicebear.com/9.x/big-smile/svg?seed=${encodeURIComponent(session.user.id)}&size=40`);
         });
     } else {
       setAvatarUrl('');
@@ -86,53 +92,53 @@ export default function Header() {
 
           {/* 中央: ロゴ */}
           <div className="flex flex-col justify-center items-center">
-            <Link href="/" className="mx-auto w-[150px] text-center">
+            <Link href="/" className="w-[150px] text-center">
               <Image 
-                src="/anke.svg" 
-                alt="アンケ" 
+                src="/images/logo.png" 
+                alt="ハナシテ" 
                 width={150} 
                 height={40}
                 className="w-full"
               />
             </Link>
+            <div className="text-[0.45rem] text-gray-500 text-center">powered by DOKUJO</div>
             <div className="w-full text-[0.5rem] text-center text-gray-600">
-              ニュース × アンケート × コミュニティ。みんなの意見が見える新しいSNS
+              AIと人間が協働する恋愛・結婚・人間関係の総合相談
             </div>
           </div>
 
           {/* 右: アバターアイコン */}
-          <button
-            className="top-1/2 right-[2%] z-[99999] absolute text-center cursor-pointer -translate-y-1/2"
-            onClick={() => setRightSidebarOpen(true)}
-          >
-            <div className="relative">
-              <div className="relative rounded-full w-10 h-10 overflow-hidden">
-                {status === 'loading' ? (
-                  <div className="relative bg-gray-300 rounded-full w-10 h-10 overflow-hidden">
-                    <div className="absolute top-[8px] left-1/2 bg-white rounded-full w-[18px] h-[18px] -translate-x-1/2"></div>
-                    <div className="absolute top-[22px] left-1/2 bg-white rounded-[50%_50%_50%_50%/60%_60%_40%_40%] w-[27px] h-[20px] -translate-x-1/2"></div>
-                  </div>
-                ) : session && avatarUrl ? (
-                  <img
-                    src={avatarUrl}
-                    alt="プロフィール画像"
-                    className="w-full h-full object-cover"
-                  />
-                ) : (
-                  <div className="relative bg-gray-300 rounded-full w-10 h-10 overflow-hidden">
-                    <div className="absolute top-[8px] left-1/2 bg-white rounded-full w-[18px] h-[18px] -translate-x-1/2"></div>
-                    <div className="absolute top-[22px] left-1/2 bg-white rounded-[50%_50%_50%_50%/60%_60%_40%_40%] w-[27px] h-[20px] -translate-x-1/2"></div>
-                  </div>
+          {session ? (
+            <button
+              className="top-1/2 right-[2%] z-[99999] absolute text-center cursor-pointer -translate-y-1/2"
+              onClick={() => setRightSidebarOpen(true)}
+            >
+              <div className="relative">
+                <img
+                  src={avatarUrl || `https://api.dicebear.com/9.x/big-smile/svg?seed=${session.user.id}&size=40`}
+                  alt="プロフィール画像"
+                  id="header-avatar"
+                  className="border-2 border-gray-300 rounded-full w-10 h-10 object-cover"
+                />
+                {/* 通知ドット */}
+                {unreadCount > 0 && (
+                  <span className="top-0 right-0 absolute flex justify-center items-center bg-red-500 rounded-full w-4 h-4 text-[10px] text-white font-bold">
+                    {unreadCount > 9 ? '9+' : unreadCount}
+                  </span>
                 )}
               </div>
-              {/* 通知ドット */}
-              {session && unreadCount > 0 && (
-                <span className="top-0 right-0 absolute flex justify-center items-center bg-red-500 rounded-full w-4 h-4 text-[10px] text-white font-bold">
-                  {unreadCount > 9 ? '9+' : unreadCount}
-                </span>
-              )}
-            </div>
-          </button>
+            </button>
+          ) : (
+            <Link
+              href="/login"
+              className="top-1/2 right-[2%] z-[99999] absolute text-center cursor-pointer -translate-y-1/2"
+            >
+              <div className="relative bg-gray-300 rounded-full w-10 h-10 overflow-hidden" id="header-avatar">
+                <div className="absolute top-[8px] left-1/2 bg-white rounded-full w-[18px] h-[18px] -translate-x-1/2"></div>
+                <div className="absolute top-[22px] left-1/2 bg-white rounded-[50%_50%_50%_50%/60%_60%_40%_40%] w-[27px] h-[20px] -translate-x-1/2"></div>
+              </div>
+            </Link>
+          )}
         </div>
       </header>
 
@@ -148,22 +154,23 @@ export default function Header() {
               <Link href="/" className="flex flex-col items-center">
                 <div className="w-[150px] text-center">
                   <Image 
-                    src="/anke.svg" 
-                    alt="アンケ" 
+                    src="/images/logo.png" 
+                    alt="ハナシテ" 
                     width={150} 
                     height={40}
                     className="w-full"
                   />
                 </div>
+                <span className="text-[0.55rem] text-gray-500">powered by DOKUJO</span>
               </Link>
               
               {/* アンケート統計情報 */}
               <div className="flex flex-col text-gray-600 text-xs">
                 <div className="font-semibold text-gray-800">
-                  アンケート合計数: {postsCount.toLocaleString()}本
+                  相談合計数: {postsCount.toLocaleString()}件
                 </div>
                 <div className="mt-0.5 text-[0.65rem] leading-tight">
-                  ニュース × アンケート × コミュニティ。みんなの意見が見える新しいSNS
+                  AIと人間が協働する恋愛・結婚・人間関係の総合相談
                 </div>
               </div>
             </div>

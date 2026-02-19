@@ -98,7 +98,7 @@ export async function GET(request: Request) {
     // 投稿情報を取得
     const { data: posts } = await supabase
       .from('posts')
-      .select('id, title, created_at, user_id, og_image, thumbnail_url')
+      .select('id, title, created_at, user_id, og_image, thumbnail_url, best_answer_id')
       .in('id', postIds);
 
     if (!posts) {

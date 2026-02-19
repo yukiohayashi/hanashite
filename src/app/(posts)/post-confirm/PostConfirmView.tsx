@@ -102,7 +102,7 @@ export default function PostConfirmView() {
         setErrorMessage(data.error);
       }
     } catch (error) {
-      setErrorMessage('アンケートの作成に失敗しました');
+      setErrorMessage('相談記事の投稿に失敗しました');
     } finally {
       setSubmitting(false);
     }
@@ -124,6 +124,14 @@ export default function PostConfirmView() {
     return categories[category] || category;
   };
 
+  const formatDateWithDay = (dateStr: string) => {
+    if (!dateStr) return '';
+    const date = new Date(dateStr);
+    const days = ['日', '月', '火', '水', '木', '金', '土'];
+    const dayOfWeek = days[date.getDay()];
+    return `${dateStr}(${dayOfWeek})`;
+  };
+
   return (
     <div className="space-y-6">
       {errorMessage && (
@@ -136,97 +144,39 @@ export default function PostConfirmView() {
 
       <Alert className="border-blue-500 bg-blue-50">
         <AlertDescription className="text-blue-800">
-          以下の内容でアンケートを作成します。よろしければ「投稿する」ボタンをクリックしてください。
+          以下の内容で投稿します。内容をご確認の上、問題なければ下のボタンをクリックしてください。
         </AlertDescription>
       </Alert>
 
       <div className="bg-white border border-gray-300 rounded-md shadow-sm">
         <div className="p-4 space-y-6">
-          {/* 質問者 */}
+          {/* 相談者 */}
           <div>
-            <h3 className="font-bold text-lg mb-2">質問者</h3>
+            <h3 className="font-bold text-lg mb-2">相談者</h3>
             <p className="font-medium">{ankeData.userName}</p>
           </div>
 
-          {/* アンケート内容 */}
+          {/* 相談内容 */}
           <div className="space-y-4">
           <div>
             <p className="font-bold text-gray-700 text-sm">タイトル</p>
             <p className="mt-1 text-lg">{ankeData.title}</p>
           </div>
           <div>
-            <p className="font-bold text-gray-700 text-sm">補足内容</p>
+            <p className="font-bold text-gray-700 text-sm">相談内容</p>
             <p className="mt-1 whitespace-pre-wrap">{ankeData.content}</p>
           </div>
           <div>
             <p className="font-bold text-gray-700 text-sm">カテゴリー</p>
             <p className="mt-1">{getCategoryName(ankeData.category)}</p>
           </div>
-          </div>
-
-          {/* 区切り線 */}
-          <div className="border-t border-gray-300"></div>
-
-          {/* 選択肢 */}
           <div>
-            <h3 className="font-bold text-lg mb-2">選択肢</h3>
-          <ul className="space-y-2">
-            {ankeData.choices.map((choice, index) => (
-              <li key={index} className="flex items-center gap-2">
-                <span className="flex-shrink-0 flex justify-center items-center bg-gray-200 rounded-full w-6 h-6 font-bold text-gray-700 text-sm">
-                  {index + 1}
-                </span>
-                <span>{choice}</span>
-              </li>
-            ))}
-          </ul>
-          <div className="flex gap-4 mt-4">
-            {ankeData.multi && (
-              <span className="bg-blue-100 px-3 py-1 rounded-full text-blue-800 text-sm">
-                複数選択可
-              </span>
-            )}
-            {ankeData.random && (
-              <span className="bg-purple-100 px-3 py-1 rounded-full text-purple-800 text-sm">
-                ランダム表示
-              </span>
-            )}
+            <p className="font-bold text-gray-700 text-sm">締切日時</p>
+            <p className="mt-1">
+              {formatDateWithDay(ankeData.closeDate)} {ankeData.closeTime}
+            </p>
           </div>
           </div>
-
-          {/* 区切り線 */}
-          <div className="border-t border-gray-300"></div>
-
-          {/* オプション */}
-          {(ankeData.imagePreview || ankeData.imageUrl || ankeData.closeDate) && (
-            <div className="space-y-4">
-              <h3 className="font-bold text-lg">オプション</h3>
-            {ankeData.imagePreview && (
-              <div>
-                <p className="font-bold text-gray-700 text-sm mb-2">アップロード画像</p>
-                <img 
-                  src={ankeData.imagePreview} 
-                  alt="アップロード画像" 
-                  className="max-w-full h-auto max-h-64 rounded-lg border border-gray-300"
-                />
-              </div>
-            )}
-            {ankeData.imageUrl && (
-              <div>
-                <p className="font-bold text-gray-700 text-sm">画像URL</p>
-                <p className="mt-1 text-blue-600 break-all">{ankeData.imageUrl}</p>
-              </div>
-            )}
-            {ankeData.closeDate && (
-              <div>
-                <p className="font-bold text-gray-700 text-sm">締め切り</p>
-                <p className="mt-1">
-                  {ankeData.closeDate} {ankeData.closeTime}
-                </p>
-              </div>
-            )}
-            </div>
-          )}
         </div>
       </div>
 
@@ -245,7 +195,7 @@ export default function PostConfirmView() {
           disabled={submitting}
           className="bg-[#ff6b35] hover:bg-[#e58a2f] px-10 py-6 rounded font-bold text-white text-base"
         >
-          {submitting ? '投稿中...' : '投稿する'}
+          {submitting ? '投稿中...' : 'この内容で投稿する'}
         </Button>
       </div>
     </div>

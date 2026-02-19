@@ -118,7 +118,7 @@ export default function PostEditForm({
       
       if (data.success) {
         alert('削除しました');
-        router.push('/myanke');
+        router.push('/my-posts');
       } else {
         alert('削除に失敗しました: ' + (data.error || '不明なエラー'));
       }

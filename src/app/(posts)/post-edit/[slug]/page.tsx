@@ -22,12 +22,12 @@ export default async function AnkeEditPage({ params }: { params: Promise<{ slug:
     .single();
 
   if (!post || postError) {
-    redirect('/myanke');
+    redirect('/my-posts');
   }
 
   // 投稿者本人かチェック
   if (post.user_id.toString() !== session.user.id.toString()) {
-    redirect('/myanke');
+    redirect('/my-posts');
   }
 
   // 投票オプションを取得

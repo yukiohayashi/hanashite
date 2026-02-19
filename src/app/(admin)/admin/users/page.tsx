@@ -11,7 +11,7 @@ async function getUsers(statusFilter?: number, hasImage?: boolean, page: number 
   // ユーザーデータを取得
   let query = supabase
     .from('users')
-    .select('id, name, email, user_img_url, created_at, is_banned, status, profile_slug', { count: 'exact' });
+    .select('id, name, email, user_img_url, created_at, is_banned, status, profile_slug, avatar_style, avatar_seed, use_custom_image', { count: 'exact' });
 
   // ステータスフィルター適用
   if (statusFilter !== undefined) {
@@ -42,9 +42,29 @@ async function getUsers(statusFilter?: number, hasImage?: boolean, page: number 
   // ページネーション
   const paginatedData = sortedData.slice(from, to + 1);
   
-  console.log('getUsers - returned users:', paginatedData.length, 'total:', filteredData.length);
+  // 各ユーザーの投稿件数を取得
+  const userIds = paginatedData.map(u => u.id);
+  const { data: postCounts } = await supabase
+    .from('posts')
+    .select('user_id')
+    .in('user_id', userIds);
   
-  return { users: paginatedData, total: filteredData.length };
+  // ユーザーごとの投稿件数をカウント
+  const postCountMap = new Map<string, number>();
+  postCounts?.forEach(post => {
+    const count = postCountMap.get(post.user_id) || 0;
+    postCountMap.set(post.user_id, count + 1);
+  });
+  
+  // ユーザーデータに投稿件数を追加
+  const usersWithPostCount = paginatedData.map(user => ({
+    ...user,
+    post_count: postCountMap.get(user.id) || 0
+  }));
+  
+  console.log('getUsers - returned users:', usersWithPostCount.length, 'total:', filteredData.length);
+  
+  return { users: usersWithPostCount, total: filteredData.length };
 }
 
 async function getUserCounts() {

@@ -3,17 +3,33 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 
+interface Comment {
+  id: number;
+  content: string;
+  user_id: string;
+  created_at: string;
+  users: {
+    id: string;
+    name: string;
+  } | null;
+}
+
 interface Post {
   id: number;
   title: string;
   content: string;
   status: string;
   created_at: string;
+  deadline_at?: string | null;
   og_image?: string | null;
+  best_answer_id?: number | null;
+  best_answer_selected_at?: string | null;
+  user_id: string;
   users: {
     id: number;
     name: string;
   } | null;
+  comments?: Comment[];
 }
 
 interface PostEditFormProps {
@@ -30,11 +46,14 @@ export default function PostEditForm({ post }: PostEditFormProps) {
     title: post.title || '',
     content: post.content || '',
     status: post.status || 'draft',
+    created_at: post.created_at ? new Date(post.created_at).toISOString().slice(0, 16) : '',
+    deadline_at: post.deadline_at ? new Date(post.deadline_at).toISOString().slice(0, 16) : '',
   });
   const [loading, setLoading] = useState(false);
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [imagePreview, setImagePreview] = useState<string>(post.og_image || '');
   const [imageDeleted, setImageDeleted] = useState(false);
+  const [bestAnswerId, setBestAnswerId] = useState<number | null>(post.best_answer_id || null);
   
   console.log('Form data status:', formData.status);
 
@@ -116,14 +135,20 @@ export default function PostEditForm({ post }: PostEditFormProps) {
         }
       }
 
-      console.log('Sending update request:', { ...formData, og_image: uploadedImageUrl });
+      console.log('Sending update request:', { ...formData, og_image: uploadedImageUrl, best_answer_id: bestAnswerId });
       
       const response = await fetch(`/api/admin/posts/${post.id}/update`, {
         method: 'PATCH',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ ...formData, og_image: uploadedImageUrl }),
+        body: JSON.stringify({ 
+          ...formData, 
+          og_image: uploadedImageUrl, 
+          best_answer_id: bestAnswerId,
+          created_at: new Date(formData.created_at).toISOString(),
+          deadline_at: formData.deadline_at ? new Date(formData.deadline_at).toISOString() : null
+        }),
       });
 
       const result = await response.json();
@@ -132,7 +157,7 @@ export default function PostEditForm({ post }: PostEditFormProps) {
 
       if (response.ok) {
         alert('投稿を更新しました');
-        router.push('/admin/posts');
+        router.refresh();
       } else {
         console.error('Update failed:', JSON.stringify(result, null, 2));
         alert(`更新に失敗しました: ${result.error || '不明なエラー'}\n詳細: ${JSON.stringify(result.details || {})}`);
@@ -148,33 +173,23 @@ export default function PostEditForm({ post }: PostEditFormProps) {
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
       {/* 基本情報 */}
-      <div className="bg-white rounded-lg shadow p-6">
-        <h2 className="text-lg font-semibold text-gray-900 mb-4">基本情報</h2>
+      <div className="bg-white rounded-lg shadow p-4">
+        <h2 className="text-lg font-semibold text-gray-900 mb-3">基本情報</h2>
         
-        <div className="space-y-4">
-          <div>
+        <div className="flex gap-3 items-end mb-3">
+          <div className="w-20">
             <label className="block text-sm font-medium text-gray-700 mb-1">
-              投稿ID
+              ID
             </label>
-            <div className="flex gap-2">
-              <input
-                type="text"
-                value={post.id}
-                disabled
-                className="flex-1 px-3 py-2 border border-gray-300 rounded-md bg-gray-50 text-gray-500"
-              />
-              <a
-                href={`/posts/${post.id}`}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 whitespace-nowrap"
-              >
-                実際のページを見る
-              </a>
-            </div>
+            <input
+              type="text"
+              value={post.id}
+              disabled
+              className="w-full px-2 py-2 border border-gray-300 rounded-md bg-gray-50 text-gray-500 text-sm text-center"
+            />
           </div>
 
-          <div>
+          <div className="flex-1">
             <label className="block text-sm font-medium text-gray-700 mb-1">
               タイトル <span className="text-red-500">*</span>
             </label>
@@ -183,10 +198,94 @@ export default function PostEditForm({ post }: PostEditFormProps) {
               value={formData.title}
               onChange={(e) => setFormData({ ...formData, title: e.target.value })}
               required
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
+              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500 text-sm"
             />
           </div>
 
+          <div className="w-48">
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              投稿者
+            </label>
+            <input
+              type="text"
+              value={post.users?.name || 'ゲスト'}
+              disabled
+              className="w-full px-3 py-2 border border-gray-300 rounded-md bg-gray-50 text-gray-500 text-sm"
+            />
+          </div>
+
+          <div className="w-52">
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              作成日
+            </label>
+            <input
+              type="datetime-local"
+              value={formData.created_at}
+              onChange={(e) => setFormData({ ...formData, created_at: e.target.value })}
+              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500 text-sm"
+            />
+          </div>
+
+          <div className="w-52">
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              締め切り
+            </label>
+            <input
+              type="datetime-local"
+              value={formData.deadline_at}
+              onChange={(e) => setFormData({ ...formData, deadline_at: e.target.value })}
+              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500 text-sm"
+            />
+          </div>
+        </div>
+
+        <div className="flex gap-3 items-end">
+          <div className="w-32">
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              ステータス
+            </label>
+            <select
+              value={formData.status}
+              onChange={(e) => setFormData({ ...formData, status: e.target.value })}
+              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500 text-sm"
+            >
+              <option value="draft">下書き</option>
+              <option value="published">公開</option>
+              <option value="trash">ゴミ箱</option>
+            </select>
+          </div>
+
+          <button
+            type="submit"
+            disabled={loading}
+            className="px-6 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed text-sm whitespace-nowrap font-medium"
+          >
+            {loading ? '保存中...' : '投稿を更新'}
+          </button>
+
+          <a
+            href="/admin/posts"
+            className="px-4 py-2 text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 text-sm whitespace-nowrap"
+          >
+            キャンセル
+          </a>
+
+          <button
+            type="button"
+            onClick={handleDelete}
+            disabled={loading}
+            className="px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 disabled:opacity-50 disabled:cursor-not-allowed text-sm whitespace-nowrap"
+          >
+            {loading ? '削除中...' : '投稿を削除'}
+          </button>
+        </div>
+      </div>
+
+      {/* 内容と画像 */}
+      <div className="bg-white rounded-lg shadow p-4">
+        <h2 className="text-lg font-semibold text-gray-900 mb-3">内容と画像</h2>
+        
+        <div className="grid grid-cols-2 gap-4">
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
               内容 <span className="text-red-500">*</span>
@@ -195,27 +294,11 @@ export default function PostEditForm({ post }: PostEditFormProps) {
               value={formData.content}
               onChange={(e) => setFormData({ ...formData, content: e.target.value })}
               required
-              rows={15}
+              rows={20}
               className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500 font-mono text-sm"
             />
           </div>
 
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              ステータス
-            </label>
-            <select
-              value={formData.status}
-              onChange={(e) => setFormData({ ...formData, status: e.target.value })}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
-            >
-              <option value="draft">下書き</option>
-              <option value="published">公開</option>
-              <option value="trash">ゴミ箱</option>
-            </select>
-          </div>
-
-          {/* 画像管理 */}
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
               画像
@@ -234,11 +317,11 @@ export default function PostEditForm({ post }: PostEditFormProps) {
                   <button
                     type="button"
                     onClick={handleImageRemove}
-                    className="px-4 py-2 text-sm bg-red-600 text-white rounded-md hover:bg-red-700"
+                    className="px-3 py-1.5 text-sm bg-red-600 text-white rounded-md hover:bg-red-700"
                   >
                     画像を削除
                   </button>
-                  <label className="px-4 py-2 text-sm bg-blue-600 text-white rounded-md hover:bg-blue-700 cursor-pointer">
+                  <label className="px-3 py-1.5 text-sm bg-blue-600 text-white rounded-md hover:bg-blue-700 cursor-pointer">
                     画像を変更
                     <input
                       type="file"
@@ -253,7 +336,7 @@ export default function PostEditForm({ post }: PostEditFormProps) {
               <div>
                 <label className="block w-full px-4 py-8 border-2 border-dashed border-gray-300 rounded-lg text-center cursor-pointer hover:border-gray-400">
                   <div className="space-y-2">
-                    <svg className="mx-auto h-12 w-12 text-gray-400" stroke="currentColor" fill="none" viewBox="0 0 48 48">
+                    <svg className="mx-auto h-10 w-10 text-gray-400" stroke="currentColor" fill="none" viewBox="0 0 48 48">
                       <path d="M28 8H12a4 4 0 00-4 4v20m32-12v8m0 0v8a4 4 0 01-4 4H12a4 4 0 01-4-4v-4m32-4l-3.172-3.172a4 4 0 00-5.656 0L28 28M8 32l9.172-9.172a4 4 0 015.656 0L28 28m0 0l4 4m4-24h8m-4-4v8m-12 4h.02" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
                     </svg>
                     <div className="text-sm text-gray-600">
@@ -274,48 +357,110 @@ export default function PostEditForm({ post }: PostEditFormProps) {
         </div>
       </div>
 
-      {/* その他の情報 */}
-      <div className="bg-white rounded-lg shadow p-6">
-        <h2 className="text-lg font-semibold text-gray-900 mb-4">その他の情報</h2>
-        
-        <div className="space-y-2 text-sm text-gray-600">
-          <p>
-            <span className="font-medium">投稿者:</span>{' '}
-            {post.users?.name || 'ゲスト'}
-          </p>
-          <p>
-            <span className="font-medium">作成日:</span>{' '}
-            {new Date(post.created_at).toLocaleString('ja-JP')}
-          </p>
-        </div>
-      </div>
+      {/* ベストアンサー選択 */}
+      {post.comments && post.comments.length > 0 && (
+        <div className="bg-white rounded-lg shadow p-6">
+          <div className="flex items-center justify-between mb-4">
+            <h2 className="text-lg font-semibold text-gray-900">ベストアンサー選択</h2>
+            <span className="text-sm text-gray-600">
+              コメント数: <span className="font-medium text-gray-900">{post.comments.length}件</span>
+            </span>
+          </div>
+          
+          <div className="space-y-3">
+            <div className="flex items-center justify-between mb-4">
+              <div className="flex items-center gap-2">
+                {bestAnswerId ? (
+                  <>
+                    <div className="flex flex-col gap-1">
+                      <span className="inline-flex px-3 py-1.5 text-sm bg-green-100 text-green-800 rounded-md font-medium">
+                        ✓ ベストアンサー設定済み (ID: {bestAnswerId})
+                      </span>
+                      {post.best_answer_selected_at && (
+                        <span className="text-xs text-gray-600 ml-1">
+                          選択日時: {new Date(post.best_answer_selected_at).toLocaleString('ja-JP', { 
+                            year: 'numeric', 
+                            month: '2-digit', 
+                            day: '2-digit', 
+                            hour: '2-digit', 
+                            minute: '2-digit' 
+                          })}
+                        </span>
+                      )}
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => setBestAnswerId(null)}
+                      className="px-4 py-2 text-sm bg-red-600 text-white rounded-md hover:bg-red-700 transition-colors"
+                    >
+                      ✕ ベストアンサーを取り消す
+                    </button>
+                  </>
+                ) : (
+                  <span className="text-sm text-gray-500">
+                    ベストアンサーが設定されていません。下のコメントから選択してください。
+                  </span>
+                )}
+              </div>
+            </div>
 
-      {/* 保存ボタン */}
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-4">
-          <button
-            type="submit"
-            disabled={loading}
-            className="px-6 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed"
-          >
-            {loading ? '保存中...' : '投稿を更新'}
-          </button>
-          <a
-            href="/admin/posts"
-            className="px-6 py-2 text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50"
-          >
-            キャンセル
-          </a>
+            <div className="space-y-2 max-h-96 overflow-y-auto">
+              {post.comments.map((comment) => {
+                const isPostAuthor = comment.user_id === post.user_id;
+                const isSelectable = !isPostAuthor;
+                
+                return (
+                  <div
+                    key={comment.id}
+                    className={`p-4 border rounded-lg transition-colors ${
+                      isPostAuthor
+                        ? 'bg-gray-100 border-gray-300 cursor-not-allowed opacity-60'
+                        : bestAnswerId === comment.id
+                        ? 'border-green-500 bg-green-50 cursor-pointer'
+                        : 'border-gray-200 hover:border-blue-300 hover:bg-blue-50 cursor-pointer'
+                    }`}
+                    onClick={() => isSelectable && setBestAnswerId(comment.id)}
+                  >
+                    <div className="flex items-start justify-between mb-2">
+                      <div className="flex items-center gap-2">
+                        <span className={`text-sm font-medium ${isPostAuthor ? 'text-gray-500' : 'text-gray-900'}`}>
+                          {comment.users?.name || 'ゲスト'}
+                        </span>
+                        <span className="text-xs text-gray-500">
+                          ID: {comment.id}
+                        </span>
+                        {isPostAuthor && (
+                          <span className="inline-flex px-2 py-1 text-xs bg-gray-500 text-white rounded font-semibold">
+                            投稿者
+                          </span>
+                        )}
+                        {bestAnswerId === comment.id && (
+                          <span className="inline-flex px-2 py-1 text-xs bg-green-600 text-white rounded font-semibold">
+                            ベストアンサー
+                          </span>
+                        )}
+                      </div>
+                      <span className="text-xs text-gray-500">
+                        {new Date(comment.created_at).toLocaleDateString('ja-JP')}
+                      </span>
+                    </div>
+                    <div 
+                      className={`text-sm line-clamp-3 ${isPostAuthor ? 'text-gray-500' : 'text-gray-700'}`}
+                      dangerouslySetInnerHTML={{ __html: comment.content }}
+                    />
+                    {isPostAuthor && (
+                      <p className="text-xs text-gray-500 mt-2 italic">
+                        ※ 投稿者自身のコメントはベストアンサーに設定できません
+                      </p>
+                    )}
+                  </div>
+                );
+              })}
+            </div>
+          </div>
         </div>
-        <button
-          type="button"
-          onClick={handleDelete}
-          disabled={loading}
-          className="px-6 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 disabled:opacity-50 disabled:cursor-not-allowed"
-        >
-          {loading ? '削除中...' : '投稿を削除'}
-        </button>
-      </div>
+      )}
+
     </form>
   );
 }

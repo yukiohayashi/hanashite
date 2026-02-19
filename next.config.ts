@@ -28,6 +28,11 @@ const nextConfig: NextConfig = {
         protocol: 'https',
         hostname: 'profile.line-scdn.net',
       },
+      {
+        protocol: 'http',
+        hostname: '127.0.0.1',
+        port: '54331',
+      },
     ],
   },
   

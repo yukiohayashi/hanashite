@@ -7,29 +7,29 @@ services:
       context: .
       dockerfile: Dockerfile
       args:
-        - NEXT_PUBLIC_SUPABASE_URL=http://host.docker.internal:54321
+        - NEXT_PUBLIC_SUPABASE_URL=http://host.docker.internal:54331
         - NEXT_PUBLIC_SUPABASE_ANON_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZS1kZW1vIiwicm9sZSI6ImFub24iLCJleHAiOjE5ODM4MTI5OTZ9.CRXP1A7WOeoJeXxjNni43kdQwgnWNReilDMblYTn_I0
         - SUPABASE_SERVICE_ROLE_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZS1kZW1vIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImV4cCI6MTk4MzgxMjk5Nn0.EGIM96RAZx35lJzdJsyH-qQwv8Hdp7fsn3W0YpN81IU
-    container_name: anke-nextjs
+    container_name: hanashite-nextjs
     restart: unless-stopped
     env_file:
       - .env.local
     environment:
       - NODE_ENV=production
-      - NEXT_PUBLIC_SUPABASE_URL=http://host.docker.internal:54321
+      - NEXT_PUBLIC_SUPABASE_URL=http://host.docker.internal:54331
       - NEXT_PUBLIC_SUPABASE_ANON_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZS1kZW1vIiwicm9sZSI6ImFub24iLCJleHAiOjE5ODM4MTI5OTZ9.CRXP1A7WOeoJeXxjNni43kdQwgnWNReilDMblYTn_I0
       - SUPABASE_SERVICE_ROLE_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZS1kZW1vIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImV4cCI6MTk4MzgxMjk5Nn0.EGIM96RAZx35lJzdJsyH-qQwv8Hdp7fsn3W0YpN81IU
     expose:
       - "3000"
     networks:
-      - anke-network
+      - hanashite-network
     extra_hosts:
       - "host.docker.internal:host-gateway"
 
   # Nginx 1.27
   nginx:
     image: nginx:1.27-alpine
-    container_name: anke-nginx
+    container_name: hanashite-nginx
     restart: unless-stopped
     ports:
       - "8080:80"  # ポート8080でアクセス（3000と区別）
@@ -41,24 +41,24 @@ services:
     depends_on:
       - nextjs
     networks:
-      - anke-network
+      - hanashite-network
 
   # CRON for AI Auto Creator
   cron:
     build:
       context: ./docker/cron
       dockerfile: Dockerfile
-    container_name: anke-cron
+    container_name: hanashite-cron
     restart: unless-stopped
     depends_on:
       - nextjs
     networks:
-      - anke-network
+      - hanashite-network
     extra_hosts:
       - "host.docker.internal:host-gateway"
     volumes:
       - ./docker/cron/crontab:/etc/crontabs/root:ro
 
 networks:
-  anke-network:
+  hanashite-network:
     driver: bridge

@@ -9,9 +9,30 @@ export default function HeaderClient() {
   const { data: session, status } = useSession();
   const pathname = usePathname();
   const [unreadCount, setUnreadCount] = useState(0);
+  const [avatarUrl, setAvatarUrl] = useState('');
 
-  // セッションから直接アバター画像を取得（APIコール不要）
-  const avatarUrl = session?.user?.image || '';
+  // ユーザーのアバター画像を取得（DiceBear対応）
+  useEffect(() => {
+    if (session?.user?.id) {
+      fetch(`/api/user/${session.user.id}`)
+        .then(res => res.json())
+        .then(data => {
+          if (data.use_custom_image && data.user_img_url) {
+            setAvatarUrl(data.user_img_url);
+          } else {
+            const seed = data.avatar_seed || session.user.id;
+            const style = data.avatar_style || 'big-smile';
+            setAvatarUrl(`https://api.dicebear.com/9.x/${style}/svg?seed=${encodeURIComponent(seed)}&size=40`);
+          }
+        })
+        .catch(() => {
+          // エラー時はデフォルトDiceBearアバターを使用
+          setAvatarUrl(`https://api.dicebear.com/9.x/big-smile/svg?seed=${encodeURIComponent(session.user.id)}&size=40`);
+        });
+    } else {
+      setAvatarUrl('');
+    }
+  }, [session]);
 
   // 未読通知数を取得
   const fetchUnreadCount = () => {
@@ -52,23 +73,14 @@ export default function HeaderClient() {
         <span className="text-gray-500 text-sm">読み込み中...</span>
       ) : session ? (
         <>
-          <Link href="/mypage" className="relative flex flex-col items-center">
+          <Link href="/notifications" className="relative flex flex-col items-center">
             <div className="relative">
-              {avatarUrl ? (
-                <span className="flex items-center">
-                  <img 
-                    src={avatarUrl}
-                    alt="プロフィール画像" 
-                    className="border border-gray-300 rounded-full w-10 h-10 object-cover"
-                    id="header-avatar"
-                  />
-                </span>
-              ) : (
-                <div className="relative bg-gray-300 rounded-full w-10 h-10 overflow-hidden" id="header-avatar">
-                  <div className="absolute top-[8px] left-1/2 bg-white rounded-full w-[18px] h-[18px] -translate-x-1/2"></div>
-                  <div className="absolute top-[22px] left-1/2 bg-white rounded-[50%_50%_50%_50%/60%_60%_40%_40%] w-[27px] h-[20px] -translate-x-1/2"></div>
-                </div>
-              )}
+              <img 
+                src={avatarUrl || `https://api.dicebear.com/9.x/big-smile/svg?seed=guest&size=40`}
+                alt="プロフィール画像" 
+                className="border-1 border-gray-300 rounded-full w-10 h-10 object-cover"
+                id="header-avatar"
+              />
             </div>
             {/* 未読通知ドット */}
             {unreadCount > 0 && (

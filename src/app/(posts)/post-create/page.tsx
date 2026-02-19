@@ -7,7 +7,7 @@ import PostCreateForm from './PostCreateForm';
 import type { Metadata } from 'next';
 
 export const metadata: Metadata = {
-  title: 'アンケート作成',
+  title: '相談内容を作成',
 };
 
 export default async function AnkeCreatePage() {
@@ -25,7 +25,7 @@ export default async function AnkeCreatePage() {
         <div className="flex flex-col md:flex-row justify-center gap-4 md:gap-5">
         <main className="flex-1 md:min-w-[690px] w-full">
           <h1 className="mb-4 p-0 font-bold text-[#ff6b35] text-2xl">
-            アンケート作成
+            相談内容を作成
           </h1>
           
           <PostCreateForm />

@@ -7,6 +7,7 @@ import { useSearchParams, useRouter } from 'next/navigation';
 interface Post {
   id: number;
   title: string;
+  content?: string;
   status: string;
   created_at: string;
   user_id: number;
@@ -14,13 +15,15 @@ interface Post {
   og_image?: string | null;
   category_id?: number | null;
   total_votes?: number;
+  best_answer_id?: number | null;
+  best_answer_selected_at?: string | null;
   users: {
     id: number;
     name: string;
   } | null;
   categories?: { id: number; name: string }[] | { id: number; name: string } | null;
   keywords?: Array<{ id: number; keyword: string }>;
-  voteChoices?: Array<{ choice: string; vote_count: number }>;
+  bestAnswer?: { userId: string; userName: string } | null;
 }
 
 interface PostsTableProps {
@@ -305,25 +308,28 @@ export default function PostsTable({ posts: initialPosts, initialCounts }: Posts
                 タイトル
               </th>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                Ankeカテゴリ
+                本文
               </th>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                ニックネーム
+                ハナシテカテゴリ
               </th>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                投票選択肢
+                相談者
               </th>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100" onClick={() => handleSort('vote_count')}>
                 合計投票数 {sortBy === 'vote_count' && (sortOrder === 'asc' ? '↑' : '↓')}
               </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                投稿者
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100" onClick={() => handleSort('best_answer_id')}>
+                ベストアンサー {sortBy === 'best_answer_id' && (sortOrder === 'asc' ? '↑' : '↓')}
+              </th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100" onClick={() => handleSort('best_answer_selected_at')}>
+                ベストアンサー日付 {sortBy === 'best_answer_selected_at' && (sortOrder === 'asc' ? '↑' : '↓')}
               </th>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100" onClick={() => handleSort('created_at')}>
-                日付 {sortBy === 'created_at' && (sortOrder === 'asc' ? '↑' : '↓')}
+                投稿日付 {sortBy === 'created_at' && (sortOrder === 'asc' ? '↑' : '↓')}
               </th>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                Ankeキーワード
+                ハナシテキーワード
               </th>
             </tr>
           </thead>
@@ -371,9 +377,27 @@ export default function PostsTable({ posts: initialPosts, initialCounts }: Posts
                   >
                     {post.title}
                   </a>
-                  <div className="text-xs text-gray-500 mt-1">
-                    ID: {post.id}
+                  <div className="flex items-center gap-2 mt-1">
+                    <span className="text-xs text-gray-500">ID: {post.id}</span>
+                    <a
+                      href={`/posts/${post.id}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-xs text-blue-600 hover:text-blue-800 hover:underline"
+                    >
+                      実際のページを見る
+                    </a>
                   </div>
+                </td>
+                <td className="px-6 py-4 text-sm text-gray-600">
+                  {post.content ? (
+                    <span className="line-clamp-2">
+                      {post.content.replace(/<[^>]*>/g, '').replace(/&nbsp;/g, ' ').trim().substring(0, 20)}
+                      {post.content.replace(/<[^>]*>/g, '').replace(/&nbsp;/g, ' ').trim().length > 20 ? '...' : ''}
+                    </span>
+                  ) : (
+                    <span className="text-gray-400">—</span>
+                  )}
                 </td>
                 <td className="px-6 py-4 text-sm text-gray-900">
                   {post.categories ? (
@@ -385,23 +409,15 @@ export default function PostsTable({ posts: initialPosts, initialCounts }: Posts
                   )}
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                  {post.users?.name || 'ゲスト'}
-                </td>
-                <td className="px-6 py-4 text-sm text-gray-600">
-                  {post.voteChoices && post.voteChoices.length > 0 ? (
-                    <div style={{ fontSize: '12px', lineHeight: '1.4' }}>
-                      {post.voteChoices.map((choice, idx) => {
-                        const totalVotes = post.voteChoices!.reduce((sum, c) => sum + (c.vote_count || 0), 0);
-                        const percentage = totalVotes > 0 ? Math.round((choice.vote_count / totalVotes) * 1000) / 10 : 0;
-                        return (
-                          <div key={idx} style={{ marginBottom: '3px' }}>
-                            <strong>{choice.choice}:</strong> {choice.vote_count}票 ({percentage}%)
-                          </div>
-                        );
-                      })}
-                    </div>
+                  {post.user_id ? (
+                    <a
+                      href={`/admin/users/${post.user_id}/posts`}
+                      className="text-blue-600 hover:text-blue-800 hover:underline"
+                    >
+                      {post.users?.name || 'ゲスト'}
+                    </a>
                   ) : (
-                    <span style={{ color: '#999' }}>投票なし</span>
+                    <span>{post.users?.name || 'ゲスト'}</span>
                   )}
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
@@ -410,12 +426,30 @@ export default function PostsTable({ posts: initialPosts, initialCounts }: Posts
                   </span>
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                  {post.users?.name || 'ゲスト'}
+                  {post.bestAnswer ? (
+                    <span className="inline-flex px-2 py-1 text-xs bg-green-100 text-green-800 rounded font-semibold">
+                      {post.bestAnswer.userName}
+                    </span>
+                  ) : (
+                    <span className="text-gray-400">—</span>
+                  )}
+                </td>
+                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                  {post.best_answer_selected_at ? (
+                    <>
+                      {new Date(post.best_answer_selected_at).toLocaleDateString('ja-JP')}
+                      <div className="text-xs">
+                        {new Date(post.best_answer_selected_at).toLocaleTimeString('ja-JP', { hour: '2-digit', minute: '2-digit' })}
+                      </div>
+                    </>
+                  ) : (
+                    <span className="text-gray-400">—</span>
+                  )}
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                   {new Date(post.created_at).toLocaleDateString('ja-JP')}
                   <div className="text-xs">
-                    {new Date(post.created_at).toLocaleTimeString('ja-JP', { hour: '2-digit', minute: '2-digit', second: '2-digit' })}
+                    {new Date(post.created_at).toLocaleTimeString('ja-JP', { hour: '2-digit', minute: '2-digit' })}
                   </div>
                 </td>
                 <td className="px-6 py-4 text-sm text-gray-900">

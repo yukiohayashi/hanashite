@@ -1,12 +1,12 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { useRouter } from 'next/navigation';
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { Checkbox } from "@/components/ui/checkbox";
+import { Avatar, AvatarStyle } from '@/components/Avatar';
+import { supabase } from '@/lib/supabase';
 
 interface Category {
   id: number;
@@ -36,6 +36,9 @@ interface User {
   profile_slug?: string;
   profile_slug_updated_at?: string;
   user_img_url?: string;
+  avatar_style?: AvatarStyle;
+  avatar_seed?: string;
+  use_custom_image?: boolean;
 }
 
 interface ProfileSetFormProps {
@@ -63,16 +66,21 @@ const JOBS = [
   '主婦', '無職', 'その他'
 ];
 
+
+type ImageMode = 'upload' | 'avatar' | 'none';
+
 export default function ProfileSetForm({ user, categories, isFirstTime }: ProfileSetFormProps) {
-  const router = useRouter();
   
   const [nickname, setNickname] = useState(user.name || '');
   const [profile, setProfile] = useState(user.user_description || '');
   const [profileSlug, setProfileSlug] = useState(user.profile_slug || '');
   const [snsX, setSnsX] = useState(user.sns_x || '');
   const [participatePoints, setParticipatePoints] = useState(user.participate_points || false);
+  const [bestAnswerPoints, setBestAnswerPoints] = useState<number>(10);
   const [sex, setSex] = useState(user.sex || '');
-  const [birthYear, setBirthYear] = useState(user.birth_year || '');
+  const currentYear = new Date().getFullYear();
+  const defaultBirthYear = currentYear - 30; // デフォルト30歳
+  const [birthYear, setBirthYear] = useState(user.birth_year || String(defaultBirthYear));
   const [prefecture, setPrefecture] = useState(user.prefecture || '');
   const [marriage, setMarriage] = useState(user.marriage || 'not_specified');
   const [childCount, setChildCount] = useState(user.child_count || 0);
@@ -85,6 +93,18 @@ export default function ProfileSetForm({ user, categories, isFirstTime }: Profil
   const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
   const [avatarFile, setAvatarFile] = useState<File | null>(null);
   
+  // DiceBearアバター関連の状態
+  const [imageMode, setImageMode] = useState<ImageMode>(() => {
+    console.log('Initializing imageMode:', {
+      use_custom_image: user.use_custom_image,
+      user_img_url: user.user_img_url,
+      avatar_seed: user.avatar_seed
+    });
+    return user.use_custom_image ? 'upload' : (user.avatar_seed ? 'avatar' : 'none');
+  });
+  const [avatarStyle, setAvatarStyle] = useState<AvatarStyle>(user.avatar_style || 'fun-emoji');
+  const [avatarSeed, setAvatarSeed] = useState<string>(user.avatar_seed || user.id);
+  
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [errors, setErrors] = useState<string[]>([]);
   const [success, setSuccess] = useState(false);
@@ -95,7 +115,7 @@ export default function ProfileSetForm({ user, categories, isFirstTime }: Profil
       try {
         const cats = JSON.parse(user.interest_categories);
         setSelectedCategories(Array.isArray(cats) ? cats : []);
-      } catch (e) {
+      } catch {
         setSelectedCategories([]);
       }
     }
@@ -104,6 +124,22 @@ export default function ProfileSetForm({ user, categories, isFirstTime }: Profil
   useEffect(() => {
     setProfileLength(profile.length);
   }, [profile]);
+
+  useEffect(() => {
+    const fetchBestAnswerPoints = async () => {
+      const { data } = await supabase
+        .from('point_settings')
+        .select('point_value')
+        .eq('point_type', 'best_answer')
+        .single();
+      
+      if (data) {
+        setBestAnswerPoints(data.point_value);
+      }
+    };
+    
+    fetchBestAnswerPoints();
+  }, []);
 
   const canChangeSlug = () => {
     if (!user.profile_slug_updated_at) return true;
@@ -132,11 +168,18 @@ export default function ProfileSetForm({ user, categories, isFirstTime }: Profil
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    console.log('Form submission started');
+    console.log('Current imageMode:', imageMode);
+    console.log('Avatar file:', avatarFile ? avatarFile.name : 'No file');
     
     const newErrors: string[] = [];
     
     if (!nickname.trim()) {
       newErrors.push('ニックネームを入力してください');
+    }
+    
+    if (!job) {
+      newErrors.push('職種を選択してください');
     }
     
     if (profileSlug && profileSlug !== `?user_id=${user.id}`) {
@@ -177,16 +220,35 @@ export default function ProfileSetForm({ user, categories, isFirstTime }: Profil
       formData.append('emailSubscription', emailSubscription ? '1' : '0');
       formData.append('interestCategories', JSON.stringify(selectedCategories));
       
-      if (avatarFile) {
+      // DiceBearアバター関連の情報を追加
+      formData.append('imageMode', imageMode);
+      formData.append('avatarStyle', avatarStyle);
+      formData.append('avatarSeed', avatarSeed);
+      formData.append('useCustomImage', imageMode === 'upload' ? '1' : '0');
+      
+      if (avatarFile && imageMode === 'upload') {
         formData.append('avatar', avatarFile);
       }
       
-      const response = await fetch('/api/profileset', {
-        method: 'POST',
-        body: formData,
-      });
-      
-      const data = await response.json();
+      let data;
+      try {
+        console.log('Sending request to /api/user/profileset');
+        const response = await fetch('/api/user/profileset', {
+          method: 'POST',
+          body: formData,
+        });
+        
+        console.log('Response status:', response.status);
+        data = await response.json();
+        
+        console.log('API Response:', data);
+        console.log('Updated user data:', data.user);
+      } catch (error) {
+        console.error('Request error:', error);
+        setErrors(['ネットワークエラーが発生しました']);
+        setIsSubmitting(false);
+        return;
+      }
       
       if (data.success) {
         setSuccess(true);
@@ -204,7 +266,9 @@ export default function ProfileSetForm({ user, categories, isFirstTime }: Profil
     }
   };
 
-  const currentYear = new Date().getFullYear();
+  // 13歳以上のみ利用可能（最大年齢は1940年生まれ）
+  const minBirthYear = 1940;
+  const maxBirthYear = currentYear - 13;
 
   return (
     <>
@@ -237,7 +301,7 @@ export default function ProfileSetForm({ user, categories, isFirstTime }: Profil
           <label className="block mb-2 font-bold text-gray-700">
             興味のあるカテゴリ（１つ以上選択して下さい）
           </label>
-          <div className="gap-x-1 gap-y-1 grid grid-cols-3">
+          <div className="gap-x-1 gap-y-1 grid grid-cols-6">
             {categories.map((category) => (
               <label key={category.id} className="items-center space-x-1 hover:bg-gray-50 p-1 rounded whitespace-nowrap cursor-pointer">
                 <input
@@ -249,36 +313,6 @@ export default function ProfileSetForm({ user, categories, isFirstTime }: Profil
                 <span className="text-gray-700 text-sm leading-none">{category.name}</span>
               </label>
             ))}
-          </div>
-        </div>
-        
-        <div className="mb-4">
-          <label className="block mb-2 font-bold text-gray-700">
-            プロフィールURL
-            {!canChangeSlug() ? (
-              <sup className="text-red-600 text-xs">※変更後1ヶ月間は変更できません（あと{getDaysUntilChange()}日）</sup>
-            ) : (
-              <sup className="text-gray-600 text-xs">※英数字、ハイフン、アンダースコアのみ（3-30文字）</sup>
-            )}
-          </label>
-          <div className="flex items-center gap-2">
-            <span className="font-bold text-gray-700 text-sm whitespace-nowrap">https://anke.jp/user/</span>
-            <Input
-              type="text"
-              value={profileSlug}
-              onChange={(e) => setProfileSlug(e.target.value)}
-              placeholder="tanaka_taro"
-              disabled={!canChangeSlug()}
-              className={`flex-1 max-w-[200px] text-sm ${!canChangeSlug() ? 'bg-gray-200' : ''}`}
-            />
-            <a
-              href={profileSlug && profileSlug !== `?user_id=${user.id}` ? `/users/${profileSlug}` : `/users/${user.id}`}
-              target="_blank"
-              className="flex-shrink-0 text-orange-500 hover:text-orange-600 text-lg"
-              title="プロフィールページを見る"
-            >
-              <i className="fas fa-external-link-alt"></i>
-            </a>
           </div>
         </div>
         
@@ -316,6 +350,290 @@ export default function ProfileSetForm({ user, categories, isFirstTime }: Profil
           </div>
         </div>
         
+        {/* プロフィール画像選択（DiceBear統合版） */}
+        <div className="mb-4">
+          <label className="block mb-2 font-bold text-gray-700">プロフィール画像</label>
+          
+          {/* プレビュー */}
+          <div className="flex justify-center mb-4">
+            <div className="relative">
+              <Avatar
+                userId={imageMode === 'avatar' ? avatarSeed : user.id}
+                imageUrl={
+                  imageMode === 'upload' 
+                    ? (avatarFile ? URL.createObjectURL(avatarFile) : user.user_img_url)
+                    : imageMode === 'none'
+                    ? null
+                    : null
+                }
+                style={avatarStyle}
+                size={120}
+                className="border-4 border-white shadow-lg"
+              />
+              {imageMode === 'none' && (
+                <div className="absolute -bottom-2 left-1/2 transform -translate-x-1/2 bg-gray-100 px-2 py-1 rounded text-xs text-gray-600">
+                  未設定
+                </div>
+              )}
+            </div>
+          </div>
+
+          {/* モード選択ボタン */}
+          <div className="flex gap-2 justify-center mb-4">
+            <button
+              type="button"
+              onClick={() => setImageMode('upload')}
+              className={`
+                px-4 py-2 rounded-md text-sm font-medium transition-colors
+                ${
+                  imageMode === 'upload'
+                    ? 'bg-orange-500 text-white'
+                    : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                }
+              `}
+            >
+              画像をアップロード
+            </button>
+            <button
+              type="button"
+              onClick={() => setImageMode('avatar')}
+              className={`
+                px-4 py-2 rounded-md text-sm font-medium transition-colors
+                ${
+                  imageMode === 'avatar'
+                    ? 'bg-orange-500 text-white'
+                    : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                }
+              `}
+            >
+              アバターを選択
+            </button>
+            <button
+              type="button"
+              onClick={() => setImageMode('none')}
+              className={`
+                px-4 py-2 rounded-md text-sm font-medium transition-colors
+                ${
+                  imageMode === 'none'
+                    ? 'bg-orange-500 text-white'
+                    : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                }
+              `}
+            >
+              未設定
+            </button>
+          </div>
+
+          {/* 画像アップロードモード */}
+          {imageMode === 'upload' && (
+            <div className="space-y-4 bg-gray-50 p-4 rounded-lg">
+              <div className="text-sm text-gray-700">
+                プロフィール画像をアップロードしてください。
+              </div>
+              
+              <input
+                type="file"
+                accept="image/jpeg,image/png,image/webp"
+                onChange={(e) => {
+                  const file = e.target.files?.[0];
+                  if (file) {
+                    setAvatarFile(file);
+                    setImageMode('upload');
+                  }
+                }}
+                className="block w-full text-sm text-gray-500
+                  file:mr-4 file:py-2 file:px-4
+                  file:rounded-md file:border-0
+                  file:text-sm file:font-medium
+                  file:bg-orange-50 file:text-orange-700
+                  hover:file:bg-orange-100 cursor-pointer"
+              />
+              
+              <div className="text-xs text-gray-500 bg-white p-3 rounded border border-gray-200">
+                <div className="font-medium mb-1">アップロード要件：</div>
+                <ul className="list-disc list-inside space-y-1">
+                  <li>ファイルサイズ: 2MBまで</li>
+                  <li>ファイル形式: JPEG、PNG、WEBP</li>
+                  <li>他者の権利侵害や暴力的な表現は禁止</li>
+                  <li>性的な表現を含む画像はNG</li>
+                </ul>
+              </div>
+            </div>
+          )}
+
+          {/* アバター選択モード */}
+          {imageMode === 'avatar' && (
+            <div className="bg-gray-50 p-4 rounded-lg space-y-6">
+              <div className="max-h-[500px] overflow-y-auto border border-gray-200 rounded-lg bg-white p-3 space-y-6">
+                {/* 絵文字スタイル */}
+                <div>
+                  <div className="text-sm font-medium text-gray-700 mb-2 sticky top-0 bg-white py-1 z-10">
+                    🎭 絵文字
+                  </div>
+                  <div className="grid grid-cols-5 md:grid-cols-8 gap-2">
+                    {Array.from({ length: 24 }, (_, i) => {
+                      const seed = `emoji-${i + 1}`;
+                      const isSelected = avatarSeed === seed && avatarStyle === 'fun-emoji';
+                      return (
+                        <button
+                          key={seed}
+                          type="button"
+                          onClick={() => { setAvatarStyle('fun-emoji'); setAvatarSeed(seed); }}
+                          className={`p-1 rounded-lg transition-all ${isSelected ? 'ring-2 ring-orange-500 bg-orange-50' : 'hover:bg-gray-100'}`}
+                          title={`絵文字 ${i + 1}`}
+                        >
+                          <img 
+                            src={`https://api.dicebear.com/9.x/fun-emoji/svg?seed=${seed}&size=40`}
+                            alt={`絵文字 ${i + 1}`}
+                            width={40}
+                            height={40}
+                            loading="lazy"
+                          />
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+
+                {/* アバタースタイル */}
+                <div>
+                  <div className="text-sm font-medium text-gray-700 mb-2 sticky top-0 bg-white py-1 z-10">
+                    👤 アバター
+                  </div>
+                  <div className="grid grid-cols-5 md:grid-cols-8 gap-2">
+                    {Array.from({ length: 24 }, (_, i) => {
+                      const seed = `avatar-${i + 1}`;
+                      const isSelected = avatarSeed === seed && avatarStyle === 'avataaars';
+                      return (
+                        <button
+                          key={seed}
+                          type="button"
+                          onClick={() => { setAvatarStyle('avataaars'); setAvatarSeed(seed); }}
+                          className={`p-1 rounded-lg transition-all ${isSelected ? 'ring-2 ring-orange-500 bg-orange-50' : 'hover:bg-gray-100'}`}
+                          title={`アバター ${i + 1}`}
+                        >
+                          <img 
+                            src={`https://api.dicebear.com/9.x/avataaars/svg?seed=${seed}&size=40`}
+                            alt={`アバター ${i + 1}`}
+                            width={40}
+                            height={40}
+                            loading="lazy"
+                          />
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+
+                </div>
+              <div className="text-xs text-gray-500 text-center">
+                48種類のキャラクターから選べます
+              </div>
+            </div>
+          )}
+
+          {/* 未設定モード */}
+          {imageMode === 'none' && (
+            <div className="bg-gray-50 p-4 rounded-lg">
+              <div className="text-sm text-gray-600 text-center">
+                プロフィール画像が未設定の場合、デフォルトのアバターが自動的に表示されます。
+              </div>
+            </div>
+          )}
+        </div>
+        
+        <div className="mb-4">
+          <label className="block mb-2 font-bold text-gray-700">
+            性別<sup className="text-red-600">※</sup>
+          </label>
+          <select
+            value={sex}
+            onChange={(e) => setSex(e.target.value)}
+            className="p-2.5 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-orange-400 w-full"
+          >
+            <option value="female">女性</option>
+            <option value="male">男性</option>
+            <option value="other">その他</option>
+          </select>
+        </div>
+        
+        <div className="mb-4">
+          <label className="block mb-2 font-bold text-gray-700">
+            生まれた年<sup className="text-red-600">※</sup>
+            <span className="ml-2 text-gray-500 text-xs font-normal">※20代など年代のみ表示されます</span>
+          </label>
+          <select
+            value={birthYear}
+            onChange={(e) => setBirthYear(e.target.value)}
+            className="p-2.5 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-orange-400 w-full"
+          >
+            {Array.from({ length: maxBirthYear - minBirthYear + 1 }, (_, i) => maxBirthYear - i).map((year) => (
+              <option key={year} value={year}>{year}年生まれ</option>
+            ))}
+          </select>
+        </div>
+        
+        <div className="mb-4">
+          <label className="block mb-2 font-bold text-gray-700">
+            都道府県<sup className="text-red-600">※</sup>
+          </label>
+          <select
+            value={prefecture}
+            onChange={(e) => setPrefecture(e.target.value)}
+            className="p-2.5 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-orange-400 w-full"
+          >
+            {PREFECTURES.map((pref) => (
+              <option key={pref} value={pref}>{pref}</option>
+            ))}
+          </select>
+        </div>
+        
+        <div className="mb-4">
+          <label className="block mb-2 font-bold text-gray-700">
+            職種<sup className="text-red-600">※</sup>
+            <span className="ml-2 text-gray-500 text-xs font-normal">※表示されません</span>
+          </label>
+          <select
+            value={job}
+            onChange={(e) => setJob(e.target.value)}
+            className="p-2.5 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-orange-400 w-full"
+          >
+            {JOBS.map((j) => (
+              <option key={j} value={j}>{j}</option>
+            ))}
+          </select>
+        </div>
+        
+        <div className="mb-4">
+          <label className="block mb-2 font-bold text-gray-700">
+            プロフィールURL
+            {!canChangeSlug() ? (
+              <sup className="text-red-600 text-xs">※変更後1ヶ月間は変更できません（あと{getDaysUntilChange()}日）</sup>
+            ) : (
+              <sup className="text-gray-600 text-xs">※英数字、ハイフン、アンダースコアのみ（3-30文字）</sup>
+            )}
+          </label>
+          <div className="flex items-center gap-2">
+            <span className="font-bold text-gray-700 text-sm whitespace-nowrap">https://hanashite.jp/user/</span>
+            <Input
+              type="text"
+              value={profileSlug}
+              onChange={(e) => setProfileSlug(e.target.value)}
+              placeholder="tanaka_taro"
+              disabled={!canChangeSlug()}
+              className={`flex-1 max-w-[200px] text-sm ${!canChangeSlug() ? 'bg-gray-200' : ''}`}
+            />
+            <a
+              href={profileSlug && profileSlug !== `?user_id=${user.id}` ? `/users/${profileSlug}` : `/users/${user.id}`}
+              target="_blank"
+              className="shrink-0 text-orange-500 hover:text-orange-600 text-lg"
+              title="プロフィールページを見る"
+            >
+              <i className="fas fa-external-link-alt"></i>
+            </a>
+          </div>
+        </div>
+        
         <div className="mb-4">
           <label className="block mb-2 font-bold text-gray-700">X(url)</label>
           <Input
@@ -327,90 +645,20 @@ export default function ProfileSetForm({ user, categories, isFirstTime }: Profil
           <p className="mt-1 text-gray-600 text-xs">https://からすべて入力してください</p>
         </div>
         
-        <div className="mb-4">
-          <label className="block mb-2 font-bold text-gray-700">プロフィール画像</label>
-          {user.user_img_url && (
-            <div className="mb-2">
-              <img
-                src={user.user_img_url}
-                alt="プロフィール画像"
-                className="my-2 border-2 border-green-500 rounded max-w-[150px] h-auto"
-              />
-            </div>
-          )}
-          {!user.user_img_url && (
-            <div className="my-2 text-gray-600 text-sm">アバター画像: 未設定</div>
-          )}
-          <p className="mb-2 text-gray-600 text-xs">
-            ファイルサイズ：2MBまで｜ファイル形式：JPEG、PNG｜他者へ権利侵害や暴力・性的な表現を含む画像はNG
-          </p>
-          <input
-            type="file"
-            accept="image/jpeg,image/png"
-            onChange={(e) => setAvatarFile(e.target.files?.[0] || null)}
-            className="p-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-orange-400 w-full"
-          />
-        </div>
-        
-        <div className="bg-gray-50 my-6 p-4 border border-gray-300 rounded-lg">
+        <div className="flex justify-center items-center gap-2 my-6">
           <label className="flex items-center cursor-pointer">
             <input
               type="checkbox"
-              checked={participatePoints}
-              onChange={(e) => setParticipatePoints(e.target.checked)}
-              className="mr-3 rounded focus:ring-orange-400 w-5 h-5 text-orange-500"
+              checked={emailSubscription}
+              onChange={(e) => setEmailSubscription(e.target.checked)}
+              className="mr-2 rounded focus:ring-orange-400 w-4 h-4 text-orange-500"
             />
-            <span className="font-bold text-gray-800">ポイント獲得に参加する</span>
+            <span className="text-gray-700">メルマガを受け取る</span>
           </label>
-          <p className="mt-2 ml-8 text-gray-600 text-sm">
-            チェックを入れると、アンケート投稿・投票・コメントでポイントを獲得できます。<br />
-            参加する場合は、以下の詳細情報の入力をお願いします。
-          </p>
         </div>
         
         {participatePoints && (
           <div className="space-y-4">
-            <div className="mb-4">
-              <label className="block mb-2 font-bold text-gray-700">性別</label>
-              <select
-                value={sex}
-                onChange={(e) => setSex(e.target.value)}
-                className="p-2.5 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-orange-400 w-full"
-              >
-                <option value=""></option>
-                <option value="male">男性</option>
-                <option value="female">女性</option>
-              </select>
-            </div>
-            
-            <div className="mb-4">
-              <label className="block mb-2 font-bold text-gray-700">生まれた年</label>
-              <select
-                value={birthYear}
-                onChange={(e) => setBirthYear(e.target.value)}
-                className="p-2.5 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-orange-400 w-full"
-              >
-                <option value=""></option>
-                {Array.from({ length: currentYear - 1940 + 1 }, (_, i) => currentYear - i).map((year) => (
-                  <option key={year} value={year}>{year}年生まれ</option>
-                ))}
-              </select>
-            </div>
-            
-            <div className="mb-4">
-              <label className="block mb-2 font-bold text-gray-700">都道府県</label>
-              <select
-                value={prefecture}
-                onChange={(e) => setPrefecture(e.target.value)}
-                className="p-2.5 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-orange-400 w-full"
-              >
-                <option value=""></option>
-                {PREFECTURES.map((pref) => (
-                  <option key={pref} value={pref}>{pref}</option>
-                ))}
-              </select>
-            </div>
-            
             <div className="mb-4">
               <label className="block mb-2 font-bold text-gray-700">結婚の有無</label>
               <select
@@ -433,25 +681,10 @@ export default function ProfileSetForm({ user, categories, isFirstTime }: Profil
                 onChange={(e) => setChildCount(parseInt(e.target.value))}
                 className="p-2.5 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-orange-400 w-full"
               >
-                <option value=""></option>
                 {[0, 1, 2, 3, 4].map((num) => (
                   <option key={num} value={num}>{num}人</option>
                 ))}
                 <option value="5">5人以上</option>
-              </select>
-            </div>
-            
-            <div className="mb-4">
-              <label className="block mb-2 font-bold text-gray-700">職種</label>
-              <select
-                value={job}
-                onChange={(e) => setJob(e.target.value)}
-                className="p-2.5 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-orange-400 w-full"
-              >
-                <option value=""></option>
-                {JOBS.map((j) => (
-                  <option key={j} value={j}>{j}</option>
-                ))}
               </select>
             </div>
             
@@ -497,16 +730,20 @@ export default function ProfileSetForm({ user, categories, isFirstTime }: Profil
           </div>
         )}
         
-        <div className="flex justify-center items-center gap-2 my-6">
+        <div className="bg-gray-50 my-6 p-4 border border-gray-300 rounded-lg">
           <label className="flex items-center cursor-pointer">
             <input
               type="checkbox"
-              checked={emailSubscription}
-              onChange={(e) => setEmailSubscription(e.target.checked)}
-              className="mr-2 rounded focus:ring-orange-400 w-4 h-4 text-orange-500"
+              checked={participatePoints}
+              onChange={(e) => setParticipatePoints(e.target.checked)}
+              className="mr-3 rounded focus:ring-orange-400 w-5 h-5 text-orange-500"
             />
-            <span className="text-gray-700">メルマガを受け取る</span>
+            <span className="font-bold text-gray-800">ポイント獲得に参加する</span>
           </label>
+          <p className="mt-2 ml-8 text-gray-600 text-sm">
+            チェックを入れると、ベストアンサーで<span className="font-bold text-orange-600">{bestAnswerPoints}ポイント</span>獲得できます。<br />
+            参加する場合は、以下の詳細情報の入力をお願いします。
+          </p>
         </div>
         
         <div className="mt-8 text-center">

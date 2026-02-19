@@ -28,7 +28,7 @@ export default function UserRightSidebar() {
           if (data.profile_slug) {
             setProfileSlug(data.profile_slug);
           }
-          setUserName(data.user_nicename || data.name || session.user.name || 'ゲスト');
+          setUserName(data.name || session.user.name || 'ゲスト');
         })
         .catch(err => console.error('ユーザー情報取得エラー:', err));
     }
@@ -55,20 +55,7 @@ export default function UserRightSidebar() {
           <Link href="/profileset" className="text-[#ff6b35]">
             {displayName}
           </Link>
-          さん<br />
-          獲得ポイント: {totalPoints.toLocaleString()}pt
-        </div>
-        
-        <div className="my-2.5 text-center">
-          <Link href="/ankeworks" className="inline-block">
-            <Image 
-              src="/images/ankeworks.webp" 
-              alt="アンケワークス" 
-              width={64}
-              height={64}
-              className="w-16 h-auto"
-            />
-          </Link>
+          さん
         </div>
         
         <div className="flex justify-center my-2.5 w-full pc">

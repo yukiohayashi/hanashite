@@ -161,7 +161,7 @@ export async function POST(request: NextRequest) {
     
     const emailResult = await sendWelcomeEmail({
       email: user.email,
-      nickname: user.user_nicename || user.name,
+      nickname: user.name,
       password: newPassword,
       loginUrl,
       siteUrl,

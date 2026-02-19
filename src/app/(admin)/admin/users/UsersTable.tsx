@@ -12,6 +12,10 @@ interface User {
   is_banned?: boolean;
   status?: number;
   profile_slug?: string | null;
+  avatar_style?: string | null;
+  avatar_seed?: string | null;
+  use_custom_image?: boolean | null;
+  post_count?: number;
 }
 
 interface UsersTableProps {
@@ -238,6 +242,9 @@ export default function UsersTable({ users: initialUsers }: UsersTableProps) {
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                 ステータス
               </th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                相談件数
+              </th>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100" onClick={() => handleSort('created_at')}>
                 <div className="flex items-center gap-1">
                   登録日
@@ -270,7 +277,7 @@ export default function UsersTable({ users: initialUsers }: UsersTableProps) {
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap">
                   <div className="w-10 h-10 rounded-full overflow-hidden bg-gray-200">
-                    {user.user_img_url ? (
+                    {user.use_custom_image && user.user_img_url ? (
                       <img
                         src={user.user_img_url}
                         alt={user.name}
@@ -281,9 +288,11 @@ export default function UsersTable({ users: initialUsers }: UsersTableProps) {
                         }}
                       />
                     ) : (
-                      <div className="w-full h-full flex items-center justify-center text-gray-400">
-                        ?
-                      </div>
+                      <img
+                        src={`https://api.dicebear.com/9.x/${user.avatar_style || 'big-smile'}/svg?seed=${encodeURIComponent(user.avatar_seed || user.id)}&size=40`}
+                        alt={user.name}
+                        className="w-full h-full object-cover"
+                      />
                     )}
                   </div>
                 </td>
@@ -333,6 +342,14 @@ export default function UsersTable({ users: initialUsers }: UsersTableProps) {
                   >
                     {user.is_banned ? 'BAN' : 'アクティブ'}
                   </span>
+                </td>
+                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                  <a
+                    href={`/admin/users/${user.id}/posts`}
+                    className="text-blue-600 hover:text-blue-800 hover:underline font-medium"
+                  >
+                    {user.post_count || 0}件
+                  </a>
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                   {new Date(user.created_at).toLocaleDateString('ja-JP')}

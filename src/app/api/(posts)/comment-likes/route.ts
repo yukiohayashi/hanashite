@@ -45,7 +45,7 @@ export async function POST(request: NextRequest) {
       const { data: newLike, error: insertError } = await supabase
         .from('likes')
         .insert({
-          user_id: effectiveUserId,
+          user_id: effectiveUserId ? String(effectiveUserId) : null,
           like_type: 'comment',
           target_id: commentId,
           created_at: new Date().toISOString()

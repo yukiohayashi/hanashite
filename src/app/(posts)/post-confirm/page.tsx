@@ -8,7 +8,7 @@ import PostConfirmView from './PostConfirmView';
 import type { Metadata } from 'next';
 
 export const metadata: Metadata = {
-  title: 'アンケート確認',
+  title: '相談記事の確認',
 };
 
 export default async function PostConfirmPage() {
@@ -22,19 +22,16 @@ export default async function PostConfirmPage() {
     <div className="bg-gray-50 min-h-screen">
       <Header />
       
-      <div className="wrapper md:flex md:max-w-full md:mx-2.5 md:mt-2 md:justify-center pt-20 md:pt-2 mx-auto">
-        <main className="article__contents md:min-w-[690px] mx-1 md:mx-1.5">
+      <div className="wrapper md:flex md:max-w-7xl md:mx-auto md:mt-2 md:justify-center md:gap-4 pt-20 md:pt-4 mx-auto px-4 sm:px-6 lg:px-8">
+        <main className="flex-1 max-w-[760px]">
           <h1 className="mb-4 p-0 font-bold text-[#ff6b35] text-2xl">
-            アンケート作成確認
+            相談記事の確認画面
           </h1>
           
           <PostConfirmView />
         </main>
         
-        <aside className="hidden md:block md:shrink-0 md:w-80">
-          <div className="mb-4">
-            <RightSidebar />
-          </div>
+        <aside className="hidden md:block w-[280px]">
           <MyPageMenu />
         </aside>
       </div>

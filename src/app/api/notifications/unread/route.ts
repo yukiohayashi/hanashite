@@ -54,7 +54,7 @@ export async function GET(request: Request) {
         replies.forEach(reply => {
           notifications.push({
             type: 'reply',
-            link: `/posts/${reply.post_id}#anke-comment-${reply.id}`
+            link: `/posts/${reply.post_id}#reply-${reply.id}`
           });
         });
       }
@@ -83,7 +83,7 @@ export async function GET(request: Request) {
         postComments.forEach(comment => {
           notifications.push({
             type: 'post_comment',
-            link: `/posts/${comment.post_id}#anke-comment-${comment.id}`
+            link: `/posts/${comment.post_id}#reply-${comment.id}`
           });
         });
       }
@@ -95,13 +95,18 @@ export async function GET(request: Request) {
       .select('notification_type, notification_id')
       .eq('user_id', userId);
 
+    // アンカー部分を正規化してSetに格納
     const readSet = new Set(
-      (readNotifications || []).map(r => `${r.notification_type}-${r.notification_id}`)
+      (readNotifications || []).map(r => {
+        const normalizedId = r.notification_id.replace(/#anke-comment-/g, '#reply-');
+        return `${r.notification_type}-${normalizedId}`;
+      })
     );
 
-    // 未読通知数をカウント
+    // 未読通知数をカウント（通知リンクも正規化して比較）
     const unreadCount = notifications.filter(n => {
-      const notificationKey = `${n.type}-${n.link}`;
+      const normalizedLink = n.link.replace(/#anke-comment-/g, '#reply-');
+      const notificationKey = `${n.type}-${normalizedLink}`;
       return !readSet.has(notificationKey);
     }).length;
 

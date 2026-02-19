@@ -6,7 +6,7 @@ async function getPosts(statusFilter?: string, limit: number = 100, sortBy: stri
   
   let query = supabase
     .from('posts')
-    .select('id, title, status, created_at, user_id, thumbnail_url, og_image, category_id, total_votes, categories(id, name)');
+    .select('id, title, content, status, created_at, user_id, thumbnail_url, og_image, category_id, total_votes, best_answer_id, best_answer_selected_at, categories(id, name)');
 
   if (statusFilter) {
     query = query.eq('status', statusFilter);
@@ -53,20 +53,56 @@ async function getPosts(statusFilter?: string, limit: number = 100, sortBy: stri
 
   const userMap = new Map(users?.map(u => [u.id, u]) || []);
 
-  // 投票選択肢を一括取得
-  const { data: voteChoices } = await supabase
-    .from('vote_choices')
-    .select('post_id, choice, vote_count')
-    .in('post_id', postIds)
-    .order('id', { ascending: true });
+  // ベストアンサーを一括取得（commentsテーブルから）
+  const postsWithBestAnswer = posts.filter(p => p.best_answer_id);
+  const bestAnswerIds = postsWithBestAnswer.map(p => p.best_answer_id).filter(Boolean);
 
-  const voteChoicesMap = new Map<number, any[]>();
-  voteChoices?.forEach(vc => {
-    if (!voteChoicesMap.has(vc.post_id)) {
-      voteChoicesMap.set(vc.post_id, []);
+  console.log('Posts with best answer:', postsWithBestAnswer.length);
+  console.log('Best answer IDs:', bestAnswerIds);
+
+  const bestAnswerMap = new Map<number, { userId: string; userName: string }>();
+  
+  if (bestAnswerIds.length > 0) {
+    // commentsを取得
+    const { data: bestComments, error: commentsError } = await supabase
+      .from('comments')
+      .select('id, user_id')
+      .in('id', bestAnswerIds);
+
+    console.log('Best comments query result:', { bestComments, commentsError });
+    if (commentsError) {
+      console.error('Comments query error details:', JSON.stringify(commentsError, null, 2));
     }
-    voteChoicesMap.get(vc.post_id)!.push(vc);
-  });
+
+    if (bestComments && bestComments.length > 0) {
+      // ユーザーIDを収集
+      const commentUserIds = [...new Set(bestComments.map(c => c.user_id).filter(Boolean))];
+      
+      // ユーザー情報を取得
+      const { data: commentUsers } = await supabase
+        .from('users')
+        .select('id, name')
+        .in('id', commentUserIds);
+
+      const commentUserMap = new Map(commentUsers?.map(u => [u.id, u]) || []);
+
+      postsWithBestAnswer.forEach(post => {
+        const comment = bestComments.find(c => c.id === post.best_answer_id);
+        console.log(`Post ${post.id} - Looking for comment ${post.best_answer_id}:`, comment);
+        if (comment) {
+          const user = commentUserMap.get(comment.user_id);
+          bestAnswerMap.set(post.id, {
+            userId: comment.user_id || '',
+            userName: user?.name || 'ゲスト'
+          });
+          console.log(`Set best answer for post ${post.id}:`, user?.name || 'ゲスト');
+        }
+      });
+    }
+  }
+  
+  console.log('Final best answer map size:', bestAnswerMap.size);
+  console.log('Best answer map entries:', Array.from(bestAnswerMap.entries()));
 
   // キーワードを一括取得
   const { data: postKeywords } = await supabase
@@ -89,7 +125,7 @@ async function getPosts(statusFilter?: string, limit: number = 100, sortBy: stri
     ...post,
     users: userMap.get(post.user_id) || null,
     keywords: keywordsMap.get(post.id) || [],
-    voteChoices: voteChoicesMap.get(post.id) || [],
+    bestAnswer: bestAnswerMap.get(post.id) || null,
   }));
 
   return postsWithDetails;

@@ -33,10 +33,45 @@ export async function POST(request: Request) {
     const emailSubscription = formData.get('emailSubscription') === '1';
     const interestCategories = formData.get('interestCategories') as string;
     const avatarFile = formData.get('avatar') as File | null;
+    
+    // DiceBearアバター関連
+    const imageMode = formData.get('imageMode') as string;
+    const avatarStyle = formData.get('avatarStyle') as string;
+    const avatarSeed = formData.get('avatarSeed') as string;
+    const useCustomImage = formData.get('useCustomImage') === '1';
 
     if (!nickname?.trim()) {
       return NextResponse.json(
         { success: false, error: 'ニックネームを入力してください' },
+        { status: 400 }
+      );
+    }
+
+    // 必須項目のバリデーション
+    if (!sex) {
+      return NextResponse.json(
+        { success: false, error: '性別を選択してください' },
+        { status: 400 }
+      );
+    }
+
+    if (!birthYear) {
+      return NextResponse.json(
+        { success: false, error: '生まれた年を選択してください' },
+        { status: 400 }
+      );
+    }
+
+    if (!job) {
+      return NextResponse.json(
+        { success: false, error: '職種を選択してください' },
+        { status: 400 }
+      );
+    }
+
+    if (!prefecture) {
+      return NextResponse.json(
+        { success: false, error: '都道府県を選択してください' },
         { status: 400 }
       );
     }
@@ -107,6 +142,12 @@ export async function POST(request: Request) {
 
     // アバター画像のアップロード処理
     let avatarUrl = null;
+    console.log('Avatar file:', avatarFile ? {
+      name: avatarFile.name,
+      size: avatarFile.size,
+      type: avatarFile.type
+    } : 'No file');
+    
     if (avatarFile && avatarFile.size > 0) {
       const maxSize = 2 * 1024 * 1024; // 2MB
       if (avatarFile.size > maxSize) {
@@ -160,7 +201,11 @@ export async function POST(request: Request) {
       email_subscription: emailSubscription ? 1 : 0,
       interest_categories: interestCategories || null,
       profile_registered: 1,
-      updated_at: new Date().toISOString()
+      updated_at: new Date().toISOString(),
+      // DiceBearアバター関連
+      avatar_style: avatarStyle || 'big-smile',
+      avatar_seed: avatarSeed || null,
+      use_custom_image: useCustomImage
     };
 
     if (updateSlug) {
@@ -172,10 +217,16 @@ export async function POST(request: Request) {
       updateData.user_img_url = avatarUrl;
     }
 
-    const { error: updateError } = await supabase
+    console.log('Updating user:', session.user.id);
+    console.log('Update data:', JSON.stringify(updateData, null, 2));
+
+    const { data: updateResult, error: updateError } = await supabase
       .from('users')
       .update(updateData)
-      .eq('id', session.user.id);
+      .eq('id', session.user.id)
+      .select();
+
+    console.log('Update result:', updateResult);
 
     if (updateError) {
       console.error('Profile update error:', updateError);

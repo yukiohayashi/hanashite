@@ -62,9 +62,9 @@ export default function PasswordChangeForm() {
       setNewPassword('');
       setConfirmPassword('');
 
-      // 3秒後にマイページにリダイレクト
+      // 3秒後に通知ページにリダイレクト
       setTimeout(() => {
-        router.push('/mypage');
+        router.push('/notifications');
       }, 3000);
     } catch (err) {
       setError('パスワード変更中にエラーが発生しました');

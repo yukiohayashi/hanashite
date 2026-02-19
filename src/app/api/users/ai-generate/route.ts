@@ -30,7 +30,7 @@ export async function POST(request: NextRequest) {
           const userId = await insertUser(userData);
           if (userId) {
             generatedUsers.push(userData);
-            console.log(`User ${i + 1} created successfully:`, userData.user_nicename);
+            console.log(`User ${i + 1} created successfully:`, userData.name);
           } else {
             errors.push(`User ${i + 1}: Failed to insert into database`);
             console.error(`User ${i + 1}: Failed to insert`);
@@ -122,7 +122,7 @@ function generateProfile() {
   }
 
   return {
-    user_nicename: userNicename,
+    name: userNicename,
     status: 6,
     user_description: description,
     birth_year: String(birthYear),
@@ -156,11 +156,11 @@ async function generateProfileWithAI() {
   "marriage": "single, married, divorced, not_specified のいずれか",
   "child_count": "0〜3の数値",
   "user_description": "100文字程度の自己紹介文",
-  "user_nicename": "創造的で自然なニックネーム（例：しょうちゃん、カレー大好き、きのこ派、あおぞら、yamada99など）"
+  "name": "創造的で自然なニックネーム（例：しょうちゃん、カレー大好き、きのこ派、あおぞら、yamada99など）"
 }
 
 ※ リアルで自然なプロフィールを生成してください。
-※ user_nicenameは必ず毎回違う創造的で親しみやすいものを考案してください。`;
+※ nameは必ず毎回違う創造的で親しみやすいものを考案してください。`;
 
   try {
     const completion = await openai.chat.completions.create({
@@ -178,7 +178,7 @@ async function generateProfileWithAI() {
         const aiData = JSON.parse(jsonMatch[0]);
 
         return {
-          user_nicename: aiData.user_nicename,
+          name: aiData.name,
           status: 6,
           user_description: aiData.user_description,
           birth_year: String(aiData.birth_year),
@@ -242,7 +242,7 @@ async function insertUser(userData: any) {
     const tempEmail = `temp_${Math.floor(Math.random() * 900000) + 100000}@temp.local`;
     
     // profile_slugを生成（ニックネームをベースに）
-    const baseSlug = userData.user_nicename
+    const baseSlug = userData.name
       .toLowerCase()
       .replace(/[^a-z0-9\u3040-\u309F\u30A0-\u30FF\u4E00-\u9FAF]/g, '')
       .substring(0, 20);
@@ -255,8 +255,7 @@ async function insertUser(userData: any) {
         id: newUserId,
         email: tempEmail,
         user_pass: '$2y$10$abcdefghijklmnopqrstuvwxyz',
-        name: userData.user_nicename,
-        user_nicename: userData.user_nicename,
+        name: userData.name,
         status: userData.status,
         user_description: userData.user_description,
         birth_year: userData.birth_year,

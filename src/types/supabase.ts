@@ -935,8 +935,7 @@ export type Database = {
           updated_at: string | null
           user_description: string | null
           user_img_url: string | null
-          user_nicename: string | null
-          user_pass: string | null
+                    user_pass: string | null
         }
         Insert: {
           birth_year?: number | null

@@ -30,8 +30,13 @@ export async function getKeywordBySlug(slug: string): Promise<Keyword | null> {
     .single();
 
   if (error) {
-    console.error('❌ Error fetching keyword:', error);
-    console.error('Searched slug:', slug);
+    // PGRST116 は "no rows returned" エラー（キーワードが見つからない場合）
+    if (error.code === 'PGRST116') {
+      console.log('Keyword not found for slug:', slug);
+    } else {
+      console.error('❌ Error fetching keyword:', error);
+      console.error('Searched slug:', slug);
+    }
     return null;
   }
 

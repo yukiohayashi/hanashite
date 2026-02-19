@@ -96,7 +96,6 @@ export async function POST(request: NextRequest) {
         id: newUserId,
         email,
         user_pass: hashedPassword,
-        user_nicename: defaultNickname,
         name: defaultNickname,
         status: 0, // 仮登録
         created_at: new Date().toISOString(),

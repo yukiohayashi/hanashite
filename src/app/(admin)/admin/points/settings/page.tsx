@@ -80,16 +80,12 @@ export default function PointsSettingsPage() {
         return '📝';
       case 'comment':
         return '💬';
-      case 'vote':
-        return '🗳️';
+      case 'best_answer':
+        return '🏆';
       case 'incentive':
         return '🎁';
-      case 'work_post':
-        return '💼';
       case 'campaign':
         return '🎉';
-      case 'work_vote':
-        return '👔';
       default:
         return '⭐';
     }
