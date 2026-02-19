@@ -495,7 +495,7 @@ export default async function PostPage({ params, searchParams }: { params: Promi
               </div>
 
               {/* コメントセクション */}
-              <CommentSection postId={post.id} initialComments={comments || []} totalCount={totalCommentCount || 0} postUserId={post.user_id} bestAnswerId={post.best_answer_id ? Number(post.best_answer_id) : undefined} />
+              <CommentSection postId={post.id} initialComments={comments || []} totalCount={totalCommentCount || 0} postUserId={post.user_id as any} bestAnswerId={post.best_answer_id ? Number(post.best_answer_id) : undefined} />
             </article>
           </section>
         </div>
