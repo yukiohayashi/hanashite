@@ -38,7 +38,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
         // Supabaseからユーザーを取得
         const { data: user, error } = await supabaseAdmin
           .from('users')
-          .select('id, email, name, user_pass, user_img_url, status')
+          .select('id, email, name, user_pass, image, status')
           .eq('email', credentials.email as string)
           .single()
 
@@ -70,7 +70,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
             id: String(user.id),
             email: user.email,
             name: user.name || 'ゲスト',
-            image: user.user_img_url || null,
+            image: user.image || null,
             status: user.status,
           }
         }
@@ -95,7 +95,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
           id: String(user.id),
           email: user.email,
           name: user.name || 'ゲスト',
-          image: user.user_img_url || null,
+          image: user.image || null,
           status: user.status,
         }
       },
@@ -175,7 +175,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
             } else {
               // 既存ユーザーの場合、画像を更新（メールは既存のものを保持）
               const updateData: Record<string, string> = {
-                user_img_url: user.image || '',
+                image: user.image || '',
                 updated_at: new Date().toISOString(),
               };
               
