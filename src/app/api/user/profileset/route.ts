@@ -83,7 +83,7 @@ export async function POST(request: Request) {
         console.log('Uploading to Supabase Storage:', filePath);
 
         const { data: uploadData, error: uploadError } = await supabase.storage
-          .from('user-avatars')
+          .from('avatars')
           .upload(filePath, buffer, {
             contentType: avatarFile.type,
             upsert: true
@@ -95,7 +95,7 @@ export async function POST(request: Request) {
         } else {
           console.log('Upload successful:', uploadData);
           const { data: { publicUrl } } = supabase.storage
-            .from('user-avatars')
+            .from('avatars')
             .getPublicUrl(filePath);
           avatarUrl = publicUrl;
           console.log('Public URL:', avatarUrl);
@@ -133,7 +133,7 @@ export async function POST(request: Request) {
     };
 
     if (avatarUrl) {
-      updateData.user_img_url = avatarUrl;
+      updateData.image = avatarUrl;
     }
 
     console.log('Updating user:', session.user.id);
