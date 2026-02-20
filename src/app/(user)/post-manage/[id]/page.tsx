@@ -78,10 +78,10 @@ async function getComments(postId: number): Promise<Comment[]> {
           // 複数のカラム名を試して正しいユーザー名を取得
           const userName = user?.display_name || user?.user_name || user?.name || '匿名';
           
-          // アバターURLの優先順位：avatar_url > user_img_url > avatar_style+avatar_seedで生成
-          let avatarUrl = user?.avatar_url || user?.user_img_url;
+          // アバターURLの優先順位：avatar_url > image > avatar_style+avatar_seedで生成
+          let avatarUrl = user?.avatar_url || user?.image;
           
-          // avatar_urlとuser_img_urlが両方nullの場合、avatar_styleとavatar_seedで生成
+          // avatar_urlとimageが両方nullの場合、avatar_styleとavatar_seedで生成
           if (!avatarUrl && user?.avatar_style && user?.avatar_seed) {
             avatarUrl = `https://api.dicebear.com/9.x/${user.avatar_style}/svg?seed=${user.avatar_seed}&size=40`;
           }

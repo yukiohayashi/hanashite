@@ -7,7 +7,7 @@ interface User {
   id: number;
   name: string;
   email: string;
-  user_img_url: string | null;
+  image: string | null;
   created_at: string;
   is_banned?: boolean;
   status?: number;
@@ -277,9 +277,9 @@ export default function UsersTable({ users: initialUsers }: UsersTableProps) {
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap">
                   <div className="w-10 h-10 rounded-full overflow-hidden bg-gray-200">
-                    {user.use_custom_image && user.user_img_url ? (
+                    {user.use_custom_image && user.image ? (
                       <img
-                        src={user.user_img_url}
+                        src={user.image}
                         alt={user.name}
                         className="w-full h-full object-cover"
                         onError={(e) => {

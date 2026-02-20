@@ -37,7 +37,7 @@ export default function MobileRightSidebar({ isOpen, onClose }: MobileRightSideb
             setProfileSlug(data.profile_slug);
           }
           setUserName(data.name || session.user.name || 'ゲスト');
-          setAvatarUrl(data.user_img_url || '');
+          setAvatarUrl(data.image || '');
           setParticipatePoints(data.participate_points || false);
         })
         .catch(err => console.error('ユーザー情報取得エラー:', err));

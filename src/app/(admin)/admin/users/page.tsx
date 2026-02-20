@@ -11,7 +11,7 @@ async function getUsers(statusFilter?: number, hasImage?: boolean, page: number 
   // ユーザーデータを取得
   let query = supabase
     .from('users')
-    .select('id, name, email, user_img_url, created_at, is_banned, status, profile_slug, avatar_style, avatar_seed, use_custom_image', { count: 'exact' });
+    .select('id, name, email, image, created_at, is_banned, status, profile_slug, avatar_style, avatar_seed, use_custom_image', { count: 'exact' });
 
   // ステータスフィルター適用
   if (statusFilter !== undefined) {
@@ -20,7 +20,7 @@ async function getUsers(statusFilter?: number, hasImage?: boolean, page: number 
 
   // プロフィール画像フィルター適用
   if (hasImage) {
-    query = query.not('user_img_url', 'is', null);
+    query = query.not('image', 'is', null);
   }
 
   const { data: allData, error: allError } = await query;
@@ -68,7 +68,7 @@ async function getUsers(statusFilter?: number, hasImage?: boolean, page: number 
 }
 
 async function getUserCounts() {
-  const { data: allUsers } = await supabase.from('users').select('status, user_img_url');
+  const { data: allUsers } = await supabase.from('users').select('status, image');
   
   const counts = {
     all: allUsers?.length || 0,
@@ -78,7 +78,7 @@ async function getUserCounts() {
     member: allUsers?.filter(u => u.status === 1).length || 0,
     ai_editor: allUsers?.filter(u => u.status === 2).length || 0,
     ai_member: allUsers?.filter(u => u.status === 6).length || 0,
-    with_image: allUsers?.filter(u => u.user_img_url).length || 0,
+    with_image: allUsers?.filter(u => u.image).length || 0,
   };
 
   return counts;

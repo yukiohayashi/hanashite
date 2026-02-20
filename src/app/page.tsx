@@ -275,15 +275,15 @@ export default async function Home({ searchParams }: HomeProps) {
     const top3UserIds = [...new Set(top3Posts.map(p => p.user_id).filter(id => id !== null))];
     const { data: top3UsersData } = await supabase
       .from('users')
-      .select('id, name, avatar_style, avatar_seed, use_custom_image, user_img_url')
+      .select('id, name, avatar_style, avatar_seed, use_custom_image, image')
       .in('id', top3UserIds);
 
     // ユーザー情報をマージ
     featuredPosts = top3Posts.map(post => {
       const userData = top3UsersData?.find(u => u.id === post.user_id);
       let avatarUrl: string;
-      if (userData?.use_custom_image && userData?.user_img_url) {
-        avatarUrl = userData.user_img_url;
+      if (userData?.use_custom_image && userData?.image) {
+        avatarUrl = userData.image;
       } else {
         const seed = userData?.avatar_seed || String(post.user_id) || 'guest';
         const style = userData?.avatar_style || 'big-smile';
@@ -304,14 +304,14 @@ export default async function Home({ searchParams }: HomeProps) {
     
     const { data: usersData } = await supabase
       .from('users')
-      .select('id, name, avatar_style, avatar_seed, use_custom_image, user_img_url')
+      .select('id, name, avatar_style, avatar_seed, use_custom_image, image')
       .in('id', userIds);
 
     posts = postsData.map(post => {
       const user = usersData?.find(u => u.id === post.user_id);
       let avatarUrl: string;
-      if (user?.use_custom_image && user?.user_img_url) {
-        avatarUrl = user.user_img_url;
+      if (user?.use_custom_image && user?.image) {
+        avatarUrl = user.image;
       } else {
         const seed = user?.avatar_seed || String(post.user_id) || 'guest';
         const style = user?.avatar_style || 'big-smile';
@@ -350,7 +350,7 @@ export default async function Home({ searchParams }: HomeProps) {
       const baUserIds = [...new Set(bestComments.map(c => c.user_id).filter(id => id !== null))];
       const { data: baUsersData } = await supabase
         .from('users')
-        .select('id, name, avatar_style, avatar_seed, use_custom_image, user_img_url')
+        .select('id, name, avatar_style, avatar_seed, use_custom_image, image')
         .in('id', baUserIds);
 
       bestAnswersWithUsers = bestComments.map(comment => {
@@ -359,8 +359,8 @@ export default async function Home({ searchParams }: HomeProps) {
         
         // アバターURLを生成
         let avatarUrl: string;
-        if (user?.use_custom_image && user?.user_img_url) {
-          avatarUrl = user.user_img_url;
+        if (user?.use_custom_image && user?.image) {
+          avatarUrl = user.image;
         } else {
           const seed = user?.avatar_seed || String(comment.user_id) || 'guest';
           const style = user?.avatar_style || 'big-smile';

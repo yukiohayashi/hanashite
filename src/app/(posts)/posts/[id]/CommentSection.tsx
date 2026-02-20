@@ -13,7 +13,7 @@ interface Comment {
   parent_id?: number;
   users?: {
     name: string;
-    user_img_url?: string | null;
+    image?: string | null;
     avatar_style?: string | null;
     avatar_seed?: string | null;
     use_custom_image?: boolean | null;
@@ -262,8 +262,8 @@ export default function CommentSection({ postId, initialComments, totalCount, po
               const users = comment.users;
               const userName = users?.name || 'ゲスト';
               const getCommentAvatarUrl = () => {
-                if (users?.use_custom_image && users?.user_img_url) {
-                  return users.user_img_url;
+                if (users?.use_custom_image && users?.image) {
+                  return users.image;
                 }
                 const seed = users?.avatar_seed || (comment.user_id ? String(comment.user_id) : 'guest');
                 const style = users?.avatar_style || 'big-smile';
@@ -350,8 +350,8 @@ export default function CommentSection({ postId, initialComments, totalCount, po
                     const replyUsers = reply.users;
                     const replyUserName = replyUsers?.name || 'ゲスト';
                     const getReplyAvatarUrl = () => {
-                      if (replyUsers?.use_custom_image && replyUsers?.user_img_url) {
-                        return replyUsers.user_img_url;
+                      if (replyUsers?.use_custom_image && replyUsers?.image) {
+                        return replyUsers.image;
                       }
                       const seed = replyUsers?.avatar_seed || (reply.user_id ? String(reply.user_id) : 'guest');
                       const style = replyUsers?.avatar_style || 'big-smile';
@@ -437,8 +437,8 @@ export default function CommentSection({ postId, initialComments, totalCount, po
                           const nestedUsers = nestedReply.users;
                           const nestedUserName = nestedUsers?.name || 'ゲスト';
                           const getNestedAvatarUrl = () => {
-                            if (nestedUsers?.use_custom_image && nestedUsers?.user_img_url) {
-                              return nestedUsers.user_img_url;
+                            if (nestedUsers?.use_custom_image && nestedUsers?.image) {
+                              return nestedUsers.image;
                             }
                             const seed = nestedUsers?.avatar_seed || (nestedReply.user_id ? String(nestedReply.user_id) : 'guest');
                             const style = nestedUsers?.avatar_style || 'big-smile';

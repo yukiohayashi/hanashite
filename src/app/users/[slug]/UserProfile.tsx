@@ -8,7 +8,7 @@ interface User {
   name: string;
   email: string;
   user_description?: string;
-  user_img_url?: string;
+  image?: string;
   sns_x?: string;
   created_at: string;
   profile_slug?: string;
@@ -117,8 +117,8 @@ export default function UserProfile({ user, posts, comments, isOwnProfile }: Use
       <div className="autor__container flex flex-row items-start gap-4 p-2.5">
         <div className="autor__containerPhoto shrink-0">
           <img 
-            src={user.use_custom_image && user.user_img_url 
-              ? user.user_img_url 
+            src={user.use_custom_image && user.image 
+              ? user.image 
               : `https://api.dicebear.com/9.x/${user.avatar_style || 'big-smile'}/svg?seed=${encodeURIComponent(user.avatar_seed || String(user.id))}&size=80`
             } 
             alt={user.name} 

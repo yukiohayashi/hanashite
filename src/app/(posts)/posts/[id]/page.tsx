@@ -72,13 +72,13 @@ export default async function PostPage({ params, searchParams }: { params: Promi
   if (post?.user_id) {
     const { data: user } = await supabase
       .from('users')
-      .select('name, user_img_url, sex, birth_year, prefecture, avatar_style, avatar_seed, use_custom_image')
+      .select('name, image, sex, birth_year, prefecture, avatar_style, avatar_seed, use_custom_image')
       .eq('id', post.user_id)
       .single();
     
     if (user) {
       if (user.name) userName = user.name;
-      userAvatar = user.user_img_url;
+      userAvatar = user.image;
       userSex = user.sex;
       userBirthYear = user.birth_year;
       userPrefecture = user.prefecture;
@@ -201,13 +201,13 @@ export default async function PostPage({ params, searchParams }: { params: Promi
       if (comment.user_id) {
         const { data: user } = await supabase
           .from('users')
-          .select('name, user_img_url, avatar_style, avatar_seed, use_custom_image')
+          .select('name, image, avatar_style, avatar_seed, use_custom_image')
           .eq('id', comment.user_id)
           .single();
         
         if (user) {
           if (user.name) commentUserName = user.name;
-          commentUserAvatar = user.user_img_url;
+          commentUserAvatar = user.image;
           commentAvatarStyle = user.avatar_style;
           commentAvatarSeed = user.avatar_seed;
           commentUseCustomImage = user.use_custom_image || false;
@@ -225,7 +225,7 @@ export default async function PostPage({ params, searchParams }: { params: Promi
         ...comment,
         users: { 
           name: commentUserName,
-          user_img_url: commentUserAvatar,
+          image: commentUserAvatar,
           avatar_style: commentAvatarStyle,
           avatar_seed: commentAvatarSeed,
           use_custom_image: commentUseCustomImage

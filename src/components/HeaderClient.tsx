@@ -17,8 +17,8 @@ export default function HeaderClient() {
       fetch(`/api/user/${session.user.id}`)
         .then(res => res.json())
         .then(data => {
-          if (data.use_custom_image && data.user_img_url) {
-            setAvatarUrl(data.user_img_url);
+          if (data.use_custom_image && data.image) {
+            setAvatarUrl(data.image);
           } else {
             const seed = data.avatar_seed || session.user.id;
             const style = data.avatar_style || 'big-smile';

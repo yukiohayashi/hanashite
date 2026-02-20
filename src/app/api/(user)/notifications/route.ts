@@ -28,7 +28,7 @@ export async function GET(request: Request) {
     // 運営スタッフのアバター画像を取得
     const { data: adminUser } = await supabase
       .from('users')
-      .select('user_img_url')
+      .select('image')
       .eq('id', 33)
       .single();
 
@@ -39,7 +39,7 @@ export async function GET(request: Request) {
           date: post.created_at,
           content: post.title.length > 40 ? post.title.substring(0, 40) + '...' : post.title,
           link: `/posts/${post.id}`,
-          avatar_src: adminUser?.user_img_url || '',
+          avatar_src: adminUser?.image || '',
           author_url: '/users/33',
           author_name: '運営スタッフ'
         });
@@ -67,7 +67,7 @@ export async function GET(request: Request) {
         for (const reply of replies) {
           const { data: user } = await supabase
             .from('users')
-            .select('name, user_img_url')
+            .select('name, image')
             .eq('id', reply.user_id)
             .single();
 
@@ -76,7 +76,7 @@ export async function GET(request: Request) {
             date: reply.created_at,
             content: reply.content.length > 40 ? reply.content.substring(0, 40) + '...' : reply.content,
             link: `/posts/${reply.post_id}#reply-${reply.id}`,
-            avatar_src: user?.user_img_url || '',
+            avatar_src: user?.image || '',
             author_url: `/users/${reply.user_id}`,
             author_name: user?.name || '匿名さん',
             comment_id: reply.id
@@ -108,7 +108,7 @@ export async function GET(request: Request) {
         for (const comment of postComments) {
           const { data: user } = await supabase
             .from('users')
-            .select('name, user_img_url')
+            .select('name, image')
             .eq('id', comment.user_id)
             .single();
 
@@ -117,7 +117,7 @@ export async function GET(request: Request) {
             date: comment.created_at,
             content: comment.content.length > 40 ? comment.content.substring(0, 40) + '...' : comment.content,
             link: `/posts/${comment.post_id}#reply-${comment.id}`,
-            avatar_src: user?.user_img_url || '',
+            avatar_src: user?.image || '',
             author_url: `/users/${comment.user_id}`,
             author_name: user?.name || '匿名さん',
             comment_id: comment.id

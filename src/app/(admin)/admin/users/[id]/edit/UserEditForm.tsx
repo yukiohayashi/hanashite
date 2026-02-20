@@ -10,7 +10,7 @@ interface User {
   status: number;
   is_banned: boolean;
   user_description?: string;
-  user_img_url?: string;
+  image?: string;
   sei?: string;
   mei?: string;
   kana_sei?: string;
@@ -50,7 +50,7 @@ export default function UserEditForm({ user }: UserEditFormProps) {
     sns_x: user.sns_x || '',
   });
   const [avatarFile, setAvatarFile] = useState<File | null>(null);
-  const [avatarPreview, setAvatarPreview] = useState<string>(user.user_img_url || '');
+  const [avatarPreview, setAvatarPreview] = useState<string>(user.image || '');
   const [loading, setLoading] = useState(false);
 
   const handleAvatarChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -71,7 +71,7 @@ export default function UserEditForm({ user }: UserEditFormProps) {
 
     try {
       // アバター画像をアップロード
-      let imageUrl = user.user_img_url;
+      let imageUrl = user.image;
       if (avatarFile) {
         const formDataImage = new FormData();
         formDataImage.append('file', avatarFile);
@@ -96,7 +96,7 @@ export default function UserEditForm({ user }: UserEditFormProps) {
         },
         body: JSON.stringify({
           ...formData,
-          user_img_url: imageUrl,
+          image: imageUrl,
         }),
       });
 

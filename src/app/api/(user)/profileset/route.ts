@@ -214,7 +214,7 @@ export async function POST(request: Request) {
     }
 
     if (avatarUrl) {
-      updateData.user_img_url = avatarUrl;
+      updateData.image = avatarUrl;
     }
 
     console.log('Updating user:', session.user.id);

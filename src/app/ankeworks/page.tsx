@@ -16,7 +16,7 @@ interface Worker {
   users: {
     id: number;
     name: string;
-    user_img_url: string | null;
+    image: string | null;
   } | null;
   worker_meta: {
     vote_budget: number;

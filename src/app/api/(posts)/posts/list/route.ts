@@ -46,14 +46,14 @@ export async function GET(request: Request) {
     const userIds = [...new Set(postsData.map(p => p.user_id).filter(id => id !== null))];
     const { data: usersData } = await supabase
       .from('users')
-      .select('id, name, avatar_style, avatar_seed, use_custom_image, user_img_url')
+      .select('id, name, avatar_style, avatar_seed, use_custom_image, image')
       .in('id', userIds);
 
     const posts = postsData.map(post => {
       const user = usersData?.find(u => u.id === post.user_id);
       let avatarUrl: string;
-      if (user?.use_custom_image && user?.user_img_url) {
-        avatarUrl = user.user_img_url;
+      if (user?.use_custom_image && user?.image) {
+        avatarUrl = user.image;
       } else {
         const seed = user?.avatar_seed || String(post.user_id) || 'guest';
         const style = user?.avatar_style || 'big-smile';

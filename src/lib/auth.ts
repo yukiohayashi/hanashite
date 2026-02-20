@@ -121,12 +121,12 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
       if ((user || trigger === 'update') && token.id) {
         const { data: userData } = await supabaseAdmin
           .from('users')
-          .select('user_img_url')
+          .select('image')
           .eq('id', token.id as string)
           .single();
         
-        if (userData?.user_img_url) {
-          token.picture = userData.user_img_url;
+        if (userData?.image) {
+          token.picture = userData.image;
         }
       }
       
@@ -162,7 +162,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
                   id: user.id,
                   name: user.name || '',
                   email: emailToSave,
-                  user_img_url: user.image || '',
+                  image: user.image || '',
                   status: 1,
                   created_at: new Date().toISOString(),
                 });

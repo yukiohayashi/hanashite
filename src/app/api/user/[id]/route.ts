@@ -23,7 +23,7 @@ export async function GET(
     // ユーザー情報を取得（UUID形式または数値IDで検索）
     const { data: user, error } = await supabase
       .from('users')
-      .select('id, name, email, user_img_url, user_description, sns_x, created_at, profile_slug, avatar_style, avatar_seed, use_custom_image, participate_points')
+      .select('id, name, email, image, user_description, sns_x, created_at, profile_slug, avatar_style, avatar_seed, use_custom_image, participate_points')
       .eq('id', id)
       .single();
 
