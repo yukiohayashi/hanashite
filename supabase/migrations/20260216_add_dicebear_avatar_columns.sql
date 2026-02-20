@@ -11,10 +11,10 @@ ADD COLUMN IF NOT EXISTS use_custom_image boolean NULL DEFAULT false;
 UPDATE users
 SET use_custom_image = true,
     avatar_style = 'big-smile'
-WHERE user_img_url IS NOT NULL AND use_custom_image IS NULL;
+WHERE (worker_img_url IS NOT NULL OR image IS NOT NULL) AND use_custom_image IS NULL;
 
 -- 3. カスタム画像を持たないユーザーは use_custom_image = false に設定
 UPDATE users
 SET use_custom_image = false,
     avatar_style = 'big-smile'
-WHERE user_img_url IS NULL AND use_custom_image IS NULL;
+WHERE worker_img_url IS NULL AND image IS NULL AND use_custom_image IS NULL;
