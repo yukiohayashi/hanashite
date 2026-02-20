@@ -75,7 +75,7 @@ export async function POST(request: Request) {
         // ファイルをSupabase Storageにアップロード
         const fileExt = avatarFile.name.split('.').pop();
         const fileName = `${session.user.id}-${Date.now()}.${fileExt}`;
-        const filePath = `avatars/${fileName}`;
+        const filePath = fileName;
 
         const arrayBuffer = await avatarFile.arrayBuffer();
         const buffer = Buffer.from(arrayBuffer);
