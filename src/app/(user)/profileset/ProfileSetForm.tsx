@@ -35,7 +35,7 @@ interface User {
   interest_categories?: string;
   profile_slug?: string;
   profile_slug_updated_at?: string;
-  user_img_url?: string;
+  image?: string;
   avatar_style?: AvatarStyle;
   avatar_seed?: string;
   use_custom_image?: boolean;
@@ -97,7 +97,7 @@ export default function ProfileSetForm({ user, categories, isFirstTime }: Profil
   const [imageMode, setImageMode] = useState<ImageMode>(() => {
     console.log('Initializing imageMode:', {
       use_custom_image: user.use_custom_image,
-      user_img_url: user.user_img_url,
+      image: user.image,
       avatar_seed: user.avatar_seed
     });
     return user.use_custom_image ? 'upload' : (user.avatar_seed ? 'avatar' : 'none');
@@ -361,7 +361,7 @@ export default function ProfileSetForm({ user, categories, isFirstTime }: Profil
                 userId={imageMode === 'avatar' ? avatarSeed : user.id}
                 imageUrl={
                   imageMode === 'upload' 
-                    ? (avatarFile ? URL.createObjectURL(avatarFile) : user.user_img_url)
+                    ? (avatarFile ? URL.createObjectURL(avatarFile) : user.image)
                     : imageMode === 'none'
                     ? null
                     : null
