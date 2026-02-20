@@ -299,7 +299,7 @@ export default async function UserPage({ params }: { params: Promise<{ slug: str
                           {activity.type === 'post' ? (
                             <span>
                               <Link href={activity.link} className="text-gray-800 hover:text-orange-600 font-medium">
-                                {user.name || '匿名'}
+                                {user?.name || '匿名'}
                               </Link>
                               さんから相談がありました！
                             </span>
