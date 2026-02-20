@@ -27,7 +27,7 @@ export async function POST(request: Request) {
         user_id: userId,
         content: content.trim(),
         status: 'approved',
-        parent_id: parentId || 0
+        parent_id: parentId || null
       })
       .select('id, content, created_at, user_id, parent_id')
       .single();
