@@ -12,7 +12,6 @@ interface User {
   name: string | null;
   email: string | null;
   image: string | null;
-  image: string | null;
   created_at: string;
   user_description: string | null;
   sns_x: string | null;
