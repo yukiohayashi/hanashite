@@ -47,9 +47,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
         }
 
         if (error || !user) {
-          if (process.env.NODE_ENV === 'development') {
-            console.error('User not found:', error);
-          }
+          console.error('User not found:', error);
           return null
         }
 
@@ -79,9 +77,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
 
         // 通常のパスワード検証
         if (!user.user_pass) {
-          if (process.env.NODE_ENV === 'development') {
-            console.error('No password hash found for user');
-          }
+          console.error('No password hash found for user');
           return null
         }
 
@@ -91,9 +87,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
         )
 
         if (!isPasswordValid) {
-          if (process.env.NODE_ENV === 'development') {
-            console.error('Invalid password');
-          }
+          console.error('Invalid password');
           return null
         }
 
@@ -180,7 +174,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
               }
             } else {
               // 既存ユーザーの場合、画像を更新（メールは既存のものを保持）
-              const updateData: any = {
+              const updateData: Record<string, string> = {
                 user_img_url: user.image || '',
                 updated_at: new Date().toISOString(),
               };

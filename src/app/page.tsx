@@ -8,7 +8,6 @@ import HomeRightSidebar from '@/components/HomeRightSidebar';
 import SearchHistory from '@/components/SearchHistory';
 import SearchForm from '@/components/SearchForm';
 import KeywordsSection from '@/components/KeywordsSection';
-import PostImage from '@/components/PostImage';
 import InfinitePostList from '@/components/InfinitePostList';
 import { auth } from '@/lib/auth';
 
@@ -505,9 +504,6 @@ export default async function Home({ searchParams }: HomeProps) {
               </div>
             )}
 
-            {/* ニュース・話題 */}
-            <NewsSection />
-
             {/* カテゴリ */}
             {session && <InterestCategoriesSection userId={userId} />}
 
@@ -667,51 +663,6 @@ async function LatestCommentsMobile() {
         </li>
       ))}
     </ul>
-  );
-}
-
-// ニュース・話題セクション
-async function NewsSection() {
-  const { data: newsPosts } = await supabase
-    .from('posts')
-    .select('id, title, created_at, og_image, thumbnail_url, users!inner(name)')
-    .in('status', ['publish', 'published'])
-    .order('created_at', { ascending: false })
-    .limit(5);
-
-  if (!newsPosts || newsPosts.length === 0) return null;
-
-  return (
-    <div className="mb-4">
-      <h3 className="m-1.5 mb-2 px-0 font-bold text-base" style={{ color: '#ff6b35' }}>ニュース・話題</h3>
-      <div className="space-y-2 px-2">
-        {newsPosts.map((post) => {
-          const imageUrl = (post as any).og_image || (post as any).thumbnail_url;
-          const userName = (post as any).users?.name || 'ゲスト';
-          return (
-            <Link key={post.id} href={`/posts/${post.id}`} className="flex gap-3 bg-white hover:shadow-md p-3 border border-gray-300 rounded-md transition-all hover:-translate-y-1">
-              <div className="flex-1 min-w-0">
-                <h3 className="font-normal text-gray-900 text-sm leading-relaxed">
-                  {post.title}
-                </h3>
-                <div className="mt-2 text-gray-500 text-xs">
-                  <span>{userName}さんからの相談</span>
-                  <span className="ml-2">{new Date(post.created_at).toLocaleDateString('ja-JP')}</span>
-                </div>
-              </div>
-              <div className="shrink-0 rounded w-20 h-20 overflow-hidden">
-                <PostImage
-                  src={imageUrl}
-                  alt={post.title}
-                  className="w-full h-full object-cover"
-                  loading="lazy"
-                />
-              </div>
-            </Link>
-          );
-        })}
-      </div>
-    </div>
   );
 }
 
