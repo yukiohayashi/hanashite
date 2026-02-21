@@ -73,14 +73,14 @@ export default function ProfileSetForm({ user, categories, isFirstTime }: Profil
   
   const [nickname, setNickname] = useState(user.name || '');
   const [profile, setProfile] = useState(user.user_description || '');
-  const [profileSlug, setProfileSlug] = useState(user.profile_slug || '');
+  const [profileSlug, setProfileSlug] = useState(user.profile_slug || user.id || '');
   const [snsX, setSnsX] = useState(user.sns_x || '');
   const [participatePoints, setParticipatePoints] = useState(user.participate_points || false);
   const [bestAnswerPoints, setBestAnswerPoints] = useState<number>(10);
   const [sex, setSex] = useState(user.sex || '');
   const currentYear = new Date().getFullYear();
   const defaultBirthYear = currentYear - 30; // デフォルト30歳
-  const [birthYear, setBirthYear] = useState(user.birth_year || String(defaultBirthYear));
+  const [birthYear, setBirthYear] = useState(user.birth_year || '');
   const [prefecture, setPrefecture] = useState(user.prefecture || '');
   const [marriage, setMarriage] = useState(user.marriage || 'not_specified');
   const [childCount, setChildCount] = useState(user.child_count || 0);
@@ -551,6 +551,7 @@ export default function ProfileSetForm({ user, categories, isFirstTime }: Profil
             onChange={(e) => setSex(e.target.value)}
             className="p-2.5 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-orange-400 w-full"
           >
+            <option value="">選択してください</option>
             <option value="female">女性</option>
             <option value="male">男性</option>
             <option value="other">その他</option>
@@ -567,6 +568,7 @@ export default function ProfileSetForm({ user, categories, isFirstTime }: Profil
             onChange={(e) => setBirthYear(e.target.value)}
             className="p-2.5 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-orange-400 w-full"
           >
+            <option value="">選択してください</option>
             {Array.from({ length: maxBirthYear - minBirthYear + 1 }, (_, i) => maxBirthYear - i).map((year) => (
               <option key={year} value={year}>{year}年生まれ</option>
             ))}
@@ -582,6 +584,7 @@ export default function ProfileSetForm({ user, categories, isFirstTime }: Profil
             onChange={(e) => setPrefecture(e.target.value)}
             className="p-2.5 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-orange-400 w-full"
           >
+            <option value="">選択してください</option>
             {PREFECTURES.map((pref) => (
               <option key={pref} value={pref}>{pref}</option>
             ))}
@@ -598,6 +601,7 @@ export default function ProfileSetForm({ user, categories, isFirstTime }: Profil
             onChange={(e) => setJob(e.target.value)}
             className="p-2.5 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-orange-400 w-full"
           >
+            <option value="">選択してください</option>
             {JOBS.map((j) => (
               <option key={j} value={j}>{j}</option>
             ))}
