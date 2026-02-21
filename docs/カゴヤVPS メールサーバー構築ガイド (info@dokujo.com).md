@@ -303,6 +303,51 @@ sudo cat /etc/opendkim/keys/dokujo.com/default.txt
 - **名称**: `default._domainkey`
 - **値**: `v=DKIM1; k=rsa; p=...` (括弧と引用符を除いた部分)
 
+### 6.5. OpenDKIM起動問題のトラブルシューティング
+
+**重要**: OpenDKIMが起動しない場合の対処法
+
+#### 問題: PIDファイルディレクトリが存在しない
+
+```bash
+# PIDディレクトリを作成
+sudo mkdir -p /run/opendkim
+sudo chown opendkim:opendkim /run/opendkim
+```
+
+#### 問題: 設定ファイルでタイムアウトが発生
+
+元の設定ファイルでタイムアウトが発生する場合、以下の簡素化された設定を使用：
+
+```bash
+sudo systemctl stop opendkim
+sudo tee /etc/opendkim.conf > /dev/null <<'EOF'
+Syslog                  yes
+UMask                   007
+Mode                    sv
+Socket                  inet:8891@localhost
+PidFile                 /run/opendkim/opendkim.pid
+KeyTable                /etc/opendkim/KeyTable
+SigningTable            refile:/etc/opendkim/SigningTable
+ExternalIgnoreList      refile:/etc/opendkim/TrustedHosts
+InternalHosts           refile:/etc/opendkim/TrustedHosts
+EOF
+
+sudo systemctl start opendkim
+```
+
+#### 起動確認
+
+```bash
+sudo systemctl is-active opendkim
+```
+
+`active` と表示されればOK。`activating` や `failed` の場合はログを確認：
+
+```bash
+sudo journalctl -u opendkim -n 20 --no-pager
+```
+
 ## 7. メールアカウントの作成
 
 `info` という名前のLinuxユーザーを作成し、これをメールアカウントとして使用します。
