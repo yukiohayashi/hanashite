@@ -103,7 +103,7 @@ export default function ProfileSetForm({ user, categories, isFirstTime }: Profil
     return user.use_custom_image ? 'upload' : (user.avatar_seed ? 'avatar' : 'none');
   });
   const [avatarStyle, setAvatarStyle] = useState<AvatarStyle>(user.avatar_style || 'fun-emoji');
-  const [avatarSeed, setAvatarSeed] = useState<string>(user.avatar_seed || user.id);
+  const [avatarSeed, setAvatarSeed] = useState<string>(user.avatar_seed || '');
   
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [errors, setErrors] = useState<string[]>([]);
@@ -222,8 +222,8 @@ export default function ProfileSetForm({ user, categories, isFirstTime }: Profil
       
       // DiceBearアバター関連の情報を追加
       formData.append('imageMode', imageMode);
-      formData.append('avatarStyle', avatarStyle);
-      formData.append('avatarSeed', avatarSeed);
+      formData.append('avatarStyle', imageMode === 'avatar' ? avatarStyle : '');
+      formData.append('avatarSeed', imageMode === 'avatar' ? avatarSeed : '');
       formData.append('useCustomImage', imageMode === 'upload' ? '1' : '0');
       
       if (avatarFile && imageMode === 'upload') {
@@ -614,7 +614,7 @@ export default function ProfileSetForm({ user, categories, isFirstTime }: Profil
             )}
           </label>
           <div className="flex items-center gap-2">
-            <span className="font-bold text-gray-700 text-sm whitespace-nowrap">https://hanashite.jp/user/</span>
+            <span className="font-bold text-gray-700 text-sm whitespace-nowrap">{process.env.NEXT_PUBLIC_APP_URL}/user/</span>
             <Input
               type="text"
               value={profileSlug}
