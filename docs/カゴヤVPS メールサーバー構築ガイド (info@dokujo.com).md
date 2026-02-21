@@ -139,6 +139,8 @@ home_mailbox = Maildir/
 
 # SMTP認証 (SASL) の設定
 smtpd_sasl_auth_enable = yes
+smtpd_sasl_type = dovecot
+smtpd_sasl_path = private/auth
 smtpd_sasl_security_options = noanonymous
 smtpd_sasl_local_domain = $myhostname
 smtpd_recipient_restrictions = permit_mynetworks, permit_sasl_authenticated, reject_unauth_destination
@@ -149,6 +151,8 @@ milter_default_action = accept
 smtpd_milters = inet:localhost:8891
 non_smtpd_milters = $smtpd_milters
 ```
+
+> **重要**: `smtpd_sasl_type = dovecot` と `smtpd_sasl_path = private/auth` の設定が必須です。これがないとDovecotとの認証連携が機能しません。
 
 ### 4.2. master.cf の設定
 
@@ -590,7 +594,49 @@ openssl s_client -connect dokujo.com:995
 
 ## 14. トラブルシューティング
 
-### 14.1. SSLエラー: wrong version number
+### 14.1. SMTP認証エラー: SASL authentication failed
+
+**症状**: メールクライアントから接続時に「認証エラー」が発生する
+
+**ログの確認**:
+```bash
+sudo tail -30 /var/log/mail.log
+```
+
+**よくある原因と解決策**:
+
+#### 原因1: Postfixの認証設定が不正
+
+ログに `smtpd_sasl_type = cyrus` と表示される場合、Dovecot認証が正しく設定されていません。
+
+**解決策**:
+```bash
+sudo postconf -e 'smtpd_sasl_type = dovecot'
+sudo postconf -e 'smtpd_sasl_path = private/auth'
+sudo systemctl restart postfix
+```
+
+#### 原因2: ユーザー名が間違っている
+
+ログに `sasl_username=info@mail.dokujo.com` のように表示される場合、ユーザー名にドメインが含まれています。
+
+**正しい設定**:
+- ❌ 間違い: `info@mail.dokujo.com` または `info@dokujo.com`
+- ✅ 正しい: `info` （ユーザー名のみ）
+
+#### 原因3: Dovecotの認証ソケットが作成されていない
+
+**確認コマンド**:
+```bash
+sudo ls -la /var/spool/postfix/private/auth
+```
+
+ソケットが存在しない場合、Dovecotの設定を確認：
+```bash
+sudo grep -A 10 "service auth" /etc/dovecot/conf.d/10-master.conf
+```
+
+### 14.2. SSLエラー: wrong version number
 
 **症状**: `ssl3_get_record:wrong version number` エラー
 
@@ -600,7 +646,7 @@ openssl s_client -connect dokujo.com:995
 - ポート587を使用する場合は、SSL/TLSチェックを**オフ**にする
 - または、ポート465に変更してSSL/TLSチェックを**オン**にする
 
-### 14.2. メールが届かない（宛先が古いアドレス）
+### 14.3. メールが届かない（宛先が古いアドレス）
 
 **症状**: 問い合わせメールが `info@anke.jp` など古いアドレスに送信される
 
@@ -612,7 +658,7 @@ echo "ADMIN_EMAIL=info@dokujo.com" | sudo tee -a /var/www/hanashite/.env.local
 pm2 restart hanashite
 ```
 
-### 14.3. SASL認証エラー
+### 14.4. SASL認証エラー（パスワード不一致）
 
 **症状**: `SASL LOGIN authentication failed`
 
@@ -623,7 +669,7 @@ pm2 restart hanashite
 2. Dovecotの設定を確認: `/etc/dovecot/conf.d/10-auth.conf`
 3. サービスを再起動: `sudo systemctl restart dovecot postfix`
 
-### 14.4. OpenDKIM鍵ファイルのパーミッションエラー
+### 14.5. OpenDKIM鍵ファイルのパーミッションエラー
 
 **症状**: OpenDKIMがエラーで起動しない
 
@@ -636,7 +682,7 @@ sudo chmod 600 /etc/opendkim/keys/dokujo.com/default.private
 sudo systemctl restart opendkim
 ```
 
-### 14.5. メールがGmailに届かない
+### 14.6. メールがGmailに届かない
 
 **症状**: サーバーからは送信成功だが、Gmailで受信できない
 
@@ -648,7 +694,7 @@ sudo systemctl restart opendkim
    sudo ls -la /home/info/Maildir/new/
    ```
 
-### 14.6. 接続拒否エラー
+### 14.7. 接続拒否エラー
 
 **症状**: `Connection refused`
 
