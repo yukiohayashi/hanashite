@@ -203,7 +203,7 @@ export async function POST(request: Request) {
       profile_registered: 1,
       updated_at: new Date().toISOString(),
       // DiceBearアバター関連
-      avatar_style: avatarStyle || 'big-smile',
+      avatar_style: avatarStyle || null,
       avatar_seed: avatarSeed || null,
       use_custom_image: useCustomImage
     };

@@ -229,12 +229,17 @@ export default async function UserPage({ params }: { params: Promise<{ slug: str
                     alt={user.name || '匿名'} 
                     className="w-20 h-20 rounded-full object-cover"
                   />
-                ) : (
+                ) : user.avatar_seed ? (
                   <img 
-                    src={`https://api.dicebear.com/9.x/${user.avatar_style || 'big-smile'}/svg?seed=${encodeURIComponent(user.avatar_seed || user.id)}&size=80`}
+                    src={`https://api.dicebear.com/9.x/${user.avatar_style || 'fun-emoji'}/svg?seed=${encodeURIComponent(user.avatar_seed)}&size=80`}
                     alt={user.name || '匿名'} 
                     className="w-20 h-20 rounded-full object-cover"
                   />
+                ) : (
+                  <div className="relative bg-gray-300 rounded-full w-20 h-20 overflow-hidden">
+                    <div className="absolute top-[16px] left-1/2 bg-white rounded-full w-[36px] h-[36px] -translate-x-1/2"></div>
+                    <div className="absolute top-[44px] left-1/2 bg-white rounded-[50%_50%_50%_50%/60%_60%_40%_40%] w-[54px] h-[40px] -translate-x-1/2"></div>
+                  </div>
                 )}
               </div>
 
