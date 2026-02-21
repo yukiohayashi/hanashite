@@ -55,45 +55,10 @@ export async function POST(request: NextRequest) {
     // ニックネーム生成（メールアドレスの@前部分）
     const defaultNickname = email.split('@')[0].replace(/[^a-zA-Z0-9]/g, '');
 
-    // 最新のIDを取得して自動採番
-    const { data: latestUser } = await supabase
-      .from('users')
-      .select('id')
-      .order('id', { ascending: false })
-      .limit(1)
-      .single();
-
-    let newUserId = '1';
-    if (latestUser && latestUser.id) {
-      const latestId = latestUser.id;
-      const numericId = parseInt(latestId);
-      if (!isNaN(numericId)) {
-        newUserId = String(numericId + 1);
-      } else {
-        const { data: maxNumericUser } = await supabase
-          .from('users')
-          .select('id')
-          .order('id', { ascending: false })
-          .limit(100);
-        
-        let maxId = 0;
-        if (maxNumericUser) {
-          for (const user of maxNumericUser) {
-            const id = parseInt(user.id);
-            if (!isNaN(id) && id > maxId) {
-              maxId = id;
-            }
-          }
-        }
-        newUserId = String(maxId + 1);
-      }
-    }
-
-    // usersテーブルに仮登録
+    // usersテーブルに仮登録（IDはデフォルト値のUUIDが自動生成される）
     const { data: newUser, error: userError } = await supabase
       .from('users')
       .insert({
-        id: newUserId,
         email,
         user_pass: hashedPassword,
         name: defaultNickname,
