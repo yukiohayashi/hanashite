@@ -103,7 +103,7 @@ export async function POST(request: Request) {
         }
       }
 
-      // 形式チェック
+      // 形式チェック（UUIDはハイフン含む英数字なので許可）
       if (!/^[a-zA-Z0-9_-]+$/.test(profileSlug)) {
         return NextResponse.json(
           { success: false, error: 'プロフィールURLは英数字、ハイフン、アンダースコアのみ使用できます。' },
@@ -111,7 +111,9 @@ export async function POST(request: Request) {
         );
       }
 
-      if (profileSlug.length < 3 || profileSlug.length > 30) {
+      // UUID（初期値）はそのまま許可、ユーザーが設定する場合は3-30文字
+      const isUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(profileSlug);
+      if (!isUuid && (profileSlug.length < 3 || profileSlug.length > 30)) {
         return NextResponse.json(
           { success: false, error: 'プロフィールURLは3文字以上30文字以内で入力してください。' },
           { status: 400 }

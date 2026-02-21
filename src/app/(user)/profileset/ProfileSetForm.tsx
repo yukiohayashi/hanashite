@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -73,7 +73,7 @@ export default function ProfileSetForm({ user, categories, isFirstTime }: Profil
   
   const [nickname, setNickname] = useState(user.name || '');
   const [profile, setProfile] = useState(user.user_description || '');
-  const [profileSlug, setProfileSlug] = useState(user.profile_slug || user.id || '');
+  const [profileSlug, setProfileSlug] = useState(user.profile_slug || '');
   const [snsX, setSnsX] = useState(user.sns_x || '');
   const [participatePoints, setParticipatePoints] = useState(user.participate_points || false);
   const [bestAnswerPoints, setBestAnswerPoints] = useState<number>(10);
@@ -92,6 +92,7 @@ export default function ProfileSetForm({ user, categories, isFirstTime }: Profil
   const [emailSubscription, setEmailSubscription] = useState(user.email_subscription ?? true);
   const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
   const [avatarFile, setAvatarFile] = useState<File | null>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
   
   // DiceBearアバター関連の状態
   const [imageMode, setImageMode] = useState<ImageMode>(() => {
@@ -182,12 +183,13 @@ export default function ProfileSetForm({ user, categories, isFirstTime }: Profil
       newErrors.push('職種を選択してください');
     }
     
-    if (profileSlug && profileSlug !== `?user_id=${user.id}`) {
-      if (!canChangeSlug()) {
+    if (profileSlug) {
+      const isUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(profileSlug);
+      if (!canChangeSlug() && profileSlug !== user.profile_slug) {
         newErrors.push(`プロフィールURLは変更後1ヶ月間変更できません。あと${getDaysUntilChange()}日お待ちください。`);
       } else if (!/^[a-zA-Z0-9_-]+$/.test(profileSlug)) {
         newErrors.push('プロフィールURLは英数字、ハイフン、アンダースコアのみ使用できます。');
-      } else if (profileSlug.length < 3 || profileSlug.length > 30) {
+      } else if (!isUuid && (profileSlug.length < 3 || profileSlug.length > 30)) {
         newErrors.push('プロフィールURLは3文字以上30文字以内で入力してください。');
       }
     }
@@ -390,7 +392,7 @@ export default function ProfileSetForm({ user, categories, isFirstTime }: Profil
           <div className="flex gap-2 justify-center mb-4">
             <button
               type="button"
-              onClick={() => setImageMode('upload')}
+              onClick={() => { setImageMode('upload'); fileInputRef.current?.click(); }}
               className={`
                 px-4 py-2 rounded-md text-sm font-medium transition-colors
                 ${
@@ -432,31 +434,27 @@ export default function ProfileSetForm({ user, categories, isFirstTime }: Profil
             </button>
           </div>
 
+          {/* 非表示のファイル入力（ボタンからトリガー） */}
+          <input
+            ref={fileInputRef}
+            type="file"
+            accept="image/jpeg,image/png,image/webp"
+            className="hidden"
+            onChange={(e) => {
+              const file = e.target.files?.[0];
+              if (file) {
+                setAvatarFile(file);
+                setImageMode('upload');
+              }
+            }}
+          />
+
           {/* 画像アップロードモード */}
           {imageMode === 'upload' && (
             <div className="space-y-4 bg-gray-50 p-4 rounded-lg">
               <div className="text-sm text-gray-700">
-                プロフィール画像をアップロードしてください。
+                {avatarFile ? `選択中: ${avatarFile.name}` : 'プロフィール画像をアップロードしてください。'}
               </div>
-              
-              <input
-                type="file"
-                accept="image/jpeg,image/png,image/webp"
-                onChange={(e) => {
-                  const file = e.target.files?.[0];
-                  if (file) {
-                    setAvatarFile(file);
-                    setImageMode('upload');
-                  }
-                }}
-                className="block w-full text-sm text-gray-500
-                  file:mr-4 file:py-2 file:px-4
-                  file:rounded-md file:border-0
-                  file:text-sm file:font-medium
-                  file:bg-orange-50 file:text-orange-700
-                  hover:file:bg-orange-100 cursor-pointer"
-              />
-              
               <div className="text-xs text-gray-500 bg-white p-3 rounded border border-gray-200">
                 <div className="font-medium mb-1">アップロード要件：</div>
                 <ul className="list-disc list-inside space-y-1">
@@ -488,8 +486,8 @@ export default function ProfileSetForm({ user, categories, isFirstTime }: Profil
                     <div className="text-sm font-medium text-gray-700 mb-2 sticky top-0 bg-white py-1 z-10">
                       {label}
                     </div>
-                    <div className="grid grid-cols-6 md:grid-cols-10 gap-2">
-                      {Array.from({ length: 20 }, (_, i) => {
+                    <div className="grid grid-cols-5 md:grid-cols-10 gap-2">
+                      {Array.from({ length: 10 }, (_, i) => {
                         const seed = `${prefix}-${i + 1}`;
                         const isSelected = avatarSeed === seed && avatarStyle === s;
                         return (

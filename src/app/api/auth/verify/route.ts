@@ -69,14 +69,18 @@ export async function POST(request: NextRequest) {
     const newPassword = crypto.randomBytes(12).toString('hex');
     const hashedPassword = await bcrypt.hash(newPassword, 10);
 
-    // ユーザーのステータスを本登録に更新
+    // ユーザーのステータスを本登録に更新（profile_slugが未設定の場合はidを設定）
+    const slugUpdate: Record<string, string | number> = {
+      status: 1,
+      user_pass: hashedPassword,
+      updated_at: new Date().toISOString(),
+    };
+    if (!user.profile_slug) {
+      slugUpdate.profile_slug = user.id;
+    }
     const { error: updateError } = await supabase
       .from('users')
-      .update({
-        status: 1,
-        user_pass: hashedPassword,
-        updated_at: new Date().toISOString(),
-      })
+      .update(slugUpdate)
       .eq('id', user.id);
 
     if (updateError) {
