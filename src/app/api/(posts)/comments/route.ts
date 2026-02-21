@@ -40,17 +40,23 @@ export async function POST(request: Request) {
       );
     }
 
-    // ユーザー名を取得
-    let userName = 'ゲスト';
+    // ユーザー情報を取得（アバター含む）
+    let userInfo: { name: string; image?: string | null; avatar_style?: string | null; avatar_seed?: string | null; use_custom_image?: boolean | null } = { name: 'ゲスト' };
     if (comment.user_id) {
       const { data: user } = await supabase
         .from('users')
-        .select('name')
+        .select('name, image, avatar_style, avatar_seed, use_custom_image')
         .eq('id', comment.user_id)
         .single();
       
-      if (user && user.name) {
-        userName = user.name;
+      if (user) {
+        userInfo = {
+          name: user.name || 'ゲスト',
+          image: user.image,
+          avatar_style: user.avatar_style,
+          avatar_seed: user.avatar_seed,
+          use_custom_image: user.use_custom_image,
+        };
       }
     }
 
@@ -58,7 +64,7 @@ export async function POST(request: Request) {
       success: true,
       comment: {
         ...comment,
-        users: { name: userName },
+        users: userInfo,
         like_count: 0
       }
     });
