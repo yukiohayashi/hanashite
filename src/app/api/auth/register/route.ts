@@ -1,13 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { createClient } from '@supabase/supabase-js';
 import bcrypt from 'bcryptjs';
 import crypto from 'crypto';
 import { sendVerificationEmail } from '@/lib/email';
-
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.SUPABASE_SERVICE_ROLE_KEY!
-);
+import { supabaseAdmin } from '@/lib/supabase';
 
 export async function POST(request: NextRequest) {
   try {
@@ -31,7 +26,7 @@ export async function POST(request: NextRequest) {
     }
 
     // メールアドレス重複チェック
-    const { data: existingUser } = await supabase
+    const { data: existingUser } = await supabaseAdmin
       .from('users')
       .select('id')
       .eq('email', email)
@@ -55,10 +50,14 @@ export async function POST(request: NextRequest) {
     // ニックネーム生成（メールアドレスの@前部分）
     const defaultNickname = email.split('@')[0].replace(/[^a-zA-Z0-9]/g, '');
 
-    // usersテーブルに仮登録（IDはデフォルト値のUUIDが自動生成される）
-    const { data: newUser, error: userError } = await supabase
+    // UUIDを生成
+    const userId = crypto.randomUUID();
+
+    // usersテーブルに仮登録
+    const { data: newUser, error: userError } = await supabaseAdmin
       .from('users')
       .insert({
+        id: userId,
         email,
         user_pass: hashedPassword,
         name: defaultNickname,
@@ -81,7 +80,7 @@ export async function POST(request: NextRequest) {
     const expiresAt = new Date();
     expiresAt.setHours(expiresAt.getHours() + 24);
 
-    const { error: tokenError } = await supabase
+    const { error: tokenError } = await supabaseAdmin
       .from('verification_tokens')
       .insert({
         identifier: email,

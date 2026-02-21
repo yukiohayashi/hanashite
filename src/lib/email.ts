@@ -29,9 +29,34 @@ async function getMailSettings() {
   return data;
 }
 
+async function getMailTemplate(templateKey: string) {
+  const { data, error } = await supabase
+    .from('mail_templates')
+    .select('*')
+    .eq('template_key', templateKey)
+    .eq('is_active', true)
+    .single();
+
+  if (error || !data) {
+    throw new Error(`メールテンプレート「${templateKey}」が見つかりません`);
+  }
+
+  return data;
+}
+
+function replaceTemplateVariables(template: string, variables: Record<string, string>): string {
+  let result = template;
+  for (const [key, value] of Object.entries(variables)) {
+    const regex = new RegExp(`{{${key}}}`, 'g');
+    result = result.replace(regex, value);
+  }
+  return result;
+}
+
 export async function sendVerificationEmail({ email, activationLink }: SendVerificationEmailParams) {
   try {
     const settings = await getMailSettings();
+    const template = await getMailTemplate('verification_email');
 
     const transporter = nodemailer.createTransport({
       host: settings.smtp_host,
@@ -43,29 +68,20 @@ export async function sendVerificationEmail({ email, activationLink }: SendVerif
       },
     });
 
+    // テンプレート変数を置換
+    const subject = replaceTemplateVariables(template.subject || '【Anke】メールアドレスの認証', {
+      activation_link: activationLink,
+    });
+
+    const body = replaceTemplateVariables(template.body || '', {
+      activation_link: activationLink,
+    });
+
     const info = await transporter.sendMail({
       from: `"${settings.from_name}" <${settings.from_email}>`,
       to: email,
-      subject: '【Anke】メールアドレスの認証',
-      html: `
-        <div style="font-family: sans-serif; max-width: 600px; margin: 0 auto;">
-          <h2>メールアドレスの認証</h2>
-          <p>メールアドレスの認証が完了しました。</p>
-          <p>アンケへの会員登録が完了しました。</p>
-          <p>下記のリンクをクリックして、本登録を完了してください。</p>
-          <p style="margin: 30px 0;">
-            <a href="${activationLink}" style="background-color: #5ac971; color: white; padding: 12px 24px; text-decoration: none; border-radius: 5px; display: inline-block;">
-              本登録を完了する
-            </a>
-          </p>
-          <p>または、以下のURLをコピーしてブラウザに貼り付けてください：</p>
-          <p style="word-break: break-all; color: #666;">${activationLink}</p>
-          <hr style="margin: 30px 0; border: none; border-top: 1px solid #ddd;">
-          <p style="color: #999; font-size: 12px;">
-            このメールに心当たりがない場合は、削除していただいて構いません。
-          </p>
-        </div>
-      `,
+      subject,
+      html: body,
     });
 
     console.log('Verification email sent:', info.messageId);
@@ -86,6 +102,7 @@ export async function sendWelcomeEmail({
 }: SendWelcomeEmailParams) {
   try {
     const settings = await getMailSettings();
+    const template = await getMailTemplate('welcome_email');
 
     const transporter = nodemailer.createTransport({
       host: settings.smtp_host,
@@ -97,38 +114,30 @@ export async function sendWelcomeEmail({
       },
     });
 
+    // テンプレート変数を置換
+    const subject = replaceTemplateVariables(template.subject || '【Anke】本登録完了', {
+      nickname,
+      email,
+      password,
+      login_url: loginUrl,
+      site_url: siteUrl,
+      site_name: siteName,
+    });
+
+    const body = replaceTemplateVariables(template.body || '', {
+      nickname,
+      email,
+      password,
+      login_url: loginUrl,
+      site_url: siteUrl,
+      site_name: siteName,
+    });
+
     const info = await transporter.sendMail({
       from: `"${settings.from_name}" <${settings.from_email}>`,
       to: email,
-      subject: '【Anke】本登録完了',
-      html: `
-        <div style="font-family: sans-serif; max-width: 600px; margin: 0 auto;">
-          <h2>${nickname} 様</h2>
-          <p>メールアドレスの認証が完了しました。</p>
-          <p>アンケへの会員登録が完了しました。</p>
-          <hr style="margin: 20px 0; border: none; border-top: 1px solid #ddd;">
-          <h3>ログイン情報</h3>
-          <table style="width: 100%; border-collapse: collapse;">
-            <tr>
-              <td style="padding: 8px; background-color: #f5f5f5; font-weight: bold;">メールアドレス</td>
-              <td style="padding: 8px;">${email}</td>
-            </tr>
-            <tr>
-              <td style="padding: 8px; background-color: #f5f5f5; font-weight: bold;">パスワード</td>
-              <td style="padding: 8px;">${password}</td>
-            </tr>
-          </table>
-          <p style="margin-top: 20px;">大切に保管してください。</p>
-          <p style="margin: 30px 0;">
-            <a href="${loginUrl}" style="background-color: #5ac971; color: white; padding: 12px 24px; text-decoration: none; border-radius: 5px; display: inline-block;">
-              ログインする
-            </a>
-          </p>
-          <hr style="margin: 30px 0; border: none; border-top: 1px solid #ddd;">
-          <p>アンケ運営事務局</p>
-          <p><a href="${siteUrl}" style="color: #5ac971;">${siteName}</a></p>
-        </div>
-      `,
+      subject,
+      html: body,
     });
 
     console.log('Welcome email sent:', info.messageId);
@@ -148,6 +157,7 @@ interface SendPasswordResetEmailParams {
 export async function sendPasswordResetEmail({ email, resetUrl, userName }: SendPasswordResetEmailParams) {
   try {
     const settings = await getMailSettings();
+    const template = await getMailTemplate('password_reset_email');
 
     const transporter = nodemailer.createTransport({
       host: settings.smtp_host,
@@ -159,32 +169,22 @@ export async function sendPasswordResetEmail({ email, resetUrl, userName }: Send
       },
     });
 
+    // テンプレート変数を置換
+    const subject = replaceTemplateVariables(template.subject || '【Anke】パスワードリセットのご案内', {
+      user_name: userName || '',
+      reset_url: resetUrl,
+    });
+
+    const body = replaceTemplateVariables(template.body || '', {
+      user_name: userName || '',
+      reset_url: resetUrl,
+    });
+
     const info = await transporter.sendMail({
       from: `"${settings.from_name}" <${settings.from_email}>`,
       to: email,
-      subject: '【Anke】パスワードリセットのご案内',
-      html: `
-        <div style="font-family: sans-serif; max-width: 600px; margin: 0 auto;">
-          <h2>パスワードリセットのご案内</h2>
-          ${userName ? `<p>${userName} 様</p>` : ''}
-          <p>パスワードリセットのリクエストを受け付けました。</p>
-          <p>下記のリンクをクリックして、新しいパスワードを設定してください。</p>
-          <p style="margin: 30px 0;">
-            <a href="${resetUrl}" style="background-color: #ff6b35; color: white; padding: 12px 24px; text-decoration: none; border-radius: 5px; display: inline-block;">
-              パスワードをリセットする
-            </a>
-          </p>
-          <p>または、以下のURLをコピーしてブラウザに貼り付けてください：</p>
-          <p style="word-break: break-all; color: #666;">${resetUrl}</p>
-          <p style="color: #999; font-size: 14px; margin-top: 30px;">
-            ※このリンクの有効期限は1時間です。<br>
-            ※このメールに心当たりがない場合は、削除していただいて構いません。
-          </p>
-          <hr style="margin: 30px 0; border: none; border-top: 1px solid #ddd;">
-          <p>アンケ運営事務局</p>
-          <p><a href="https://anke.jp" style="color: #ff6b35;">Anke</a></p>
-        </div>
-      `,
+      subject,
+      html: body,
     });
 
     console.log('Password reset email sent:', info.messageId);
