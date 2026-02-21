@@ -265,9 +265,11 @@ export default function CommentSection({ postId, initialComments, totalCount, po
                 if (users?.use_custom_image && users?.image) {
                   return users.image;
                 }
-                const seed = users?.avatar_seed || (comment.user_id ? String(comment.user_id) : 'guest');
-                const style = users?.avatar_style || 'big-smile';
-                return `https://api.dicebear.com/9.x/${style}/svg?seed=${encodeURIComponent(seed)}&size=20`;
+                if (users?.avatar_seed) {
+                  const style = users?.avatar_style || 'fun-emoji';
+                  return `https://api.dicebear.com/9.x/${style}/svg?seed=${encodeURIComponent(users.avatar_seed)}&size=20`;
+                }
+                return '/images/default-avatar.svg';
               };
               const avatarUrl = getCommentAvatarUrl();
               const replies = getReplies(comment.id);
@@ -353,9 +355,11 @@ export default function CommentSection({ postId, initialComments, totalCount, po
                       if (replyUsers?.use_custom_image && replyUsers?.image) {
                         return replyUsers.image;
                       }
-                      const seed = replyUsers?.avatar_seed || (reply.user_id ? String(reply.user_id) : 'guest');
-                      const style = replyUsers?.avatar_style || 'big-smile';
-                      return `https://api.dicebear.com/9.x/${style}/svg?seed=${encodeURIComponent(seed)}&size=20`;
+                      if (replyUsers?.avatar_seed) {
+                        const style = replyUsers?.avatar_style || 'fun-emoji';
+                        return `https://api.dicebear.com/9.x/${style}/svg?seed=${encodeURIComponent(replyUsers.avatar_seed)}&size=20`;
+                      }
+                      return '/images/default-avatar.svg';
                     };
                     const replyAvatarUrl = getReplyAvatarUrl();
                     const nestedReplies = getReplies(reply.id);
