@@ -671,16 +671,49 @@ pm2 restart hanashite
 
 ### 14.5. OpenDKIM鍵ファイルのパーミッションエラー
 
-**症状**: OpenDKIMがエラーで起動しない
+**症状**: メール送信時に `451 4.7.1 Service unavailable - try again later` エラーが発生する
 
-**原因**: 鍵ファイルのパーミッションが不正
-
-**解決策**:
+**ログの確認**:
 ```bash
-sudo chown -R opendkim:opendkim /etc/opendkim/keys/
+sudo tail -f /var/log/mail.log
+```
+
+**よくあるエラーメッセージと解決策**:
+
+#### エラー1: `key data is not secure: /etc/opendkim/keys is writeable and owned by uid 110`
+
+```bash
+sudo chmod 750 /etc/opendkim/keys
+sudo chmod 750 /etc/opendkim/keys/dokujo.com
+sudo chown -R root:opendkim /etc/opendkim/keys
+sudo systemctl restart opendkim
+```
+
+#### エラー2: `key data is not secure: default.private is in group 111 which has multiple users`
+
+```bash
+sudo chmod 600 /etc/opendkim/keys/dokujo.com/default.private
+sudo chown opendkim:opendkim /etc/opendkim/keys/dokujo.com/default.private
+sudo systemctl restart opendkim
+```
+
+#### エラー3: `key data is not secure: default.private is not owned by the executing uid (0)`
+
+OpenDKIMがroot (uid 0)で実行されている場合、鍵ファイルもrootが所有する必要があります：
+
+```bash
+sudo chown root:root /etc/opendkim/keys/dokujo.com/default.private
 sudo chmod 600 /etc/opendkim/keys/dokujo.com/default.private
 sudo systemctl restart opendkim
 ```
+
+#### 最終確認
+
+```bash
+sudo journalctl -u opendkim -n 20 --no-pager
+```
+
+エラーなく起動していれば、DKIM署名が正常に機能します。
 
 ### 14.6. メールがGmailに届かない
 
