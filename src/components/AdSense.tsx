@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect } from 'react';
+import { useEffect, useRef } from 'react';
 
 interface AdSenseProps {
   adSlot: string;
@@ -17,14 +17,22 @@ export default function AdSense({
   style,
   className = '',
 }: AdSenseProps) {
+  const isAdPushed = useRef(false);
+
   useEffect(() => {
+    if (isAdPushed.current) return;
+    
     try {
       if (typeof window !== 'undefined') {
         const w = window as Window & { adsbygoogle?: unknown[] };
         (w.adsbygoogle = w.adsbygoogle || []).push({});
+        isAdPushed.current = true;
       }
     } catch (err) {
-      console.error('AdSense error:', err);
+      // エラーは無視（既に広告が読み込まれている場合のエラーを抑制）
+      if (err instanceof Error && !err.message.includes('already have ads')) {
+        console.error('AdSense error:', err);
+      }
     }
   }, []);
 
