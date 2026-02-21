@@ -357,19 +357,27 @@ export default function ProfileSetForm({ user, categories, isFirstTime }: Profil
           {/* プレビュー */}
           <div className="flex justify-center mb-4">
             <div className="relative">
-              <Avatar
-                userId={imageMode === 'avatar' ? avatarSeed : user.id}
-                imageUrl={
-                  imageMode === 'upload' 
-                    ? (avatarFile ? URL.createObjectURL(avatarFile) : user.image)
-                    : imageMode === 'none'
-                    ? null
-                    : null
-                }
-                style={avatarStyle}
-                size={120}
-                className="border-4 border-white shadow-lg"
-              />
+              {imageMode === 'none' ? (
+                <img
+                  src="/images/default-avatar.svg"
+                  alt="デフォルトアバター"
+                  width={120}
+                  height={120}
+                  className="rounded-full object-cover border-4 border-white shadow-lg"
+                />
+              ) : (
+                <Avatar
+                  userId={imageMode === 'avatar' ? avatarSeed : user.id}
+                  imageUrl={
+                    imageMode === 'upload'
+                      ? (avatarFile ? URL.createObjectURL(avatarFile) : user.image)
+                      : null
+                  }
+                  style={avatarStyle}
+                  size={120}
+                  className="border-4 border-white shadow-lg"
+                />
+              )}
               {imageMode === 'none' && (
                 <div className="absolute -bottom-2 left-1/2 transform -translate-x-1/2 bg-gray-100 px-2 py-1 rounded text-xs text-gray-600">
                   未設定
