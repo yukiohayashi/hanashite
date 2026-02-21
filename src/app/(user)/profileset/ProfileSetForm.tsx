@@ -418,20 +418,22 @@ export default function ProfileSetForm({ user, categories, isFirstTime }: Profil
             >
               アバターを選択
             </button>
-            <button
-              type="button"
-              onClick={() => setImageMode('none')}
-              className={`
-                px-4 py-2 rounded-md text-sm font-medium transition-colors
-                ${
-                  imageMode === 'none'
-                    ? 'bg-orange-500 text-white'
-                    : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-                }
-              `}
-            >
-              未設定
-            </button>
+            {isFirstTime && (
+              <button
+                type="button"
+                onClick={() => setImageMode('none')}
+                className={`
+                  px-4 py-2 rounded-md text-sm font-medium transition-colors
+                  ${
+                    imageMode === 'none'
+                      ? 'bg-orange-500 text-white'
+                      : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                  }
+                `}
+              >
+                未設定
+              </button>
+            )}
           </div>
 
           {/* 非表示のファイル入力（ボタンからトリガー） */}

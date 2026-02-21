@@ -54,6 +54,66 @@ export async function POST(request: Request) {
       );
     }
 
+    // プロフィールスラッグのバリデーション
+    let updateSlug = false;
+    let slugValue = profileSlug;
+
+    if (profileSlug) {
+      const { data: currentUser } = await supabase
+        .from('users')
+        .select('profile_slug, profile_slug_updated_at')
+        .eq('id', session.user.id)
+        .single();
+
+      if (currentUser?.profile_slug_updated_at) {
+        const lastUpdate = new Date(currentUser.profile_slug_updated_at);
+        const oneMonthLater = new Date(lastUpdate);
+        oneMonthLater.setMonth(oneMonthLater.getMonth() + 1);
+        if (new Date() < oneMonthLater && profileSlug !== currentUser.profile_slug) {
+          const daysUntilChange = Math.ceil((oneMonthLater.getTime() - new Date().getTime()) / (1000 * 60 * 60 * 24));
+          return NextResponse.json(
+            { success: false, error: `プロフィールURLは変更後1ヶ月間変更できません。あと${daysUntilChange}日お待ちください。` },
+            { status: 400 }
+          );
+        }
+      }
+
+      if (!/^[a-zA-Z0-9_-]+$/.test(profileSlug)) {
+        return NextResponse.json(
+          { success: false, error: 'プロフィールURLは英数字、ハイフン、アンダースコアのみ使用できます。' },
+          { status: 400 }
+        );
+      }
+
+      const isUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(profileSlug);
+      if (!isUuid && (profileSlug.length < 3 || profileSlug.length > 30)) {
+        return NextResponse.json(
+          { success: false, error: 'プロフィールURLは3文字以上30文字以内で入力してください。' },
+          { status: 400 }
+        );
+      }
+
+      const { data: existingUser } = await supabase
+        .from('users')
+        .select('id')
+        .eq('profile_slug', profileSlug)
+        .neq('id', session.user.id)
+        .single();
+
+      if (existingUser) {
+        return NextResponse.json(
+          { success: false, error: 'このプロフィールURLは既に使用されています。' },
+          { status: 400 }
+        );
+      }
+
+      if (profileSlug !== currentUser?.profile_slug) {
+        updateSlug = true;
+      }
+    } else {
+      slugValue = '';
+    }
+
     // アバター画像のアップロード処理
     let avatarUrl = null;
     console.log('Avatar file:', avatarFile ? {
@@ -131,6 +191,11 @@ export async function POST(request: Request) {
       avatar_seed: avatarSeed || null,
       use_custom_image: useCustomImage ? 1 : 0
     };
+
+    if (updateSlug) {
+      updateData.profile_slug = slugValue;
+      updateData.profile_slug_updated_at = new Date().toISOString();
+    }
 
     if (avatarUrl) {
       updateData.image = avatarUrl;
