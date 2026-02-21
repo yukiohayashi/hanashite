@@ -15,7 +15,10 @@ export type AvatarStyle =
   | 'adventurer'        // アニメ風の人物キャラクター
   | 'pixel-art'         // ドット絵風
   | 'croodles'          // 手書き風の可愛いキャラクター
-  | 'notionists'        // シンプルなイラスト風
+  | 'bottts'           // ロボット風
+  | 'personas'          // シンプルな人物
+  | 'thumbs'            // 動物顔風キャラクター
+  | 'big-ears'          // 動物耳風キャラクター
   | 'micah';            // フラットデザインの人物
 
 interface AvatarProps {

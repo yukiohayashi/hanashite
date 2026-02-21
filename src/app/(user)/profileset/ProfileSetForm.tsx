@@ -481,9 +481,11 @@ export default function ProfileSetForm({ user, categories, isFirstTime }: Profil
                   { style: 'croodles' as AvatarStyle, label: '🖊️ 手書き風', prefix: 'croodles' },
                   { style: 'pixel-art' as AvatarStyle, label: '🎮 ドット絵', prefix: 'pixel' },
                   { style: 'micah' as AvatarStyle, label: '🎨 フラット', prefix: 'micah' },
-                  { style: 'notionists' as AvatarStyle, label: '💡 シンプル', prefix: 'notion' },
+                  { style: 'thumbs' as AvatarStyle, label: '🐱 動物顔', prefix: 'thumbs' },
+                  { style: 'big-ears' as AvatarStyle, label: '🐰 動物耳', prefix: 'bigears' },
+                  { style: 'bottts' as AvatarStyle, label: '🤖 ロボット', prefix: 'bottts' },
                   { style: 'fun-emoji' as AvatarStyle, label: '😄 絵文字', prefix: 'emoji' },
-                  { style: 'avataaars' as AvatarStyle, label: '👤 アバター', prefix: 'av' },
+                  { style: 'personas' as AvatarStyle, label: '👤 アバター', prefix: 'personas' },
                 ] as { style: AvatarStyle; label: string; prefix: string }[]).map(({ style: s, label, prefix }) => (
                   <div key={s}>
                     <div className="text-sm font-medium text-gray-700 mb-2 sticky top-0 bg-white py-1 z-10">
@@ -517,7 +519,7 @@ export default function ProfileSetForm({ user, categories, isFirstTime }: Profil
 
               </div>
               <div className="text-xs text-gray-500 text-center">
-                160種類のキャラクターから選べます
+                200種類のキャラクターから選べます
               </div>
             </div>
           )}
