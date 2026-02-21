@@ -69,12 +69,12 @@ export async function sendVerificationEmail({ email, activationLink }: SendVerif
     });
 
     // テンプレート変数を置換
-    const subject = replaceTemplateVariables(template.subject || '【Anke】メールアドレスの認証', {
-      activation_link: activationLink,
+    const subject = replaceTemplateVariables(template.subject, {
+      activationLink,
     });
 
-    const body = replaceTemplateVariables(template.body || '', {
-      activation_link: activationLink,
+    const body = replaceTemplateVariables(template.body, {
+      activationLink,
     });
 
     const info = await transporter.sendMail({
@@ -115,22 +115,22 @@ export async function sendWelcomeEmail({
     });
 
     // テンプレート変数を置換
-    const subject = replaceTemplateVariables(template.subject || '【Anke】本登録完了', {
+    const subject = replaceTemplateVariables(template.subject, {
       nickname,
       email,
       password,
-      login_url: loginUrl,
-      site_url: siteUrl,
-      site_name: siteName,
+      loginUrl,
+      siteUrl,
+      siteName,
     });
 
-    const body = replaceTemplateVariables(template.body || '', {
+    const body = replaceTemplateVariables(template.body, {
       nickname,
       email,
       password,
-      login_url: loginUrl,
-      site_url: siteUrl,
-      site_name: siteName,
+      loginUrl,
+      siteUrl,
+      siteName,
     });
 
     const info = await transporter.sendMail({
@@ -170,14 +170,14 @@ export async function sendPasswordResetEmail({ email, resetUrl, userName }: Send
     });
 
     // テンプレート変数を置換
-    const subject = replaceTemplateVariables(template.subject || '【Anke】パスワードリセットのご案内', {
-      user_name: userName || '',
-      reset_url: resetUrl,
+    const subject = replaceTemplateVariables(template.subject, {
+      userName: userName || '',
+      resetUrl,
     });
 
-    const body = replaceTemplateVariables(template.body || '', {
-      user_name: userName || '',
-      reset_url: resetUrl,
+    const body = replaceTemplateVariables(template.body, {
+      userName: userName || '',
+      resetUrl,
     });
 
     const info = await transporter.sendMail({
