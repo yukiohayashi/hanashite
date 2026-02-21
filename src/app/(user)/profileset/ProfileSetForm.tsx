@@ -474,18 +474,15 @@ export default function ProfileSetForm({ user, categories, isFirstTime }: Profil
             <div className="bg-gray-50 p-4 rounded-lg space-y-6">
               <div className="max-h-[600px] overflow-y-auto border border-gray-200 rounded-lg bg-white p-3 space-y-6">
 
-                {/* イラスト風（日本人向け） */}
                 {([
-                  { style: 'lorelei' as AvatarStyle, label: '🌸 イラスト風', prefix: 'lorelei' },
                   { style: 'adventurer' as AvatarStyle, label: '✨ アニメ風', prefix: 'adv' },
-                  { style: 'croodles' as AvatarStyle, label: '🖊️ 手書き風', prefix: 'croodles' },
-                  { style: 'pixel-art' as AvatarStyle, label: '🎮 ドット絵', prefix: 'pixel' },
-                  { style: 'micah' as AvatarStyle, label: '🎨 フラット', prefix: 'micah' },
-                  { style: 'thumbs' as AvatarStyle, label: '🐱 動物顔', prefix: 'thumbs' },
-                  { style: 'big-ears' as AvatarStyle, label: '🐰 動物耳', prefix: 'bigears' },
-                  { style: 'bottts' as AvatarStyle, label: '🤖 ロボット', prefix: 'bottts' },
+                  { style: 'adventurer-neutral' as AvatarStyle, label: '✨ アニメ風（中性）', prefix: 'advn' },
+                  { style: 'avataaars' as AvatarStyle, label: '👤 アバター', prefix: 'av' },
+                  { style: 'avataaars-neutral' as AvatarStyle, label: '� アバター（中性）', prefix: 'avn' },
+                  { style: 'croodles' as AvatarStyle, label: '�️ 手書き風', prefix: 'croodles' },
+                  { style: 'croodles-neutral' as AvatarStyle, label: '🖊️ 手書き風（中性）', prefix: 'croodlesn' },
                   { style: 'fun-emoji' as AvatarStyle, label: '😄 絵文字', prefix: 'emoji' },
-                  { style: 'personas' as AvatarStyle, label: '👤 アバター', prefix: 'personas' },
+                  { style: 'pixel-art' as AvatarStyle, label: '🎮 ドット絵', prefix: 'pixel' },
                 ] as { style: AvatarStyle; label: string; prefix: string }[]).map(({ style: s, label, prefix }) => (
                   <div key={s}>
                     <div className="text-sm font-medium text-gray-700 mb-2 sticky top-0 bg-white py-1 z-10">
@@ -519,7 +516,7 @@ export default function ProfileSetForm({ user, categories, isFirstTime }: Profil
 
               </div>
               <div className="text-xs text-gray-500 text-center">
-                200種類のキャラクターから選べます
+                160種類のキャラクターから選べます
               </div>
             </div>
           )}

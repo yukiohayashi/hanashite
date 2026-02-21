@@ -9,17 +9,14 @@
 import { useMemo } from 'react';
 
 export type AvatarStyle = 
-  | 'fun-emoji'         // 絵文字風の可愛らしいアバター
-  | 'avataaars'         // 多様性のあるキャラクター
-  | 'lorelei'           // アニメ・イラスト風（日本人向け）
-  | 'adventurer'        // アニメ風の人物キャラクター
-  | 'pixel-art'         // ドット絵風
-  | 'croodles'          // 手書き風の可愛いキャラクター
-  | 'bottts'           // ロボット風
-  | 'personas'          // シンプルな人物
-  | 'thumbs'            // 動物顔風キャラクター
-  | 'big-ears'          // 動物耳風キャラクター
-  | 'micah';            // フラットデザインの人物
+  | 'adventurer'           // アニメ風の人物キャラクター
+  | 'adventurer-neutral'   // アニメ風（中性的）
+  | 'avataaars'            // 多様性のあるキャラクター
+  | 'avataaars-neutral'    // アバター（中性的）
+  | 'croodles'             // 手書き風の可愛いキャラクター
+  | 'croodles-neutral'     // 手書き風（中性的）
+  | 'fun-emoji'            // 絵文字風の可愛らしいアバター
+  | 'pixel-art';           // ドット絵風
 
 interface AvatarProps {
   /** ユーザーID（アバター生成のシードとして使用） */
