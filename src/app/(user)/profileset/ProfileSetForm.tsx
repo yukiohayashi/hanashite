@@ -472,70 +472,52 @@ export default function ProfileSetForm({ user, categories, isFirstTime }: Profil
           {/* アバター選択モード */}
           {imageMode === 'avatar' && (
             <div className="bg-gray-50 p-4 rounded-lg space-y-6">
-              <div className="max-h-[500px] overflow-y-auto border border-gray-200 rounded-lg bg-white p-3 space-y-6">
-                {/* 絵文字スタイル */}
-                <div>
-                  <div className="text-sm font-medium text-gray-700 mb-2 sticky top-0 bg-white py-1 z-10">
-                    🎭 絵文字
-                  </div>
-                  <div className="grid grid-cols-5 md:grid-cols-8 gap-2">
-                    {Array.from({ length: 24 }, (_, i) => {
-                      const seed = `emoji-${i + 1}`;
-                      const isSelected = avatarSeed === seed && avatarStyle === 'fun-emoji';
-                      return (
-                        <button
-                          key={seed}
-                          type="button"
-                          onClick={() => { setAvatarStyle('fun-emoji'); setAvatarSeed(seed); }}
-                          className={`p-1 rounded-lg transition-all ${isSelected ? 'ring-2 ring-orange-500 bg-orange-50' : 'hover:bg-gray-100'}`}
-                          title={`絵文字 ${i + 1}`}
-                        >
-                          <img 
-                            src={`https://api.dicebear.com/9.x/fun-emoji/svg?seed=${seed}&size=40`}
-                            alt={`絵文字 ${i + 1}`}
-                            width={40}
-                            height={40}
-                            loading="lazy"
-                          />
-                        </button>
-                      );
-                    })}
-                  </div>
-                </div>
+              <div className="max-h-[600px] overflow-y-auto border border-gray-200 rounded-lg bg-white p-3 space-y-6">
 
-                {/* アバタースタイル */}
-                <div>
-                  <div className="text-sm font-medium text-gray-700 mb-2 sticky top-0 bg-white py-1 z-10">
-                    👤 アバター
+                {/* イラスト風（日本人向け） */}
+                {([
+                  { style: 'lorelei' as AvatarStyle, label: '🌸 イラスト風', prefix: 'lorelei' },
+                  { style: 'adventurer' as AvatarStyle, label: '✨ アニメ風', prefix: 'adv' },
+                  { style: 'croodles' as AvatarStyle, label: '🖊️ 手書き風', prefix: 'croodles' },
+                  { style: 'pixel-art' as AvatarStyle, label: '🎮 ドット絵', prefix: 'pixel' },
+                  { style: 'micah' as AvatarStyle, label: '🎨 フラット', prefix: 'micah' },
+                  { style: 'notionists' as AvatarStyle, label: '💡 シンプル', prefix: 'notion' },
+                  { style: 'fun-emoji' as AvatarStyle, label: '😄 絵文字', prefix: 'emoji' },
+                  { style: 'avataaars' as AvatarStyle, label: '👤 アバター', prefix: 'av' },
+                ] as { style: AvatarStyle; label: string; prefix: string }[]).map(({ style: s, label, prefix }) => (
+                  <div key={s}>
+                    <div className="text-sm font-medium text-gray-700 mb-2 sticky top-0 bg-white py-1 z-10">
+                      {label}
+                    </div>
+                    <div className="grid grid-cols-6 md:grid-cols-10 gap-2">
+                      {Array.from({ length: 20 }, (_, i) => {
+                        const seed = `${prefix}-${i + 1}`;
+                        const isSelected = avatarSeed === seed && avatarStyle === s;
+                        return (
+                          <button
+                            key={seed}
+                            type="button"
+                            onClick={() => { setAvatarStyle(s); setAvatarSeed(seed); }}
+                            className={`p-1 rounded-lg transition-all ${isSelected ? 'ring-2 ring-orange-500 bg-orange-50' : 'hover:bg-gray-100'}`}
+                            title={`${label} ${i + 1}`}
+                          >
+                            <img
+                              src={`https://api.dicebear.com/9.x/${s}/svg?seed=${seed}&size=40`}
+                              alt={`${label} ${i + 1}`}
+                              width={40}
+                              height={40}
+                              loading="lazy"
+                            />
+                          </button>
+                        );
+                      })}
+                    </div>
                   </div>
-                  <div className="grid grid-cols-5 md:grid-cols-8 gap-2">
-                    {Array.from({ length: 24 }, (_, i) => {
-                      const seed = `avatar-${i + 1}`;
-                      const isSelected = avatarSeed === seed && avatarStyle === 'avataaars';
-                      return (
-                        <button
-                          key={seed}
-                          type="button"
-                          onClick={() => { setAvatarStyle('avataaars'); setAvatarSeed(seed); }}
-                          className={`p-1 rounded-lg transition-all ${isSelected ? 'ring-2 ring-orange-500 bg-orange-50' : 'hover:bg-gray-100'}`}
-                          title={`アバター ${i + 1}`}
-                        >
-                          <img 
-                            src={`https://api.dicebear.com/9.x/avataaars/svg?seed=${seed}&size=40`}
-                            alt={`アバター ${i + 1}`}
-                            width={40}
-                            height={40}
-                            loading="lazy"
-                          />
-                        </button>
-                      );
-                    })}
-                  </div>
-                </div>
+                ))}
 
-                </div>
+              </div>
               <div className="text-xs text-gray-500 text-center">
-                48種類のキャラクターから選べます
+                160種類のキャラクターから選べます
               </div>
             </div>
           )}

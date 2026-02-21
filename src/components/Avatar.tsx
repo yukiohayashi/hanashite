@@ -9,8 +9,14 @@
 import { useMemo } from 'react';
 
 export type AvatarStyle = 
-  | 'fun-emoji'      // デフォルト: 絵文字風の可愛らしいアバター
-  | 'avataaars';     // 多様性のあるキャラクター
+  | 'fun-emoji'         // 絵文字風の可愛らしいアバター
+  | 'avataaars'         // 多様性のあるキャラクター
+  | 'lorelei'           // アニメ・イラスト風（日本人向け）
+  | 'adventurer'        // アニメ風の人物キャラクター
+  | 'pixel-art'         // ドット絵風
+  | 'croodles'          // 手書き風の可愛いキャラクター
+  | 'notionists'        // シンプルなイラスト風
+  | 'micah';            // フラットデザインの人物
 
 interface AvatarProps {
   /** ユーザーID（アバター生成のシードとして使用） */
