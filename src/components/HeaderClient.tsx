@@ -83,10 +83,7 @@ export default function HeaderClient() {
                   id="header-avatar"
                 />
               ) : (
-                <div className="relative bg-gray-300 rounded-full w-10 h-10 overflow-hidden" id="header-avatar">
-                  <div className="absolute top-[8px] left-1/2 bg-white rounded-full w-[18px] h-[18px] -translate-x-1/2"></div>
-                  <div className="absolute top-[22px] left-1/2 bg-white rounded-[50%_50%_50%_50%/60%_60%_40%_40%] w-[27px] h-[20px] -translate-x-1/2"></div>
-                </div>
+                <img src="/images/default-avatar.svg" alt="デフォルトアバター" id="header-avatar" className="rounded-full w-10 h-10 object-cover" />
               )}
             </div>
             {/* 未読通知ドット */}
@@ -99,10 +96,7 @@ export default function HeaderClient() {
         </>
       ) : (
         <Link href="/login" className="flex items-center">
-          <div className="relative bg-gray-300 rounded-full w-10 h-10 overflow-hidden" id="header-avatar">
-            <div className="absolute top-[8px] left-1/2 bg-white rounded-full w-[18px] h-[18px] -translate-x-1/2"></div>
-            <div className="absolute top-[22px] left-1/2 bg-white rounded-[50%_50%_50%_50%/60%_60%_40%_40%] w-[27px] h-[20px] -translate-x-1/2"></div>
-          </div>
+          <img src="/images/default-avatar.svg" alt="デフォルトアバター" id="header-avatar" className="rounded-full w-10 h-10 object-cover" />
         </Link>
       )}
     </div>
