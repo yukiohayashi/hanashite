@@ -9,6 +9,7 @@ import SearchHistory from '@/components/SearchHistory';
 import SearchForm from '@/components/SearchForm';
 import KeywordsSection from '@/components/KeywordsSection';
 import InfinitePostList from '@/components/InfinitePostList';
+import AdSense from '@/components/AdSense';
 import { auth } from '@/lib/auth';
 
 // HTMLタグを除去するヘルパー関数
@@ -545,6 +546,15 @@ export default async function Home({ searchParams }: HomeProps) {
                 </div>
               </>
             )}
+
+            {/* 広告 - レクタングル */}
+            <div className="mx-1.5 mb-4">
+              <AdSense 
+                adSlot="1234567890"
+                adFormat="rectangle"
+                style={{ minHeight: '250px' }}
+              />
+            </div>
 
             {/* 相談受付中見出し */}
             <h3 className="m-1.5 mb-2 px-0 font-bold text-base" style={{ color: '#ff6b35' }}>
