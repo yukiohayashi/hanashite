@@ -34,6 +34,11 @@ export default function RootLayout({
           crossOrigin="anonymous"
           referrerPolicy="no-referrer"
         />
+        <script
+          async
+          src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-6354581291730879"
+          crossOrigin="anonymous"
+        />
       </head>
       <body
         className={`${notoSansJP.variable} antialiased`}
