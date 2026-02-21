@@ -47,16 +47,23 @@
 > - **Aレコード**: `mail.dokujo.com` というホスト名（メールサーバー名）が、どのIPアドレスに対応するかを定義します。
 > - **MXレコード**: `dokujo.com` 宛のメールを、どのメールサーバー（この場合は `mail.dokujo.com`）に配送するかを指定します。優先度は `10` が一般的です。
 
-### 2.3. 既存のDMARCレコードを確認・修正
+### 2.3. DMARCレコードを追加
 
-画像を見ると、既にDMARCレコードが設定されています。レポート送付先を確認し、必要に応じて修正します。
+DMARCレコードは、メール送信ドメイン認証の結果をレポートするために必要です。
 
-**既存のDMARCレコード**:
-- **ホスト名**: `_dmarc`
-- **TYPE**: `TXT`
-- **VALUE**: `v=DMARC1; p=none; rua=mailto:info@dokujo.com`
+#### DMARCレコード（送信ドメイン認証レポート）
 
-> **確認**: 既に `info@dokujo.com` が設定されていれば、修正不要です。
+| 項目 | 入力値 |
+|------|--------|
+| **ホスト名** | `_dmarc` |
+| **TYPE** | `TXT` |
+| **TTL** | `300` (デフォルトのまま) |
+| **VALUE** | `v=DMARC1; p=none; rua=mailto:info@dokujo.com` |
+
+> **解説**:
+> - `v=DMARC1`: DMARCバージョン1を使用
+> - `p=none`: 監視モード（メール配送には影響しない）
+> - `rua=mailto:info@dokujo.com`: DMARCレポートを `info@dokujo.com` に送信
 
 ### 2.4. DNS設定の確定
 
