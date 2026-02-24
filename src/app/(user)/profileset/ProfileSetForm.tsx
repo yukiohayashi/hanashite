@@ -39,6 +39,7 @@ interface User {
   avatar_style?: AvatarStyle;
   avatar_seed?: string;
   use_custom_image?: boolean;
+  show_post_history?: boolean;
 }
 
 interface ProfileSetFormProps {
@@ -90,6 +91,7 @@ export default function ProfileSetForm({ user, categories, isFirstTime }: Profil
   const [sei, setSei] = useState(user.sei || '');
   const [mei, setMei] = useState(user.mei || '');
   const [emailSubscription, setEmailSubscription] = useState(user.email_subscription ?? true);
+  const [showPostHistory, setShowPostHistory] = useState(user.show_post_history ?? false);
   const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
   const [avatarFile, setAvatarFile] = useState<File | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -212,6 +214,7 @@ export default function ProfileSetForm({ user, categories, isFirstTime }: Profil
       formData.append('sei', sei);
       formData.append('mei', mei);
       formData.append('emailSubscription', emailSubscription ? '1' : '0');
+      formData.append('showPostHistory', showPostHistory ? '1' : '0');
       formData.append('interestCategories', JSON.stringify(selectedCategories));
       
       // DiceBearアバター関連の情報を追加
@@ -627,7 +630,7 @@ export default function ProfileSetForm({ user, categories, isFirstTime }: Profil
           <p className="mt-1 text-gray-600 text-xs">https://からすべて入力してください</p>
         </div>
         
-        <div className="flex justify-center items-center gap-2 my-6">
+        <div className="flex flex-col items-center gap-3 my-6">
           <label className="flex items-center cursor-pointer">
             <input
               type="checkbox"
@@ -636,6 +639,15 @@ export default function ProfileSetForm({ user, categories, isFirstTime }: Profil
               className="mr-2 rounded focus:ring-orange-400 w-4 h-4 text-orange-500"
             />
             <span className="text-gray-700">メルマガを受け取る</span>
+          </label>
+          <label className="flex items-center cursor-pointer">
+            <input
+              type="checkbox"
+              checked={showPostHistory}
+              onChange={(e) => setShowPostHistory(e.target.checked)}
+              className="mr-2 rounded focus:ring-orange-400 w-4 h-4 text-orange-500"
+            />
+            <span className="text-gray-700">投稿履歴を公開する</span>
           </label>
         </div>
         

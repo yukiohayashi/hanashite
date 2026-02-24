@@ -28,6 +28,7 @@ interface User {
   avatar_style: string | null;
   avatar_seed: string | null;
   use_custom_image: boolean | null;
+  show_post_history: boolean | null;
 }
 
 interface Post {
@@ -286,12 +287,14 @@ export default async function UserPage({ params }: { params: Promise<{ slug: str
             )}
           </div>
 
-          {/* アクティビティ一覧 - 一時的に非表示 */}
-          {false && (
+          {/* 投稿履歴 */}
+          {(user.show_post_history || isOwnProfile) && (
             <div className="bg-white shadow-md border border-gray-200 rounded">
               <div className="p-4 border-b border-gray-200">
-                <h2 className="text-lg font-bold text-gray-900">アクティビティ</h2>
-                <p className="text-sm text-gray-500">最大100件表示</p>
+                <h2 className="text-lg font-bold text-gray-900">投稿履歴</h2>
+                {!user.show_post_history && isOwnProfile && (
+                  <p className="text-xs text-gray-400">※自分のみ表示（公開設定OFF）</p>
+                )}
               </div>
 
               {limitedActivities.length > 0 ? (
