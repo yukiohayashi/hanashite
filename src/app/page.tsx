@@ -453,22 +453,22 @@ export default async function Home({ searchParams }: HomeProps) {
                           {post.title}
                         </h3>
                         {contentPreview && (
-                          <p className="mt-1 text-gray-600 text-sm">
+                          <p className="mt-1 text-gray-600 text-sm line-clamp-1 md:line-clamp-2 overflow-hidden text-ellipsis">
                             {contentPreview}
                           </p>
                         )}
-                        <div className="mt-2 flex items-center justify-between text-gray-500 text-xs">
-                          <div className="flex items-center">
+                        <div className="mt-2 flex items-center justify-between gap-2 text-gray-500 text-xs">
+                          <div className="flex items-center min-w-0 flex-1 overflow-hidden">
                             <img 
                               src={(post as any).avatar_url || 'https://api.dicebear.com/9.x/big-smile/svg?seed=guest&size=20'} 
                               alt="相談者"
-                              className="w-4 h-4 rounded-full border border-gray-200 inline-block mr-1"
+                              className="w-4 h-4 rounded-full border border-gray-200 inline-block mr-1 shrink-0"
                             />
-                            <span>{(post as any).user_name || 'ゲスト'}さんからの相談</span>
-                            <span className="ml-2">{new Date(post.created_at).toLocaleDateString('ja-JP')}</span>
+                            <span className="truncate">{(post as any).user_name || 'ゲスト'}さんからの相談</span>
+                            <span className="ml-2 shrink-0 hidden md:inline">{new Date(post.created_at).toLocaleDateString('ja-JP')}</span>
                           </div>
                           {(post as any).categories?.name && (
-                            <span className="inline-block px-2 py-0.5 text-xs font-medium text-gray-600 bg-gray-200 rounded">
+                            <span className="inline-block px-2 py-0.5 text-xs font-medium text-gray-600 bg-gray-200 rounded whitespace-nowrap shrink-0">
                               {(post as any).categories.name}
                             </span>
                           )}
@@ -495,21 +495,21 @@ export default async function Home({ searchParams }: HomeProps) {
                         {post.title}
                       </div>
                       {contentPreview && (
-                        <p className="mt-1 text-gray-500 text-xs line-clamp-2">
+                        <p className="mt-1 text-gray-500 text-xs line-clamp-1 overflow-hidden text-ellipsis">
                           {contentPreview}
                         </p>
                       )}
-                      <div className="mt-1 flex items-center justify-between font-normal text-[10px] text-gray-400">
-                        <div className="flex items-center">
+                      <div className="mt-1 flex items-center justify-between gap-1 font-normal text-[10px] text-gray-400">
+                        <div className="flex items-center min-w-0 flex-1 overflow-hidden">
                           <img 
                             src={(post as any).avatar_url || 'https://api.dicebear.com/9.x/big-smile/svg?seed=guest&size=20'} 
                             alt="相談者"
-                            className="w-4 h-4 rounded-full border border-gray-200 inline-block mr-1"
+                            className="w-4 h-4 rounded-full border border-gray-200 inline-block mr-1 shrink-0"
                           />
-                          <span>{(post as any).user_name || 'ゲスト'}さん</span>
+                          <span className="truncate">{(post as any).user_name || 'ゲスト'}さん</span>
                         </div>
                         {(post as any).categories?.name && (
-                          <span className="inline-block px-1.5 py-0.5 text-[10px] font-medium text-gray-600 bg-gray-200 rounded">
+                          <span className="inline-block px-1.5 py-0.5 text-[10px] font-medium text-gray-600 bg-gray-200 rounded whitespace-nowrap shrink-0">
                             {(post as any).categories.name}
                           </span>
                         )}
@@ -552,10 +552,10 @@ export default async function Home({ searchParams }: HomeProps) {
                         <p className="text-gray-800 text-sm line-clamp-2">
                           {contentPreview}...
                         </p>
-                        <div className="mt-2 flex items-center justify-between text-gray-500 text-xs">
-                          <span>相談: {answer.post_title.substring(0, 40)}{answer.post_title.length > 40 ? '...' : ''}</span>
+                        <div className="mt-2 flex items-center justify-between gap-2 text-gray-500 text-xs">
+                          <span className="truncate flex-1 min-w-0">相談: {answer.post_title.substring(0, 40)}{answer.post_title.length > 40 ? '...' : ''}</span>
                           {answer.category_name && (
-                            <span className="inline-block px-2 py-0.5 text-xs font-medium text-gray-600 bg-gray-200 rounded">
+                            <span className="inline-block px-2 py-0.5 text-xs font-medium text-gray-600 bg-gray-200 rounded whitespace-nowrap shrink-0">
                               {answer.category_name}
                             </span>
                           )}

@@ -102,22 +102,22 @@ export default function InfinitePostList({ initialPosts, sortBy }: InfinitePostL
               {post.title}
             </h3>
             {contentPreview && (
-              <p className="mt-1 text-gray-600 text-sm line-clamp-2">
+              <p className="mt-1 text-gray-600 text-sm line-clamp-1 md:line-clamp-2 overflow-hidden text-ellipsis">
                 {contentPreview}
               </p>
             )}
-            <div className="mt-2 flex items-center justify-between text-gray-500 text-xs">
-              <div className="flex items-center">
+            <div className="mt-2 flex items-center justify-between gap-2 text-gray-500 text-xs">
+              <div className="flex items-center min-w-0 flex-1 overflow-hidden">
                 <img 
                   src={post.avatar_url || 'https://api.dicebear.com/9.x/big-smile/svg?seed=guest&size=20'} 
                   alt="相談者"
-                  className="w-4 h-4 rounded-full border border-gray-200 inline-block mr-1"
+                  className="w-4 h-4 rounded-full border border-gray-200 inline-block mr-1 flex-shrink-0"
                 />
-                <span>{post.user_name || 'ゲスト'}さんからの相談</span>
-                <span className="ml-2">{new Date(post.created_at).toLocaleDateString('ja-JP')}</span>
+                <span className="truncate">{post.user_name || 'ゲスト'}さんからの相談</span>
+                <span className="ml-2 flex-shrink-0 hidden md:inline">{new Date(post.created_at).toLocaleDateString('ja-JP')}</span>
               </div>
               {post.category_name && (
-                <span className="inline-block px-2 py-0.5 text-xs font-medium text-gray-600 bg-gray-200 rounded">
+                <span className="inline-block px-2 py-0.5 text-xs font-medium text-gray-600 bg-gray-200 rounded whitespace-nowrap flex-shrink-0">
                   {post.category_name}
                 </span>
               )}
