@@ -155,11 +155,12 @@ export default function Sidebar() {
   };
 
   const fetchUserCategories = async () => {
-    // 全カテゴリを取得してデフォルト表示
+    // 全カテゴリを取得してデフォルト表示（運営からのお知らせを除外）
     const { data: categoriesData } = await supabase
       .from('categories')
       .select('id, name, slug, icon')
       .eq('is_active', true)
+      .neq('slug', 'announcement')
       .order('display_order', { ascending: true });
 
     setUserCategories(categoriesData || []);
