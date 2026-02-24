@@ -109,7 +109,6 @@ export default function ProfileSetForm({ user, categories, isFirstTime }: Profil
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [errors, setErrors] = useState<string[]>([]);
   const [success, setSuccess] = useState(false);
-  const [profileLength, setProfileLength] = useState(0);
 
   useEffect(() => {
     if (user.interest_categories) {
@@ -121,10 +120,6 @@ export default function ProfileSetForm({ user, categories, isFirstTime }: Profil
       }
     }
   }, [user.interest_categories]);
-
-  useEffect(() => {
-    setProfileLength(profile.length);
-  }, [profile]);
 
   useEffect(() => {
     const fetchBestAnswerPoints = async () => {
@@ -179,9 +174,6 @@ export default function ProfileSetForm({ user, categories, isFirstTime }: Profil
       newErrors.push('ニックネームを入力してください');
     }
     
-    if (!job) {
-      newErrors.push('職種を選択してください');
-    }
     
     if (profileSlug) {
       const isUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(profileSlug);
@@ -328,7 +320,7 @@ export default function ProfileSetForm({ user, categories, isFirstTime }: Profil
         
         <div className="mb-4">
           <label className="block mb-2 font-bold text-gray-700">
-            ニックネーム <sup className="text-gray-600 text-xs">※日本語推奨</sup>
+            ニックネーム 
           </label>
           <Input
             type="text"
@@ -340,16 +332,13 @@ export default function ProfileSetForm({ user, categories, isFirstTime }: Profil
         
         <div className="mb-4">
           <label className="block mb-2 font-bold text-gray-700">
-            自己紹介<sup className="text-red-600">※</sup>
+            自己紹介
           </label>
           <Textarea
             value={profile}
             onChange={(e) => setProfile(e.target.value)}
             className="w-full min-h-[80px] resize-y"
           />
-          <div className="mt-1 text-gray-600 text-sm">
-            <sup>現在: {profileLength}文字</sup>
-          </div>
         </div>
         
         {/* プロフィール画像選択（DiceBear統合版） */}
@@ -533,7 +522,7 @@ export default function ProfileSetForm({ user, categories, isFirstTime }: Profil
         
         <div className="mb-4">
           <label className="block mb-2 font-bold text-gray-700">
-            性別<sup className="text-red-600">※</sup>
+            性別
           </label>
           <select
             value={sex}
@@ -549,7 +538,7 @@ export default function ProfileSetForm({ user, categories, isFirstTime }: Profil
         
         <div className="mb-4">
           <label className="block mb-2 font-bold text-gray-700">
-            生まれた年<sup className="text-red-600">※</sup>
+            生まれた年
             <span className="ml-2 text-gray-500 text-xs font-normal">※20代など年代のみ表示されます</span>
           </label>
           <select
@@ -566,7 +555,7 @@ export default function ProfileSetForm({ user, categories, isFirstTime }: Profil
         
         <div className="mb-4">
           <label className="block mb-2 font-bold text-gray-700">
-            都道府県<sup className="text-red-600">※</sup>
+            都道府県
           </label>
           <select
             value={prefecture}
@@ -582,7 +571,7 @@ export default function ProfileSetForm({ user, categories, isFirstTime }: Profil
         
         <div className="mb-4">
           <label className="block mb-2 font-bold text-gray-700">
-            職種<sup className="text-red-600">※</sup>
+            職種
             <span className="ml-2 text-gray-500 text-xs font-normal">※表示されません</span>
           </label>
           <select

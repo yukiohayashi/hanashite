@@ -13,19 +13,28 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
   },
   cookies: {
     pkceCodeVerifier: {
-      name: "next-auth.pkce.code_verifier",
+      name: "__Secure-next-auth.pkce.code_verifier",
       options: {
         httpOnly: true,
-        sameSite: "none",
+        sameSite: "lax",
         path: "/",
         secure: true,
       },
     },
     state: {
-      name: "next-auth.state",
+      name: "__Secure-next-auth.state",
       options: {
         httpOnly: true,
-        sameSite: "none",
+        sameSite: "lax",
+        path: "/",
+        secure: true,
+      },
+    },
+    callbackUrl: {
+      name: "__Secure-next-auth.callback-url",
+      options: {
+        httpOnly: true,
+        sameSite: "lax",
         path: "/",
         secure: true,
       },
@@ -172,7 +181,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
               .single();
 
             // メールアドレスが空の場合、ユニークなダミーメールアドレスを生成
-            const emailToSave = user.email || `${account.provider}_${user.id}@anke.jp`;
+            const emailToSave = user.email || `${account.provider}_${user.id}@dokujo.com`;
 
             if (!existingUser) {
               // 新規ユーザーの場合、usersテーブルに挿入

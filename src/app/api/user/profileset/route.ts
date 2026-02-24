@@ -47,13 +47,6 @@ export async function POST(request: Request) {
       );
     }
 
-    if (!job) {
-      return NextResponse.json(
-        { success: false, error: '職種を選択してください' },
-        { status: 400 }
-      );
-    }
-
     // プロフィールスラッグのバリデーション
     let updateSlug = false;
     let slugValue = profileSlug;
