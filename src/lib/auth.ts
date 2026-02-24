@@ -192,6 +192,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
                   name: user.name || '',
                   email: emailToSave,
                   image: user.image || '',
+                  use_custom_image: user.image ? true : false,
                   status: 1,
                   created_at: new Date().toISOString(),
                 });
@@ -203,8 +204,9 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
               }
             } else {
               // 既存ユーザーの場合、画像を更新（メールは既存のものを保持）
-              const updateData: Record<string, string> = {
+              const updateData: Record<string, string | boolean> = {
                 image: user.image || '',
+                use_custom_image: user.image ? true : false,
                 updated_at: new Date().toISOString(),
               };
               
