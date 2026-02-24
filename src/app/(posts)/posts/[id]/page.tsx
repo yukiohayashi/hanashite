@@ -182,10 +182,24 @@ export default async function PostPage({ params, searchParams }: { params: Promi
     }, {} as { [key: number]: number });
   }
 
-  const comments = (commentsData || []).map((comment) => ({
-    ...comment,
-    like_count: likeCounts[comment.id] || 0
-  }));
+  const comments = (commentsData || []).map((comment) => {
+    const commentUser = (comment as any).users;
+    return {
+      id: comment.id,
+      content: comment.content,
+      created_at: comment.created_at,
+      user_id: comment.user_id,
+      parent_id: comment.parent_id,
+      users: {
+        name: commentUser?.name || 'ゲスト',
+        image: commentUser?.image || null,
+        avatar_style: commentUser?.avatar_style || null,
+        avatar_seed: commentUser?.avatar_seed || null,
+        use_custom_image: commentUser?.use_custom_image || false
+      },
+      like_count: likeCounts[comment.id] || 0
+    };
+  });
 
   if (!post || post.status === 'trash') {
     return (
