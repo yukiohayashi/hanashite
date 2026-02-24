@@ -38,12 +38,19 @@ interface Category {
   name: string;
 }
 
+interface Keyword {
+  id: number;
+  keyword: string;
+}
+
 interface PostEditFormProps {
   post: Post;
   categories: Category[];
+  allKeywords: Keyword[];
+  postKeywords: Keyword[];
 }
 
-export default function PostEditForm({ post, categories }: PostEditFormProps) {
+export default function PostEditForm({ post, categories, allKeywords, postKeywords }: PostEditFormProps) {
   const router = useRouter();
   
   console.log('Post data:', post);
@@ -62,8 +69,13 @@ export default function PostEditForm({ post, categories }: PostEditFormProps) {
   const [imagePreview, setImagePreview] = useState<string>(post.og_image || '');
   const [imageDeleted, setImageDeleted] = useState(false);
   const [bestAnswerId, setBestAnswerId] = useState<number | null>(post.best_answer_id || null);
+  const [selectedKeywords, setSelectedKeywords] = useState<number[]>(postKeywords.map(k => k.id));
+  const [keywordSearchTerm, setKeywordSearchTerm] = useState('');
   
   console.log('Form data status:', formData.status);
+  console.log('PostEditForm - postKeywords:', postKeywords);
+  console.log('PostEditForm - selectedKeywords:', selectedKeywords);
+  console.log('PostEditForm - allKeywords:', allKeywords);
 
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -164,8 +176,22 @@ export default function PostEditForm({ post, categories }: PostEditFormProps) {
       console.log('Response:', JSON.stringify(result, null, 2));
 
       if (response.ok) {
-        alert('投稿を更新しました');
-        router.refresh();
+        // キーワードを更新
+        const keywordsResponse = await fetch(`/api/admin/posts/${post.id}/keywords`, {
+          method: 'PUT',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ keywordIds: selectedKeywords }),
+        });
+
+        if (keywordsResponse.ok) {
+          alert('投稿を更新しました');
+          router.refresh();
+        } else {
+          alert('投稿は更新されましたが、キーワードの更新に失敗しました');
+          router.refresh();
+        }
       } else {
         console.error('Update failed:', JSON.stringify(result, null, 2));
         alert(`更新に失敗しました: ${result.error || '不明なエラー'}\n詳細: ${JSON.stringify(result.details || {})}`);
@@ -304,6 +330,75 @@ export default function PostEditForm({ post, categories }: PostEditFormProps) {
           >
             {loading ? '削除中...' : '投稿を削除'}
           </button>
+        </div>
+      </div>
+
+      {/* キーワード */}
+      <div className="bg-white rounded-lg shadow p-4">
+        <h2 className="text-lg font-semibold text-gray-900 mb-3">ハナシテキーワード</h2>
+        
+        {/* 選択中のキーワード */}
+        <div className="mb-4">
+          <label className="block text-sm font-medium text-gray-700 mb-2">
+            選択中のキーワード
+          </label>
+          <div className="flex flex-wrap gap-2 min-h-[40px] p-2 border border-gray-300 rounded-md bg-gray-50">
+            {selectedKeywords.length > 0 ? (
+              selectedKeywords.map(keywordId => {
+                const keyword = allKeywords.find(k => k.id === keywordId);
+                return keyword ? (
+                  <span
+                    key={keywordId}
+                    className="inline-flex items-center gap-1 px-3 py-1 text-sm bg-orange-100 text-orange-800 rounded-full"
+                  >
+                    {keyword.keyword}
+                    <button
+                      type="button"
+                      onClick={() => setSelectedKeywords(selectedKeywords.filter(id => id !== keywordId))}
+                      className="ml-1 text-orange-600 hover:text-orange-800"
+                    >
+                      ×
+                    </button>
+                  </span>
+                ) : null;
+              })
+            ) : (
+              <span className="text-gray-400 text-sm">キーワードが選択されていません</span>
+            )}
+          </div>
+        </div>
+
+        {/* キーワード検索・選択 */}
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-2">
+            キーワードを追加
+          </label>
+          <input
+            type="text"
+            value={keywordSearchTerm}
+            onChange={(e) => setKeywordSearchTerm(e.target.value)}
+            placeholder="キーワードを検索..."
+            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500 text-sm mb-2"
+          />
+          <div className="max-h-48 overflow-y-auto border border-gray-300 rounded-md p-2 bg-white">
+            <div className="flex flex-wrap gap-2">
+              {allKeywords
+                .filter(keyword => 
+                  !selectedKeywords.includes(keyword.id) &&
+                  keyword.keyword.toLowerCase().includes(keywordSearchTerm.toLowerCase())
+                )
+                .map(keyword => (
+                  <button
+                    key={keyword.id}
+                    type="button"
+                    onClick={() => setSelectedKeywords([...selectedKeywords, keyword.id])}
+                    className="px-3 py-1 text-sm bg-gray-100 text-gray-700 rounded-full hover:bg-orange-100 hover:text-orange-800 transition-colors"
+                  >
+                    + {keyword.keyword}
+                  </button>
+                ))}
+            </div>
+          </div>
         </div>
       </div>
 

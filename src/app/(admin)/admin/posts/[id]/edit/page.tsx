@@ -74,15 +74,51 @@ async function getCategories() {
   return categories || [];
 }
 
+async function getKeywords() {
+  const { data: keywords } = await supabase
+    .from('keywords')
+    .select('id, keyword')
+    .order('keyword', { ascending: true });
+  
+  return keywords || [];
+}
+
+async function getPostKeywords(postId: number) {
+  const { data: postKeywords, error } = await supabase
+    .from('post_keywords')
+    .select('keyword_id, keywords(id, keyword)')
+    .eq('post_id', postId);
+  
+  console.log('getPostKeywords - postId:', postId);
+  console.log('getPostKeywords - raw data:', postKeywords);
+  console.log('getPostKeywords - error:', error);
+  
+  if (!postKeywords) return [];
+  
+  const keywords: Array<{ id: number; keyword: string }> = [];
+  postKeywords.forEach(pk => {
+    console.log('Processing pk:', pk);
+    if (pk.keywords && typeof pk.keywords === 'object' && 'id' in pk.keywords && 'keyword' in pk.keywords) {
+      keywords.push(pk.keywords as { id: number; keyword: string });
+    }
+  });
+  
+  console.log('getPostKeywords - final keywords:', keywords);
+  return keywords;
+}
+
 export default async function PostEditPage({
   params,
 }: {
   params: Promise<{ id: string }>;
 }) {
   const { id } = await params;
-  const [post, categories] = await Promise.all([
+  const postId = parseInt(id);
+  const [post, categories, allKeywords, postKeywords] = await Promise.all([
     getPost(id),
-    getCategories()
+    getCategories(),
+    getKeywords(),
+    getPostKeywords(postId)
   ]);
 
   if (!post) {
@@ -114,7 +150,7 @@ export default async function PostEditPage({
         </div>
       </div>
 
-      <PostEditForm post={post} categories={categories} />
+      <PostEditForm post={post} categories={categories} allKeywords={allKeywords} postKeywords={postKeywords} />
     </div>
   );
 }

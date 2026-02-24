@@ -312,6 +312,9 @@ export default function PostsTable({ posts: initialPosts, initialCounts }: Posts
                 タイトル
               </th>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                ハナシテキーワード
+              </th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                 本文
               </th>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
@@ -331,9 +334,6 @@ export default function PostsTable({ posts: initialPosts, initialCounts }: Posts
               </th>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100" onClick={() => handleSort('created_at')}>
                 投稿日付 {sortBy === 'created_at' && (sortOrder === 'asc' ? '↑' : '↓')}
-              </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                ハナシテキーワード
               </th>
             </tr>
           </thead>
@@ -405,6 +405,19 @@ export default function PostsTable({ posts: initialPosts, initialCounts }: Posts
                     </a>
                   </div>
                 </td>
+                <td className="px-6 py-4 text-sm text-gray-900">
+                  {post.keywords && post.keywords.length > 0 ? (
+                    <div className="flex flex-wrap gap-1">
+                      {post.keywords.map((kw) => (
+                        <span key={kw.id} className="inline-flex px-2 py-1 text-xs bg-orange-100 text-orange-800 rounded">
+                          {kw.keyword}
+                        </span>
+                      ))}
+                    </div>
+                  ) : (
+                    <span className="text-gray-400">—</span>
+                  )}
+                </td>
                 <td className="px-6 py-4 text-sm text-gray-600">
                   {post.content ? (
                     <span className="line-clamp-2">
@@ -467,24 +480,6 @@ export default function PostsTable({ posts: initialPosts, initialCounts }: Posts
                   <div className="text-xs">
                     {new Date(post.created_at).toLocaleTimeString('ja-JP', { hour: '2-digit', minute: '2-digit' })}
                   </div>
-                </td>
-                <td className="px-6 py-4 text-sm text-gray-900">
-                  {post.keywords && post.keywords.length > 0 ? (
-                    <div className="flex flex-wrap gap-1">
-                      {post.keywords.slice(0, 3).map((kw) => (
-                        <span key={kw.id} className="inline-flex px-2 py-1 text-xs bg-orange-100 text-orange-800 rounded">
-                          {kw.keyword}
-                        </span>
-                      ))}
-                      {post.keywords.length > 3 && (
-                        <span className="text-xs text-gray-400">
-                          +{post.keywords.length - 3}
-                        </span>
-                      )}
-                    </div>
-                  ) : (
-                    <span className="text-gray-400">—</span>
-                  )}
                 </td>
               </tr>
             ))}
