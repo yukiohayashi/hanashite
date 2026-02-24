@@ -53,28 +53,20 @@ export default async function Home({ searchParams }: HomeProps) {
 
   // 殿堂入り投稿を取得（total_votesカラムを使用して効率的に取得）
   if (sortBy === 'statistics') {
-    // total_votesカラムを使用して50票以上の投稿を直接取得
+    // users.statusでフィルタリングして運営者を除外（JOINで1回のクエリ）
     const { data: hallOfFameData } = await supabase
       .from('posts')
-      .select('id, title, content, created_at, deadline_at, user_id, og_image, thumbnail_url, total_votes, category_id, categories(name)')
+      .select('id, title, content, created_at, deadline_at, user_id, og_image, thumbnail_url, total_votes, category_id, categories(name), users!inner(status)')
       .in('status', ['publish', 'published'])
       .neq('user_id', 1)
+      .neq('users.status', 3)
       .gte('total_votes', 50)
       .order('total_votes', { ascending: false })
-      .limit(100);
+      .limit(10);
 
-    // 運営者の投稿を除外
     if (hallOfFameData) {
-      const userIds = [...new Set(hallOfFameData.map(p => p.user_id).filter(id => id !== null))];
-      const { data: usersData } = await supabase
-        .from('users')
-        .select('id, status')
-        .in('id', userIds);
-      
-      const operatorIds = usersData?.filter(u => u.status === 3).map(u => u.id) || [];
-      const filtered = hallOfFameData.filter(p => !operatorIds.includes(p.user_id)).slice(0, 10);
-      hallOfFamePosts = filtered;
-      postsData = filtered;
+      hallOfFamePosts = hallOfFameData;
+      postsData = hallOfFameData;
     } else {
       hallOfFamePosts = [];
       postsData = [];
@@ -83,34 +75,18 @@ export default async function Home({ searchParams }: HomeProps) {
     // 締切が近い順：deadline_atが近い順
     const { data: allPosts } = await supabase
       .from('posts')
-      .select('id, title, created_at, deadline_at, user_id, og_image, thumbnail_url, best_answer_id, best_answer_selected_at, category_id, categories(name)')
+      .select('id, title, created_at, deadline_at, user_id, og_image, thumbnail_url, best_answer_id, best_answer_selected_at, category_id, categories(name), users!inner(status)')
       .in('status', ['publish', 'published'])
       .neq('user_id', 1)
+      .neq('users.status', 3)
       .is('best_answer_id', null)
       .is('best_answer_selected_at', null)
       .not('deadline_at', 'is', null)
       .gte('deadline_at', new Date().toISOString())
       .order('deadline_at', { ascending: true })
-      .limit(100);
-    
-    // 運営者の投稿を除外
-    let data = allPosts;
-    if (allPosts) {
-      const userIds = [...new Set(allPosts.map(p => p.user_id).filter(id => id !== null))];
-      const { data: usersData } = await supabase
-        .from('users')
-        .select('id, status')
-        .in('id', userIds);
-      
-      const operatorIds = usersData?.filter(u => u.status === 3).map(u => u.id) || [];
-      data = allPosts.filter(p => !operatorIds.includes(p.user_id));
-    }
+      .limit(30);
 
-    if (data) {
-      postsData = data.slice(0, 30);
-    } else {
-      postsData = [];
-    }
+    postsData = allPosts || [];
   } else if (sortBy === 'comment') {
     // コメント順：最新コメントがある投稿順
     const { data: recentComments } = await supabase
@@ -118,39 +94,27 @@ export default async function Home({ searchParams }: HomeProps) {
       .select('post_id, created_at')
       .eq('status', 'approved')
       .order('created_at', { ascending: false })
-      .limit(1000);  // 100から1000に増やす
+      .limit(1000);
 
     if (recentComments && recentComments.length > 0) {
       const uniquePostIds = [...new Set(recentComments.map(c => c.post_id))];
       
       const { data: allPosts } = await supabase
         .from('posts')
-        .select('id, title, created_at, deadline_at, user_id, og_image, thumbnail_url, best_answer_id, best_answer_selected_at, category_id, categories(name)')
+        .select('id, title, created_at, deadline_at, user_id, og_image, thumbnail_url, best_answer_id, best_answer_selected_at, category_id, categories(name), users!inner(status)')
         .in('status', ['publish', 'published'])
         .neq('user_id', 1)
+        .neq('users.status', 3)
         .is('best_answer_id', null)
         .is('best_answer_selected_at', null)
         .order('created_at', { ascending: false })
         .limit(100);
       
-      // 運営者の投稿を除外
-      let data = allPosts;
       if (allPosts) {
-        const userIds = [...new Set(allPosts.map(p => p.user_id).filter(id => id !== null))];
-        const { data: usersData } = await supabase
-          .from('users')
-          .select('id, status')
-          .in('id', userIds);
-        
-        const operatorIds = usersData?.filter(u => u.status === 3).map(u => u.id) || [];
-        data = allPosts.filter(p => !operatorIds.includes(p.user_id));
-      }
-      
-      if (data) {
         // クライアント側でフィルタリングして並べ替え
         const postIdOrder = uniquePostIds.slice(0, 10);
         postsData = postIdOrder
-          .map(id => data.find(p => p.id === id))
+          .map(id => allPosts.find(p => p.id === id))
           .filter((post): post is NonNullable<typeof post> => post !== undefined);
       }
     }
@@ -178,43 +142,28 @@ export default async function Home({ searchParams }: HomeProps) {
 
     const { data: allPosts } = await supabase
       .from('posts')
-      .select('id, title, content, created_at, deadline_at, user_id, og_image, thumbnail_url, best_answer_id, best_answer_selected_at, category_id, categories(name)')
+      .select('id, title, content, created_at, deadline_at, user_id, og_image, thumbnail_url, best_answer_id, best_answer_selected_at, category_id, categories(name), users!inner(status)')
       .in('status', ['publish', 'published'])
       .neq('user_id', 1)
+      .neq('users.status', 3)
       .is('best_answer_id', null)
       .is('best_answer_selected_at', null)
       .gte('created_at', oneMonthAgo.toISOString())
       .order('created_at', { ascending: false })
       .limit(100);
-    
-    // 運営者の投稿を除外
-    let data = allPosts;
-    if (allPosts) {
-      const userIds = [...new Set(allPosts.map(p => p.user_id).filter(id => id !== null))];
-      const { data: usersData } = await supabase
-        .from('users')
-        .select('id, status')
-        .in('id', userIds);
-      
-      const operatorIds = usersData?.filter(u => u.status === 3).map(u => u.id) || [];
-      data = allPosts.filter(p => !operatorIds.includes(p.user_id));
-    }
 
     // クライアント側で除外（投票済みの投稿を除外）
-    if (data) {
+    if (allPosts) {
       if (excludedPostIds.length > 0) {
-        postsData = data.filter(post => !excludedPostIds.includes(post.id)).slice(0, 30);
+        postsData = allPosts.filter(post => !excludedPostIds.includes(post.id)).slice(0, 30);
       } else {
-        postsData = data.slice(0, 30);
+        postsData = allPosts.slice(0, 30);
       }
     } else {
       postsData = [];
     }
   } else if (sortBy === 'top_post') {
     // 最新順（受付中のみ）
-    // 現在時刻を取得（実行時に毎回取得）
-    const currentTime = new Date().toISOString();
-    
     let query = supabase
       .from('posts')
       .select('id, title, content, created_at, deadline_at, user_id, og_image, thumbnail_url, best_answer_id, best_answer_selected_at, category_id, categories(name)')
@@ -295,26 +244,16 @@ export default async function Home({ searchParams }: HomeProps) {
       combinedPosts.push(...newPosts);
     }
     
-    // 運営者の投稿を除外
-    if (combinedPosts.length > 0) {
-      const userIds = [...new Set(combinedPosts.map(p => p.user_id).filter(id => id !== null))];
-      const { data: usersData } = await supabase
-        .from('users')
-        .select('id, status')
-        .in('id', userIds);
-      
-      const operatorIds = usersData?.filter(u => u.status === 3).map(u => u.id) || [];
-      postsData = combinedPosts.filter(p => !operatorIds.includes(p.user_id)).slice(0, 10);
-    } else {
-      postsData = [];
-    }
+    // combinedPostsは既にJOINでフィルタリング済み
+    postsData = combinedPosts.slice(0, 10);
   } else {
     // オススメ（デフォルト）（受付中のみ）
     let query = supabase
       .from('posts')
-      .select('id, title, content, created_at, user_id, og_image, thumbnail_url, best_answer_id, best_answer_selected_at, category_id, categories(name)')
+      .select('id, title, content, created_at, user_id, og_image, thumbnail_url, best_answer_id, best_answer_selected_at, category_id, categories(name), users!inner(status)')
       .in('status', ['publish', 'published'])
       .neq('user_id', 1)
+      .neq('users.status', 3)
       .is('best_answer_id', null)
       .is('best_answer_selected_at', null);
 
@@ -325,7 +264,7 @@ export default async function Home({ searchParams }: HomeProps) {
 
     const { data: allPosts, error: searchError } = await query
       .order('created_at', { ascending: false })
-      .limit(100);
+      .limit(10);
     
     if (searchQuery) {
       console.log('🔍 Search Results:', allPosts?.length || 0, 'posts found');
@@ -335,42 +274,23 @@ export default async function Home({ searchParams }: HomeProps) {
       }
     }
     
-    // 運営者の投稿を除外
-    if (allPosts) {
-      const userIds = [...new Set(allPosts.map(p => p.user_id).filter(id => id !== null))];
-      const { data: usersData } = await supabase
-        .from('users')
-        .select('id, status')
-        .in('id', userIds);
-      
-      const operatorIds = usersData?.filter(u => u.status === 3).map(u => u.id) || [];
-      postsData = allPosts.filter(p => !operatorIds.includes(p.user_id)).slice(0, 10);
-    } else {
-      postsData = [];
-    }
+    postsData = allPosts || [];
   }
 
   // 注目の相談を取得（受付中の投稿を3件）
   let featuredPosts: any[] = [];
   const { data: openPosts } = await supabase
     .from('posts')
-    .select('id, title, content, created_at, user_id, og_image, thumbnail_url, best_answer_id, category_id, categories(name)')
+    .select('id, title, content, created_at, user_id, og_image, thumbnail_url, best_answer_id, category_id, categories(name), users!inner(status)')
     .in('status', ['publish', 'published'])
     .neq('user_id', 1)
+    .neq('users.status', 3)
     .is('best_answer_id', null)
     .order('created_at', { ascending: false })
     .limit(100);
 
   if (openPosts && openPosts.length > 0) {
-    // 運営者の投稿を除外
-    const userIds = [...new Set(openPosts.map(p => p.user_id).filter(id => id !== null))];
-    const { data: usersData } = await supabase
-      .from('users')
-      .select('id, status')
-      .in('id', userIds);
-    
-    const operatorIds = usersData?.filter(u => u.status === 3).map(u => u.id) || [];
-    const filteredOpenPosts = openPosts.filter(p => !operatorIds.includes(p.user_id));
+    const filteredOpenPosts = openPosts;
 
     // 各投稿のいいね数を取得
     const postIds = filteredOpenPosts.map(p => p.id);
@@ -456,9 +376,10 @@ export default async function Home({ searchParams }: HomeProps) {
   // ベストアンサー待ちの投稿を取得（締め切りが過ぎてもベストアンサーがない投稿）
   const { data: waitingPosts } = await supabase
     .from('posts')
-    .select('id, title, content, created_at, deadline_at, user_id, og_image, thumbnail_url, best_answer_id, best_answer_selected_at, category_id, categories(name)')
+    .select('id, title, content, created_at, deadline_at, user_id, og_image, thumbnail_url, best_answer_id, best_answer_selected_at, category_id, categories(name), users!inner(status, name, avatar_style, avatar_seed, use_custom_image, image)')
     .in('status', ['publish', 'published'])
     .neq('user_id', 1)
+    .neq('users.status', 3)
     .is('best_answer_id', null)
     .is('best_answer_selected_at', null)
     .not('deadline_at', 'is', null)
@@ -466,21 +387,12 @@ export default async function Home({ searchParams }: HomeProps) {
     .order('deadline_at', { ascending: false })
     .limit(30);
 
-  // 運営者の投稿を除外
+  // ユーザー情報を結合
   let waitingPostsFiltered: any[] = [];
   if (waitingPosts) {
-    const userIds = [...new Set(waitingPosts.map(p => p.user_id).filter(id => id !== null))];
-    const { data: usersData } = await supabase
-      .from('users')
-      .select('id, status, name, avatar_style, avatar_seed, use_custom_image, image')
-      .in('id', userIds);
-    
-    const operatorIds = usersData?.filter(u => u.status === 3).map(u => u.id) || [];
-    const filtered = waitingPosts.filter(p => !operatorIds.includes(p.user_id));
-    
-    // ユーザー情報を結合
-    waitingPostsFiltered = filtered.map(post => {
-      const user = usersData?.find(u => u.id === post.user_id);
+    // JOINで取得したusersデータを使用
+    waitingPostsFiltered = waitingPosts.map(post => {
+      const user = (post as any).users;
       let avatarUrl: string;
       if (user?.use_custom_image && user?.image) {
         avatarUrl = user.image;
