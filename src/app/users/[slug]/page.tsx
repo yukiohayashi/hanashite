@@ -288,13 +288,10 @@ export default async function UserPage({ params }: { params: Promise<{ slug: str
           </div>
 
           {/* 相談・回答履歴 */}
-          {user.show_post_history || isOwnProfile ? (
+          {user.show_post_history ? (
             <div className="bg-white shadow-md border border-gray-200 rounded">
               <div className="p-4 border-b border-gray-200">
                 <h2 className="text-lg font-bold text-gray-900">相談・回答履歴</h2>
-                {!user.show_post_history && isOwnProfile && (
-                  <p className="text-xs text-gray-400">※自分のみ表示（公開設定OFF）</p>
-                )}
               </div>
 
               {limitedActivities.length > 0 ? (
