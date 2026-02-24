@@ -42,8 +42,6 @@ const nextConfig: NextConfig = {
   // 実験的機能（パフォーマンス向上）
   experimental: {
     optimizePackageImports: ['lucide-react', '@radix-ui/react-select', '@radix-ui/react-checkbox'],
-    // PPR（Partial Prerendering）を有効化してパフォーマンス向上
-    ppr: 'incremental',
   },
   
   // 本番環境での最適化
