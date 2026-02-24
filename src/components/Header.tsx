@@ -100,7 +100,7 @@ export default function Header() {
                 className="w-full"
               />
             </Link>
-            <div className="text-[0.45rem] text-gray-500 text-center">powered by DOKUJO</div>
+            <div className="hidden md:block text-[0.45rem] text-gray-500 text-center">powered by DOKUJO</div>
             <div className="w-full text-[0.5rem] text-center text-gray-600">
               AIと人間が協働する恋愛・結婚・人間関係の総合相談
             </div>

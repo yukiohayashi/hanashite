@@ -227,9 +227,6 @@ export default async function Home({ searchParams }: HomeProps) {
     if (!searchQuery) {
       query = query.is('best_answer_id', null).is('best_answer_selected_at', null);
     }
-    
-    // 締切が過ぎた相談を除外（deadline_atがnullまたは未来の日時）
-    query = query.or('deadline_at.is.null,deadline_at.gte.' + new Date().toISOString());
 
     if (searchQuery) {
       console.log('🔍 Search Query (top_post):', searchQuery);
@@ -239,6 +236,13 @@ export default async function Home({ searchParams }: HomeProps) {
     const { data: allPosts } = await query
       .order('created_at', { ascending: false })
       .limit(100);
+    
+    // 締切が過ぎた相談を除外（クライアントサイドでフィルタリング）
+    const now = new Date();
+    const filteredPosts = allPosts?.filter(post => {
+      if (!post.deadline_at) return true; // 締切なしはOK
+      return new Date(post.deadline_at) > now; // 締切が未来ならOK
+    }) || [];
     
     let postsFromComments: any[] = [];
     if (searchQuery) {
@@ -267,11 +271,17 @@ export default async function Home({ searchParams }: HomeProps) {
     }
     
     // 投稿とコメントの検索結果をマージ
-    const combinedPosts = allPosts || [];
+    const combinedPosts = filteredPosts;
     if (postsFromComments.length > 0) {
+      // コメントからの投稿も締切でフィルタリング
+      const filteredCommentPosts = postsFromComments.filter(post => {
+        if (!post.deadline_at) return true;
+        return new Date(post.deadline_at) > now;
+      });
+      
       // 重複を除去してマージ
       const existingIds = new Set(combinedPosts.map(p => p.id));
-      const newPosts = postsFromComments.filter(p => !existingIds.has(p.id));
+      const newPosts = filteredCommentPosts.filter(p => !existingIds.has(p.id));
       combinedPosts.push(...newPosts);
     }
     
