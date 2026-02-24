@@ -57,7 +57,7 @@ export default function PostCreateForm() {
         body: JSON.stringify({
           ...formData,
           category_id: formData.category_id ? parseInt(formData.category_id) : null,
-          user_id: 33, // 管理者ID
+          user_id: 1, // 管理者ID
         }),
       });
 
@@ -179,7 +179,7 @@ export default function PostCreateForm() {
       {/* 注意事項 */}
       <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
         <p className="text-sm text-blue-800">
-          <strong>注意:</strong> 管理者（user_id: 33）として投稿されます。アンケートの選択肢は表示されません。
+          <strong>注意:</strong> 管理者（user_id: 1）として投稿されます。
         </p>
       </div>
 

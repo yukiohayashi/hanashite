@@ -43,8 +43,6 @@ export default function UserRightSidebar() {
   }
 
   if (status === 'authenticated' && session) {
-    const displayName = userName || session.user?.name || 'ゲスト';
-    
     return (
       <>
         <div className="my-2.5 text-center">
@@ -52,10 +50,16 @@ export default function UserRightSidebar() {
             <div className="absolute top-[16px] left-1/2 bg-white rounded-full w-[36px] h-[36px] -translate-x-1/2"></div>
             <div className="absolute top-[44px] left-1/2 bg-white rounded-[50%_50%_50%_50%/60%_60%_40%_40%] w-[54px] h-[40px] -translate-x-1/2"></div>
           </div>
-          <Link href="/profileset" className="text-[#ff6b35]">
-            {displayName}
-          </Link>
-          さん
+          {userName ? (
+            <>
+              <Link href="/profileset" className="text-[#ff6b35]">
+                {userName}
+              </Link>
+              さん
+            </>
+          ) : (
+            <span className="text-gray-500 text-sm">読み込み中...</span>
+          )}
         </div>
         
         <div className="flex justify-center my-2.5 w-full pc">

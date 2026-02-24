@@ -10,7 +10,7 @@ export default function Footer() {
           {/* SNSリンク */}
           <div className="flex justify-center items-center gap-4 bg-[#f9f6f6] p-2.5 w-full">
             <a 
-              href="https://twitter.com/hanashite_jp" 
+              href="https://x.com/ym_haya" 
               target="_blank" 
               rel="noopener noreferrer"
               className="inline-flex justify-center items-center text-gray-700 hover:text-[#ff6b35] transition-colors duration-300"
@@ -20,7 +20,7 @@ export default function Footer() {
               </svg>
             </a>
             <a 
-              href="https://www.instagram.com/hanashite.jp/" 
+              href="https://www.instagram.com/anke.jp/" 
               target="_blank" 
               rel="noopener noreferrer"
               className="inline-flex justify-center items-center text-gray-700 hover:text-[#ff6b35] transition-colors duration-300"

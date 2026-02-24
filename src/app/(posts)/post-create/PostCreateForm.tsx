@@ -329,7 +329,7 @@ export default function PostCreateForm() {
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="closeDate">締切日時（3週間以内を選択） <span className="text-red-600">*</span></Label>
+              <Label htmlFor="closeDate">締切日時（<span className="text-gray-900">3週間</span>以内を選択） <span className="text-red-600">*</span></Label>
               <Input
                 id="closeDate"
                 type="date"

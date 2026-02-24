@@ -178,10 +178,16 @@ export default function MobileRightSidebar({ isOpen, onClose }: MobileRightSideb
                       <div className="absolute top-[44px] left-1/2 bg-white rounded-[50%_50%_50%_50%/60%_60%_40%_40%] w-[54px] h-[40px] -translate-x-1/2"></div>
                     </div>
                   )}
-                  <Link href="/profileset" className="text-[#ff6b35]" onClick={onClose}>
-                    {userName || 'ゲスト'}
-                  </Link>
-                  さん
+                  {userName ? (
+                    <>
+                      <Link href="/profileset" className="text-[#ff6b35]" onClick={onClose}>
+                        {userName}
+                      </Link>
+                      さん
+                    </>
+                  ) : (
+                    <span className="text-gray-500 text-sm">読み込み中...</span>
+                  )}
                 </div>
                 
                 <div className="flex justify-center my-2.5 w-full">

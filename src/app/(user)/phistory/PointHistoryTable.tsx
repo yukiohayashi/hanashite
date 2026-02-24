@@ -10,8 +10,6 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Alert, AlertDescription } from "@/components/ui/alert";
 
 interface PointRecord {
   id: number;
@@ -27,11 +25,9 @@ const getPointTypeLabel = (type: string): string => {
     'login': 'ログイン',
     'post': '一般投稿',
     'comment': 'コメント',
-    'vote': '一般投票',
+    'best_answer': 'ベストアンサー',
     'incentive': 'インセンティブ',
-    'work_post': 'アンケワークス投稿',
-    'campaign': 'キャンペーン',
-    'work_vote': 'アンケワークス投票'
+    'campaign': 'キャンペーン'
   };
   return labels[type] || type;
 };
@@ -101,17 +97,12 @@ export default function PointHistoryTable() {
 
   return (
     <div className="space-y-6">
-      <Alert className="border-blue-500 bg-blue-50">
-        <AlertDescription className="font-bold text-blue-600 text-lg">
-          現在所有のankeポイント：{totalPoints.toLocaleString()}pt
-        </AlertDescription>
-      </Alert>
-
-      <Card>
-        <CardHeader>
-          <CardTitle>ポイント獲得履歴</CardTitle>
-        </CardHeader>
-        <CardContent>
+      <div className="bg-white border border-gray-300 rounded-md p-4">
+        <p className="font-bold text-blue-600 text-lg mb-4">
+          現在所有のハナシテpoint：{totalPoints.toLocaleString()}pt
+        </p>
+        <h2 className="font-bold text-lg mb-4">ポイント獲得履歴</h2>
+        <div>
           {pointHistory.length === 0 ? (
             <p className="py-10 text-center text-gray-500">ポイント履歴がありません</p>
           ) : (
@@ -145,8 +136,8 @@ export default function PointHistoryTable() {
               </Table>
             </div>
           )}
-        </CardContent>
-      </Card>
+        </div>
+      </div>
     </div>
   );
 }

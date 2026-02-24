@@ -10,6 +10,7 @@ import SearchForm from '@/components/SearchForm';
 import KeywordsSection from '@/components/KeywordsSection';
 import InfinitePostList from '@/components/InfinitePostList';
 import AdSense from '@/components/AdSense';
+import ResolvedSection from '@/components/ResolvedSection';
 import { auth } from '@/lib/auth';
 
 // HTMLタグを除去するヘルパー関数
@@ -33,6 +34,17 @@ export default async function Home({ searchParams }: HomeProps) {
   const params = await searchParams;
   const searchQuery = params.s || '';
   const sortBy = params.sort || 'top_post';
+  
+  console.log('📊 Page params:', { searchQuery, sortBy, allParams: params });
+
+  // 運営からのお知らせカテゴリのIDを取得
+  const { data: announcementCategory } = await supabase
+    .from('categories')
+    .select('id')
+    .eq('slug', 'announcement')
+    .single();
+  
+  const announcementCategoryId = announcementCategory?.id || null;
 
   // ソート方法に応じてデータを取得
   let postsData: any[] = [];
@@ -43,7 +55,7 @@ export default async function Home({ searchParams }: HomeProps) {
     // total_votesカラムを使用して50票以上の投稿を直接取得
     const { data: hallOfFameData } = await supabase
       .from('posts')
-      .select('id, title, content, created_at, user_id, og_image, thumbnail_url, total_votes, category_id, categories(name)')
+      .select('id, title, content, created_at, deadline_at, user_id, og_image, thumbnail_url, total_votes, category_id, categories(name)')
       .in('status', ['publish', 'published'])
       .neq('user_id', 33)
       .gte('total_votes', 50)
@@ -66,6 +78,38 @@ export default async function Home({ searchParams }: HomeProps) {
       hallOfFamePosts = [];
       postsData = [];
     }
+  } else if (sortBy === 'deadline') {
+    // 締切が近い順：deadline_atが近い順
+    const { data: allPosts } = await supabase
+      .from('posts')
+      .select('id, title, created_at, deadline_at, user_id, og_image, thumbnail_url, best_answer_id, best_answer_selected_at, category_id, categories(name)')
+      .in('status', ['publish', 'published'])
+      .neq('user_id', 33)
+      .is('best_answer_id', null)
+      .is('best_answer_selected_at', null)
+      .not('deadline_at', 'is', null)
+      .gte('deadline_at', new Date().toISOString())
+      .order('deadline_at', { ascending: true })
+      .limit(100);
+    
+    // 運営者の投稿を除外
+    let data = allPosts;
+    if (allPosts) {
+      const userIds = [...new Set(allPosts.map(p => p.user_id).filter(id => id !== null))];
+      const { data: usersData } = await supabase
+        .from('users')
+        .select('id, status')
+        .in('id', userIds);
+      
+      const operatorIds = usersData?.filter(u => u.status === 3).map(u => u.id) || [];
+      data = allPosts.filter(p => !operatorIds.includes(p.user_id));
+    }
+
+    if (data) {
+      postsData = data.slice(0, 30);
+    } else {
+      postsData = [];
+    }
   } else if (sortBy === 'comment') {
     // コメント順：最新コメントがある投稿順
     const { data: recentComments } = await supabase
@@ -80,7 +124,7 @@ export default async function Home({ searchParams }: HomeProps) {
       
       const { data: allPosts } = await supabase
         .from('posts')
-        .select('id, title, created_at, user_id, og_image, thumbnail_url, best_answer_id, best_answer_selected_at, category_id, categories(name)')
+        .select('id, title, created_at, deadline_at, user_id, og_image, thumbnail_url, best_answer_id, best_answer_selected_at, category_id, categories(name)')
         .in('status', ['publish', 'published'])
         .neq('user_id', 33)
         .is('best_answer_id', null)
@@ -133,7 +177,7 @@ export default async function Home({ searchParams }: HomeProps) {
 
     const { data: allPosts } = await supabase
       .from('posts')
-      .select('id, title, content, created_at, user_id, og_image, thumbnail_url, best_answer_id, best_answer_selected_at, category_id, categories(name)')
+      .select('id, title, content, created_at, deadline_at, user_id, og_image, thumbnail_url, best_answer_id, best_answer_selected_at, category_id, categories(name)')
       .in('status', ['publish', 'published'])
       .neq('user_id', 33)
       .is('best_answer_id', null)
@@ -166,27 +210,77 @@ export default async function Home({ searchParams }: HomeProps) {
       postsData = [];
     }
   } else if (sortBy === 'top_post') {
-    // 最新の相談順（受付中のみ）
-    const { data: allPosts } = await supabase
+    // 最新順（受付中のみ、ただし検索時はすべて）
+    let query = supabase
       .from('posts')
-      .select('id, title, content, created_at, user_id, og_image, thumbnail_url, best_answer_id, best_answer_selected_at, category_id, categories(name)')
+      .select('id, title, content, created_at, deadline_at, user_id, og_image, thumbnail_url, best_answer_id, best_answer_selected_at, category_id, categories(name)')
       .in('status', ['publish', 'published'])
-      .neq('user_id', 33)
-      .is('best_answer_id', null)
-      .is('best_answer_selected_at', null)
+      .neq('user_id', 33);
+
+    // 運営からのお知らせカテゴリを除外
+    if (announcementCategoryId) {
+      query = query.neq('category_id', announcementCategoryId);
+    }
+
+    // 検索時以外は受付中のみ
+    if (!searchQuery) {
+      query = query.is('best_answer_id', null).is('best_answer_selected_at', null);
+    }
+
+    if (searchQuery) {
+      console.log('🔍 Search Query (top_post):', searchQuery);
+      query = query.or(`title.ilike.%${searchQuery}%,content.ilike.%${searchQuery}%`);
+    }
+
+    const { data: allPosts } = await query
       .order('created_at', { ascending: false })
       .limit(100);
     
+    let postsFromComments: any[] = [];
+    if (searchQuery) {
+      console.log('🔍 Search Results (top_post):', allPosts?.length || 0, 'posts found');
+      
+      // コメントからも検索
+      const { data: comments } = await supabase
+        .from('comments')
+        .select('post_id')
+        .ilike('content', `%${searchQuery}%`)
+        .eq('status', 'approved');
+      
+      if (comments && comments.length > 0) {
+        const postIdsFromComments = [...new Set(comments.map(c => c.post_id))];
+        console.log('🔍 Posts with matching comments:', postIdsFromComments.length);
+        
+        const { data: commentPosts } = await supabase
+          .from('posts')
+          .select('id, title, content, created_at, user_id, og_image, thumbnail_url, best_answer_id, best_answer_selected_at, category_id, categories(name)')
+          .in('id', postIdsFromComments)
+          .in('status', ['publish', 'published'])
+          .neq('user_id', 33);
+        
+        postsFromComments = commentPosts || [];
+      }
+    }
+    
+    // 投稿とコメントの検索結果をマージ
+    const combinedPosts = allPosts || [];
+    if (postsFromComments.length > 0) {
+      // 重複を除去してマージ
+      const existingIds = new Set(combinedPosts.map(p => p.id));
+      const newPosts = postsFromComments.filter(p => !existingIds.has(p.id));
+      combinedPosts.push(...newPosts);
+    }
+    
     // 運営者の投稿を除外
-    if (allPosts) {
-      const userIds = [...new Set(allPosts.map(p => p.user_id).filter(id => id !== null))];
+    if (combinedPosts.length > 0) {
+      const userIds = [...new Set(combinedPosts.map(p => p.user_id).filter(id => id !== null))];
       const { data: usersData } = await supabase
         .from('users')
         .select('id, status')
         .in('id', userIds);
       
       const operatorIds = usersData?.filter(u => u.status === 3).map(u => u.id) || [];
-      postsData = allPosts.filter(p => !operatorIds.includes(p.user_id)).slice(0, 10);
+      postsData = combinedPosts.filter(p => !operatorIds.includes(p.user_id)).slice(0, 10);
     } else {
       postsData = [];
     }
@@ -201,12 +295,21 @@ export default async function Home({ searchParams }: HomeProps) {
       .is('best_answer_selected_at', null);
 
     if (searchQuery) {
+      console.log('🔍 Search Query:', searchQuery);
       query = query.or(`title.ilike.%${searchQuery}%,content.ilike.%${searchQuery}%`);
     }
 
-    const { data: allPosts } = await query
+    const { data: allPosts, error: searchError } = await query
       .order('created_at', { ascending: false })
       .limit(100);
+    
+    if (searchQuery) {
+      console.log('🔍 Search Results:', allPosts?.length || 0, 'posts found');
+      console.log('🔍 Search Error:', searchError);
+      if (allPosts && allPosts.length > 0) {
+        console.log('🔍 First result:', { id: allPosts[0].id, title: allPosts[0].title });
+      }
+    }
     
     // 運営者の投稿を除外
     if (allPosts) {
@@ -326,6 +429,66 @@ export default async function Home({ searchParams }: HomeProps) {
     });
   }
 
+  // ベストアンサー待ちの投稿を取得（締め切りが過ぎてもベストアンサーがない投稿）
+  const { data: waitingPosts } = await supabase
+    .from('posts')
+    .select('id, title, content, created_at, deadline_at, user_id, og_image, thumbnail_url, best_answer_id, best_answer_selected_at, category_id, categories(name)')
+    .in('status', ['publish', 'published'])
+    .neq('user_id', 33)
+    .is('best_answer_id', null)
+    .is('best_answer_selected_at', null)
+    .not('deadline_at', 'is', null)
+    .lt('deadline_at', new Date().toISOString())
+    .order('deadline_at', { ascending: false })
+    .limit(30);
+
+  // 運営者の投稿を除外
+  let waitingPostsFiltered: any[] = [];
+  if (waitingPosts) {
+    const userIds = [...new Set(waitingPosts.map(p => p.user_id).filter(id => id !== null))];
+    const { data: usersData } = await supabase
+      .from('users')
+      .select('id, status, name, avatar_style, avatar_seed, use_custom_image, image')
+      .in('id', userIds);
+    
+    const operatorIds = usersData?.filter(u => u.status === 3).map(u => u.id) || [];
+    const filtered = waitingPosts.filter(p => !operatorIds.includes(p.user_id));
+    
+    // ユーザー情報を結合
+    waitingPostsFiltered = filtered.map(post => {
+      const user = usersData?.find(u => u.id === post.user_id);
+      let avatarUrl: string;
+      if (user?.use_custom_image && user?.image) {
+        avatarUrl = user.image;
+      } else {
+        const seed = user?.avatar_seed || String(post.user_id) || 'guest';
+        const style = user?.avatar_style || 'big-smile';
+        avatarUrl = `https://api.dicebear.com/9.x/${style}/svg?seed=${encodeURIComponent(seed)}&size=20`;
+      }
+      return {
+        ...post,
+        user_name: user?.name || null,
+        avatar_url: avatarUrl
+      };
+    });
+  }
+
+  // 運営からのお知らせを取得（最新3件）
+  let announcementPosts: any[] = [];
+  if (announcementCategoryId) {
+    const { data: announcements } = await supabase
+      .from('posts')
+      .select('id, title, content, created_at, user_id, og_image, thumbnail_url, category_id, categories(name)')
+      .eq('category_id', announcementCategoryId)
+      .in('status', ['publish', 'published'])
+      .order('created_at', { ascending: false })
+      .limit(3);
+    
+    if (announcements) {
+      announcementPosts = announcements;
+    }
+  }
+
   // 最新の解決済みを取得（直近3件）
   // postsテーブルのbest_answer_idを使用
   const { data: postsWithBestAnswer, error: bestAnswerError } = await supabase
@@ -431,7 +594,7 @@ export default async function Home({ searchParams }: HomeProps) {
             {/* 検索時は以下を非表示 */}
             {!searchQuery && (
               <>
-            {/* みんなのアンケート（最新の相談順時のみ表示） */}
+            {/* みんなのアンケート（最新順時のみ表示） */}
             {(sortBy === 'recommend' || sortBy === 'top_post') && featuredPosts.length > 0 && (
               <>
                 <h3 className="m-1.5 mb-2 px-0 font-bold text-base" style={{ color: '#ff6b35' }}>注目の相談</h3>
@@ -480,7 +643,7 @@ export default async function Home({ searchParams }: HomeProps) {
               </>
             )}
 
-            {/* 最新2列（最新の相談順時のみ表示） */}
+            {/* 最新2列（最新順時のみ表示） */}
             {(sortBy === 'recommend' || sortBy === 'top_post') && featuredPosts.length > 1 && (
               <div className="gap-2 grid grid-cols-2 mx-1.5 mb-4 w-auto">
                 {featuredPosts.slice(1, 3).map((post) => {
@@ -523,49 +686,11 @@ export default async function Home({ searchParams }: HomeProps) {
             {/* カテゴリ */}
             {session && <InterestCategoriesSection userId={userId} />}
 
-            {/* 最新の解決済み */}
-            {bestAnswersWithUsers.length > 0 && (
-              <>
-                <h3 className="m-1.5 mb-2 px-0 font-bold text-base" style={{ color: '#ff6b35' }}>
-                  <i className="fas fa-trophy mr-1"></i>最新の解決済み
-                </h3>
-                <div className="mx-1.5 mb-4 space-y-2">
-                  {bestAnswersWithUsers.map((answer) => {
-                    const contentPreview = stripHtmlTags(answer.content).substring(0, 80);
-                    return (
-                      <Link 
-                        key={answer.id} 
-                        href={`/posts/${answer.post_id}`}
-                        className="block bg-white hover:shadow-md p-3 border border-gray-300 rounded-md transition-all"
-                      >
-                        <div className="flex items-center gap-1.5 text-xs text-gray-500 mb-1">
-                          <Image 
-                            src={answer.avatar_url} 
-                            alt={answer.user_name}
-                            width={20}
-                            height={20}
-                            unoptimized
-                            className="w-5 h-5 rounded-full border border-gray-200"
-                          />
-                          <span className="font-medium text-gray-700">{answer.user_name}さんのベストアンサー</span>
-                        </div>
-                        <p className="text-gray-800 text-sm line-clamp-2">
-                          {contentPreview}...
-                        </p>
-                        <div className="mt-2 flex items-center justify-between gap-2 text-gray-500 text-xs">
-                          <span className="truncate flex-1 min-w-0">相談: {answer.post_title.substring(0, 40)}{answer.post_title.length > 40 ? '...' : ''}</span>
-                          {answer.category_name && (
-                            <span className="inline-block px-2 py-0.5 text-xs font-medium text-gray-600 bg-gray-200 rounded whitespace-nowrap shrink-0">
-                              {answer.category_name}
-                            </span>
-                          )}
-                        </div>
-                      </Link>
-                    );
-                  })}
-                </div>
-              </>
-            )}
+            {/* 解決済み */}
+            <ResolvedSection 
+              bestAnswers={bestAnswersWithUsers} 
+              waitingPosts={waitingPostsFiltered}
+            />
 
           
 
@@ -578,10 +703,10 @@ export default async function Home({ searchParams }: HomeProps) {
             <div className="px-1 py-0">
               <ul className="flex justify-center m-0 p-0 w-full list-none">
                 <li className="m-0 mx-1.5 my-1.5 w-auto text-xs">
-                  <Link href="/" className={`block w-full h-full underline ${sortBy === 'top_post' || sortBy === 'recommend' ? 'font-bold text-gray-900' : 'text-gray-600'}`}>最新の相談順</Link>
+                  <Link href="/" className={`block w-full h-full underline ${sortBy === 'top_post' || sortBy === 'recommend' ? 'font-bold text-gray-900' : 'text-gray-600'}`}>最新順</Link>
                 </li>
                 <li className="m-0 mx-1.5 my-1.5 w-auto text-xs">
-                  <Link href="/?sort=comment" className={`block w-full h-full underline ${sortBy === 'comment' ? 'font-bold text-gray-900' : 'text-gray-600'}`}>最新回答順</Link>
+                  <Link href="/?sort=deadline" className={`block w-full h-full underline ${sortBy === 'deadline' ? 'font-bold text-gray-900' : 'text-gray-600'}`}>締切が近い順</Link>
                 </li>
               </ul>
             </div>
@@ -605,6 +730,7 @@ export default async function Home({ searchParams }: HomeProps) {
                 title: post.title,
                 content: (post as any).content || '',
                 created_at: post.created_at,
+                deadline_at: (post as any).deadline_at || null,
                 user_name: (post as any).user_name || null,
                 avatar_url: (post as any).avatar_url || 'https://api.dicebear.com/9.x/big-smile/svg?seed=guest&size=20',
                 category_id: (post as any).category_id || null,

@@ -39,7 +39,6 @@ export async function POST(request: Request) {
     const avatarStyle = formData.get('avatarStyle') as string;
     const avatarSeed = formData.get('avatarSeed') as string;
     const useCustomImage = formData.get('useCustomImage') === '1';
-    const showPostHistory = formData.get('showPostHistory') === '1';
 
     if (!nickname?.trim()) {
       return NextResponse.json(
@@ -183,8 +182,7 @@ export async function POST(request: Request) {
       // DiceBearアバター関連
       avatar_style: avatarStyle || null,
       avatar_seed: avatarSeed || null,
-      use_custom_image: useCustomImage ? 1 : 0,
-      show_post_history: showPostHistory
+      use_custom_image: useCustomImage ? 1 : 0
     };
 
     if (updateSlug) {

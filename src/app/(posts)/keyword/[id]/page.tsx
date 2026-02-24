@@ -1,41 +1,27 @@
 import { supabase } from '@/lib/supabase';
-import { getKeywordBySlug } from '@/lib/keywords';
+import { getKeywordById } from '@/lib/keywords';
 import Link from 'next/link';
-import { redirect } from 'next/navigation';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
 import Sidebar from '@/components/Sidebar';
 import RightSidebar from '@/components/RightSidebar';
-import PostImage from '@/components/PostImage';
 
 export default async function KeywordPage({ 
   params,
   searchParams 
 }: { 
-  params: Promise<{ slug: string }>;
+  params: Promise<{ id: string }>;
   searchParams: Promise<{ page?: string }>;
 }) {
-  const { slug } = await params;
+  const { id } = await params;
   const { page } = await searchParams;
   const currentPage = parseInt(page || '1');
   const postsPerPage = 20;
   
-  // キーワード情報を取得（slugはURLエンコードされた状態でDBに保存されている）
-  const keyword = await getKeywordBySlug(slug);
+  // キーワード情報を取得
+  const keyword = await getKeywordById(parseInt(id));
 
   if (!keyword) {
-    // キーワードが見つからない場合、カテゴリを検索
-    const { data: category } = await supabase
-      .from('categories')
-      .select('id, slug')
-      .eq('slug', slug)
-      .single();
-    
-    if (category) {
-      // カテゴリが見つかった場合、カテゴリページにリダイレクト
-      redirect(`/category/${category.id}`);
-    }
-    
     return (
       <div className="flex justify-center items-center bg-gray-50 min-h-screen">
         <div className="text-center">
@@ -59,15 +45,26 @@ export default async function KeywordPage({
     categoryId = category?.id || null;
   }
 
+  // post_keywordsテーブルから関連投稿IDを取得
+  const { data: postKeywords } = await supabase
+    .from('post_keywords')
+    .select('post_id')
+    .eq('keyword_id', parseInt(id));
+
+  const postIds = postKeywords?.map(pk => pk.post_id) || [];
+
   // 総投稿数を取得
   let countQuery = supabase
     .from('posts')
     .select('*', { count: 'exact', head: true })
     .in('status', ['publish', 'published']);
 
-  if (keyword.keyword_type === 'category' && categoryId) {
+  if (postIds.length > 0) {
+    countQuery = countQuery.in('id', postIds);
+  } else if (keyword.keyword_type === 'category' && categoryId) {
     countQuery = countQuery.eq('category_id', categoryId);
   } else {
+    // post_keywordsに紐付けがない場合は、タイトル・本文検索にフォールバック
     countQuery = countQuery.or(`title.ilike.%${keyword.keyword}%,content.ilike.%${keyword.keyword}%`);
   }
 
@@ -80,9 +77,12 @@ export default async function KeywordPage({
     .select('id, title, content, created_at, user_id, category_id, og_image, thumbnail_url')
     .in('status', ['publish', 'published']);
 
-  if (keyword.keyword_type === 'category' && categoryId) {
+  if (postIds.length > 0) {
+    postsQuery = postsQuery.in('id', postIds);
+  } else if (keyword.keyword_type === 'category' && categoryId) {
     postsQuery = postsQuery.eq('category_id', categoryId);
   } else {
+    // post_keywordsに紐付けがない場合は、タイトル・本文検索にフォールバック
     postsQuery = postsQuery.or(`title.ilike.%${keyword.keyword}%,content.ilike.%${keyword.keyword}%`);
   }
 
@@ -95,22 +95,38 @@ export default async function KeywordPage({
   }
   console.log('取得した投稿数:', posts?.length || 0);
 
-  // ユーザー情報を別途取得
+  // ユーザー情報とカテゴリ情報を別途取得
   let postsWithUsers = posts || [];
   if (posts && posts.length > 0) {
     const userIds = [...new Set(posts.map(p => p.user_id).filter(Boolean))];
+    const categoryIds = [...new Set(posts.map(p => p.category_id).filter(Boolean))];
+    
+    let userMap = new Map();
+    let categoryMap = new Map();
+    
     if (userIds.length > 0) {
       const { data: users } = await supabase
         .from('users')
-        .select('id, name')
+        .select('id, name, image')
         .in('id', userIds);
 
-      const userMap = new Map(users?.map(u => [u.id, u]) || []);
-      postsWithUsers = posts.map(post => ({
-        ...post,
-        users: post.user_id ? userMap.get(post.user_id) : null
-      }));
+      userMap = new Map(users?.map(u => [u.id, u]) || []);
     }
+    
+    if (categoryIds.length > 0) {
+      const { data: categories } = await supabase
+        .from('categories')
+        .select('id, name')
+        .in('id', categoryIds);
+
+      categoryMap = new Map(categories?.map(c => [c.id, c]) || []);
+    }
+    
+    postsWithUsers = posts.map(post => ({
+      ...post,
+      users: post.user_id ? userMap.get(post.user_id) : null,
+      categories: post.category_id ? categoryMap.get(post.category_id) : null
+    }));
   }
 
   return (
@@ -148,26 +164,33 @@ export default async function KeywordPage({
 
             {postsWithUsers && postsWithUsers.length > 0 ? (
               postsWithUsers.map((post) => {
-                const imageUrl = (post as any).og_image || (post as any).thumbnail_url;
                 const userName = (post as any).users?.name || 'ゲスト';
+                const avatarUrl = (post as any).users?.image || 'https://api.dicebear.com/9.x/big-smile/svg?seed=guest&size=20';
+                const categoryName = (post as any).categories?.name;
                 return (
-                  <Link key={post.id} href={`/posts/${post.id}`} className="flex gap-3 bg-white hover:shadow-md p-3 border border-gray-300 rounded-md transition-all hover:-translate-y-1">
-                    <div className="flex-1 min-w-0">
-                      <h3 className="font-normal text-gray-900 text-base md:text-lg leading-relaxed">
-                        {post.title}
-                      </h3>
-                      <div className="mt-2 text-gray-500 text-xs">
-                        <span>相談者:{userName}</span>
+                  <Link 
+                    key={post.id} 
+                    href={`/posts/${post.id}`} 
+                    className="block bg-white p-3 border border-gray-300 rounded-md hover:shadow-md transition-shadow"
+                  >
+                    <h3 className="mb-2 font-extrabold text-gray-900 text-lg line-clamp-2">
+                      {post.title}
+                    </h3>
+                    <div className="mt-2 flex items-center justify-between text-gray-500 text-xs">
+                      <div className="flex items-center">
+                        <img 
+                          src={avatarUrl} 
+                          alt="相談者"
+                          className="w-4 h-4 rounded-full border border-gray-200 inline-block mr-1"
+                        />
+                        <span>{userName}さんからの相談</span>
                         <span className="ml-2">{new Date(post.created_at).toLocaleDateString('ja-JP')}</span>
                       </div>
-                    </div>
-                    <div className="flex-shrink-0 rounded w-20 h-20 overflow-hidden">
-                      <PostImage
-                        src={imageUrl}
-                        alt={post.title}
-                        className="w-full h-full object-cover"
-                        loading="lazy"
-                      />
+                      {categoryName && (
+                        <span className="inline-block px-2 py-0.5 text-xs font-medium text-gray-600 bg-gray-200 rounded">
+                          {categoryName}
+                        </span>
+                      )}
                     </div>
                   </Link>
                 );
@@ -181,7 +204,7 @@ export default async function KeywordPage({
               <div className="flex justify-center items-center gap-2 mt-8">
                 {currentPage > 1 && (
                   <Link
-                    href={`/keyword/${slug}?page=${currentPage - 1}`}
+                    href={`/keyword/${id}?page=${currentPage - 1}`}
                     className="px-4 py-2 bg-white border border-gray-300 rounded hover:bg-gray-50"
                   >
                     前へ
@@ -194,7 +217,7 @@ export default async function KeywordPage({
                 
                 {currentPage < totalPages && (
                   <Link
-                    href={`/keyword/${slug}?page=${currentPage + 1}`}
+                    href={`/keyword/${id}?page=${currentPage + 1}`}
                     className="px-4 py-2 bg-white border border-gray-300 rounded hover:bg-gray-50"
                   >
                     次へ

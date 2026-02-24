@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
+import { checkNgWord } from '@/lib/ngWordCheck';
 
 interface AnkeData {
   userId: string;
@@ -25,16 +26,59 @@ export default function PostConfirmView() {
   const [ankeData, setAnkeData] = useState<AnkeData | null>(null);
   const [submitting, setSubmitting] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
+  const [ngWordWarning, setNgWordWarning] = useState<string>('');
+  const [isBlocked, setIsBlocked] = useState(false);
+  const [needsApproval, setNeedsApproval] = useState(false);
   const router = useRouter();
 
   useEffect(() => {
     const savedData = sessionStorage.getItem('anke_create_data');
     if (savedData) {
-      setAnkeData(JSON.parse(savedData));
+      const data = JSON.parse(savedData);
+      setAnkeData(data);
+      checkForNgWords(data);
     } else {
       router.push('/post-create');
     }
   }, [router]);
+
+  const checkForNgWords = async (data: AnkeData) => {
+    // タイトルをチェック
+    const titleCheck = await checkNgWord(data.title);
+    if (titleCheck.isNg) {
+      if (titleCheck.severity === 1) {
+        setNgWordWarning('タイトルに不適切な表現が含まれています。投稿できません。');
+        setIsBlocked(true);
+        setNeedsApproval(false);
+        return;
+      } else if (titleCheck.severity === 2) {
+        setNgWordWarning('タイトルに不適切な表現が含まれています。この投稿は管理者の承認後に公開されます。');
+        setIsBlocked(false);
+        setNeedsApproval(true);
+        return;
+      }
+    }
+
+    // 本文をチェック
+    const contentCheck = await checkNgWord(data.content);
+    if (contentCheck.isNg) {
+      if (contentCheck.severity === 1) {
+        setNgWordWarning('本文に不適切な表現が含まれています。投稿できません。');
+        setIsBlocked(true);
+        setNeedsApproval(false);
+        return;
+      } else if (contentCheck.severity === 2) {
+        setNgWordWarning('本文に不適切な表現が含まれています。この投稿は管理者の承認後に公開されます。');
+        setIsBlocked(false);
+        setNeedsApproval(true);
+        return;
+      }
+    }
+
+    setNgWordWarning('');
+    setIsBlocked(false);
+    setNeedsApproval(false);
+  };
 
   const handleBack = () => {
     router.push('/post-create');
@@ -42,6 +86,12 @@ export default function PostConfirmView() {
 
   const handleSubmit = async () => {
     if (!ankeData) return;
+
+    // NGワードチェック（ブロックレベルのみ投稿不可）
+    if (isBlocked) {
+      setErrorMessage(ngWordWarning);
+      return;
+    }
 
     setSubmitting(true);
     setErrorMessage('');
@@ -81,7 +131,8 @@ export default function PostConfirmView() {
       const postData = {
         ...ankeData,
         imageUrl: uploadedImageUrl,
-        imagePreview: undefined // Base64データは送信しない
+        imagePreview: undefined, // Base64データは送信しない
+        status: needsApproval ? 'pending' : 'published' // NGワード警告レベルの場合は承認待ち
       };
 
       const response = await fetch('/api/post-create', {
@@ -97,7 +148,13 @@ export default function PostConfirmView() {
       if (data.success) {
         sessionStorage.removeItem('anke_create_data');
         sessionStorage.removeItem('anke_image_file');
-        router.push(`/posts/${data.postId}`);
+        if (needsApproval) {
+          // 承認待ちの場合は、承認待ちメッセージを表示してトップページへ
+          alert('投稿を受け付けました。管理者の承認後に公開されます。');
+          router.push('/');
+        } else {
+          router.push(`/posts/${data.postId}`);
+        }
       } else {
         setErrorMessage(data.error);
       }
@@ -134,6 +191,14 @@ export default function PostConfirmView() {
 
   return (
     <div className="space-y-6">
+      {ngWordWarning && (
+        <Alert className={isBlocked ? "border-red-600 bg-red-50" : "border-yellow-600 bg-yellow-50"}>
+          <AlertDescription className={isBlocked ? "font-bold text-red-800" : "font-bold text-yellow-800"}>
+            {isBlocked ? '❌' : '⚠️'} {ngWordWarning}
+          </AlertDescription>
+        </Alert>
+      )}
+
       {errorMessage && (
         <Alert className="border-red-600 bg-red-50">
           <AlertDescription className="font-bold text-red-800">
@@ -142,11 +207,13 @@ export default function PostConfirmView() {
         </Alert>
       )}
 
-      <Alert className="border-blue-500 bg-blue-50">
-        <AlertDescription className="text-blue-800">
-          以下の内容で投稿します。内容をご確認の上、問題なければ下のボタンをクリックしてください。
-        </AlertDescription>
-      </Alert>
+      {!isBlocked && (
+        <Alert className="border-blue-500 bg-blue-50">
+          <AlertDescription className="text-blue-800">
+            以下の内容で投稿します。内容をご確認の上、問題なければ下のボタンをクリックしてください。
+          </AlertDescription>
+        </Alert>
+      )}
 
       <div className="bg-white border border-gray-300 rounded-md shadow-sm">
         <div className="p-4 space-y-6">
@@ -192,8 +259,8 @@ export default function PostConfirmView() {
         <Button
           type="button"
           onClick={handleSubmit}
-          disabled={submitting}
-          className="bg-[#ff6b35] hover:bg-[#e58a2f] px-10 py-6 rounded font-bold text-white text-base"
+          disabled={submitting || isBlocked}
+          className="bg-[#ff6b35] hover:bg-[#e58a2f] px-10 py-6 rounded font-bold text-white text-base disabled:opacity-50 disabled:cursor-not-allowed"
         >
           {submitting ? '投稿中...' : 'この内容で投稿する'}
         </Button>

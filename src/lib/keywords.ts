@@ -3,7 +3,6 @@ import { supabase } from './supabase';
 export interface Keyword {
   id: number;
   keyword: string;
-  slug: string;
   description?: string;
   keyword_type: string;
   parent_id?: number;
@@ -17,25 +16,23 @@ export interface Keyword {
 }
 
 /**
- * スラッグからキーワードを取得
+ * IDからキーワードを取得
  */
-export async function getKeywordBySlug(slug: string): Promise<Keyword | null> {
-  console.log('🔍 Searching for keyword with slug:', slug);
+export async function getKeywordById(id: number): Promise<Keyword | null> {
+  console.log('🔍 Searching for keyword with id:', id);
   
-  // 大文字小文字を区別しない検索（ilike使用）
   const { data, error } = await supabase
     .from('keywords')
     .select('*')
-    .ilike('slug', slug)
+    .eq('id', id)
     .single();
 
   if (error) {
-    // PGRST116 は "no rows returned" エラー（キーワードが見つからない場合）
     if (error.code === 'PGRST116') {
-      console.log('Keyword not found for slug:', slug);
+      console.log('Keyword not found for id:', id);
     } else {
       console.error('❌ Error fetching keyword:', error);
-      console.error('Searched slug:', slug);
+      console.error('Searched id:', id);
     }
     return null;
   }
@@ -45,21 +42,32 @@ export async function getKeywordBySlug(slug: string): Promise<Keyword | null> {
 }
 
 /**
- * 人気キーワードを取得
+ * 人気検索ワードを取得（keyword_search_historyから集計）
+ * keywordsテーブルに存在しないキーワードも含む
  */
-export async function getPopularKeywords(limit: number = 10): Promise<Keyword[]> {
-  const { data, error } = await supabase
-    .from('keywords')
-    .select('*')
-    .order('search_count', { ascending: false })
-    .limit(limit);
+export async function getPopularKeywords(limit: number = 10): Promise<Array<{ keyword: string; count: number }>> {
+  // keyword_search_historyから検索キーワードを集計
+  const { data: searchHistory, error: historyError } = await supabase
+    .from('keyword_search_history')
+    .select('search_keyword');
 
-  if (error) {
-    console.error('Error fetching popular keywords:', error);
+  if (historyError) {
+    console.error('Error fetching search history:', historyError);
     return [];
   }
 
-  return data || [];
+  // 検索キーワードの出現回数をカウント
+  const keywordCounts: { [key: string]: number } = {};
+  searchHistory?.forEach((item) => {
+    const keyword = item.search_keyword;
+    keywordCounts[keyword] = (keywordCounts[keyword] || 0) + 1;
+  });
+
+  // 出現回数でソートして上位を取得
+  return Object.entries(keywordCounts)
+    .sort((a, b) => b[1] - a[1])
+    .slice(0, limit)
+    .map(([keyword, count]) => ({ keyword, count }));
 }
 
 /**

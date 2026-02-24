@@ -28,6 +28,7 @@ interface CommentSectionProps {
   totalCount: number;
   postUserId?: number;
   bestAnswerId?: number | null;
+  deadlineAt?: string | null;
 }
 
 function getTimeAgo(dateString: string): string {
@@ -68,13 +69,20 @@ function TimeAgo({ dateString }: { dateString: string }) {
   return <span className="text-gray-500 text-xs">{timeAgo}前</span>;
 }
 
-export default function CommentSection({ postId, initialComments, totalCount, postUserId, bestAnswerId }: CommentSectionProps) {
+export default function CommentSection({ postId, initialComments, totalCount, postUserId, bestAnswerId, deadlineAt }: CommentSectionProps) {
   const { data: session } = useSession();
   const [comments, setComments] = useState<Comment[]>(initialComments);
   const [newComment, setNewComment] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [likingComments, setLikingComments] = useState<Set<number>>(new Set());
   const [replyingTo, setReplyingTo] = useState<number | null>(null);
+  
+  // 締め切りが過ぎているかどうかを判定
+  const isDeadlinePassed = deadlineAt ? new Date(deadlineAt) < new Date() : false;
+  // 現在のユーザーが相談者かどうかを判定
+  const isPostOwner = session?.user?.id && postUserId && Number(session.user.id) === Number(postUserId);
+  // 締め切り後は相談者のみ回答可能
+  const canComment = !isDeadlinePassed || isPostOwner;
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -209,6 +217,23 @@ export default function CommentSection({ postId, initialComments, totalCount, po
             >
               ベストアンサーを見る
             </button>
+          </div>
+        </div>
+      ) : isDeadlinePassed && !isPostOwner ? (
+        <div className="mb-6 p-6 bg-orange-50 border-2 border-orange-300 rounded-lg text-center">
+          <div className="flex flex-col items-center gap-3">
+            <div className="flex items-center gap-2 text-orange-700">
+              <i className="fas fa-clock text-orange-500 text-2xl"></i>
+              <span className="font-bold text-lg">
+                締め切り済み
+              </span>
+            </div>
+            <p className="text-orange-600 text-sm font-medium">
+              この相談は締め切りを過ぎたため、相談者からのベストアンサー待ちとなります。
+            </p>
+            <p className="text-gray-600 text-xs">
+              締め切り日: {deadlineAt ? new Date(deadlineAt).toLocaleDateString('ja-JP', { year: 'numeric', month: 'long', day: 'numeric' }) : ''}
+            </p>
           </div>
         </div>
       ) : (

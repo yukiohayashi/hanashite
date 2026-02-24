@@ -2,7 +2,6 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import { useSession } from 'next-auth/react';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -181,26 +180,20 @@ export default function PointExchangeForm() {
         </Alert>
       )}
 
-      <Alert className="border-blue-500 bg-blue-50">
-        <AlertDescription className="font-bold text-blue-600 text-lg">
-          現在所有のankeポイント：{totalPoints.toLocaleString()}pt
-        </AlertDescription>
-      </Alert>
+      <div className="bg-white border border-gray-300 rounded-md p-4">
+        <p className="font-bold text-blue-600 text-lg mb-4">
+          現在所有のハナシテpoint：{totalPoints.toLocaleString()}pt
+        </p>
 
-      {totalPoints < 10000 ? (
-        <Alert className="border-yellow-500 bg-yellow-50">
-          <AlertDescription>
+        {totalPoints < 10000 ? (
+          <div className="bg-yellow-50 border border-yellow-500 rounded-md p-4">
             <p className="m-0 font-bold text-yellow-800">⚠️ ポイント交換には10,000pt以上が必要です。</p>
             <p className="mt-2 text-yellow-800">あと{(10000 - totalPoints).toLocaleString()}pt必要です。</p>
-          </AlertDescription>
-        </Alert>
-      ) : (
-        <Card>
-          <CardHeader>
-            <CardTitle>ポイント交換申請フォーム</CardTitle>
-            <CardDescription>必要事項を入力して申請してください</CardDescription>
-          </CardHeader>
-          <CardContent>
+          </div>
+        ) : (
+          <div>
+            <h2 className="font-bold text-lg mb-2">ポイント交換申請フォーム</h2>
+            <p className="text-gray-600 text-sm mb-4">必要事項を入力して申請してください</p>
             <form onSubmit={handleSubmit} className="space-y-4">
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
@@ -295,9 +288,9 @@ export default function PointExchangeForm() {
                 </Button>
               </div>
             </form>
-          </CardContent>
-        </Card>
-      )}
+          </div>
+        )}
+      </div>
     </div>
   );
 }

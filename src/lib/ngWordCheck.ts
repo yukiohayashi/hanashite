@@ -1,10 +1,12 @@
+'use client';
+
 import { supabase } from './supabase';
 
 interface NgWord {
   id: number;
   word: string;
   word_type: string;
-  severity: string;
+  severity: number;
   category: string | null;
   is_active: number;
 }
@@ -36,7 +38,7 @@ async function getNgWords(): Promise<NgWord[]> {
 export async function checkNgWord(text: string): Promise<{
   isNg: boolean;
   matchedWord?: string;
-  severity?: string;
+  severity?: number;
   category?: string;
 }> {
   if (!text || !text.trim()) {

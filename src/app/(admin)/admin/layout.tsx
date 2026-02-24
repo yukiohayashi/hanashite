@@ -1,7 +1,7 @@
 'use client';
 
 import Link from 'next/link';
-import { LayoutDashboard, FileText, Users, MessageSquare, Heart, Coins, Mail, Bot, LogOut, Search, Trash2, Settings, Briefcase } from 'lucide-react';
+import { LayoutDashboard, FileText, Users, MessageSquare, Heart, Coins, Mail, Bot, LogOut, Search, Trash2, Settings } from 'lucide-react';
 
 export default function AdminPanelLayout({
   children,
@@ -44,7 +44,7 @@ export default function AdminPanelLayout({
             className={`flex items-center gap-2 px-3 py-1 text-gray-300 ${hoverBgColor} hover:text-white transition-colors`}
           >
             <Trash2 className="w-5 h-5" />
-            <span className="text-sm">リーンアップ（削除記事に対するコメント、いいね、フォローを削除）</span>
+            <span className="text-sm">クリーンアップ（削除記事に対するコメント、いいね、フォローを削除）</span>
           </Link>
 
           <div>
@@ -286,30 +286,6 @@ export default function AdminPanelLayout({
                 className={`block px-3 py-1 text-sm text-gray-400 ${hoverBgColor} hover:text-white transition-colors`}
               >
                 設定
-              </Link>
-            </div>
-          </div>
-
-          <div>
-            <Link
-              href="/admin/ankeworks"
-              className={`flex items-center gap-2 px-3 py-1 text-gray-300 ${hoverBgColor} hover:text-white transition-colors`}
-            >
-              <Briefcase className="w-5 h-5" />
-              <span className="text-sm">アンケワークス投稿管理</span>
-            </Link>
-            <div className="ml-11 space-y-1">
-              <Link
-                href="/admin/ankeworks"
-                className={`block px-3 py-1 text-sm text-gray-400 ${hoverBgColor} hover:text-white transition-colors`}
-              >
-                投稿一覧
-              </Link>
-              <Link
-                href="/admin/ankeworks/new"
-                className={`block px-3 py-1 text-sm text-gray-400 ${hoverBgColor} hover:text-white transition-colors`}
-              >
-                新規作成
               </Link>
             </div>
           </div>

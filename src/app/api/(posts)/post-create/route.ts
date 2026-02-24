@@ -158,8 +158,57 @@ export async function POST(request: Request) {
       }
     }
 
-    // カテゴリーを設定（autoでない場合）
+    // キーワードを抽出して自動付与
+    try {
+      // キーワード一覧を取得
+      const { data: keywords } = await supabase
+        .from('keywords')
+        .select('id, keyword');
+
+      if (keywords && keywords.length > 0) {
+        const matchedKeywords: number[] = [];
+        // HTMLタグを除去してからテキストを結合
+        const cleanContent = content.replace(/<[^>]*>/g, '').replace(/&nbsp;/g, ' ');
+        const combinedText = `${title} ${cleanContent}`.toLowerCase();
+
+        console.log('Keyword matching - Combined text:', combinedText.substring(0, 200));
+
+        // タイトルと本文にキーワードが含まれているかチェック
+        for (const keyword of keywords) {
+          const keywordLower = keyword.keyword.toLowerCase();
+          if (combinedText.includes(keywordLower)) {
+            matchedKeywords.push(keyword.id);
+            console.log('Matched keyword:', keyword.keyword, 'ID:', keyword.id);
+          }
+        }
+
+        console.log('Total matched keywords:', matchedKeywords.length);
+
+        // マッチしたキーワードをpost_keywordsに保存
+        if (matchedKeywords.length > 0) {
+          const keywordInserts = matchedKeywords.map(keywordId => ({
+            post_id: post.id,
+            keyword_id: keywordId
+          }));
+
+          const { error: keywordError } = await supabase
+            .from('post_keywords')
+            .insert(keywordInserts);
+
+          if (keywordError) {
+            console.error('Keyword insert error:', keywordError);
+          } else {
+            console.log('Successfully inserted keywords for post:', post.id);
+          }
+        }
+      }
+    } catch (error) {
+      console.error('Keyword assignment error:', error);
+    }
+
+    // カテゴリーを設定
     if (category && category !== 'auto') {
+      // 手動選択の場合
       const { error: categoryError } = await supabase
         .from('post_categories')
         .insert({
@@ -169,6 +218,58 @@ export async function POST(request: Request) {
 
       if (categoryError) {
         console.error('Category assignment error:', categoryError);
+      }
+    } else if (category === 'auto') {
+      // 自動選択の場合：内容に合ったカテゴリを自動付与
+      try {
+        const { data: categories } = await supabase
+          .from('categories')
+          .select('id, name')
+          .eq('is_active', true);
+
+        console.log('Auto category - Available categories:', categories?.length || 0);
+
+        if (categories && categories.length > 0) {
+          // HTMLタグを除去してからテキストを結合
+          const cleanContent = content.replace(/<[^>]*>/g, '').replace(/&nbsp;/g, ' ');
+          const combinedText = `${title} ${cleanContent}`.toLowerCase();
+          let bestMatch: { id: number; name: string } | null = null;
+
+          console.log('Auto category - Combined text:', combinedText.substring(0, 200));
+
+          // 各カテゴリ名が含まれているかチェック
+          for (const cat of categories) {
+            const catName = cat.name.toLowerCase();
+            console.log('Checking category:', cat.name);
+            
+            if (combinedText.includes(catName)) {
+              // カテゴリ名が含まれている場合、そのカテゴリを選択
+              bestMatch = { id: cat.id, name: cat.name };
+              console.log('Matched category:', cat.name, 'ID:', cat.id);
+              break;
+            }
+          }
+
+          // マッチしたカテゴリがあれば保存
+          if (bestMatch) {
+            const { error: catError } = await supabase
+              .from('post_categories')
+              .insert({
+                post_id: post.id,
+                category_id: bestMatch.id
+              });
+
+            if (catError) {
+              console.error('Category insert error:', catError);
+            } else {
+              console.log('Successfully assigned category:', bestMatch.name, 'to post:', post.id);
+            }
+          } else {
+            console.log('No matching category found for auto selection');
+          }
+        }
+      } catch (error) {
+        console.error('Auto category assignment error:', error);
       }
     }
 

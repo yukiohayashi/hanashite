@@ -8,6 +8,7 @@ interface Post {
   title: string;
   content: string;
   created_at: string;
+  deadline_at: string | null;
   user_name: string | null;
   avatar_url: string;
   category_id: number | null;
@@ -114,7 +115,9 @@ export default function InfinitePostList({ initialPosts, sortBy }: InfinitePostL
                   className="w-4 h-4 rounded-full border border-gray-200 inline-block mr-1 flex-shrink-0"
                 />
                 <span className="truncate">{post.user_name || 'ゲスト'}さんからの相談</span>
-                <span className="ml-2 flex-shrink-0 hidden md:inline">{new Date(post.created_at).toLocaleDateString('ja-JP')}</span>
+                {post.deadline_at && (
+                  <span className="ml-2 flex-shrink-0 hidden md:inline">締切: {new Date(post.deadline_at).toLocaleDateString('ja-JP')}</span>
+                )}
               </div>
               {post.category_name && (
                 <span className="inline-block px-2 py-0.5 text-xs font-medium text-gray-600 bg-gray-200 rounded whitespace-nowrap flex-shrink-0">

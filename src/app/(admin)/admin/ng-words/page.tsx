@@ -8,7 +8,7 @@ interface NgWord {
   id: number;
   word: string;
   word_type: string;
-  severity: string;
+  severity: number;
   category: string | null;
   is_active: number;
   created_at: string;
@@ -48,10 +48,11 @@ export default function NgWordsPage() {
 
   const handleEdit = (word: NgWord) => {
     setEditingWord(word);
+    const severityString = word.severity === 1 ? 'block' : word.severity === 2 ? 'warn' : 'log';
     setFormData({
       word: word.word,
       word_type: word.word_type,
-      severity: word.severity,
+      severity: severityString,
       category: word.category || '',
       is_active: word.is_active,
     });
@@ -64,13 +65,15 @@ export default function NgWordsPage() {
       return;
     }
 
+    const severityValue = formData.severity === 'block' ? 1 : formData.severity === 'warn' ? 2 : 3;
+
     if (editingWord) {
       const { error } = await supabase
         .from('ng_words')
         .update({
           word: formData.word,
           word_type: formData.word_type,
-          severity: formData.severity,
+          severity: severityValue,
           category: formData.category || null,
           is_active: formData.is_active,
           updated_at: new Date().toISOString(),
@@ -87,7 +90,7 @@ export default function NgWordsPage() {
         .insert({
           word: formData.word,
           word_type: formData.word_type,
-          severity: formData.severity,
+          severity: severityValue,
           category: formData.category || null,
           is_active: formData.is_active,
         });
@@ -129,7 +132,8 @@ export default function NgWordsPage() {
   const filteredWords = ngWords.filter((word) => {
     const matchSearch = word.word.toLowerCase().includes(searchTerm.toLowerCase());
     const matchCategory = filterCategory === 'all' || word.category === filterCategory;
-    const matchSeverity = filterSeverity === 'all' || word.severity === filterSeverity;
+    const severityString = word.severity === 1 ? 'block' : word.severity === 2 ? 'warn' : 'log';
+    const matchSeverity = filterSeverity === 'all' || severityString === filterSeverity;
     return matchSearch && matchCategory && matchSeverity;
   });
 
@@ -273,11 +277,13 @@ export default function NgWordsPage() {
                     </td>
                     <td className="px-4 py-3">
                       <span className={`px-2 py-1 text-xs rounded ${
-                        word.severity === 'block'
+                        word.severity === 1
                           ? 'bg-red-100 text-red-800'
-                          : 'bg-yellow-100 text-yellow-800'
+                          : word.severity === 2
+                          ? 'bg-yellow-100 text-yellow-800'
+                          : 'bg-blue-100 text-blue-800'
                       }`}>
-                        {word.severity === 'block' ? 'ブロック' : '警告'}
+                        {word.severity === 1 ? 'ブロック' : word.severity === 2 ? '警告' : 'ログ'}
                       </span>
                     </td>
                     <td className="px-4 py-3 text-sm text-gray-600">
