@@ -11,7 +11,7 @@ export async function GET(request: Request) {
 
     let query = supabase
       .from('posts')
-      .select('id, title, content, created_at, user_id, best_answer_id, best_answer_selected_at')
+      .select('id, title, content, created_at, user_id, best_answer_id, best_answer_selected_at, category_id, categories(name)')
       .in('status', ['publish', 'published'])
       .is('best_answer_id', null)
       .is('best_answer_selected_at', null);
@@ -65,7 +65,9 @@ export async function GET(request: Request) {
         content: post.content,
         created_at: post.created_at,
         user_name: user?.name || null,
-        avatar_url: avatarUrl
+        avatar_url: avatarUrl,
+        category_id: (post as any).category_id || null,
+        category_name: (post as any).categories?.name || null
       };
     });
 

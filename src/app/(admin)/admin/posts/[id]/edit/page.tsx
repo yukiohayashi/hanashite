@@ -7,7 +7,7 @@ async function getPost(id: string) {
   
   const { data: post, error } = await supabase
     .from('posts')
-    .select('*, best_answer_selected_at, deadline_at')
+    .select('*, best_answer_selected_at, deadline_at, category_id')
     .eq('id', postId)
     .single();
 
@@ -65,13 +65,25 @@ async function getPost(id: string) {
   return result;
 }
 
+async function getCategories() {
+  const { data: categories } = await supabase
+    .from('categories')
+    .select('id, name')
+    .order('id', { ascending: true });
+  
+  return categories || [];
+}
+
 export default async function PostEditPage({
   params,
 }: {
   params: Promise<{ id: string }>;
 }) {
   const { id } = await params;
-  const post = await getPost(id);
+  const [post, categories] = await Promise.all([
+    getPost(id),
+    getCategories()
+  ]);
 
   if (!post) {
     notFound();
@@ -102,7 +114,7 @@ export default async function PostEditPage({
         </div>
       </div>
 
-      <PostEditForm post={post} />
+      <PostEditForm post={post} categories={categories} />
     </div>
   );
 }

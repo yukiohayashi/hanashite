@@ -21,7 +21,7 @@ export async function PATCH(
   const postId = parseInt(id);
   const body = await request.json();
 
-  const { title, content, status, og_image, best_answer_id, created_at, deadline_at } = body;
+  const { title, content, status, og_image, best_answer_id, created_at, deadline_at, category_id } = body;
 
   const updateData: Record<string, any> = {};
 
@@ -31,6 +31,7 @@ export async function PATCH(
   if (og_image !== undefined) updateData.og_image = og_image;
   if (created_at !== undefined) updateData.created_at = created_at;
   if (deadline_at !== undefined) updateData.deadline_at = deadline_at;
+  if (category_id !== undefined) updateData.category_id = category_id;
 
   // ベストアンサーの変更を処理
   let oldBestAnswerId: number | null = null;

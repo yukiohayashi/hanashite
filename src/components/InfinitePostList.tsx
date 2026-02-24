@@ -10,6 +10,8 @@ interface Post {
   created_at: string;
   user_name: string | null;
   avatar_url: string;
+  category_id: number | null;
+  category_name: string | null;
 }
 
 interface InfinitePostListProps {
@@ -104,14 +106,21 @@ export default function InfinitePostList({ initialPosts, sortBy }: InfinitePostL
                 {contentPreview}
               </p>
             )}
-            <div className="mt-2 text-gray-500 text-xs">
-              <img 
-                src={post.avatar_url || 'https://api.dicebear.com/9.x/big-smile/svg?seed=guest&size=20'} 
-                alt="相談者"
-                className="w-4 h-4 rounded-full border border-gray-200 inline-block mr-1"
-              />
-              <span>{post.user_name || 'ゲスト'}さんからの相談</span>
-              <span className="ml-2">{new Date(post.created_at).toLocaleDateString('ja-JP')}</span>
+            <div className="mt-2 flex items-center justify-between text-gray-500 text-xs">
+              <div className="flex items-center">
+                <img 
+                  src={post.avatar_url || 'https://api.dicebear.com/9.x/big-smile/svg?seed=guest&size=20'} 
+                  alt="相談者"
+                  className="w-4 h-4 rounded-full border border-gray-200 inline-block mr-1"
+                />
+                <span>{post.user_name || 'ゲスト'}さんからの相談</span>
+                <span className="ml-2">{new Date(post.created_at).toLocaleDateString('ja-JP')}</span>
+              </div>
+              {post.category_name && (
+                <span className="inline-block px-2 py-0.5 text-xs font-medium text-gray-600 bg-gray-200 rounded">
+                  {post.category_name}
+                </span>
+              )}
             </div>
           </Link>
         );

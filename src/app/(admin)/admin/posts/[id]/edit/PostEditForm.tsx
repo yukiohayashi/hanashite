@@ -25,6 +25,7 @@ interface Post {
   best_answer_id?: number | null;
   best_answer_selected_at?: string | null;
   user_id: string;
+  category_id?: number | null;
   users: {
     id: number;
     name: string;
@@ -32,11 +33,17 @@ interface Post {
   comments?: Comment[];
 }
 
-interface PostEditFormProps {
-  post: Post;
+interface Category {
+  id: number;
+  name: string;
 }
 
-export default function PostEditForm({ post }: PostEditFormProps) {
+interface PostEditFormProps {
+  post: Post;
+  categories: Category[];
+}
+
+export default function PostEditForm({ post, categories }: PostEditFormProps) {
   const router = useRouter();
   
   console.log('Post data:', post);
@@ -48,6 +55,7 @@ export default function PostEditForm({ post }: PostEditFormProps) {
     status: post.status || 'draft',
     created_at: post.created_at ? new Date(post.created_at).toISOString().slice(0, 16) : '',
     deadline_at: post.deadline_at ? new Date(post.deadline_at).toISOString().slice(0, 16) : '',
+    category_id: post.category_id || null,
   });
   const [loading, setLoading] = useState(false);
   const [imageFile, setImageFile] = useState<File | null>(null);
@@ -236,6 +244,24 @@ export default function PostEditForm({ post }: PostEditFormProps) {
               onChange={(e) => setFormData({ ...formData, deadline_at: e.target.value })}
               className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500 text-sm"
             />
+          </div>
+
+          <div className="w-52">
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              ハナシテカテゴリ
+            </label>
+            <select
+              value={formData.category_id || ''}
+              onChange={(e) => setFormData({ ...formData, category_id: e.target.value ? parseInt(e.target.value) : null })}
+              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500 text-sm"
+            >
+              <option value="">未設定</option>
+              {categories.map((category) => (
+                <option key={category.id} value={category.id}>
+                  {category.name}
+                </option>
+              ))}
+            </select>
           </div>
         </div>
 

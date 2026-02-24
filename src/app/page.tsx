@@ -43,7 +43,7 @@ export default async function Home({ searchParams }: HomeProps) {
     // total_votesカラムを使用して50票以上の投稿を直接取得
     const { data: hallOfFameData } = await supabase
       .from('posts')
-      .select('id, title, content, created_at, user_id, og_image, thumbnail_url, total_votes')
+      .select('id, title, content, created_at, user_id, og_image, thumbnail_url, total_votes, category_id, categories(name)')
       .in('status', ['publish', 'published'])
       .neq('user_id', 33)
       .gte('total_votes', 50)
@@ -80,7 +80,7 @@ export default async function Home({ searchParams }: HomeProps) {
       
       const { data: allPosts } = await supabase
         .from('posts')
-        .select('id, title, created_at, user_id, og_image, thumbnail_url, best_answer_id, best_answer_selected_at')
+        .select('id, title, created_at, user_id, og_image, thumbnail_url, best_answer_id, best_answer_selected_at, category_id, categories(name)')
         .in('status', ['publish', 'published'])
         .neq('user_id', 33)
         .is('best_answer_id', null)
@@ -133,7 +133,7 @@ export default async function Home({ searchParams }: HomeProps) {
 
     const { data: allPosts } = await supabase
       .from('posts')
-      .select('id, title, content, created_at, user_id, og_image, thumbnail_url, best_answer_id, best_answer_selected_at')
+      .select('id, title, content, created_at, user_id, og_image, thumbnail_url, best_answer_id, best_answer_selected_at, category_id, categories(name)')
       .in('status', ['publish', 'published'])
       .neq('user_id', 33)
       .is('best_answer_id', null)
@@ -169,7 +169,7 @@ export default async function Home({ searchParams }: HomeProps) {
     // 最新の相談順（受付中のみ）
     const { data: allPosts } = await supabase
       .from('posts')
-      .select('id, title, content, created_at, user_id, og_image, thumbnail_url, best_answer_id, best_answer_selected_at')
+      .select('id, title, content, created_at, user_id, og_image, thumbnail_url, best_answer_id, best_answer_selected_at, category_id, categories(name)')
       .in('status', ['publish', 'published'])
       .neq('user_id', 33)
       .is('best_answer_id', null)
@@ -194,7 +194,7 @@ export default async function Home({ searchParams }: HomeProps) {
     // オススメ（デフォルト）（受付中のみ）
     let query = supabase
       .from('posts')
-      .select('id, title, content, created_at, user_id, og_image, thumbnail_url, best_answer_id, best_answer_selected_at')
+      .select('id, title, content, created_at, user_id, og_image, thumbnail_url, best_answer_id, best_answer_selected_at, category_id, categories(name)')
       .in('status', ['publish', 'published'])
       .neq('user_id', 33)
       .is('best_answer_id', null)
@@ -227,7 +227,7 @@ export default async function Home({ searchParams }: HomeProps) {
   let featuredPosts: any[] = [];
   const { data: openPosts } = await supabase
     .from('posts')
-    .select('id, title, content, created_at, user_id, og_image, thumbnail_url, best_answer_id')
+    .select('id, title, content, created_at, user_id, og_image, thumbnail_url, best_answer_id, category_id, categories(name)')
     .in('status', ['publish', 'published'])
     .neq('user_id', 33)
     .is('best_answer_id', null)
@@ -330,13 +330,13 @@ export default async function Home({ searchParams }: HomeProps) {
   // postsテーブルのbest_answer_idを使用
   const { data: postsWithBestAnswer, error: bestAnswerError } = await supabase
     .from('posts')
-    .select('id, title, best_answer_id')
+    .select('id, title, best_answer_id, category_id, categories(name)')
     .not('best_answer_id', 'is', null)
     .in('status', ['publish', 'published'])
     .order('created_at', { ascending: false })
     .limit(3);
 
-  let bestAnswersWithUsers: { id: number; content: string; created_at: string; post_id: number; post_title: string; user_name: string; user_id: string | null; avatar_url: string }[] = [];
+  let bestAnswersWithUsers: { id: number; content: string; created_at: string; post_id: number; post_title: string; user_name: string; user_id: string | null; avatar_url: string; category_name: string | null }[] = [];
   if (postsWithBestAnswer && postsWithBestAnswer.length > 0) {
     const bestAnswerIds = postsWithBestAnswer.map(p => p.best_answer_id).filter(id => id !== null);
     
@@ -376,7 +376,8 @@ export default async function Home({ searchParams }: HomeProps) {
           post_title: post?.title || '',
           user_name: user?.name || 'ゲスト',
           user_id: comment.user_id,
-          avatar_url: avatarUrl
+          avatar_url: avatarUrl,
+          category_name: (post as any)?.categories?.name || null
         };
       });
     }
@@ -456,14 +457,21 @@ export default async function Home({ searchParams }: HomeProps) {
                             {contentPreview}
                           </p>
                         )}
-                        <div className="mt-2 text-gray-500 text-xs">
-                          <img 
-                            src={(post as any).avatar_url || 'https://api.dicebear.com/9.x/big-smile/svg?seed=guest&size=20'} 
-                            alt="相談者"
-                            className="w-4 h-4 rounded-full border border-gray-200 inline-block mr-1"
-                          />
-                          <span>{(post as any).user_name || 'ゲスト'}さんからの相談</span>
-                          <span className="ml-2">{new Date(post.created_at).toLocaleDateString('ja-JP')}</span>
+                        <div className="mt-2 flex items-center justify-between text-gray-500 text-xs">
+                          <div className="flex items-center">
+                            <img 
+                              src={(post as any).avatar_url || 'https://api.dicebear.com/9.x/big-smile/svg?seed=guest&size=20'} 
+                              alt="相談者"
+                              className="w-4 h-4 rounded-full border border-gray-200 inline-block mr-1"
+                            />
+                            <span>{(post as any).user_name || 'ゲスト'}さんからの相談</span>
+                            <span className="ml-2">{new Date(post.created_at).toLocaleDateString('ja-JP')}</span>
+                          </div>
+                          {(post as any).categories?.name && (
+                            <span className="inline-block px-2 py-0.5 text-xs font-medium text-gray-600 bg-gray-200 rounded">
+                              {(post as any).categories.name}
+                            </span>
+                          )}
                         </div>
                       </Link>
                     );
@@ -491,13 +499,20 @@ export default async function Home({ searchParams }: HomeProps) {
                           {contentPreview}
                         </p>
                       )}
-                      <div className="mt-1 font-normal text-[10px] text-gray-400">
-                        <img 
-                          src={(post as any).avatar_url || 'https://api.dicebear.com/9.x/big-smile/svg?seed=guest&size=20'} 
-                          alt="相談者"
-                          className="w-4 h-4 rounded-full border border-gray-200 inline-block mr-1"
-                        />
-                        <span>{(post as any).user_name || 'ゲスト'}さん</span>
+                      <div className="mt-1 flex items-center justify-between font-normal text-[10px] text-gray-400">
+                        <div className="flex items-center">
+                          <img 
+                            src={(post as any).avatar_url || 'https://api.dicebear.com/9.x/big-smile/svg?seed=guest&size=20'} 
+                            alt="相談者"
+                            className="w-4 h-4 rounded-full border border-gray-200 inline-block mr-1"
+                          />
+                          <span>{(post as any).user_name || 'ゲスト'}さん</span>
+                        </div>
+                        {(post as any).categories?.name && (
+                          <span className="inline-block px-1.5 py-0.5 text-[10px] font-medium text-gray-600 bg-gray-200 rounded">
+                            {(post as any).categories.name}
+                          </span>
+                        )}
                       </div>
                     </Link>
                   );
@@ -537,8 +552,13 @@ export default async function Home({ searchParams }: HomeProps) {
                         <p className="text-gray-800 text-sm line-clamp-2">
                           {contentPreview}...
                         </p>
-                        <div className="mt-2 text-gray-500 text-xs">
-                          相談: {answer.post_title.substring(0, 40)}{answer.post_title.length > 40 ? '...' : ''}
+                        <div className="mt-2 flex items-center justify-between text-gray-500 text-xs">
+                          <span>相談: {answer.post_title.substring(0, 40)}{answer.post_title.length > 40 ? '...' : ''}</span>
+                          {answer.category_name && (
+                            <span className="inline-block px-2 py-0.5 text-xs font-medium text-gray-600 bg-gray-200 rounded">
+                              {answer.category_name}
+                            </span>
+                          )}
                         </div>
                       </Link>
                     );
@@ -547,14 +567,7 @@ export default async function Home({ searchParams }: HomeProps) {
               </>
             )}
 
-            {/* 広告 - レクタングル */}
-            <div className="mx-1.5 mb-4">
-              <AdSense 
-                adSlot="1234567890"
-                adFormat="rectangle"
-                style={{ minHeight: '250px' }}
-              />
-            </div>
+          
 
             {/* 相談受付中見出し */}
             <h3 className="m-1.5 mb-2 px-0 font-bold text-base" style={{ color: '#ff6b35' }}>
@@ -593,7 +606,9 @@ export default async function Home({ searchParams }: HomeProps) {
                 content: (post as any).content || '',
                 created_at: post.created_at,
                 user_name: (post as any).user_name || null,
-                avatar_url: (post as any).avatar_url || 'https://api.dicebear.com/9.x/big-smile/svg?seed=guest&size=20'
+                avatar_url: (post as any).avatar_url || 'https://api.dicebear.com/9.x/big-smile/svg?seed=guest&size=20',
+                category_id: (post as any).category_id || null,
+                category_name: (post as any).categories?.name || null
               })) || []}
               sortBy={sortBy}
             />
