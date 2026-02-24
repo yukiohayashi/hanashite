@@ -227,6 +227,9 @@ export default async function Home({ searchParams }: HomeProps) {
     if (!searchQuery) {
       query = query.is('best_answer_id', null).is('best_answer_selected_at', null);
     }
+    
+    // 締切が過ぎた相談を除外（deadline_atがnullまたは未来の日時）
+    query = query.or('deadline_at.is.null,deadline_at.gte.' + new Date().toISOString());
 
     if (searchQuery) {
       console.log('🔍 Search Query (top_post):', searchQuery);

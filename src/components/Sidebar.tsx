@@ -32,60 +32,50 @@ export default function Sidebar() {
   const [userCategories, setUserCategories] = useState<Category[]>([]);
 
   const fetchBestAnswerRanking = async () => {
-    // ベストアンサーを持つ投稿を取得
-    const { data: postsWithBestAnswer, error: postsError } = await supabase
+    // 最新100件のベストアンサーのみを対象に高速化
+    const { data: postsWithBestAnswer } = await supabase
       .from('posts')
       .select('best_answer_id')
       .not('best_answer_id', 'is', null)
-      .in('status', ['publish', 'published']);
+      .in('status', ['publish', 'published'])
+      .order('best_answer_selected_at', { ascending: false })
+      .limit(100);
 
-    if (postsError || !postsWithBestAnswer || postsWithBestAnswer.length === 0) {
+    if (!postsWithBestAnswer || postsWithBestAnswer.length === 0) {
       return;
     }
 
-    // ベストアンサーのコメントIDを取得
     const bestAnswerIds = postsWithBestAnswer.map(p => p.best_answer_id).filter(id => id !== null);
     
-    // コメントからユーザーIDを取得
-    const { data: commentsData, error: commentsError } = await supabase
+    const { data: commentsData } = await supabase
       .from('comments')
-      .select('id, user_id')
+      .select('user_id, users(id, name)')
       .in('id', bestAnswerIds);
 
-    if (commentsError || !commentsData) {
+    if (!commentsData) {
       return;
     }
 
     // ユーザーごとにベストアンサー数を集計
-    const userBestAnswerCounts = new Map<string, number>();
+    const userCounts = new Map<string, { name: string; count: number }>();
     commentsData.forEach(comment => {
-      if (comment.user_id) {
-        userBestAnswerCounts.set(comment.user_id, (userBestAnswerCounts.get(comment.user_id) || 0) + 1);
+      if (comment.user_id && comment.users) {
+        const userId = comment.user_id;
+        const current = userCounts.get(userId);
+        if (current) {
+          current.count++;
+        } else {
+          userCounts.set(userId, { name: (comment.users as any).name || '名無し', count: 1 });
+        }
       }
     });
 
-    // ユーザー情報を取得
-    const userIds = Array.from(userBestAnswerCounts.keys());
-    
-    if (userIds.length === 0) {
-      return;
-    }
-
-    const { data: usersData, error: usersError } = await supabase
-      .from('users')
-      .select('id, name')
-      .in('id', userIds);
-
-    if (usersError || !usersData) {
-      return;
-    }
-
     // ランキングデータを作成
-    const ranking = usersData
-      .map(user => ({
-        user_id: user.id,
-        name: user.name || '名無し',
-        like_count: userBestAnswerCounts.get(user.id) || 0
+    const ranking = Array.from(userCounts.entries())
+      .map(([user_id, data]) => ({
+        user_id,
+        name: data.name,
+        like_count: data.count
       }))
       .sort((a, b) => b.like_count - a.like_count)
       .slice(0, 5);
@@ -94,59 +84,61 @@ export default function Sidebar() {
   };
 
   const fetchCommentLikesRanking = async () => {
-    // コメントへのいいねを集計（コメント投稿者別）- 最新10000件に制限
-    const { data: likesData, error: likesError } = await supabase
+    // 最新1000件のいいねのみを対象に高速化
+    const { data: likesData } = await supabase
       .from('likes')
       .select('target_id')
       .eq('like_type', 'comment')
       .order('id', { ascending: false })
-      .limit(10000);
+      .limit(1000);
 
-    if (likesError || !likesData || likesData.length === 0) {
+    if (!likesData || likesData.length === 0) {
       return;
     }
 
-    // コメントIDからコメント投稿者を取得（最初の100件のみ）
-    const commentIds = [...new Set(likesData.map(l => l.target_id))].slice(0, 100);
+    // ユニークなコメントIDを取得（最大50件）
+    const commentIds = [...new Set(likesData.map(l => l.target_id))].slice(0, 50);
     
-    const { data: commentsData, error: commentsError } = await supabase
+    const { data: commentsData } = await supabase
       .from('comments')
-      .select('id, user_id')
+      .select('id, user_id, users(id, name)')
       .in('id', commentIds);
-
 
     if (!commentsData) {
       return;
     }
 
-    // コメント投稿者ごとにいいね数を集計
-    const userLikeCounts = new Map<string, number>();
-    likesData.forEach(like => {
-      const comment = commentsData.find(c => c.id === like.target_id);
-      if (comment && comment.user_id) {
-        userLikeCounts.set(comment.user_id, (userLikeCounts.get(comment.user_id) || 0) + 1);
+    // コメントIDからユーザー情報へのマップを作成
+    const commentUserMap = new Map<number, { id: string; name: string }>();
+    commentsData.forEach(comment => {
+      if (comment.user_id && comment.users) {
+        commentUserMap.set(comment.id, {
+          id: comment.user_id,
+          name: (comment.users as any).name || '名無し'
+        });
       }
     });
 
-    // ユーザー情報を取得
-    const userIds = Array.from(userLikeCounts.keys());
-    
-    const { data: usersData, error: usersError } = await supabase
-      .from('users')
-      .select('id, name')
-      .in('id', userIds);
-
-
-    if (!usersData) {
-      return;
-    }
+    // ユーザーごとにいいね数を集計
+    const userLikeCounts = new Map<string, { name: string; count: number }>();
+    likesData.forEach(like => {
+      const user = commentUserMap.get(like.target_id);
+      if (user) {
+        const current = userLikeCounts.get(user.id);
+        if (current) {
+          current.count++;
+        } else {
+          userLikeCounts.set(user.id, { name: user.name, count: 1 });
+        }
+      }
+    });
 
     // ランキングデータを作成
-    const ranking = usersData
-      .map(user => ({
-        user_id: user.id,
-        name: user.name || '名無し',
-        like_count: userLikeCounts.get(user.id) || 0
+    const ranking = Array.from(userLikeCounts.entries())
+      .map(([user_id, data]) => ({
+        user_id,
+        name: data.name,
+        like_count: data.count
       }))
       .sort((a, b) => b.like_count - a.like_count)
       .slice(0, 5);
@@ -167,12 +159,12 @@ export default function Sidebar() {
   };
 
   useEffect(() => {
-    const fetchRankings = async () => {
-      await fetchBestAnswerRanking();
-      await fetchCommentLikesRanking();
-      await fetchUserCategories();
-    };
-    fetchRankings();
+    // 並列実行で高速化
+    Promise.all([
+      fetchBestAnswerRanking(),
+      fetchCommentLikesRanking(),
+      fetchUserCategories()
+    ]).catch(err => console.error('Sidebar data fetch error:', err));
   }, []);
 
   const getBadgeColor = (rank: number) => {
