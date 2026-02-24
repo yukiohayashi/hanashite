@@ -56,7 +56,7 @@ export default function MobileRightSidebar({ isOpen, onClose }: MobileRightSideb
       supabase
         .from('posts')
         .select('id, title, created_at')
-        .eq('user_id', 33)
+        .eq('user_id', 1)
         .in('status', ['publish', 'published'])
         .order('created_at', { ascending: false })
         .limit(2)

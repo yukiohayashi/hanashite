@@ -88,7 +88,7 @@ export default function HomeRightSidebar() {
         .from('posts')
         .select('id, title, created_at, category_id')
         .in('status', ['publish', 'published'])
-        .neq('user_id', 33) // 管理者投稿を除外
+        .neq('user_id', 1) // 管理者投稿を除外
         .order('created_at', { ascending: false })
         .limit(5);
       

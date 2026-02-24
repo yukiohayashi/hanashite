@@ -58,7 +58,7 @@ export default async function Home({ searchParams }: HomeProps) {
       .from('posts')
       .select('id, title, content, created_at, deadline_at, user_id, og_image, thumbnail_url, total_votes, category_id, categories(name)')
       .in('status', ['publish', 'published'])
-      .neq('user_id', 33)
+      .neq('user_id', 1)
       .gte('total_votes', 50)
       .order('total_votes', { ascending: false })
       .limit(100);
@@ -85,7 +85,7 @@ export default async function Home({ searchParams }: HomeProps) {
       .from('posts')
       .select('id, title, created_at, deadline_at, user_id, og_image, thumbnail_url, best_answer_id, best_answer_selected_at, category_id, categories(name)')
       .in('status', ['publish', 'published'])
-      .neq('user_id', 33)
+      .neq('user_id', 1)
       .is('best_answer_id', null)
       .is('best_answer_selected_at', null)
       .not('deadline_at', 'is', null)
@@ -127,7 +127,7 @@ export default async function Home({ searchParams }: HomeProps) {
         .from('posts')
         .select('id, title, created_at, deadline_at, user_id, og_image, thumbnail_url, best_answer_id, best_answer_selected_at, category_id, categories(name)')
         .in('status', ['publish', 'published'])
-        .neq('user_id', 33)
+        .neq('user_id', 1)
         .is('best_answer_id', null)
         .is('best_answer_selected_at', null)
         .order('created_at', { ascending: false })
@@ -180,7 +180,7 @@ export default async function Home({ searchParams }: HomeProps) {
       .from('posts')
       .select('id, title, content, created_at, deadline_at, user_id, og_image, thumbnail_url, best_answer_id, best_answer_selected_at, category_id, categories(name)')
       .in('status', ['publish', 'published'])
-      .neq('user_id', 33)
+      .neq('user_id', 1)
       .is('best_answer_id', null)
       .is('best_answer_selected_at', null)
       .gte('created_at', oneMonthAgo.toISOString())
@@ -219,7 +219,7 @@ export default async function Home({ searchParams }: HomeProps) {
       .from('posts')
       .select('id, title, content, created_at, deadline_at, user_id, og_image, thumbnail_url, best_answer_id, best_answer_selected_at, category_id, categories(name)')
       .in('status', ['publish', 'published'])
-      .neq('user_id', 33);
+      .neq('user_id', 1);
 
     // 運営からのお知らせカテゴリを除外
     if (announcementCategoryId) {
@@ -273,7 +273,7 @@ export default async function Home({ searchParams }: HomeProps) {
           .select('id, title, content, created_at, user_id, og_image, thumbnail_url, best_answer_id, best_answer_selected_at, category_id, categories(name)')
           .in('id', postIdsFromComments)
           .in('status', ['publish', 'published'])
-          .neq('user_id', 33);
+          .neq('user_id', 1);
         
         postsFromComments = commentPosts || [];
       }
@@ -314,7 +314,7 @@ export default async function Home({ searchParams }: HomeProps) {
       .from('posts')
       .select('id, title, content, created_at, user_id, og_image, thumbnail_url, best_answer_id, best_answer_selected_at, category_id, categories(name)')
       .in('status', ['publish', 'published'])
-      .neq('user_id', 33)
+      .neq('user_id', 1)
       .is('best_answer_id', null)
       .is('best_answer_selected_at', null);
 
@@ -356,7 +356,7 @@ export default async function Home({ searchParams }: HomeProps) {
     .from('posts')
     .select('id, title, content, created_at, user_id, og_image, thumbnail_url, best_answer_id, category_id, categories(name)')
     .in('status', ['publish', 'published'])
-    .neq('user_id', 33)
+    .neq('user_id', 1)
     .is('best_answer_id', null)
     .order('created_at', { ascending: false })
     .limit(100);
@@ -458,7 +458,7 @@ export default async function Home({ searchParams }: HomeProps) {
     .from('posts')
     .select('id, title, content, created_at, deadline_at, user_id, og_image, thumbnail_url, best_answer_id, best_answer_selected_at, category_id, categories(name)')
     .in('status', ['publish', 'published'])
-    .neq('user_id', 33)
+    .neq('user_id', 1)
     .is('best_answer_id', null)
     .is('best_answer_selected_at', null)
     .not('deadline_at', 'is', null)

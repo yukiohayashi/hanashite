@@ -10,15 +10,15 @@ export default function MediaPage() {
         <h1 className="mb-8 font-bold text-gray-900 text-3xl">データ引用について</h1>
         
         <div className="bg-white shadow-sm p-6 rounded-lg max-w-none prose prose-sm">
-          <h2>アンケ.jpのデータ引用について</h2>
+          <h2>ハナシテのデータ引用について</h2>
           <p>
-            アンケ.jpで実施されたアンケート結果は、メディア、ブログ、SNSなどで自由に引用していただけます。
+            ハナシテで実施されたアンケート結果は、メディア、ブログ、SNSなどで自由に引用していただけます。
           </p>
 
           <h2>引用時のお願い</h2>
           <p>データを引用される際は、以下の点にご注意ください。</p>
           <ul>
-            <li>出典元として「アンケ.jp」を明記してください</li>
+            <li>出典元として「ハナシテ」を明記してください</li>
             <li>可能な限り、該当するアンケートページへのリンクを設置してください</li>
             <li>データの改変や歪曲はお控えください</li>
             <li>商用利用の場合は、事前にご連絡いただけますと幸いです</li>
@@ -26,7 +26,7 @@ export default function MediaPage() {
 
           <h2>引用例</h2>
           <div className="bg-gray-50 p-4 rounded">
-            <p className="mb-2">出典: アンケ.jp「〇〇に関するアンケート」</p>
+            <p className="mb-2">出典: ハナシテ「〇〇に関するアンケート」</p>
             <p className="text-gray-600 text-sm">https://anke.jp/posts/[アンケートID]</p>
           </div>
 

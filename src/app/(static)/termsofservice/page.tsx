@@ -12,7 +12,7 @@ export default function TermsOfServicePage() {
         <div className="bg-white shadow-sm p-6 rounded-lg max-w-none prose prose-sm">
           <h2>第1条（適用）</h2>
           <p>
-            本規約は、株式会社サクメディア（以下「当社」といいます）が運営するアンケ.jp（以下「本サービス」といいます）の利用条件を定めるものです。
+            本規約は、株式会社サクメディア（以下「当社」といいます）が運営するハナシテ（以下「本サービス」といいます）の利用条件を定めるものです。
             登録ユーザーの皆さま（以下「ユーザー」といいます）には、本規約に従って本サービスをご利用いただきます。
           </p>
 

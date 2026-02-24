@@ -11,9 +11,9 @@ export default function FAQPage() {
         
         <div className="space-y-4">
           <div className="bg-white shadow-sm p-6 rounded-lg">
-            <h2 className="mb-3 font-bold text-gray-900 text-lg">Q. アンケ.jpとは何ですか？</h2>
+            <h2 className="mb-3 font-bold text-gray-900 text-lg">Q. ハナシテとは何ですか？</h2>
             <p className="text-gray-700">
-              A. アンケ.jpは、誰でも簡単にアンケートを作成・回答できるコミュニティサイトです。
+              A. ハナシテは、誰でも簡単にアンケートを作成・回答できるコミュニティサイトです。
               様々なテーマのアンケートに参加したり、自分でアンケートを作成して意見を集めることができます。
             </p>
           </div>

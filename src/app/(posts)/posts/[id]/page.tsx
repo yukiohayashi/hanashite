@@ -380,7 +380,7 @@ export default async function PostPage({ params, searchParams }: { params: Promi
                 </div>
 
                 {/* 本文（管理者投稿は緑エリアなし、一般投稿は条件分岐） */}
-                {post.user_id.toString() === '33' ? (
+                {post.user_id.toString() === '1' ? (
                   // 管理者投稿：緑エリアなし、本文のみ表示
                   <div className="mb-1.5">
                     <div className="font-normal text-gray-800 text-sm leading-relaxed">

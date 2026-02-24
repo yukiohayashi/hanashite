@@ -21,7 +21,7 @@ export async function GET(request: Request) {
     const { data: adminPosts } = await supabase
       .from('posts')
       .select('id, title, created_at')
-      .eq('user_id', 33)
+      .eq('user_id', 1)
       .in('status', ['publish', 'published'])
       .order('created_at', { ascending: false });
 
@@ -29,7 +29,7 @@ export async function GET(request: Request) {
     const { data: adminUser } = await supabase
       .from('users')
       .select('image')
-      .eq('id', 33)
+      .eq('id', 1)
       .single();
 
     if (adminPosts) {

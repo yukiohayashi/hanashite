@@ -14,7 +14,7 @@ export default function ServiceGuidePage() {
           <div className="bg-white shadow-sm p-6 rounded-lg">
             <h2 className="mb-4 font-bold text-gray-900 text-xl">アンケワークスとは</h2>
             <p className="mb-4 text-gray-700 leading-relaxed">
-              アンケワークスは、アンケ.jpが提供するアンケート回答サービスです。
+              アンケワークスは、ハナシテが提供するアンケート回答サービスです。
               企業や団体からの依頼を受けて、会員の皆様にアンケートにご回答いただき、
               その対価としてポイントを獲得できます。
             </p>

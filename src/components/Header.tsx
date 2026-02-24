@@ -80,7 +80,7 @@ export default function Header() {
         {/* カラフルなボーダー */}
         <div className="bg-gradient-to-r from-pink-500 via-orange-500 to-yellow-500 h-1"></div>
         
-        <div className="relative flex justify-center items-center py-2">
+        <div className="relative flex justify-center items-center py-1">
           {/* 左: 検索アイコン */}
           <button
             className="top-1/2 left-[3%] z-[101] absolute text-gray-700 text-xl -translate-y-1/2"

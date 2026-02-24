@@ -20,11 +20,11 @@ export async function POST(request: Request) {
       let notificationIds: string[] = [];
 
       if (type === 'admin_post') {
-        // 管理者投稿（user_id: 33）
+        // 管理者投稿（user_id: 1）
         const { data: posts } = await supabaseAdmin
           .from('posts')
           .select('id')
-          .eq('user_id', 33)
+          .eq('user_id', 1)
           .in('status', ['publish', 'published']);
         
         notificationIds = posts?.map(p => `/posts/${p.id}`) || [];
