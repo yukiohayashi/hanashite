@@ -287,11 +287,11 @@ export default async function UserPage({ params }: { params: Promise<{ slug: str
             )}
           </div>
 
-          {/* 投稿履歴 */}
-          {(user.show_post_history || isOwnProfile) && (
+          {/* 相談・回答履歴 */}
+          {user.show_post_history || isOwnProfile ? (
             <div className="bg-white shadow-md border border-gray-200 rounded">
               <div className="p-4 border-b border-gray-200">
-                <h2 className="text-lg font-bold text-gray-900">投稿履歴</h2>
+                <h2 className="text-lg font-bold text-gray-900">相談・回答履歴</h2>
                 {!user.show_post_history && isOwnProfile && (
                   <p className="text-xs text-gray-400">※自分のみ表示（公開設定OFF）</p>
                 )}
@@ -338,6 +338,10 @@ export default async function UserPage({ params }: { params: Promise<{ slug: str
                   まだアクティビティがありません
                 </div>
               )}
+            </div>
+          ) : (
+            <div className="bg-white shadow-md border border-gray-200 rounded p-8 text-center text-gray-500">
+              相談・回答履歴は非公開です
             </div>
           )}
         </div>

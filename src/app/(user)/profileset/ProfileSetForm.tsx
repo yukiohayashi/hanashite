@@ -344,7 +344,7 @@ export default function ProfileSetForm({ user, categories, isFirstTime }: Profil
           />
         </div>
         
-        {/* 投稿履歴を公開する */}
+        {/* 相談・回答履歴をプロフィールに公開する */}
         <div className="mb-4">
           <label className="flex items-center cursor-pointer">
             <input
@@ -353,7 +353,7 @@ export default function ProfileSetForm({ user, categories, isFirstTime }: Profil
               onChange={(e) => setShowPostHistory(e.target.checked)}
               className="mr-2 rounded focus:ring-orange-400 w-4 h-4 text-orange-500"
             />
-            <span className="text-gray-700">投稿履歴を公開する</span>
+            <span className="text-gray-700">相談・回答履歴を<a href="/profile" className="text-orange-500 hover:underline" target="_blank">プロフィール</a>に公開する</span>
           </label>
         </div>
         
