@@ -38,14 +38,12 @@ export default async function Home({ searchParams }: HomeProps) {
   
   console.log('📊 Page params:', { searchQuery, sortBy, allParams: params });
 
-  // 運営からのお知らせカテゴリのIDを取得
-  const { data: announcementCategory } = await supabase
+  // 並列実行で高速化：announcementCategoryの取得を開始
+  const announcementCategoryPromise = supabase
     .from('categories')
     .select('id')
     .eq('slug', 'announcement')
     .single();
-  
-  const announcementCategoryId = announcementCategory?.id || null;
 
   // ソート方法に応じてデータを取得
   let postsData: any[] = [];
@@ -164,6 +162,10 @@ export default async function Home({ searchParams }: HomeProps) {
     }
   } else if (sortBy === 'top_post') {
     // 最新順（受付中のみ）
+    // announcementCategoryの結果を待つ
+    const { data: announcementCategory } = await announcementCategoryPromise;
+    const announcementCategoryId = announcementCategory?.id || null;
+
     let query = supabase
       .from('posts')
       .select('id, title, content, created_at, deadline_at, user_id, og_image, thumbnail_url, best_answer_id, best_answer_selected_at, category_id, categories(name)')
@@ -383,6 +385,10 @@ export default async function Home({ searchParams }: HomeProps) {
   }
 
   // 運営からのお知らせを取得（最新3件）
+  // announcementCategoryの結果を待つ
+  const { data: announcementCategory } = await announcementCategoryPromise;
+  const announcementCategoryId = announcementCategory?.id || null;
+  
   let announcementPosts: any[] = [];
   if (announcementCategoryId) {
     const { data: announcements } = await supabase
