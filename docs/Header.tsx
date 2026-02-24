@@ -1,0 +1,205 @@
+'use client';
+
+import { useEffect, useState } from 'react';
+import { useSession } from 'next-auth/react';
+import { usePathname } from 'next/navigation';
+import Link from 'next/link';
+import Image from 'next/image';
+import HeaderClient from './HeaderClient';
+import HeaderLink from './HeaderLink';
+import MobileLeftSidebar from './MobileLeftSidebar';
+import MobileRightSidebar from './MobileRightSidebar';
+
+export default function Header() {
+  const { data: session, status } = useSession();
+  const pathname = usePathname();
+  const [postsCount, setPostsCount] = useState(0);
+  const [leftSidebarOpen, setLeftSidebarOpen] = useState(false);
+  const [rightSidebarOpen, setRightSidebarOpen] = useState(false);
+  const [avatarUrl, setAvatarUrl] = useState('');
+  const [unreadCount, setUnreadCount] = useState(0);
+
+  useEffect(() => {
+    const fetchPostsCount = async () => {
+      try {
+        const response = await fetch('/api/stats/posts-count');
+        const data = await response.json();
+        setPostsCount(data.count || 0);
+      } catch (error) {
+        console.error('Error fetching posts count:', error);
+        setPostsCount(0);
+      }
+    };
+    fetchPostsCount();
+  }, []);
+
+  useEffect(() => {
+    if (session?.user?.id) {
+      // ユーザーのアバター画像を取得
+      fetch(`/api/user/${session.user.id}`)
+        .then(res => res.json())
+        .then(data => {
+          if (data.use_custom_image && data.image) {
+            setAvatarUrl(data.image);
+          } else if (data.avatar_seed) {
+            const style = data.avatar_style || 'big-smile';
+            setAvatarUrl(`https://api.dicebear.com/9.x/${style}/svg?seed=${encodeURIComponent(data.avatar_seed)}&size=40`);
+          } else {
+            setAvatarUrl('');
+          }
+        })
+        .catch(() => {
+          setAvatarUrl('');
+        });
+    } else {
+      setAvatarUrl('');
+      setUnreadCount(0);
+    }
+  }, [session]);
+
+  // 未読通知数を取得（ページ遷移時に再取得）
+  useEffect(() => {
+    if (session?.user?.id) {
+      fetch(`/api/notifications/unread?userId=${session.user.id}`)
+        .then(res => res.json())
+        .then(data => {
+          if (data.count !== undefined) {
+            setUnreadCount(data.count);
+          }
+        })
+        .catch(() => {
+          setUnreadCount(0);
+        });
+    }
+  }, [session, pathname]);
+
+  return (
+    <>
+      {/* スマホビュー用ヘッダー */}
+      <header className="md:hidden top-0 right-0 left-0 z-[50] fixed bg-white shadow-md">
+        {/* カラフルなボーダー */}
+        <div className="bg-gradient-to-r from-pink-500 via-orange-500 to-yellow-500 h-1"></div>
+        
+        <div className="キーワード一覧1">
+          {/* 左: 検索アイコン */}
+          <button
+            className="top-1/2 left-[3%] z-[101] absolute text-gray-700 text-xl -translate-y-1/2"
+            onClick={() => setLeftSidebarOpen(true)}
+          >
+            <i className="fas fa-search"></i>
+          </button>
+
+          {/* 中央: ロゴ */}
+          <div className="flex flex-col justify-center items-center">
+            <Link href="/" className="w-[150px] text-center">
+              <Image 
+                src="/images/logo.png" 
+                alt="ハナシテ" 
+                width={150} 
+                height={40}
+                className="w-full"
+              />
+            </Link>
+            <div className="hidden md:block text-[0.45rem] text-gray-500 text-center">powered by DOKUJO</div>
+            <div className="w-full text-[0.5rem] text-center text-gray-600">
+              AIと人間が協働する恋愛・結婚・人間関係の総合相談
+            </div>
+          </div>
+
+          {/* 右: アバターアイコン */}
+          {session ? (
+            <button
+              className="top-1/2 right-[2%] z-[99999] absolute text-center cursor-pointer -translate-y-1/2"
+              onClick={() => setRightSidebarOpen(true)}
+            >
+              <div className="relative">
+                {avatarUrl ? (
+                  <img
+                    src={avatarUrl}
+                    alt="プロフィール画像"
+                    id="header-avatar"
+                    className="border-2 border-gray-300 rounded-full w-10 h-10 object-cover"
+                  />
+                ) : (
+                  <img src="/images/default-avatar.svg" alt="デフォルトアバター" id="header-avatar" className="rounded-full w-10 h-10 object-cover" />
+                )}
+                {/* 通知ドット */}
+                {unreadCount > 0 && (
+                  <span className="top-0 right-0 absolute flex justify-center items-center bg-red-500 rounded-full w-4 h-4 text-[10px] text-white font-bold">
+                    {unreadCount > 9 ? '9+' : unreadCount}
+                  </span>
+                )}
+              </div>
+            </button>
+          ) : (
+            <Link
+              href="/login"
+              className="top-1/2 right-[2%] z-[99999] absolute text-center cursor-pointer -translate-y-1/2"
+            >
+              <img src="/images/default-avatar.svg" alt="デフォルトアバター" id="header-avatar" className="rounded-full w-10 h-10 object-cover" />
+            </Link>
+          )}
+        </div>
+      </header>
+
+      {/* PC/タブレットビュー用ヘッダー */}
+      <header className="hidden md:block bg-white shadow-md">
+        {/* カラフルなボーダー */}
+        <div className="bg-gradient-to-r from-pink-500 via-orange-500 to-yellow-500 h-1"></div>
+        
+        <div className="mx-auto px-4 sm:px-6 lg:px-8 max-w-7xl">
+          <div className="flex justify-between items-stretch min-h-[60px]">
+            {/* ロゴとアンケート情報 */}
+            <div className="flex items-center gap-4 py-2">
+              <Link href="/" className="flex flex-col items-center">
+                <div className="w-[150px] text-center">
+                  <Image 
+                    src="/images/logo.png" 
+                    alt="ハナシテ" 
+                    width={150} 
+                    height={40}
+                    className="w-full"
+                  />
+                </div>
+                <span className="text-[0.55rem] text-gray-500">powered by DOKUJO</span>
+              </Link>
+              
+              {/* アンケート統計情報 */}
+              <div className="flex flex-col text-gray-600 text-xs">
+                <div className="font-semibold text-gray-800">
+                  相談合計数: {postsCount.toLocaleString()}件
+                </div>
+                <div className="mt-0.5 text-[0.65rem] leading-tight">
+                  AIと人間が協働する恋愛・結婚・人間関係の総合相談
+                </div>
+              </div>
+            </div>
+            
+            {/* ユーザーメニューとリンク */}
+            <div className="flex items-stretch">
+              {/* ユーザーメニュー */}
+              <div className="flex items-center px-4">
+                <HeaderClient />
+              </div>
+              
+              {/* アンケ/アンケワークス切り替えリンク */}
+              <HeaderLink />
+            </div>
+          </div>
+        </div>
+      </header>
+
+      {/* 左サイドバー */}
+      <MobileLeftSidebar 
+        isOpen={leftSidebarOpen} 
+        onClose={() => setLeftSidebarOpen(false)} 
+      />
+
+      {/* 右サイドバー */}
+      <MobileRightSidebar 
+        isOpen={rightSidebarOpen} 
+        onClose={() => setRightSidebarOpen(false)} 
+      />
+    </>
+  );
+}

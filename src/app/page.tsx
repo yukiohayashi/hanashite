@@ -211,7 +211,10 @@ export default async function Home({ searchParams }: HomeProps) {
       postsData = [];
     }
   } else if (sortBy === 'top_post') {
-    // 最新順（受付中のみ、ただし検索時はすべて）
+    // 最新順（受付中のみ）
+    // 現在時刻を取得（実行時に毎回取得）
+    const currentTime = new Date().toISOString();
+    
     let query = supabase
       .from('posts')
       .select('id, title, content, created_at, deadline_at, user_id, og_image, thumbnail_url, best_answer_id, best_answer_selected_at, category_id, categories(name)')
@@ -223,10 +226,8 @@ export default async function Home({ searchParams }: HomeProps) {
       query = query.neq('category_id', announcementCategoryId);
     }
 
-    // 検索時以外は受付中のみ
-    if (!searchQuery) {
-      query = query.is('best_answer_id', null).is('best_answer_selected_at', null);
-    }
+    // 常に受付中のみ（ベストアンサーが選ばれていない相談）
+    query = query.is('best_answer_id', null).is('best_answer_selected_at', null);
 
     if (searchQuery) {
       console.log('🔍 Search Query (top_post):', searchQuery);
@@ -237,12 +238,20 @@ export default async function Home({ searchParams }: HomeProps) {
       .order('created_at', { ascending: false })
       .limit(100);
     
-    // 締切が過ぎた相談を除外（クライアントサイドでフィルタリング）
+    // 締切が過ぎた相談を除外（実行時に毎回判定）
     const now = new Date();
     const filteredPosts = allPosts?.filter(post => {
       if (!post.deadline_at) return true; // 締切なしはOK
-      return new Date(post.deadline_at) > now; // 締切が未来ならOK
+      const deadline = new Date(post.deadline_at);
+      // 締切時刻が現在時刻より未来の場合のみ表示
+      return deadline.getTime() > now.getTime();
     }) || [];
+    
+    console.log('🔍 Current time:', now.toISOString());
+    console.log('🔍 Filtered posts count:', filteredPosts.length);
+    if (filteredPosts.length > 0) {
+      console.log('🔍 First post deadline:', filteredPosts[0].deadline_at);
+    }
     
     let postsFromComments: any[] = [];
     if (searchQuery) {
@@ -276,7 +285,8 @@ export default async function Home({ searchParams }: HomeProps) {
       // コメントからの投稿も締切でフィルタリング
       const filteredCommentPosts = postsFromComments.filter(post => {
         if (!post.deadline_at) return true;
-        return new Date(post.deadline_at) > now;
+        const deadline = new Date(post.deadline_at);
+        return deadline.getTime() > now.getTime();
       });
       
       // 重複を除去してマージ
