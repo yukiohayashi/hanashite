@@ -6,7 +6,7 @@ import CommentSection from './CommentSection';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
 import Sidebar from '@/components/Sidebar';
-import RightSidebar from '@/components/RightSidebar';
+import HomeRightSidebar from '@/components/HomeRightSidebar';
 import ClickableImage from '@/components/ClickableImage';
 import LikeButton from './LikeButton';
 import FavoriteButton from './FavoriteButton';
@@ -269,7 +269,7 @@ export default async function PostPage({ params, searchParams }: { params: Promi
 
           {/* 右サイドバー */}
           <aside className="hidden md:block w-[280px]">
-            <RightSidebar />
+            <HomeRightSidebar />
           </aside>
         </main>
 
@@ -502,7 +502,7 @@ export default async function PostPage({ params, searchParams }: { params: Promi
 
         {/* 右サイドバー */}
         <aside className="hidden md:block w-[280px]">
-          <RightSidebar />
+          <HomeRightSidebar />
         </aside>
       </main>
       
