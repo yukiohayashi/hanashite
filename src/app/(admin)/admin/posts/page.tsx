@@ -6,7 +6,7 @@ async function getPosts(statusFilter?: string, limit: number = 100, sortBy: stri
   
   let query = supabase
     .from('posts')
-    .select('id, title, content, status, created_at, user_id, thumbnail_url, og_image, category_id, total_votes, best_answer_id, best_answer_selected_at, categories(id, name)');
+    .select('id, title, content, status, created_at, user_id, thumbnail_url, og_image, category_id, total_votes, best_answer_id, best_answer_selected_at, deadline_at, categories(id, name)');
 
   if (statusFilter) {
     query = query.eq('status', statusFilter);
@@ -167,7 +167,7 @@ export default async function PostsManagementPage({
 }) {
   const params = await searchParams;
   const statusFilter = params.status;
-  const limit = params.limit ? parseInt(params.limit) : 100;
+  const limit = params.limit ? parseInt(params.limit) : 300;
   const page = params.page ? parseInt(params.page) : 1;
   const sortBy = params.sort || 'created_at';
   const sortOrder = params.order || 'desc';

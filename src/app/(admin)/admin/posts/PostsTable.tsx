@@ -17,6 +17,7 @@ interface Post {
   total_votes?: number;
   best_answer_id?: number | null;
   best_answer_selected_at?: string | null;
+  deadline_at?: string | null;
   users: {
     id: number;
     name: string;
@@ -305,6 +306,9 @@ export default function PostsTable({ posts: initialPosts, initialCounts }: Posts
                 画像
               </th>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                相談者
+              </th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                 タイトル
               </th>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
@@ -313,11 +317,11 @@ export default function PostsTable({ posts: initialPosts, initialCounts }: Posts
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                 ハナシテカテゴリ
               </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                相談者
-              </th>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100" onClick={() => handleSort('vote_count')}>
                 合計投票数 {sortBy === 'vote_count' && (sortOrder === 'asc' ? '↑' : '↓')}
+              </th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100" onClick={() => handleSort('deadline_at')}>
+                締め切り {sortBy === 'deadline_at' && (sortOrder === 'asc' ? '↑' : '↓')}
               </th>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100" onClick={() => handleSort('best_answer_id')}>
                 ベストアンサー {sortBy === 'best_answer_id' && (sortOrder === 'asc' ? '↑' : '↓')}
@@ -370,6 +374,18 @@ export default function PostsTable({ posts: initialPosts, initialCounts }: Posts
                     </div>
                   )}
                 </td>
+                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                  {post.user_id ? (
+                    <a
+                      href={`/admin/users/${post.user_id}/posts`}
+                      className="text-blue-600 hover:text-blue-800 hover:underline"
+                    >
+                      {post.users?.name || 'ゲスト'}
+                    </a>
+                  ) : (
+                    <span>{post.users?.name || 'ゲスト'}</span>
+                  )}
+                </td>
                 <td className="px-6 py-4 text-sm text-gray-900">
                   <a
                     href={`/admin/posts/${post.id}/edit`}
@@ -409,21 +425,21 @@ export default function PostsTable({ posts: initialPosts, initialCounts }: Posts
                   )}
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                  {post.user_id ? (
-                    <a
-                      href={`/admin/users/${post.user_id}/posts`}
-                      className="text-blue-600 hover:text-blue-800 hover:underline"
-                    >
-                      {post.users?.name || 'ゲスト'}
-                    </a>
-                  ) : (
-                    <span>{post.users?.name || 'ゲスト'}</span>
-                  )}
-                </td>
-                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                   <span className="font-semibold">
                     {post.total_votes || 0}票
                   </span>
+                </td>
+                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                  {post.deadline_at ? (
+                    <>
+                      {new Date(post.deadline_at).toLocaleDateString('ja-JP')}
+                      <div className="text-xs">
+                        {new Date(post.deadline_at).toLocaleTimeString('ja-JP', { hour: '2-digit', minute: '2-digit' })}
+                      </div>
+                    </>
+                  ) : (
+                    <span className="text-gray-400">—</span>
+                  )}
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                   {post.bestAnswer ? (

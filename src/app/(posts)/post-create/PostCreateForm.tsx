@@ -39,13 +39,13 @@ export default function PostCreateForm() {
   const searchParams = useSearchParams();
   const workid = searchParams.get('workid');
 
-  // 締切日時の最小値と最大値を計算（1週間以内）
+  // 締切日時の最小値と最大値を計算（3週間以内）
   const { minDate, maxDate } = useMemo(() => {
     const today = new Date();
-    const oneWeekLater = new Date(today.getTime() + 7 * 24 * 60 * 60 * 1000);
+    const threeWeeksLater = new Date(today.getTime() + 21 * 24 * 60 * 60 * 1000);
     return {
       minDate: today.toISOString().split('T')[0],
-      maxDate: oneWeekLater.toISOString().split('T')[0]
+      maxDate: threeWeeksLater.toISOString().split('T')[0]
     };
   }, []);
 
