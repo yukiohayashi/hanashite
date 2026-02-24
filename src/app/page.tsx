@@ -250,7 +250,7 @@ export default async function Home({ searchParams }: HomeProps) {
     // オススメ（デフォルト）（受付中のみ）
     let query = supabase
       .from('posts')
-      .select('id, title, content, created_at, user_id, og_image, thumbnail_url, best_answer_id, best_answer_selected_at, category_id, categories(name), users!inner(status)')
+      .select('id, title, content, created_at, user_id, og_image, thumbnail_url, best_answer_id, best_answer_selected_at, category_id, categories(name), users!inner(status, name, avatar_style, avatar_seed, use_custom_image, image)')
       .in('status', ['publish', 'published'])
       .neq('user_id', 1)
       .neq('users.status', 3)
@@ -278,100 +278,73 @@ export default async function Home({ searchParams }: HomeProps) {
   }
 
   // 注目の相談を取得（受付中の投稿を3件）
+  // like_countsから直接トップ3を取得して効率化
   let featuredPosts: any[] = [];
-  const { data: openPosts } = await supabase
-    .from('posts')
-    .select('id, title, content, created_at, user_id, og_image, thumbnail_url, best_answer_id, category_id, categories(name), users!inner(status)')
-    .in('status', ['publish', 'published'])
-    .neq('user_id', 1)
-    .neq('users.status', 3)
-    .is('best_answer_id', null)
-    .order('created_at', { ascending: false })
-    .limit(100);
+  
+  // いいね数トップの投稿IDを取得
+  const { data: topLikes } = await supabase
+    .from('like_counts')
+    .select('target_id, like_count')
+    .eq('like_type', 'post')
+    .order('like_count', { ascending: false })
+    .limit(20); // 上位20件から受付中のものを3件選ぶ
 
-  if (openPosts && openPosts.length > 0) {
-    const filteredOpenPosts = openPosts;
-
-    // 各投稿のいいね数を取得
-    const postIds = filteredOpenPosts.map(p => p.id);
-    const { data: likeCounts } = await supabase
-      .from('like_counts')
-      .select('target_id, like_count')
-      .eq('like_type', 'post')
-      .in('target_id', postIds);
-
-    // いいね数でソート（いいね数が同じ場合は最新順）
-    const postsWithLikes = filteredOpenPosts.map(post => {
-      const likeData = likeCounts?.find(lc => lc.target_id === post.id);
-      return {
-        ...post,
-        like_count: likeData?.like_count || 0
-      };
-    });
-
-    postsWithLikes.sort((a, b) => {
-      if (b.like_count !== a.like_count) {
-        return b.like_count - a.like_count;
-      }
-      return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
-    });
-
-    // トップ3を取得
-    const top3Posts = postsWithLikes.slice(0, 3);
+  if (topLikes && topLikes.length > 0) {
+    const topPostIds = topLikes.map(l => l.target_id);
     
-    // ユーザー情報を取得
-    const top3UserIds = [...new Set(top3Posts.map(p => p.user_id).filter(id => id !== null))];
-    const { data: top3UsersData } = await supabase
-      .from('users')
-      .select('id, name, avatar_style, avatar_seed, use_custom_image, image')
-      .in('id', top3UserIds);
+    // 投稿情報とユーザー情報をJOINで一度に取得
+    const { data: topPosts } = await supabase
+      .from('posts')
+      .select('id, title, content, created_at, user_id, og_image, thumbnail_url, best_answer_id, category_id, categories(name), users!inner(status, name, avatar_style, avatar_seed, use_custom_image, image)')
+      .in('id', topPostIds)
+      .in('status', ['publish', 'published'])
+      .neq('user_id', 1)
+      .neq('users.status', 3)
+      .is('best_answer_id', null);
 
-    // ユーザー情報をマージ
-    featuredPosts = top3Posts.map(post => {
-      const userData = top3UsersData?.find(u => u.id === post.user_id);
-      let avatarUrl: string;
-      if (userData?.use_custom_image && userData?.image) {
-        avatarUrl = userData.image;
-      } else {
-        const seed = userData?.avatar_seed || String(post.user_id) || 'guest';
-        const style = userData?.avatar_style || 'big-smile';
-        avatarUrl = `https://api.dicebear.com/9.x/${style}/svg?seed=${encodeURIComponent(seed)}&size=20`;
-      }
-      return {
-        ...post,
-        user_name: userData?.name || null,
-        avatar_url: avatarUrl
-      };
-    });
+    if (topPosts && topPosts.length > 0) {
+      // いいね数でソートしてトップ3を取得
+      const postsWithLikes = topPosts.map(post => {
+        const likeData = topLikes.find(l => l.target_id === post.id);
+        const user = (post as any).users;
+        let avatarUrl: string;
+        if (user?.use_custom_image && user?.image) {
+          avatarUrl = user.image;
+        } else {
+          const seed = user?.avatar_seed || String(post.user_id) || 'guest';
+          const style = user?.avatar_style || 'big-smile';
+          avatarUrl = `https://api.dicebear.com/9.x/${style}/svg?seed=${encodeURIComponent(seed)}&size=20`;
+        }
+        return {
+          ...post,
+          like_count: likeData?.like_count || 0,
+          user_name: user?.name || null,
+          avatar_url: avatarUrl
+        };
+      });
+
+      postsWithLikes.sort((a, b) => b.like_count - a.like_count);
+      featuredPosts = postsWithLikes.slice(0, 3);
+    }
   }
 
-  // ユーザー情報を別途取得して結合
-  let posts = postsData;
-  if (postsData && postsData.length > 0) {
-    const userIds = [...new Set(postsData.map(p => p.user_id).filter(id => id !== null))];
-    
-    const { data: usersData } = await supabase
-      .from('users')
-      .select('id, name, avatar_style, avatar_seed, use_custom_image, image')
-      .in('id', userIds);
-
-    posts = postsData.map(post => {
-      const user = usersData?.find(u => u.id === post.user_id);
-      let avatarUrl: string;
-      if (user?.use_custom_image && user?.image) {
-        avatarUrl = user.image;
-      } else {
-        const seed = user?.avatar_seed || String(post.user_id) || 'guest';
-        const style = user?.avatar_style || 'big-smile';
-        avatarUrl = `https://api.dicebear.com/9.x/${style}/svg?seed=${encodeURIComponent(seed)}&size=20`;
-      }
-      return {
-        ...post,
-        user_name: user?.name || null,
-        avatar_url: avatarUrl
-      };
-    });
-  }
+  // ユーザー情報はJOINで取得済み
+  const posts = postsData.map(post => {
+    const user = (post as any).users;
+    let avatarUrl: string;
+    if (user?.use_custom_image && user?.image) {
+      avatarUrl = user.image;
+    } else {
+      const seed = user?.avatar_seed || String(post.user_id) || 'guest';
+      const style = user?.avatar_style || 'big-smile';
+      avatarUrl = `https://api.dicebear.com/9.x/${style}/svg?seed=${encodeURIComponent(seed)}&size=20`;
+    }
+    return {
+      ...post,
+      user_name: user?.name || null,
+      avatar_url: avatarUrl
+    };
+  });
 
   // ベストアンサー待ちの投稿を取得（締め切りが過ぎてもベストアンサーがない投稿）
   const { data: waitingPosts } = await supabase
