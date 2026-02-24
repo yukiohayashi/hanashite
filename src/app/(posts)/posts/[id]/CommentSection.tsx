@@ -208,7 +208,7 @@ export default function CommentSection({ postId, initialComments, totalCount, po
             </div>
             <button
               onClick={() => {
-                const element = document.getElementById(`comment-${bestAnswerId}`);
+                const element = document.getElementById(`reply-${bestAnswerId}`);
                 if (element) {
                   element.scrollIntoView({ behavior: 'smooth', block: 'center' });
                 }
