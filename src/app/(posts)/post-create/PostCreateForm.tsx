@@ -329,15 +329,16 @@ export default function PostCreateForm() {
             </div>
 
             <div className="space-y-2">
-              <Label>締切日時（1週間以内を選択） <span className="text-red-600">*</span></Label>
+              <Label htmlFor="closeDate">締切日時（3週間以内を選択） <span className="text-red-600">*</span></Label>
               <Input
+                id="closeDate"
                 type="date"
                 value={formData.closeDate}
                 onChange={(e) => setFormData({ ...formData, closeDate: e.target.value })}
                 min={minDate}
                 max={maxDate}
                 required
-                className="border-gray-300"
+                className="border-gray-300 cursor-pointer w-auto"
               />
             </div>
             </div>

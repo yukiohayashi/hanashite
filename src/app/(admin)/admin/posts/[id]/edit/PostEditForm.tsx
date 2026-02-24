@@ -54,7 +54,7 @@ export default function PostEditForm({ post, categories }: PostEditFormProps) {
     content: post.content || '',
     status: post.status || 'draft',
     created_at: post.created_at ? new Date(post.created_at).toISOString().slice(0, 16) : '',
-    deadline_at: post.deadline_at ? new Date(post.deadline_at).toISOString().slice(0, 16) : '',
+    deadline_at: post.deadline_at ? new Date(post.deadline_at).toISOString().slice(0, 10) : '',
     category_id: post.category_id || null,
   });
   const [loading, setLoading] = useState(false);
@@ -155,7 +155,7 @@ export default function PostEditForm({ post, categories }: PostEditFormProps) {
           og_image: uploadedImageUrl, 
           best_answer_id: bestAnswerId,
           created_at: new Date(formData.created_at).toISOString(),
-          deadline_at: formData.deadline_at ? new Date(formData.deadline_at).toISOString() : null
+          deadline_at: formData.deadline_at ? new Date(formData.deadline_at + 'T00:00:00').toISOString() : null
         }),
       });
 
@@ -239,7 +239,7 @@ export default function PostEditForm({ post, categories }: PostEditFormProps) {
               締め切り
             </label>
             <input
-              type="datetime-local"
+              type="date"
               value={formData.deadline_at}
               onChange={(e) => setFormData({ ...formData, deadline_at: e.target.value })}
               className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500 text-sm"
