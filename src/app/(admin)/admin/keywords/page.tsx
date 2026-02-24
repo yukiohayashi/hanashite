@@ -214,7 +214,7 @@ export default function KeywordsPage() {
     <div className="space-y-4">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">キーワード管理</h1>
+          <h1 className="text-2xl font-bold text-gray-900">キーワード一覧</h1>
           <p className="mt-1 text-sm text-gray-600">
             検索キーワードの管理・統計
           </p>

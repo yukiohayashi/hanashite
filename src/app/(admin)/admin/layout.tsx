@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect } from 'react';
+import { usePathname } from 'next/navigation';
 import Link from 'next/link';
 import { LayoutDashboard, FileText, Users, MessageSquare, Heart, Coins, Mail, Bot, LogOut, Search, Trash2, Settings } from 'lucide-react';
 
@@ -9,6 +10,7 @@ export default function AdminPanelLayout({
 }: {
   children: React.ReactNode;
 }) {
+  const pathname = usePathname();
   const isProduction = process.env.NODE_ENV === 'production';
   const sidebarBgColor = isProduction ? 'bg-gray-900' : 'bg-blue-900';
   const hoverBgColor = isProduction ? 'hover:bg-gray-800' : 'hover:bg-blue-800';
@@ -16,8 +18,45 @@ export default function AdminPanelLayout({
 
   // ページタイトルを設定
   useEffect(() => {
-    document.title = 'ダッシュボード | ハナシテ';
-  }, []);
+    const pageTitles: Record<string, string> = {
+      '/admin': 'ダッシュボード',
+      '/admin/cleanup': 'クリーンアップ',
+      '/admin/auto-creator': 'AI自動投稿',
+      '/admin/auto-creator/rss': 'RSS記事一覧',
+      '/admin/auto-creator/logs': '実行履歴',
+      '/admin/auto-creator/settings': 'AI自動投稿設定',
+      '/admin/posts': '投稿管理',
+      '/admin/posts/new': '投稿新規作成',
+      '/admin/posts/ai-tagger': 'AI自動タグ付け',
+      '/admin/posts/ai-tagger/settings': 'AI自動タグ付け設定',
+      '/admin/keywords': 'キーワード一覧',
+      '/admin/categories': 'カテゴリ管理',
+      '/admin/ng-words': 'NGワード管理',
+      '/admin/keywords/history': '検索履歴',
+      '/admin/keywords/stats': 'キーワード統計',
+      '/admin/auto-voter-commenter-liker': 'AI自動投票・コメント・いいね',
+      '/admin/auto-voter-commenter-liker/manual': '手動実行',
+      '/admin/auto-voter-commenter-liker/logs': '実行履歴',
+      '/admin/auto-voter-commenter-liker/settings': 'AI自動投票設定',
+      '/admin/comments': 'コメント管理',
+      '/admin/likes': 'いいね管理',
+      '/admin/likes/stats': 'いいね統計',
+      '/admin/likes/settings': 'いいね設定',
+      '/admin/users': 'ユーザー管理',
+      '/admin/users/ai-generator': 'AI会員生成',
+      '/admin/points': 'ポイント管理',
+      '/admin/points/stats': 'ポイント統計',
+      '/admin/points/settings': 'ポイント設定',
+      '/admin/mail': 'メール管理',
+      '/admin/mail/templates': 'メールテンプレート',
+      '/admin/mail/logs': 'メール送信履歴',
+      '/admin/mail/settings': 'SMTP設定',
+      '/admin/api-settings': 'API設定',
+    };
+
+    const pageTitle = pageTitles[pathname] || 'ダッシュボード';
+    document.title = `${pageTitle} | ハナシテ`;
+  }, [pathname]);
   
   return (
     <div className="flex h-screen bg-gray-100">
