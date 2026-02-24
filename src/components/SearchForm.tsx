@@ -2,8 +2,6 @@
 
 import { useState, FormEvent } from 'react';
 import { useRouter } from 'next/navigation';
-import { useSession } from 'next-auth/react';
-import { recordSearchHistory } from '../lib/api';
 import { checkNgWord } from '../lib/ngWordCheck';
 
 interface SearchFormProps {
@@ -11,13 +9,9 @@ interface SearchFormProps {
 }
 
 export default function SearchForm({ userId: _userId }: SearchFormProps) {
+  const router = useRouter();
   const [searchQuery, setSearchQuery] = useState('');
   const [errorMessage, setErrorMessage] = useState('');
-  const router = useRouter();
-  const { data: session, status } = useSession();
-  
-  // NextAuthセッションからuserIdを取得
-  const userId = session?.user?.id || null;
   
 
   const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
@@ -41,12 +35,8 @@ export default function SearchForm({ userId: _userId }: SearchFormProps) {
       setErrorMessage('');
     }
 
-    // ログインユーザーの場合は検索履歴を記録
-    if (userId) {
-      await recordSearchHistory(userId, query);
-    }
-
     // 検索ページに遷移（警告の場合は遷移を許可）
+    // 検索履歴は検索ページ側で結果件数と共に記録
     if (!ngCheck.isNg || ngCheck.severity === 2) { // 2: warn
       router.push(`/?s=${encodeURIComponent(query)}`);
     }

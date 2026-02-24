@@ -11,6 +11,7 @@ import KeywordsSection from '@/components/KeywordsSection';
 import InfinitePostList from '@/components/InfinitePostList';
 import AdSense from '@/components/AdSense';
 import ResolvedSection from '@/components/ResolvedSection';
+import SearchHistoryRecorder from '@/components/SearchHistoryRecorder';
 import { auth } from '@/lib/auth';
 
 // HTMLタグを除去するヘルパー関数
@@ -569,6 +570,9 @@ export default async function Home({ searchParams }: HomeProps) {
 
               {/* 検索履歴（クライアント側でログイン判定） */}
               <SearchHistory />
+
+              {/* 検索履歴を記録（検索時のみ） */}
+              {searchQuery && <SearchHistoryRecorder userId={userId} searchQuery={searchQuery} resultCount={posts?.length || 0} />}
 
               {/* 検索結果表示 */}
               {searchQuery && (
