@@ -24,8 +24,8 @@ interface HomeProps {
 }
 
 // ISR（Incremental Static Regeneration）を有効化
-// 3600秒（1時間）ごとに再生成し、それまでは静的HTMLを配信（高速化）
-export const revalidate = 3600;
+// 300秒（5分）ごとに再生成し、それまでは静的HTMLを配信（高速化）
+export const revalidate = 300;
 
 export default async function Home({ searchParams }: HomeProps) {
   // 現在のユーザーを取得（セッションから）

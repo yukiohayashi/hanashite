@@ -42,6 +42,8 @@ const nextConfig: NextConfig = {
   // 実験的機能（パフォーマンス向上）
   experimental: {
     optimizePackageImports: ['lucide-react', '@radix-ui/react-select', '@radix-ui/react-checkbox'],
+    // PPR（Partial Prerendering）を有効化してパフォーマンス向上
+    ppr: 'incremental',
   },
   
   // 本番環境での最適化
@@ -56,6 +58,33 @@ const nextConfig: NextConfig = {
   
   // Docker用のstandaloneモード
   output: 'standalone',
+  
+  // 静的最適化を有効化
+  reactStrictMode: true,
+  
+  // ヘッダー最適化（キャッシュ制御）
+  async headers() {
+    return [
+      {
+        source: '/:path*',
+        headers: [
+          {
+            key: 'Cache-Control',
+            value: 'public, max-age=3600, stale-while-revalidate=86400',
+          },
+        ],
+      },
+      {
+        source: '/api/:path*',
+        headers: [
+          {
+            key: 'Cache-Control',
+            value: 'public, max-age=60, stale-while-revalidate=120',
+          },
+        ],
+      },
+    ];
+  },
 };
 
 export default nextConfig;
