@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# アンケNext.js VPSデプロイスクリプト
+# ハナシテ Next.js VPSデプロイスクリプト
 # 使用方法: ./scripts/deploy.sh [--full]
 
 set -e  # エラーが発生したら停止
@@ -10,11 +10,11 @@ FULL_BUILD="$1"
 echo "🚀 デプロイを開始します..."
 
 # VPSに接続してデプロイ
-ssh -i ~/.ssh/anke-nextjs.key ubuntu@133.18.122.123 "FULL_BUILD=$FULL_BUILD bash -s" << 'ENDSSH'
-cd /var/www/anke-nextjs
+ssh -i ~/.ssh/hanashite.key ubuntu@133.18.125.19 "FULL_BUILD=$FULL_BUILD bash -s" << 'ENDSSH'
+cd /home/ubuntu/hanashite
 
 echo "📦 アプリケーションを停止..."
-pm2 stop anke-nextjs
+pm2 stop hanashite
 
 echo "📥 最新のコードを取得..."
 git pull origin main
@@ -35,15 +35,15 @@ echo "📁 静的ファイルをstandaloneにコピー..."
 cp -r .next/static .next/standalone/.next/
 cp -r public/* .next/standalone/public/
 
-echo "� アプリケーションを再起動..."
-pm2 restart anke-nextjs
+echo "🔄 アプリケーションを再起動..."
+pm2 restart hanashite
 
 echo "✅ ステータス確認..."
 pm2 status
 
 echo ""
 echo "🎉 デプロイ完了！"
-echo "📍 https://anke.jp"
+echo "📍 https://dokujo.com"
 ENDSSH
 
 echo ""

@@ -29,7 +29,7 @@ export default function SearchForm({ userId: _userId }: SearchFormProps) {
     // NGワードチェック
     const ngCheck = await checkNgWord(query);
     if (ngCheck.isNg) {
-      if (ngCheck.severity === 'block') {
+      if (ngCheck.severity === 1) { // 1: block
         setErrorMessage(`「${ngCheck.matchedWord}」は検索できません。`);
         return;
       } else {
@@ -47,7 +47,7 @@ export default function SearchForm({ userId: _userId }: SearchFormProps) {
     }
 
     // 検索ページに遷移（警告の場合は遷移を許可）
-    if (!ngCheck.isNg || ngCheck.severity === 'warn') {
+    if (!ngCheck.isNg || ngCheck.severity === 2) { // 2: warn
       router.push(`/?s=${encodeURIComponent(query)}`);
     }
   };
