@@ -55,38 +55,19 @@ export default async function PostPage({ params, searchParams }: { params: Promi
   
   const { data: post } = await supabase
     .from('posts')
-    .select('id, title, content, created_at, user_id, og_image, thumbnail_url, source_url, og_title, og_description, status, category_id, deadline_at, best_answer_id')
+    .select('id, title, content, created_at, user_id, og_image, thumbnail_url, source_url, og_title, og_description, status, category_id, deadline_at, best_answer_id, users(name, image, sex, birth_year, prefecture, avatar_style, avatar_seed, use_custom_image), categories(id, name)')
     .eq('id', id)
-    .single() as { data: Post | null, error: { message: string } | null };
+    .single() as { data: any | null, error: { message: string } | null };
 
-  
-
-  let userName = 'ゲスト';
-  let userAvatar: string | null = null;
-  let userSex: string | null = null;
-  let userBirthYear: number | null = null;
-  let userPrefecture: string | null = null;
-  let userAvatarStyle: string | null = null;
-  let userAvatarSeed: string | null = null;
-  let userUseCustomImage: boolean = false;
-  if (post?.user_id) {
-    const { data: user } = await supabase
-      .from('users')
-      .select('name, image, sex, birth_year, prefecture, avatar_style, avatar_seed, use_custom_image')
-      .eq('id', post.user_id)
-      .single();
-    
-    if (user) {
-      if (user.name) userName = user.name;
-      userAvatar = user.image;
-      userSex = user.sex;
-      userBirthYear = user.birth_year;
-      userPrefecture = user.prefecture;
-      userAvatarStyle = user.avatar_style;
-      userAvatarSeed = user.avatar_seed;
-      userUseCustomImage = user.use_custom_image || false;
-    }
-  }
+  const user = (post as any)?.users;
+  const userName = user?.name || 'ゲスト';
+  const userAvatar = user?.image || null;
+  const userSex = user?.sex || null;
+  const userBirthYear = user?.birth_year || null;
+  const userPrefecture = user?.prefecture || null;
+  const userAvatarStyle = user?.avatar_style || null;
+  const userAvatarSeed = user?.avatar_seed || null;
+  const userUseCustomImage = user?.use_custom_image || false;
   
   // DiceBearアバターURLを生成
   const getDiceBearUrl = (seed: string, style: string = 'big-smile', size: number = 40) => {
@@ -131,16 +112,8 @@ export default async function PostPage({ params, searchParams }: { params: Promi
     .eq('post_id', id)
     .order('id');
 
-  // カテゴリを取得（posts.category_idから）
-  let category = null;
-  if (post?.category_id) {
-    const { data: categoryData } = await supabase
-      .from('categories')
-      .select('id, name')
-      .eq('id', post.category_id)
-      .single();
-    category = categoryData;
-  }
+  // カテゴリはJOINで取得済み
+  const category = (post as any)?.categories;
 
   // キーワードを取得
   const { data: postKeywords } = await supabase
@@ -184,56 +157,35 @@ export default async function PostPage({ params, searchParams }: { params: Promi
     .eq('post_id', parseInt(id))
     .eq('status', 'approved');
 
+  // コメントとユーザー情報をJOINで一度に取得
   const { data: commentsData } = await supabase
     .from('comments')
-    .select('id, content, created_at, user_id, parent_id')
+    .select('id, content, created_at, user_id, parent_id, users(name, image, avatar_style, avatar_seed, use_custom_image)')
     .eq('post_id', parseInt(id))
     .eq('status', 'approved')
     .order('created_at', { ascending: false });
 
-  const comments = await Promise.all(
-    (commentsData || []).map(async (comment) => {
-      let commentUserName = 'ゲスト';
-      let commentUserAvatar = null;
-      let commentAvatarStyle = null;
-      let commentAvatarSeed = null;
-      let commentUseCustomImage = false;
-      if (comment.user_id) {
-        const { data: user } = await supabase
-          .from('users')
-          .select('name, image, avatar_style, avatar_seed, use_custom_image')
-          .eq('id', comment.user_id)
-          .single();
-        
-        if (user) {
-          if (user.name) commentUserName = user.name;
-          commentUserAvatar = user.image;
-          commentAvatarStyle = user.avatar_style;
-          commentAvatarSeed = user.avatar_seed;
-          commentUseCustomImage = user.use_custom_image || false;
-        }
-      }
-      
-      // コメントのいいね数を取得
-      const { count: likeCount } = await supabase
-        .from('likes')
-        .select('*', { count: 'exact', head: true })
-        .eq('like_type', 'comment')
-        .eq('target_id', comment.id);
-      
-      return {
-        ...comment,
-        users: { 
-          name: commentUserName,
-          image: commentUserAvatar,
-          avatar_style: commentAvatarStyle,
-          avatar_seed: commentAvatarSeed,
-          use_custom_image: commentUseCustomImage
-        },
-        like_count: likeCount || 0
-      };
-    })
-  );
+  // コメントIDを取得してlike_countsから一括取得
+  const commentIds = commentsData?.map(c => c.id) || [];
+  let likeCounts: { [key: number]: number } = {};
+  
+  if (commentIds.length > 0) {
+    const { data: likeCountsData } = await supabase
+      .from('like_counts')
+      .select('target_id, like_count')
+      .eq('like_type', 'comment')
+      .in('target_id', commentIds);
+    
+    likeCounts = (likeCountsData || []).reduce((acc, lc) => {
+      acc[lc.target_id] = lc.like_count || 0;
+      return acc;
+    }, {} as { [key: number]: number });
+  }
+
+  const comments = (commentsData || []).map((comment) => ({
+    ...comment,
+    like_count: likeCounts[comment.id] || 0
+  }));
 
   if (!post || post.status === 'trash') {
     return (
