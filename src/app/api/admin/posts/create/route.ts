@@ -20,7 +20,8 @@ export async function POST(request: NextRequest) {
       .eq('id', session.user.id)
       .single();
 
-    if (!userData || (userData.status !== 3 && session.user.id !== '1')) {
+    const userId = typeof session.user.id === 'string' ? parseInt(session.user.id) : session.user.id;
+    if (!userData || (userData.status !== 3 && userId !== 1)) {
       return NextResponse.json(
         { success: false, error: '管理者権限が必要です' },
         { status: 403 }
