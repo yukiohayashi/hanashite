@@ -1,5 +1,6 @@
 'use client';
 
+import { useEffect } from 'react';
 import Link from 'next/link';
 import { LayoutDashboard, FileText, Users, MessageSquare, Heart, Coins, Mail, Bot, LogOut, Search, Trash2, Settings } from 'lucide-react';
 
@@ -12,6 +13,11 @@ export default function AdminPanelLayout({
   const sidebarBgColor = isProduction ? 'bg-gray-900' : 'bg-blue-900';
   const hoverBgColor = isProduction ? 'hover:bg-gray-800' : 'hover:bg-blue-800';
   const borderColor = isProduction ? 'border-gray-700' : 'border-blue-700';
+
+  // ページタイトルを設定
+  useEffect(() => {
+    document.title = 'ダッシュボード | ハナシテ';
+  }, []);
   
   return (
     <div className="flex h-screen bg-gray-100">
