@@ -38,7 +38,7 @@ export default async function Home({ searchParams }: HomeProps) {
   
   console.log('📊 Page params:', { searchQuery, sortBy, allParams: params });
 
-  // 並列実行で高速化：announcementCategoryの取得を開始
+  // announcementCategoryの取得を開始（並列実行）
   const announcementCategoryPromise = supabase
     .from('categories')
     .select('id')
@@ -52,9 +52,10 @@ export default async function Home({ searchParams }: HomeProps) {
   // 殿堂入り投稿を取得（total_votesカラムを使用して効率的に取得）
   if (sortBy === 'statistics') {
     // users.statusでフィルタリングして運営者を除外（JOINで1回のクエリ）
+    // contentフィールドを削除してデータ転送量を削減
     const { data: hallOfFameData } = await supabase
       .from('posts')
-      .select('id, title, content, created_at, deadline_at, user_id, og_image, thumbnail_url, total_votes, category_id, categories(name), users!inner(status)')
+      .select('id, title, created_at, deadline_at, user_id, og_image, thumbnail_url, total_votes, category_id, categories(name), users!inner(status)')
       .in('status', ['publish', 'published'])
       .neq('user_id', 1)
       .neq('users.status', 3)
@@ -140,7 +141,7 @@ export default async function Home({ searchParams }: HomeProps) {
 
     const { data: allPosts } = await supabase
       .from('posts')
-      .select('id, title, content, created_at, deadline_at, user_id, og_image, thumbnail_url, best_answer_id, best_answer_selected_at, category_id, categories(name), users!inner(status)')
+      .select('id, title, created_at, deadline_at, user_id, og_image, thumbnail_url, best_answer_id, best_answer_selected_at, category_id, categories(name), users!inner(status)')
       .in('status', ['publish', 'published'])
       .neq('user_id', 1)
       .neq('users.status', 3)
@@ -148,7 +149,7 @@ export default async function Home({ searchParams }: HomeProps) {
       .is('best_answer_selected_at', null)
       .gte('created_at', oneMonthAgo.toISOString())
       .order('created_at', { ascending: false })
-      .limit(100);
+      .limit(30);
 
     // クライアント側で除外（投票済みの投稿を除外）
     if (allPosts) {
@@ -168,7 +169,7 @@ export default async function Home({ searchParams }: HomeProps) {
 
     let query = supabase
       .from('posts')
-      .select('id, title, content, created_at, deadline_at, user_id, og_image, thumbnail_url, best_answer_id, best_answer_selected_at, category_id, categories(name)')
+      .select('id, title, created_at, deadline_at, user_id, og_image, thumbnail_url, best_answer_id, best_answer_selected_at, category_id, categories(name)')
       .in('status', ['publish', 'published'])
       .neq('user_id', 1);
 
@@ -297,7 +298,7 @@ export default async function Home({ searchParams }: HomeProps) {
     // 投稿情報とユーザー情報をJOINで一度に取得
     const { data: topPosts } = await supabase
       .from('posts')
-      .select('id, title, content, created_at, user_id, og_image, thumbnail_url, best_answer_id, category_id, categories(name), users!inner(status, name, avatar_style, avatar_seed, use_custom_image, image)')
+      .select('id, title, created_at, user_id, og_image, thumbnail_url, best_answer_id, category_id, categories(name), users!inner(status, name, avatar_style, avatar_seed, use_custom_image, image)')
       .in('id', topPostIds)
       .in('status', ['publish', 'published'])
       .neq('user_id', 1)
@@ -351,7 +352,7 @@ export default async function Home({ searchParams }: HomeProps) {
   // ベストアンサー待ちの投稿を取得（締め切りが過ぎてもベストアンサーがない投稿）
   const { data: waitingPosts } = await supabase
     .from('posts')
-    .select('id, title, content, created_at, deadline_at, user_id, og_image, thumbnail_url, best_answer_id, best_answer_selected_at, category_id, categories(name), users!inner(status, name, avatar_style, avatar_seed, use_custom_image, image)')
+    .select('id, title, created_at, deadline_at, user_id, og_image, thumbnail_url, best_answer_id, best_answer_selected_at, category_id, categories(name), users!inner(status, name, avatar_style, avatar_seed, use_custom_image, image)')
     .in('status', ['publish', 'published'])
     .neq('user_id', 1)
     .neq('users.status', 3)
