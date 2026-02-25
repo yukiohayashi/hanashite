@@ -13,25 +13,10 @@ import MobileRightSidebar from './MobileRightSidebar';
 export default function Header() {
   const { data: session, status } = useSession();
   const pathname = usePathname();
-  const [postsCount, setPostsCount] = useState(0);
   const [leftSidebarOpen, setLeftSidebarOpen] = useState(false);
   const [rightSidebarOpen, setRightSidebarOpen] = useState(false);
   const [avatarUrl, setAvatarUrl] = useState('');
   const [unreadCount, setUnreadCount] = useState(0);
-
-  useEffect(() => {
-    const fetchPostsCount = async () => {
-      try {
-        const response = await fetch('/api/stats/posts-count');
-        const data = await response.json();
-        setPostsCount(data.count || 0);
-      } catch (error) {
-        console.error('Error fetching posts count:', error);
-        setPostsCount(0);
-      }
-    };
-    fetchPostsCount();
-  }, []);
 
   useEffect(() => {
     if (session?.user?.id) {
@@ -167,7 +152,7 @@ export default function Header() {
               {/* アンケート統計情報 */}
               <div className="flex flex-col text-gray-600 text-xs">
                 <div className="font-semibold text-gray-800">
-                  相談合計数: {postsCount.toLocaleString()}件
+                  相談合計数: 300件超
                 </div>
                 <div className="mt-0.5 text-[0.65rem] leading-tight">
                   AIと人間が協働する恋愛・結婚・人間関係の総合相談

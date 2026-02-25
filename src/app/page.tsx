@@ -169,9 +169,10 @@ export default async function Home({ searchParams }: HomeProps) {
 
     let query = supabase
       .from('posts')
-      .select('id, title, created_at, deadline_at, user_id, og_image, thumbnail_url, best_answer_id, best_answer_selected_at, category_id, categories(name)')
+      .select('id, title, created_at, deadline_at, user_id, og_image, thumbnail_url, best_answer_id, best_answer_selected_at, category_id, categories(name), users!inner(status, name, avatar_style, avatar_seed, use_custom_image, image)')
       .in('status', ['publish', 'published'])
-      .neq('user_id', 1);
+      .neq('user_id', 1)
+      .neq('users.status', 3);
 
     // 運営からのお知らせカテゴリを除外
     if (announcementCategoryId) {
@@ -183,12 +184,12 @@ export default async function Home({ searchParams }: HomeProps) {
 
     if (searchQuery) {
       console.log('🔍 Search Query (top_post):', searchQuery);
-      query = query.or(`title.ilike.%${searchQuery}%,content.ilike.%${searchQuery}%`);
+      query = query.ilike('title', `%${searchQuery}%`);
     }
 
     const { data: allPosts } = await query
       .order('created_at', { ascending: false })
-      .limit(100);
+      .limit(10);
     
     // 締切が過ぎた相談を除外（実行時に毎回判定）
     const now = new Date();
