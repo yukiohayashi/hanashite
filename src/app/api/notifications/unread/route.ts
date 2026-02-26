@@ -92,21 +92,25 @@ export async function GET(request: Request) {
     // 既読状態を取得
     const { data: readNotifications } = await supabase
       .from('notification_reads')
-      .select('notification_type, notification_id')
+      .select('notification_type, target_id')
       .eq('user_id', userId);
 
-    // アンカー部分を正規化してSetに格納
+    // target_idをSetに格納（notification_type-target_id形式）
     const readSet = new Set(
-      (readNotifications || []).map(r => {
-        const normalizedId = r.notification_id.replace(/#anke-comment-/g, '#reply-');
-        return `${r.notification_type}-${normalizedId}`;
-      })
+      (readNotifications || []).map(r => `${r.notification_type}-${r.target_id}`)
     );
 
-    // 未読通知数をカウント（通知リンクも正規化して比較）
+    // 未読通知数をカウント（リンクから数値IDを抽出して比較）
     const unreadCount = notifications.filter(n => {
-      const normalizedLink = n.link.replace(/#anke-comment-/g, '#reply-');
-      const notificationKey = `${n.type}-${normalizedLink}`;
+      let targetId: number;
+      if (n.type === 'post_comment' || n.type === 'reply') {
+        const match = n.link.match(/#(?:reply-|anke-comment-)(\d+)/);
+        targetId = match ? parseInt(match[1]) : 0;
+      } else {
+        const match = n.link.match(/\/posts\/(\d+)/);
+        targetId = match ? parseInt(match[1]) : 0;
+      }
+      const notificationKey = `${n.type}-${targetId}`;
       return !readSet.has(notificationKey);
     }).length;
 

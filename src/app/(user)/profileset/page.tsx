@@ -24,12 +24,13 @@ export default async function ProfileSetPage() {
     redirect('/login');
   }
 
-  // カテゴリー一覧を取得
+  // カテゴリー一覧を取得（id=19の運営からのお知らせは除外）
   const { data: categories } = await supabase
     .from('categories')
     .select('id, name, slug')
     .neq('slug', 'gambling')
     .neq('slug', 'news')
+    .neq('id', 19)
     .order('display_order', { ascending: true });
 
   const isFirstTime = !user.profile_registered;
@@ -38,7 +39,7 @@ export default async function ProfileSetPage() {
     <div className="bg-gray-50 min-h-screen">
       <Header />
       
-      <div className="wrapper max-w-[1260px] mx-auto mt-16 md:mt-4 px-4 sm:px-6 lg:px-8">
+      <div className="wrapper max-w-[1260px] mx-auto mt-16 md:mt-4 px-2 sm:px-6 lg:px-8">
         <div className="flex flex-col md:flex-row justify-center gap-4 md:gap-5">
         <main className="flex-1 md:min-w-[690px] w-full">
           <h1 className="mb-4 p-0 font-bold text-orange-500 text-2xl">

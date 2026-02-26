@@ -3,7 +3,6 @@
 import { useEffect, useState } from 'react';
 import { useSession } from 'next-auth/react';
 import Link from 'next/link';
-import Image from 'next/image';
 import { supabase } from '@/lib/supabase';
 
 interface MobileRightSidebarProps {
@@ -127,11 +126,11 @@ export default function MobileRightSidebar({ isOpen, onClose }: MobileRightSideb
                     ログイン
                   </Link>
                   <Link
-                    href="/register"
+                    href="/regist"
                     className="block text-center text-blue-600 hover:text-blue-800 text-sm underline"
                     onClick={onClose}
                   >
-                    パスワードを忘れた方はこちら
+                    新規会員登録
                   </Link>
                 </div>
 
@@ -140,25 +139,12 @@ export default function MobileRightSidebar({ isOpen, onClose }: MobileRightSideb
                     ＼新規会員登録したら3,000pt獲得／
                   </p>
                   <Link
-                    href="/register"
+                    href="/regist"
                     className="inline-flex justify-center items-center bg-green-500 hover:bg-green-600 px-6 py-3 rounded font-bold text-white text-sm no-underline transition-colors"
                     style={{ minWidth: '180px' }}
                     onClick={onClose}
                   >
-                    新規無料登録
-                  </Link>
-                </div>
-
-                {/* ポイ活バナー */}
-                <div className="mt-6">
-                  <Link href="/register" onClick={onClose}>
-                    <Image
-                      src="/anke_banner.webp"
-                      alt="ポイ活始めませんか？"
-                      width={300}
-                      height={400}
-                      className="rounded-lg w-full"
-                    />
+                    新規会員登録
                   </Link>
                 </div>
               </div>

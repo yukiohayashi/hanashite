@@ -203,7 +203,7 @@ export default function RightSidebar() {
       <div className="flex flex-col items-center my-2.5 w-full">
         <Link 
           href="/login" 
-          className="inline-flex justify-center items-center bg-[#ff6b35] hover:bg-[#e58a2f] px-6 py-3 rounded font-bold text-white text-sm no-underline transition-colors"
+          className="inline-flex justify-center items-center bg-green-600 hover:bg-green-700 px-6 py-3 rounded font-bold text-white text-sm no-underline transition-colors"
           style={{ minWidth: '180px' }}
         >
           ログイン
@@ -215,13 +215,11 @@ export default function RightSidebar() {
         </div>
       </div>
      
-      <div className="my-2.5 text-center">
-        ＼新規会員登録したら3,000pt獲得/
-      </div>
+     
       <div className="flex justify-center w-full">
         <Link 
           href="/regist" 
-          className="inline-flex justify-center items-center bg-green-600 hover:bg-green-700 px-6 py-3 rounded font-bold text-white text-sm no-underline transition-colors"
+          className="inline-flex justify-center items-center bg-[#ff6b35] hover:bg-[#e58a2f] px-6 py-3 rounded font-bold text-white text-sm no-underline transition-colors"
           style={{ minWidth: '180px' }}
         >
           新規無料登録

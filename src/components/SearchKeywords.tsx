@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import Link from 'next/link';
 
 interface Keyword {
@@ -9,27 +9,9 @@ interface Keyword {
 }
 
 export default function SearchKeywords() {
-  const [latestKeywords, setLatestKeywords] = useState<Keyword[]>([]);
-  const [popularKeywords, setPopularKeywords] = useState<Keyword[]>([]);
-
-  useEffect(() => {
-    // 最新キーワードを取得（仮データ）
-    setLatestKeywords([
-      { keyword: '最新' },
-      { keyword: 'BTOメーカー' },
-      { keyword: 'SSD' },
-    ]);
-
-    // みんなの検索キーワードを取得（仮データ）
-    setPopularKeywords([
-      { keyword: 'iPhone' },
-      { keyword: 'レーザー脱毛' },
-      { keyword: '地震の分' },
-      { keyword: '太陽' },
-      { keyword: '関田宗佑' },
-      { keyword: 'マスエク' },
-    ]);
-  }, []);
+  // ハードコードされたキーワードを削除（空配列で初期化）
+  const [latestKeywords] = useState<Keyword[]>([]);
+  const [popularKeywords] = useState<Keyword[]>([]);
 
   return (
     <div className="space-y-2">

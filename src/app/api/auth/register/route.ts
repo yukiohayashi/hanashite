@@ -95,7 +95,11 @@ export async function POST(request: NextRequest) {
     }
 
     // メール送信
-    const activationLink = `${process.env.NEXT_PUBLIC_APP_URL}/verify?code=${activationCode}`;
+    // リクエストヘッダーからホスト情報を取得
+    const host = request.headers.get('host') || 'dokujo.com';
+    const protocol = host.includes('localhost') ? 'http' : 'https';
+    const baseUrl = `${protocol}://${host}`;
+    const activationLink = `${baseUrl}/verify?code=${activationCode}`;
     
     const emailResult = await sendVerificationEmail({
       email,

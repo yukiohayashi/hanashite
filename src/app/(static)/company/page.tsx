@@ -18,7 +18,7 @@ export default function CompanyPage() {
               </tr>
               <tr className="border-gray-200 border-b">
                 <th className="bg-gray-50 px-6 py-4 font-bold text-gray-700 text-sm text-left">代表取締役</th>
-                <td className="px-6 py-4 text-gray-900 text-sm">林 祐輝</td>
+                <td className="px-6 py-4 text-gray-900 text-sm">林 征夫</td>
               </tr>
               <tr className="border-gray-200 border-b">
                 <th className="bg-gray-50 px-6 py-4 font-bold text-gray-700 text-sm text-left">業務内容</th>
@@ -26,15 +26,15 @@ export default function CompanyPage() {
               </tr>
               <tr className="border-gray-200 border-b">
                 <th className="bg-gray-50 px-6 py-4 font-bold text-gray-700 text-sm text-left">資本金</th>
-                <td className="px-6 py-4 text-gray-900 text-sm">1,000,000円</td>
+                <td className="px-6 py-4 text-gray-900 text-sm">10,000,000円</td>
               </tr>
               <tr className="border-gray-200 border-b">
                 <th className="bg-gray-50 px-6 py-4 font-bold text-gray-700 text-sm text-left">本店所在地</th>
-                <td className="px-6 py-4 text-gray-900 text-sm">〒060-0001 北海道札幌市中央区北一条西3丁目3番地 MNビル10階</td>
+                <td className="px-6 py-4 text-gray-900 text-sm">〒141-0031 東京都品川区西五反田1丁目28-3</td>
               </tr>
               <tr className="border-gray-200 border-b">
                 <th className="bg-gray-50 px-6 py-4 font-bold text-gray-700 text-sm text-left">会社設立日</th>
-                <td className="px-6 py-4 text-gray-900 text-sm">2015年4月1日</td>
+                <td className="px-6 py-4 text-gray-900 text-sm">2007年1月17日</td>
               </tr>
               <tr className="border-gray-200 border-b">
                 <th className="bg-gray-50 px-6 py-4 font-bold text-gray-700 text-sm text-left">営業日</th>
@@ -42,13 +42,13 @@ export default function CompanyPage() {
               </tr>
               <tr className="border-gray-200 border-b">
                 <th className="bg-gray-50 px-6 py-4 font-bold text-gray-700 text-sm text-left">電話番号</th>
-                <td className="px-6 py-4 text-gray-900 text-sm">011-596-6705</td>
+                <td className="px-6 py-4 text-gray-900 text-sm">03-6910-4968</td>
               </tr>
               <tr>
                 <th className="bg-gray-50 px-6 py-4 font-bold text-gray-700 text-sm text-left">メールアドレス</th>
                 <td className="px-6 py-4 text-gray-900 text-sm">
-                  <a href="mailto:info@anke.jp" className="text-blue-600 hover:text-blue-800 hover:underline">
-                    info@anke.jp
+                  <a href="mailto:info@dokujo.com" className="text-blue-600 hover:text-blue-800 hover:underline">
+                    info@dokujo.com
                   </a>
                 </td>
               </tr>

@@ -6,6 +6,7 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import { Input } from "@/components/ui/input";
 import {
   Select,
   SelectContent,
@@ -20,9 +21,15 @@ export default function InquiryForm() {
   const [errorMessage, setErrorMessage] = useState('');
   const { data: session } = useSession();
 
+  // ダミーメールアドレス（LINE/Xログイン）を除外
+  const userEmail = session?.user?.email || '';
+  const isDummyEmail = userEmail && (userEmail.startsWith('line_') || userEmail.startsWith('x_')) && userEmail.endsWith('@dokujo.com');
+  const initialEmail = isDummyEmail ? '' : userEmail;
+
   const [formData, setFormData] = useState({
     inquiryType: '',
-    inquiryContent: ''
+    inquiryContent: '',
+    replyEmail: initialEmail
   });
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -49,7 +56,7 @@ export default function InquiryForm() {
 
       if (data.success) {
         setSuccessMessage(data.message);
-        setFormData({ inquiryType: '', inquiryContent: '' });
+        setFormData({ inquiryType: '', inquiryContent: '', replyEmail: initialEmail });
       } else {
         setErrorMessage(data.error);
       }
@@ -83,6 +90,26 @@ export default function InquiryForm() {
           <div className="p-4 space-y-6">
             <div className="space-y-4">
               <div className="space-y-2">
+                <Label htmlFor="replyEmail">
+                  返信先メールアドレス <span className="text-red-600">*</span>
+                </Label>
+                <Input
+                  id="replyEmail"
+                  type="email"
+                  value={formData.replyEmail}
+                  onChange={(e) => setFormData({ ...formData, replyEmail: e.target.value })}
+                  placeholder="example@example.com"
+                  required
+                  className="border-gray-300"
+                />
+                <p className="text-gray-500 text-xs">
+                  {!isDummyEmail && session?.user?.email 
+                    ? 'プロフィールに登録されているメールアドレスが自動入力されています。変更も可能です。' 
+                    : 'お問い合わせへの返信を受け取るメールアドレスを入力してください。'}
+                </p>
+              </div>
+
+              <div className="space-y-2">
                 <Label htmlFor="inquiryType">
                   お問い合わせ区分 <span className="text-red-600">*</span>
                 </Label>
@@ -95,9 +122,9 @@ export default function InquiryForm() {
                     <SelectValue placeholder="選択してください" />
                   </SelectTrigger>
                   <SelectContent className="bg-white">
-                    <SelectItem value="アンケートについて">アンケートについて</SelectItem>
-                    <SelectItem value="ポイントについて">ポイントについて</SelectItem>
+                    <SelectItem value="相談内容について">相談内容について</SelectItem>
                     <SelectItem value="アカウントについて">アカウントについて</SelectItem>
+                    <SelectItem value="ベストアンサーのポイントについて">ベストアンサーのポイントについて</SelectItem>
                     <SelectItem value="不具合・エラー">不具合・エラー</SelectItem>
                     <SelectItem value="その他">その他</SelectItem>
                   </SelectContent>

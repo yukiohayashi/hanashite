@@ -254,7 +254,7 @@ export default async function PostPage({ params, searchParams }: { params: Promi
     <div className="bg-gray-50 min-h-screen">
       <Header />
 
-      <main className="md:flex md:justify-center mx-auto pt-[60px] md:pt-4 pb-4 max-w-7xl px-2 sm:px-6 lg:px-8">
+      <main className="md:flex md:justify-center mx-auto pt-16 md:pt-4 pb-4 max-w-7xl px-2 sm:px-6 lg:px-8">
         {/* 左サイドバー */}
         <aside className="hidden md:block w-[220px]">
           <Sidebar />
@@ -272,7 +272,7 @@ export default async function PostPage({ params, searchParams }: { params: Promi
           <section>
             <article className="px-0 md:px-2.5">
               {/* 投稿情報エリア（single.phpと同じデザイン） */}
-              <div className="relative bg-white shadow-md mb-4 p-2.5 border border-gray-200 rounded">
+              <div className="relative bg-white shadow-md mt-4 mb-4 p-2.5 border-t-4 border-t-orange-500 border-x border-b border-gray-200 rounded">
                 <div className="flex items-start">
                   {/* アバター画像 */}
                   <div className="flex-shrink-0 mr-1.5">
@@ -332,7 +332,7 @@ export default async function PostPage({ params, searchParams }: { params: Promi
                 
                 {/* タイトル */}
                 <div className="mt-4 mb-4 flex items-center justify-between">
-                  <h1 className="font-bold text-gray-900 text-2xl">
+                  <h1 className="font-bold text-gray-900 text-1.5xl">
                     {post.title}
                   </h1>
                   {(session?.user?.status === 3 || session?.user?.id === post.user_id) && (

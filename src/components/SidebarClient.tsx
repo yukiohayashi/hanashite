@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
+import { useSession } from 'next-auth/react';
 import { supabase } from '../lib/supabase';
 
 interface RankingUser {
@@ -29,8 +30,11 @@ const MATERIAL_COLORS = [
 ];
 
 export default function SidebarClient({ categories }: SidebarClientProps) {
+  const { data: session } = useSession();
   const [bestAnswerRanking, setBestAnswerRanking] = useState<RankingUser[]>([]);
   const [commentLikesRanking, setCommentLikesRanking] = useState<RankingUser[]>([]);
+  const [interestCategories, setInterestCategories] = useState<string[]>([]);
+  const [interestCategoryObjects, setInterestCategoryObjects] = useState<Category[] | null>(null);
 
   const fetchBestAnswerRanking = async () => {
     const { data: postsWithBestAnswer } = await supabase
@@ -146,6 +150,42 @@ export default function SidebarClient({ categories }: SidebarClientProps) {
     ]).catch(err => console.error('Sidebar data fetch error:', err));
   }, []);
 
+  useEffect(() => {
+    if (!session?.user?.id) return;
+    supabase
+      .from('users')
+      .select('interest_categories')
+      .eq('id', session.user.id)
+      .single()
+      .then(({ data }) => {
+        if (data?.interest_categories) {
+          try {
+            const slugs = JSON.parse(data.interest_categories);
+            const validSlugs = Array.isArray(slugs) ? slugs : [];
+            setInterestCategories(validSlugs);
+            if (validSlugs.length > 0) {
+              // is_activeに関係なく選択したカテゴリを取得
+              supabase
+                .from('categories')
+                .select('id, name, slug, icon')
+                .in('slug', validSlugs)
+                .order('display_order', { ascending: true })
+                .then(({ data: catData }) => {
+                  setInterestCategoryObjects(catData || []);
+                });
+            } else {
+              setInterestCategoryObjects([]);
+            }
+          } catch {
+            setInterestCategories([]);
+            setInterestCategoryObjects([]);
+          }
+        } else {
+          setInterestCategoryObjects([]);
+        }
+      });
+  }, [session?.user?.id]);
+
   const getBadgeColor = (rank: number) => {
     if (rank === 1) return 'bg-[#f06292]';
     if (rank === 2) return 'bg-[#ffb74d]';
@@ -157,15 +197,20 @@ export default function SidebarClient({ categories }: SidebarClientProps) {
     return `/users/${user.user_id}`;
   };
 
+  // is_activeに関係なく取得した興味カテゴリを優先、未設定時は全カテゴリ表示
+  const displayCategories = interestCategoryObjects !== null
+    ? (interestCategoryObjects.length > 0 ? interestCategoryObjects : categories)
+    : categories;
+
   return (
     <nav className="space-y-4">
-      {/* カテゴリ（常時表示） */}
+      {/* カテゴリ */}
       <div>
         <h3 className="mb-2 px-0 font-bold text-base" style={{ color: '#ff6b35' }}>
           カテゴリ
         </h3>
         <ul className="m-0 p-0 list-none">
-          {categories.length > 0 && categories.map((category, index) => {
+          {displayCategories.length > 0 && displayCategories.map((category, index) => {
             const color = MATERIAL_COLORS[(index + 1) % MATERIAL_COLORS.length];
             return (
               <li key={category.id} className="mb-1">

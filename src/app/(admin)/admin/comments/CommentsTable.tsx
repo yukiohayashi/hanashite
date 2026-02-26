@@ -1,7 +1,7 @@
 'use client';
 
-import { useState } from 'react';
-import { Trash2, ExternalLink } from 'lucide-react';
+import { useState, useMemo } from 'react';
+import { Trash2, ExternalLink, ArrowUpDown, ArrowUp, ArrowDown } from 'lucide-react';
 
 interface Comment {
   id: number;
@@ -23,16 +23,79 @@ interface CommentsTableProps {
   comments: Comment[];
 }
 
+type SortField = 'id' | 'content' | 'user' | 'post' | 'created_at';
+type SortDirection = 'asc' | 'desc';
+
 export default function CommentsTable({ comments: initialComments }: CommentsTableProps) {
   const [comments, setComments] = useState(initialComments);
   const [selectedIds, setSelectedIds] = useState<number[]>([]);
   const [loading, setLoading] = useState<number | null>(null);
   const [deleting, setDeleting] = useState(false);
+  const [sortField, setSortField] = useState<SortField>('created_at');
+  const [sortDirection, setSortDirection] = useState<SortDirection>('desc');
+
+  // ソート処理
+  const handleSort = (field: SortField) => {
+    if (sortField === field) {
+      setSortDirection(sortDirection === 'asc' ? 'desc' : 'asc');
+    } else {
+      setSortField(field);
+      setSortDirection('asc');
+    }
+  };
+
+  // ソートアイコン
+  const SortIcon = ({ field }: { field: SortField }) => {
+    if (sortField !== field) {
+      return <ArrowUpDown className="w-4 h-4 ml-1 inline" />;
+    }
+    return sortDirection === 'asc' ? 
+      <ArrowUp className="w-4 h-4 ml-1 inline" /> : 
+      <ArrowDown className="w-4 h-4 ml-1 inline" />;
+  };
+
+  // ソート済みコメント
+  const sortedComments = useMemo(() => {
+    const sorted = [...comments].sort((a, b) => {
+      let aValue: any;
+      let bValue: any;
+
+      switch (sortField) {
+        case 'id':
+          aValue = a.id;
+          bValue = b.id;
+          break;
+        case 'content':
+          aValue = a.content.toLowerCase();
+          bValue = b.content.toLowerCase();
+          break;
+        case 'user':
+          aValue = a.users?.name?.toLowerCase() || '';
+          bValue = b.users?.name?.toLowerCase() || '';
+          break;
+        case 'post':
+          aValue = a.posts?.title?.toLowerCase() || '';
+          bValue = b.posts?.title?.toLowerCase() || '';
+          break;
+        case 'created_at':
+          aValue = new Date(a.created_at).getTime();
+          bValue = new Date(b.created_at).getTime();
+          break;
+        default:
+          return 0;
+      }
+
+      if (aValue < bValue) return sortDirection === 'asc' ? -1 : 1;
+      if (aValue > bValue) return sortDirection === 'asc' ? 1 : -1;
+      return 0;
+    });
+    return sorted;
+  }, [comments, sortField, sortDirection]);
 
   // 全選択/全解除
   const handleSelectAll = (checked: boolean) => {
     if (checked) {
-      setSelectedIds(comments.map(c => c.id));
+      setSelectedIds(sortedComments.map(c => c.id));
     } else {
       setSelectedIds([]);
     }
@@ -146,25 +209,40 @@ export default function CommentsTable({ comments: initialComments }: CommentsTab
               <th className="px-6 py-3 text-left">
                 <input
                   type="checkbox"
-                  checked={selectedIds.length === comments.length && comments.length > 0}
+                  checked={selectedIds.length === sortedComments.length && sortedComments.length > 0}
                   onChange={(e) => handleSelectAll(e.target.checked)}
                   className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
                 />
               </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                ID
+              <th 
+                className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100"
+                onClick={() => handleSort('id')}
+              >
+                ID <SortIcon field="id" />
               </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                コメント内容
+              <th 
+                className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100"
+                onClick={() => handleSort('content')}
+              >
+                コメント内容 <SortIcon field="content" />
               </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                投稿者
+              <th 
+                className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100"
+                onClick={() => handleSort('user')}
+              >
+                コメント投稿者 <SortIcon field="user" />
               </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                投稿
+              <th 
+                className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100"
+                onClick={() => handleSort('post')}
+              >
+                投稿 <SortIcon field="post" />
               </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                作成日
+              <th 
+                className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100"
+                onClick={() => handleSort('created_at')}
+              >
+                作成日 <SortIcon field="created_at" />
               </th>
               <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
                 操作
@@ -172,7 +250,7 @@ export default function CommentsTable({ comments: initialComments }: CommentsTab
             </tr>
           </thead>
           <tbody className="bg-white divide-y divide-gray-200">
-            {comments.map((comment) => (
+            {sortedComments.map((comment) => (
               <tr 
                 key={comment.id} 
                 className="hover:bg-gray-50 cursor-pointer"
@@ -247,7 +325,7 @@ export default function CommentsTable({ comments: initialComments }: CommentsTab
         </table>
       </div>
 
-      {comments.length === 0 && (
+      {sortedComments.length === 0 && (
         <div className="text-center py-12">
           <p className="text-gray-500">コメントがありません</p>
         </div>

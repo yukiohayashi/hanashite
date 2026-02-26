@@ -36,7 +36,7 @@ export async function POST(request: Request) {
     }
 
     // 管理者にメール送信
-    const adminEmail = process.env.ADMIN_EMAIL || 'info@anke.jp';
+    const adminEmail = process.env.ADMIN_EMAIL || 'info@dokujo.com';
     const subject = '【Anke】ポイント交換申請';
     const message = `ポイント交換の申請がありました。
 

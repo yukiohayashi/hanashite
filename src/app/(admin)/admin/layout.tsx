@@ -55,7 +55,7 @@ export default function AdminPanelLayout({
     };
 
     const pageTitle = pageTitles[pathname] || 'ダッシュボード';
-    document.title = `${pageTitle} | ハナシテ`;
+    document.title = `${pageTitle}｜ハナシテ`;
   }, [pathname]);
   
   return (

@@ -1,6 +1,6 @@
 import { supabase } from './supabase';
 
-export const revalidate = 3600; // 1時間ごとに再検証
+export const revalidate = 0;
 
 export async function getPostsCount(): Promise<number> {
   try {

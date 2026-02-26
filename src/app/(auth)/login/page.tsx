@@ -19,11 +19,11 @@ export default async function LoginPage() {
       
       <div className="wrapper">
         <main className="article__contents">
-          <section className="mx-auto px-4 max-w-2xl one_column_wrapper">
+          <section className="mx-auto px-4 pt-20 max-w-2xl one_column_wrapper">
             <h1 className="mb-6 font-bold text-gray-800 text-3xl text-center">
               ログイン
             </h1>
-            <p className="mb-8 text-gray-600 text-center">アンケートを作成するにはログインが必要になります。</p>
+            <p className="mb-8 text-gray-600 text-center">相談するにはログインが必要になります。</p>
             
             {/* Better Auth.js SNSログイン */}
             <SocialLoginButtons />

@@ -10,7 +10,9 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
   trustHost: true,
   session: {
     strategy: "jwt",
+    maxAge: 30 * 24 * 60 * 60, // 30日
   },
+  useSecureCookies: process.env.NODE_ENV === 'production',
   cookies: {
     pkceCodeVerifier: {
       name: "__Secure-next-auth.pkce.code_verifier",

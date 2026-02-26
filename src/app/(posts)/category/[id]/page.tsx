@@ -17,6 +17,9 @@ interface Post {
   user_id: string;
   og_image: string | null;
   thumbnail_url: string | null;
+  user_name?: string | null;
+  avatar_url?: string;
+  best_answer_id?: number | null;
 }
 
 interface Category {
@@ -63,7 +66,7 @@ export default async function CategoryPage({
     return (
       <div className="flex justify-center items-center bg-gray-50 min-h-screen">
         <div className="text-center">
-          <h1 className="font-bold text-gray-900 text-2xl">カテゴリが見つかりません</h1>
+          <h1 className="font-bold text-gray-900 text-1.5xl">カテゴリが見つかりません</h1>
           <Link href="/" className="inline-block mt-4 text-indigo-600 hover:text-indigo-500">
             トップページに戻る
           </Link>
@@ -78,14 +81,31 @@ export default async function CategoryPage({
     .select('*', { count: 'exact', head: true })
     .eq('category_id', categoryId);
 
-  // 投稿を取得
-  const { data: posts } = await supabase
+  // 投稿を取得（ユーザー情報付き）
+  const { data: rawPosts } = await supabase
     .from('posts')
-    .select('id, title, content, created_at, user_id, og_image, thumbnail_url')
+    .select('id, title, content, created_at, user_id, og_image, thumbnail_url, best_answer_id, users(name, avatar_style, avatar_seed, use_custom_image, image)')
     .eq('category_id', categoryId)
+    .in('status', ['publish', 'published'])
     .order('created_at', { ascending: false })
-    .limit(postsPerPage)
-    .returns<Post[]>();
+    .range((currentPage - 1) * postsPerPage, currentPage * postsPerPage - 1);
+
+  const posts: Post[] = (rawPosts || []).map((post: any) => {
+    const user = post.users;
+    let avatarUrl: string;
+    if (user?.use_custom_image && user?.image) {
+      avatarUrl = user.image;
+    } else {
+      const seed = user?.avatar_seed || String(post.user_id) || 'guest';
+      const style = user?.avatar_style || 'big-smile';
+      avatarUrl = `https://api.dicebear.com/9.x/${style}/svg?seed=${encodeURIComponent(seed)}&size=20`;
+    }
+    return {
+      ...post,
+      user_name: user?.name || null,
+      avatar_url: avatarUrl
+    };
+  });
 
   const totalPages = Math.ceil((totalCount || 0) / postsPerPage);
 
@@ -119,35 +139,43 @@ export default async function CategoryPage({
 
           {/* 投稿一覧 */}
           {posts && posts.length > 0 ? (
-            <div className="space-y-4">
-              {posts.map((post) => (
-                <article key={post.id} className="bg-white shadow-sm hover:shadow-md p-4 rounded-lg transition-shadow">
-                  <Link href={`/posts/${post.id}`} className="block">
-                    <div className="flex gap-4">
-                      {(post.thumbnail_url || post.og_image) && (
-                        <div className="shrink-0 w-24 h-24 rounded-lg overflow-hidden">
-                          <PostImage
-                            src={post.thumbnail_url || post.og_image}
-                            alt={post.title}
-                            className="w-full h-full object-cover"
-                          />
-                        </div>
-                      )}
-                      <div className="grow min-w-0">
-                        <h2 className="font-bold text-gray-900 text-lg line-clamp-2 mb-2">
-                          {post.title}
-                        </h2>
-                        <p className="text-gray-600 text-sm line-clamp-2 mb-2">
-                          {post.content?.replace(/<[^>]*>/g, '').substring(0, 100)}...
-                        </p>
-                        <div className="flex items-center gap-2 text-gray-500 text-xs">
-                          <span>{new Date(post.created_at).toLocaleDateString('ja-JP')}</span>
-                        </div>
-                      </div>
+            <div className="space-y-2 p-2">
+              {posts.map((post) => {
+                const cleanContent = (post.content || '').replace(/<[^>]*>/g, '').replace(/&nbsp;/g, ' ').trim();
+                const contentPreview = cleanContent.length > 0
+                  ? cleanContent.substring(0, 50) + (cleanContent.length > 50 ? '...' : '')
+                  : '';
+                return (
+                  <Link
+                    key={post.id}
+                    href={`/posts/${post.id}`}
+                    className="relative block bg-white hover:shadow-md p-3 border border-gray-300 rounded-md transition-all hover:-translate-y-1"
+                  >
+                    <h3 className="font-bold text-gray-900 text-base md:text-lg leading-relaxed pr-20">
+                      {post.title}
+                    </h3>
+                    {contentPreview && (
+                      <p className="mt-1 text-gray-600 text-sm line-clamp-1 md:line-clamp-2 overflow-hidden text-ellipsis">
+                        {contentPreview}
+                      </p>
+                    )}
+                    <div className="mt-2 flex items-center gap-2 text-gray-500 text-xs">
+                      <img
+                        src={post.avatar_url || 'https://api.dicebear.com/9.x/big-smile/svg?seed=guest&size=20'}
+                        alt="相談者"
+                        className="w-4 h-4 rounded-full border border-gray-200 shrink-0"
+                      />
+                      <span className="truncate">{post.user_name || 'ゲスト'}さんからの相談</span>
+                      <span className="shrink-0">{new Date(post.created_at).toLocaleDateString('ja-JP')}</span>
                     </div>
+                    {post.best_answer_id && (
+                      <span className="absolute bottom-3 right-3 flex items-center gap-1 bg-green-100 text-green-700 text-xs font-bold px-2 py-0.5 rounded-full border border-green-300">
+                        <i className="fas fa-check-circle"></i> 解決済み
+                      </span>
+                    )}
                   </Link>
-                </article>
-              ))}
+                );
+              })}
             </div>
           ) : (
             <div className="bg-white shadow-sm p-8 rounded-lg text-center">

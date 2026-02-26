@@ -38,7 +38,7 @@ export default function LoginRequired({ children, pageName }: LoginRequiredProps
       <div className="bg-gray-50 min-h-screen">
         <div className="wrapper" style={{ display: 'flex', maxWidth: '1260px', margin: '70px auto 0', justifyContent: 'center' }}>
           <main className="article__contents" style={{ minWidth: '690px', margin: '0 5px' }}>
-            <h1 className="mb-4 p-0 font-bold text-[#ff6b35] text-2xl">{pageName}</h1>
+            <h1 className="mb-4 py-1 font-bold text-[#ff6b35] text-2xl">{pageName}</h1>
             <div className="bg-white shadow-sm p-6 rounded-lg text-center">
               <p className="mb-4 text-gray-600">ログインしてください。</p>
               <a href="/login" className="inline-block bg-[#ff6b35] hover:bg-orange-600 px-10 py-4 rounded font-bold text-white transition-colors">

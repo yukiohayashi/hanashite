@@ -648,7 +648,7 @@ sudo grep -A 10 "service auth" /etc/dovecot/conf.d/10-master.conf
 
 ### 14.3. メールが届かない（宛先が古いアドレス）
 
-**症状**: 問い合わせメールが `info@anke.jp` など古いアドレスに送信される
+**症状**: 問い合わせメールが `info@dokujo.com` など古いアドレスに送信される
 
 **原因**: `ADMIN_EMAIL` 環境変数が設定されていない
 

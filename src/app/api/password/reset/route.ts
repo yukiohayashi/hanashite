@@ -58,7 +58,11 @@ export async function POST(request: Request) {
     }
 
     // リセットURLを生成
-    const resetUrl = `${process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'}/resetpassword/confirm?token=${resetToken}`;
+    // リクエストヘッダーからホスト情報を取得
+    const host = request.headers.get('host') || 'dokujo.com';
+    const protocol = host.includes('localhost') ? 'http' : 'https';
+    const baseUrl = `${protocol}://${host}`;
+    const resetUrl = `${baseUrl}/resetpassword/confirm?token=${resetToken}`;
     
     // SMTP経由でメールを送信
     const emailResult = await sendPasswordResetEmail({

@@ -122,6 +122,12 @@ export default function CommentSection({ postId, initialComments, totalCount, po
   };
 
   const handleLike = async (commentId: number) => {
+    // ログインチェック
+    if (!session) {
+      alert('いいねするにはログインが必要です');
+      return;
+    }
+
     if (likingComments.has(commentId)) return;
 
     setLikingComments(prev => new Set(prev).add(commentId));
@@ -134,7 +140,7 @@ export default function CommentSection({ postId, initialComments, totalCount, po
         },
         body: JSON.stringify({
           commentId,
-          userId: session?.user?.id || null,
+          userId: session.user.id,
         }),
       });
 
@@ -184,7 +190,7 @@ export default function CommentSection({ postId, initialComments, totalCount, po
           <div className="flex justify-center">
             <Link
               href="/login"
-              className="inline-flex justify-center items-center bg-[#ff6b35] hover:bg-[#e58a2f] px-6 py-3 rounded font-bold text-white text-sm no-underline transition-colors"
+              className="inline-flex justify-center items-center bg-green-600 hover:bg-green-700 px-6 py-3 rounded font-bold text-white text-sm no-underline transition-colors"
               style={{ minWidth: '180px' }}
             >
               ログイン
@@ -215,7 +221,7 @@ export default function CommentSection({ postId, initialComments, totalCount, po
               }}
               className="mt-2 px-4 py-2 bg-yellow-600 hover:bg-yellow-700 text-white rounded-md text-sm font-medium transition-colors"
             >
-              ベストアンサーを見る
+              ベストアンサーをみる
             </button>
           </div>
         </div>

@@ -298,7 +298,7 @@ export default function ProfileSetForm({ user, categories, isFirstTime }: Profil
           <label className="block mb-2 font-bold text-gray-700">
             興味のあるカテゴリ（１つ以上選択して下さい）
           </label>
-          <div className="gap-x-1 gap-y-1 grid grid-cols-6">
+          <div className="gap-x-1 gap-y-1 grid grid-cols-3 md:grid-cols-6">
             {categories.map((category) => (
               <label key={category.id} className="items-center space-x-1 hover:bg-gray-50 p-1 rounded whitespace-nowrap cursor-pointer">
                 <input

@@ -76,12 +76,12 @@ export default function Header() {
 
           {/* 中央: ロゴ */}
           <div className="flex flex-col justify-center items-center">
-            <Link href="/" className="w-[150px] text-center">
+            <Link href="/" className="w-[120px] text-center">
               <Image 
                 src="/images/logo.png" 
                 alt="ハナシテ" 
-                width={150} 
-                height={40}
+                width={120} 
+                height={32}
                 className="w-full"
               />
             </Link>
@@ -137,12 +137,12 @@ export default function Header() {
             {/* ロゴとアンケート情報 */}
             <div className="flex items-center gap-4 py-2">
               <Link href="/" className="flex flex-col items-center">
-                <div className="w-[150px] text-center">
+                <div className="w-[120px] text-center">
                   <Image 
                     src="/images/logo.png" 
                     alt="ハナシテ" 
-                    width={150} 
-                    height={40}
+                    width={120} 
+                    height={32}
                     className="w-full"
                   />
                 </div>

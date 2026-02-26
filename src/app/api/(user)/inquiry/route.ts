@@ -26,7 +26,7 @@ function replaceVariables(text: string, variables: Record<string, string>) {
 
 export async function POST(request: Request) {
   try {
-    const { userId, inquiryType, inquiryContent, userEmail, userNickname } = await request.json();
+    const { userId, inquiryType, inquiryContent, userEmail, userNickname, replyEmail } = await request.json();
 
     if (!userId || !inquiryType || !inquiryContent) {
       return NextResponse.json(
@@ -35,16 +35,27 @@ export async function POST(request: Request) {
       );
     }
 
+    // 返信先メールアドレスの決定（replyEmailを優先、ダミーメールを除外）
+    const isDummyEmail = userEmail && (userEmail.startsWith('line_') || userEmail.startsWith('x_')) && userEmail.endsWith('@dokujo.com');
+    const effectiveReplyEmail = replyEmail || (!isDummyEmail ? userEmail : '');
+
+    if (!effectiveReplyEmail) {
+      return NextResponse.json(
+        { success: false, error: '返信先メールアドレスを入力してください' },
+        { status: 400 }
+      );
+    }
+
     const variables = {
       name: userNickname || 'ユーザー',
-      email: userEmail || '',
+      email: effectiveReplyEmail,
       message: `【${inquiryType}】\n${inquiryContent}`,
       date: new Date().toLocaleString('ja-JP'),
     };
 
     // ユーザーへの自動返信メール
     const userTemplate = await getTemplate('inquiry');
-    if (userTemplate && userEmail) {
+    if (userTemplate && effectiveReplyEmail) {
       const userSubject = replaceVariables(userTemplate.subject, variables);
       const userBody = replaceVariables(userTemplate.body, variables);
 
@@ -52,7 +63,7 @@ export async function POST(request: Request) {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          to: userEmail,
+          to: effectiveReplyEmail,
           subject: userSubject,
           body: userBody,
           templateKey: 'inquiry',
@@ -65,7 +76,7 @@ export async function POST(request: Request) {
     if (adminTemplate) {
       const adminSubject = replaceVariables(adminTemplate.subject, variables);
       const adminBody = replaceVariables(adminTemplate.body, variables);
-      const adminEmail = process.env.ADMIN_EMAIL || 'info@anke.jp';
+      const adminEmail = process.env.ADMIN_EMAIL || 'info@dokujo.com';
 
       await fetch(`${process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'}/api/send-mail`, {
         method: 'POST',

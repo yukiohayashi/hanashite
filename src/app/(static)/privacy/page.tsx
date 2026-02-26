@@ -74,7 +74,7 @@ export default function PrivacyPage() {
             本ポリシーに関するお問い合わせは、下記の窓口までお願いいたします。
           </p>
           <p>
-            メールアドレス: <a href="mailto:info@anke.jp" className="text-blue-600 hover:text-blue-800 hover:underline">info@anke.jp</a>
+            メールアドレス: <a href="mailto:info@dokujo.com" className="text-blue-600 hover:text-blue-800 hover:underline">info@dokujo.com</a>
           </p>
 
           <p className="mt-8 text-gray-600 text-sm">以上</p>

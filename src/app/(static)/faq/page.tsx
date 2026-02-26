@@ -69,7 +69,7 @@ export default function FAQPage() {
             <h2 className="mb-3 font-bold text-gray-900 text-lg">Q. その他のお問い合わせ</h2>
             <p className="text-gray-700">
               A. 上記以外のご質問は、以下のメールアドレスまでお問い合わせください。<br />
-              <a href="mailto:info@anke.jp" className="text-blue-600 hover:text-blue-800 hover:underline">info@anke.jp</a>
+              <a href="mailto:info@dokujo.com" className="text-blue-600 hover:text-blue-800 hover:underline">info@dokujo.com</a>
             </p>
           </div>
         </div>

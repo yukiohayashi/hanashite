@@ -12,8 +12,15 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // ユーザーIDが指定されていない場合はゲストとして扱う
-    const effectiveUserId = userId || null;
+    // ログインユーザーのみいいね可能
+    if (!userId) {
+      return NextResponse.json(
+        { success: false, error: 'ログインが必要です' },
+        { status: 401 }
+      );
+    }
+
+    const effectiveUserId = userId;
 
     // 既存のいいねを確認
     const { data: existingLike, error: likeError } = await supabase

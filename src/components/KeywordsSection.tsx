@@ -18,13 +18,13 @@ export default async function KeywordsSection() {
           </span>
           <div className="flex flex-wrap gap-2">
             {popularKeywords.map((item, index) => (
-              <Link
+              <a
                 key={index}
                 href={`/?s=${encodeURIComponent(item.keyword)}`}
                 className="hover:bg-gray-50 px-3 py-1 border border-gray-300 hover:border-gray-400 rounded-full text-gray-700 text-sm transition-colors"
               >
                 {item.keyword}
-              </Link>
+              </a>
             ))}
           </div>
         </div>

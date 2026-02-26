@@ -2,7 +2,7 @@ import { supabase } from '@/lib/supabase';
 import { NextResponse } from 'next/server';
 
 export const dynamic = 'force-dynamic';
-export const revalidate = 300; // 5分キャッシュ
+export const revalidate = 0;
 
 export async function GET() {
   try {
@@ -21,7 +21,7 @@ export async function GET() {
       { count: count || 0 },
       {
         headers: {
-          'Cache-Control': 'public, s-maxage=300, stale-while-revalidate=600',
+          'Cache-Control': 'no-store, no-cache, must-revalidate',
         },
       }
     );

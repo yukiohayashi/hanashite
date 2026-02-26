@@ -25,7 +25,7 @@ export default async function KeywordPage({
     return (
       <div className="flex justify-center items-center bg-gray-50 min-h-screen">
         <div className="text-center">
-          <h1 className="font-bold text-gray-900 text-2xl">キーワードが見つかりません</h1>
+          <h1 className="font-bold text-gray-900 text-1.5xl">キーワードが見つかりません</h1>
           <Link href="/" className="inline-block mt-4 text-indigo-600 hover:text-indigo-500">
             トップページに戻る
           </Link>

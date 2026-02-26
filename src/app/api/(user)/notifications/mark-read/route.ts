@@ -12,8 +12,25 @@ export async function POST(request: Request) {
       );
     }
 
-    // アンカー部分を正規化（anke-comment-とreply-の両方に対応）
-    const normalizedId = notificationId.replace(/#anke-comment-/g, '#reply-');
+    // notificationIdから数値IDを抽出
+    // 例: "/posts/123" -> 123, "/posts/123#reply-456" -> 456
+    let targetId: number;
+    if (notificationType === 'post_comment' || notificationType === 'reply') {
+      // コメントIDを抽出（#reply-456 または #anke-comment-456）
+      const match = notificationId.match(/#(?:reply-|anke-comment-)(\d+)/);
+      targetId = match ? parseInt(match[1]) : 0;
+    } else {
+      // post IDを抽出（/posts/123）
+      const match = notificationId.match(/\/posts\/(\d+)/);
+      targetId = match ? parseInt(match[1]) : 0;
+    }
+
+    if (!targetId) {
+      return NextResponse.json(
+        { success: false, error: '無効な通知IDです' },
+        { status: 400 }
+      );
+    }
 
     // 既読レコードを挿入（重複の場合は無視）
     const { error } = await supabaseAdmin
@@ -21,7 +38,7 @@ export async function POST(request: Request) {
       .insert({
         user_id: parseInt(userId),
         notification_type: notificationType,
-        notification_id: normalizedId,
+        target_id: targetId,
         read_at: new Date().toISOString()
       });
 

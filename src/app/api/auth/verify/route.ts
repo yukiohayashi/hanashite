@@ -160,7 +160,10 @@ export async function POST(request: NextRequest) {
     }
 
     // 本登録完了メールを送信
-    const siteUrl = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000';
+    // リクエストヘッダーからホスト情報を取得
+    const host = request.headers.get('host') || 'dokujo.com';
+    const protocol = host.includes('localhost') ? 'http' : 'https';
+    const siteUrl = `${protocol}://${host}`;
     const loginUrl = `${siteUrl}/login`;
     
     const emailResult = await sendWelcomeEmail({
@@ -169,7 +172,7 @@ export async function POST(request: NextRequest) {
       password: newPassword,
       loginUrl,
       siteUrl,
-      siteName: 'Anke',
+      siteName: 'ハナシテ',
     });
 
     if (!emailResult.success) {

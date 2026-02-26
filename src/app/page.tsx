@@ -12,6 +12,7 @@ import InfinitePostList from '@/components/InfinitePostList';
 import AdSense from '@/components/AdSense';
 import ResolvedSection from '@/components/ResolvedSection';
 import SearchHistoryRecorder from '@/components/SearchHistoryRecorder';
+import FloatingCreateButton from '@/components/FloatingCreateButton';
 import { auth } from '@/lib/auth';
 
 // HTMLタグを除去するヘルパー関数
@@ -23,9 +24,8 @@ interface HomeProps {
   searchParams: Promise<{ s?: string; sort?: string }>;
 }
 
-// ISR（Incremental Static Regeneration）を有効化
-// 300秒（5分）ごとに再生成し、それまでは静的HTMLを配信（高速化）
-export const revalidate = 300;
+// リージョン変更後はリアルタイムでデータを取得
+export const revalidate = 0;
 
 export default async function Home({ searchParams }: HomeProps) {
   // 現在のユーザーを取得（セッションから）
@@ -282,54 +282,37 @@ export default async function Home({ searchParams }: HomeProps) {
   }
 
   // 注目の相談を取得（受付中の投稿を3件）
-  // like_countsから直接トップ3を取得して効率化
+  // 注目の相談を取得（total_votesが高い受付中の投稿）
   let featuredPosts: any[] = [];
   
-  // いいね数トップの投稿IDを取得
-  const { data: topLikes } = await supabase
-    .from('like_counts')
-    .select('target_id, like_count')
-    .eq('like_type', 'post')
-    .order('like_count', { ascending: false })
-    .limit(20); // 上位20件から受付中のものを3件選ぶ
+  const { data: topPosts } = await supabase
+    .from('posts')
+    .select('id, title, created_at, user_id, og_image, thumbnail_url, best_answer_id, total_votes, category_id, categories(name), users!inner(status, name, avatar_style, avatar_seed, use_custom_image, image)')
+    .in('status', ['publish', 'published'])
+    .neq('user_id', 1)
+    .neq('users.status', 3)
+    .is('best_answer_id', null)
+    .gte('total_votes', 1)
+    .order('total_votes', { ascending: false })
+    .limit(3);
 
-  if (topLikes && topLikes.length > 0) {
-    const topPostIds = topLikes.map(l => l.target_id);
-    
-    // 投稿情報とユーザー情報をJOINで一度に取得
-    const { data: topPosts } = await supabase
-      .from('posts')
-      .select('id, title, created_at, user_id, og_image, thumbnail_url, best_answer_id, category_id, categories(name), users!inner(status, name, avatar_style, avatar_seed, use_custom_image, image)')
-      .in('id', topPostIds)
-      .in('status', ['publish', 'published'])
-      .neq('user_id', 1)
-      .neq('users.status', 3)
-      .is('best_answer_id', null);
-
-    if (topPosts && topPosts.length > 0) {
-      // いいね数でソートしてトップ3を取得
-      const postsWithLikes = topPosts.map(post => {
-        const likeData = topLikes.find(l => l.target_id === post.id);
-        const user = (post as any).users;
-        let avatarUrl: string;
-        if (user?.use_custom_image && user?.image) {
-          avatarUrl = user.image;
-        } else {
-          const seed = user?.avatar_seed || String(post.user_id) || 'guest';
-          const style = user?.avatar_style || 'big-smile';
-          avatarUrl = `https://api.dicebear.com/9.x/${style}/svg?seed=${encodeURIComponent(seed)}&size=20`;
-        }
-        return {
-          ...post,
-          like_count: likeData?.like_count || 0,
-          user_name: user?.name || null,
-          avatar_url: avatarUrl
-        };
-      });
-
-      postsWithLikes.sort((a, b) => b.like_count - a.like_count);
-      featuredPosts = postsWithLikes.slice(0, 3);
-    }
+  if (topPosts && topPosts.length > 0) {
+    featuredPosts = topPosts.map(post => {
+      const user = (post as any).users;
+      let avatarUrl: string;
+      if (user?.use_custom_image && user?.image) {
+        avatarUrl = user.image;
+      } else {
+        const seed = user?.avatar_seed || String(post.user_id) || 'guest';
+        const style = user?.avatar_style || 'big-smile';
+        avatarUrl = `https://api.dicebear.com/9.x/${style}/svg?seed=${encodeURIComponent(seed)}&size=20`;
+      }
+      return {
+        ...post,
+        user_name: user?.name || null,
+        avatar_url: avatarUrl
+      };
+    });
   }
 
   // ユーザー情報はJOINで取得済み
@@ -416,7 +399,7 @@ export default async function Home({ searchParams }: HomeProps) {
     .order('created_at', { ascending: false })
     .limit(3);
 
-  let bestAnswersWithUsers: { id: number; content: string; created_at: string; post_id: number; post_title: string; user_name: string; user_id: string | null; avatar_url: string; category_name: string | null }[] = [];
+  let bestAnswersWithUsers: { id: number; content: string; created_at: string; post_id: number; post_title: string; user_name: string; user_id: string | null; avatar_url: string; category_name: string | null; category_id: number | null }[] = [];
   if (postsWithBestAnswer && postsWithBestAnswer.length > 0) {
     const bestAnswerIds = postsWithBestAnswer.map(p => p.best_answer_id).filter(id => id !== null);
     
@@ -457,7 +440,8 @@ export default async function Home({ searchParams }: HomeProps) {
           user_name: user?.name || 'ゲスト',
           user_id: comment.user_id,
           avatar_url: avatarUrl,
-          category_name: (post as any)?.categories?.name || null
+          category_name: (post as any)?.categories?.name || null,
+          category_id: post?.category_id || null
         };
       });
     }
@@ -528,20 +512,17 @@ export default async function Home({ searchParams }: HomeProps) {
                       ? fullContent.substring(0, Math.min(halfLength, 100)) + (fullContent.length > Math.min(halfLength, 100) ? '...' : '')
                       : '';
                     return (
-                      <Link 
-                        href={`/posts/${post.id}`} 
-                        className="block bg-white p-3 border border-gray-300 rounded-md hover:shadow-md transition-shadow"
-                      >
-                        <h3 className="mb-2 font-extrabold text-gray-900 text-lg line-clamp-2">
-                          {post.title}
-                        </h3>
-                        {contentPreview && (
-                          <p className="mt-1 text-gray-600 text-sm line-clamp-1 md:line-clamp-2 overflow-hidden text-ellipsis">
-                            {contentPreview}
-                          </p>
-                        )}
-                        <div className="mt-2 flex items-center justify-between gap-2 text-gray-500 text-xs">
-                          <div className="flex items-center min-w-0 flex-1 overflow-hidden">
+                      <div className="relative bg-white p-3 border border-gray-300 rounded-md hover:shadow-md transition-shadow">
+                        <Link href={`/posts/${post.id}`} className="block">
+                          <h3 className="mb-2 font-extrabold text-gray-900 text-lg line-clamp-2">
+                            {post.title}
+                          </h3>
+                          {contentPreview && (
+                            <p className="mt-1 text-gray-600 text-sm line-clamp-1 md:line-clamp-2 overflow-hidden text-ellipsis">
+                              {contentPreview}
+                            </p>
+                          )}
+                          <div className="mt-2 flex items-center gap-2 text-gray-500 text-xs">
                             <img 
                               src={(post as any).avatar_url || 'https://api.dicebear.com/9.x/big-smile/svg?seed=guest&size=20'} 
                               alt="相談者"
@@ -550,13 +531,16 @@ export default async function Home({ searchParams }: HomeProps) {
                             <span className="truncate">{(post as any).user_name || 'ゲスト'}さんからの相談</span>
                             <span className="ml-2 shrink-0 hidden md:inline">{new Date(post.created_at).toLocaleDateString('ja-JP')}</span>
                           </div>
-                          {(post as any).categories?.name && (
-                            <span className="inline-block px-2 py-0.5 text-xs font-medium text-gray-600 bg-gray-200 rounded whitespace-nowrap shrink-0">
-                              {(post as any).categories.name}
-                            </span>
-                          )}
-                        </div>
-                      </Link>
+                        </Link>
+                        {(post as any).categories?.name && (post as any).category_id && (
+                          <Link
+                            href={`/category/${(post as any).category_id}`}
+                            className="absolute bottom-3 right-3 inline-block px-2 py-0.5 text-xs font-medium text-gray-600 bg-gray-200 rounded whitespace-nowrap hover:bg-gray-300 transition-colors z-10"
+                          >
+                            {(post as any).categories.name}
+                          </Link>
+                        )}
+                      </div>
                     );
                   })()}
                 </div>
@@ -573,17 +557,17 @@ export default async function Home({ searchParams }: HomeProps) {
                     ? cleanContent.substring(0, 50) + (cleanContent.length > 50 ? '...' : '')
                     : '';
                   return (
-                    <Link key={post.id} href={`/posts/${post.id}`} className="flex flex-col bg-white hover:shadow-md border border-gray-300 rounded-md transition-all h-full p-2">
-                      <div className="font-bold text-gray-900 text-sm line-clamp-2 leading-tight">
-                        {post.title}
-                      </div>
-                      {contentPreview && (
-                        <p className="mt-1 text-gray-500 text-xs line-clamp-1 overflow-hidden text-ellipsis">
-                          {contentPreview}
-                        </p>
-                      )}
-                      <div className="mt-1 flex items-center justify-between gap-1 font-normal text-[10px] text-gray-400">
-                        <div className="flex items-center min-w-0 flex-1 overflow-hidden">
+                    <div key={post.id} className="relative flex flex-col bg-white hover:shadow-md border border-gray-300 rounded-md transition-all h-full p-2">
+                      <Link href={`/posts/${post.id}`} className="flex flex-col flex-1 pb-5">
+                        <div className="font-bold text-gray-900 text-sm line-clamp-2 leading-tight">
+                          {post.title}
+                        </div>
+                        {contentPreview && (
+                          <p className="mt-1 text-gray-500 text-xs line-clamp-1 overflow-hidden text-ellipsis">
+                            {contentPreview}
+                          </p>
+                        )}
+                        <div className="mt-1 flex items-center gap-1 font-normal text-[10px] text-gray-400">
                           <img 
                             src={(post as any).avatar_url || 'https://api.dicebear.com/9.x/big-smile/svg?seed=guest&size=20'} 
                             alt="相談者"
@@ -591,13 +575,16 @@ export default async function Home({ searchParams }: HomeProps) {
                           />
                           <span className="truncate">{(post as any).user_name || 'ゲスト'}さん</span>
                         </div>
-                        {(post as any).categories?.name && (
-                          <span className="inline-block px-1.5 py-0.5 text-[10px] font-medium text-gray-600 bg-gray-200 rounded whitespace-nowrap shrink-0">
-                            {(post as any).categories.name}
-                          </span>
-                        )}
-                      </div>
-                    </Link>
+                      </Link>
+                      {(post as any).categories?.name && (post as any).category_id && (
+                        <Link
+                          href={`/category/${(post as any).category_id}`}
+                          className="absolute bottom-2 right-2 inline-block px-1.5 py-0.5 text-[10px] font-medium text-gray-600 bg-gray-200 rounded whitespace-nowrap hover:bg-gray-300 transition-colors z-10"
+                        >
+                          {(post as any).categories.name}
+                        </Link>
+                      )}
+                    </div>
                   );
                 })}
               </div>
@@ -618,18 +605,6 @@ export default async function Home({ searchParams }: HomeProps) {
             <h3 className="m-1.5 mb-2 px-0 font-bold text-base" style={{ color: '#ff6b35' }}>
               <i className="fas fa-comments mr-1"></i>相談受付中
             </h3>
-
-            {/* タブメニュー */}
-            <div className="px-1 py-0">
-              <ul className="flex justify-center m-0 p-0 w-full list-none">
-                <li className="m-0 mx-1.5 my-1.5 w-auto text-xs">
-                  <Link href="/" className={`block w-full h-full underline ${sortBy === 'top_post' || sortBy === 'recommend' ? 'font-bold text-gray-900' : 'text-gray-600'}`}>最新順</Link>
-                </li>
-                <li className="m-0 mx-1.5 my-1.5 w-auto text-xs">
-                  <Link href="/?sort=deadline" className={`block w-full h-full underline ${sortBy === 'deadline' ? 'font-bold text-gray-900' : 'text-gray-600'}`}>締切が近い順</Link>
-                </li>
-              </ul>
-            </div>
 
             {/* 殿堂入りヘッダー（未使用） */}
             {false && sortBy === 'statistics' && hallOfFamePosts.length > 0 && (
@@ -678,6 +653,9 @@ export default async function Home({ searchParams }: HomeProps) {
       </main>
       
       <Footer />
+      
+      {/* 右下の相談するボタン */}
+      <FloatingCreateButton />
     </div>
   );
 }
@@ -773,9 +751,10 @@ async function InterestCategoriesSection({ userId }: { userId: string | number |
     categories.map(async (category) => {
       const { data: posts } = await supabase
         .from('posts')
-        .select('id, title, created_at, og_image, thumbnail_url, users!inner(name)')
+        .select('id, title, created_at, category_id, categories(name), users!inner(name, avatar_style, avatar_seed, use_custom_image, image)')
         .eq('category_id', category.id)
         .in('status', ['publish', 'published'])
+        .is('best_answer_id', null)
         .order('created_at', { ascending: false })
         .limit(5);
 
@@ -783,8 +762,21 @@ async function InterestCategoriesSection({ userId }: { userId: string | number |
     })
   );
 
-  // すべてのカテゴリの投稿を統合
-  const allPosts = categorySections.flatMap(({ posts }) => posts);
+  // すべてのカテゴリの投稿を統合してアバターURLを生成
+  const allPosts = categorySections.flatMap(({ posts }) =>
+    posts.map((post: any) => {
+      const user = post.users;
+      let avatarUrl: string;
+      if (user?.use_custom_image && user?.image) {
+        avatarUrl = user.image;
+      } else {
+        const seed = user?.avatar_seed || String(post.user_id) || 'guest';
+        const style = user?.avatar_style || 'big-smile';
+        avatarUrl = `https://api.dicebear.com/9.x/${style}/svg?seed=${encodeURIComponent(seed)}&size=20`;
+      }
+      return { ...post, user_name: user?.name || null, avatar_url: avatarUrl };
+    })
+  );
 
   return (
     <div className="mb-4">
@@ -795,31 +787,31 @@ async function InterestCategoriesSection({ userId }: { userId: string | number |
         </Link>
       </h3>
       <div className="space-y-2 px-2">
-        {allPosts.map((post) => {
-          const imageUrl = (post as any).og_image || (post as any).thumbnail_url || '/images/noimage.webp';
-          const userName = (post as any).users?.name || 'ゲスト';
-          return (
-            <Link key={post.id} href={`/posts/${post.id}`} className="flex gap-3 bg-white hover:shadow-md p-3 border border-gray-300 rounded-md transition-all hover:-translate-y-1">
-              <div className="flex-1 min-w-0">
-                <h3 className="font-normal text-gray-900 text-sm leading-relaxed">
-                  {post.title}
-                </h3>
-                <div className="mt-2 text-gray-500 text-xs">
-                  <span>{userName}さんからの相談</span>
-                  <span className="ml-2">{new Date(post.created_at).toLocaleDateString('ja-JP')}</span>
-                </div>
-              </div>
-              <div className="shrink-0 rounded w-20 h-20 overflow-hidden">
-                <img 
-                  src={imageUrl}
-                  alt={post.title}
-                  className="w-full h-full object-cover"
-                  loading="lazy"
+        {allPosts.map((post: any, index: number) => (
+          <div key={`${post.id}-${index}`} className="relative bg-white hover:shadow-md p-3 border border-gray-300 rounded-md transition-all hover:-translate-y-1">
+            <Link href={`/posts/${post.id}`} className="block pr-16">
+              <h3 className="font-bold text-gray-900 text-base md:text-lg leading-relaxed">
+                {post.title}
+              </h3>
+              <div className="mt-2 flex items-center gap-2 text-gray-500 text-xs">
+                <img
+                  src={post.avatar_url || 'https://api.dicebear.com/9.x/big-smile/svg?seed=guest&size=20'}
+                  alt="相談者"
+                  className="w-4 h-4 rounded-full border border-gray-200 inline-block mr-1 shrink-0"
                 />
+                <span className="truncate">{post.user_name || 'ゲスト'}さんからの相談</span>
               </div>
             </Link>
-          );
-        })}
+            {post.categories?.name && post.category_id && (
+              <Link
+                href={`/category/${post.category_id}`}
+                className="absolute bottom-3 right-3 inline-block px-2 py-0.5 text-xs font-medium text-gray-600 bg-gray-200 rounded whitespace-nowrap hover:bg-gray-300 transition-colors z-10"
+              >
+                {post.categories.name}
+              </Link>
+            )}
+          </div>
+        ))}
       </div>
     </div>
   );

@@ -87,14 +87,18 @@ export default function PostCreateForm() {
     { id: '2', value: '' }
   ]);
 
-  // カテゴリーを取得
+  // カテゴリーを取得（運営からのお知らせを除外）
   useEffect(() => {
     const fetchCategories = async () => {
       try {
         const response = await fetch('/api/categories');
         const data = await response.json();
         if (data.success) {
-          setCategories(data.categories);
+          // 運営からのお知らせ（slug: announcement）を除外
+          const filteredCategories = data.categories.filter(
+            (cat: Category) => cat.slug !== 'announcement'
+          );
+          setCategories(filteredCategories);
         }
       } catch (error) {
         console.error('Failed to fetch categories:', error);
@@ -329,7 +333,7 @@ export default function PostCreateForm() {
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="closeDate">締切日時（<span className="text-gray-900">3週間</span>以内を選択） <span className="text-red-600">*</span></Label>
+              <Label htmlFor="closeDate">締切日時(<span className="text-gray-900">3週間</span>以内を選択)<span className="text-red-600">*</span></Label>
               <Input
                 id="closeDate"
                 type="date"

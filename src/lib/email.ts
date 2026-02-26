@@ -157,7 +157,7 @@ interface SendPasswordResetEmailParams {
 export async function sendPasswordResetEmail({ email, resetUrl, userName }: SendPasswordResetEmailParams) {
   try {
     const settings = await getMailSettings();
-    const template = await getMailTemplate('password_reset_email');
+    const template = await getMailTemplate('password_reset');
 
     const transporter = nodemailer.createTransport({
       host: settings.smtp_host,

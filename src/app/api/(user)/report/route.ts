@@ -68,7 +68,7 @@ export async function POST(request: Request) {
     if (adminTemplate) {
       const adminSubject = replaceVariables(adminTemplate.subject, variables);
       const adminBody = replaceVariables(adminTemplate.body, variables);
-      const adminEmail = process.env.ADMIN_EMAIL || 'info@anke.jp';
+      const adminEmail = process.env.ADMIN_EMAIL || 'info@dokujo.com';
 
       await fetch(`${process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'}/api/send-mail`, {
         method: 'POST',

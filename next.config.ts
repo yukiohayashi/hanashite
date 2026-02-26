@@ -60,28 +60,9 @@ const nextConfig: NextConfig = {
   // 静的最適化を有効化
   reactStrictMode: true,
   
-  // ヘッダー最適化（キャッシュ制御）
-  async headers() {
-    return [
-      {
-        source: '/:path*',
-        headers: [
-          {
-            key: 'Cache-Control',
-            value: 'public, max-age=3600, stale-while-revalidate=86400',
-          },
-        ],
-      },
-      {
-        source: '/api/:path*',
-        headers: [
-          {
-            key: 'Cache-Control',
-            value: 'public, max-age=60, stale-while-revalidate=120',
-          },
-        ],
-      },
-    ];
+  // キャッシュバスティング用のビルドID
+  generateBuildId: async () => {
+    return `build-${Date.now()}`;
   },
 };
 

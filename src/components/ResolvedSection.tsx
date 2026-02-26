@@ -14,6 +14,7 @@ interface BestAnswer {
   user_id: string | null;
   avatar_url: string;
   category_name: string | null;
+  category_id?: number | null;
 }
 
 interface WaitingPost {
@@ -24,6 +25,7 @@ interface WaitingPost {
   deadline_at: string | null;
   user_name: string | null;
   avatar_url: string;
+  category_id?: number | null;
   categories?: {
     name: string;
   } | null;
@@ -84,34 +86,36 @@ export default function ResolvedSection({ bestAnswers, waitingPosts }: ResolvedS
             bestAnswers.map((answer) => {
               const contentPreview = stripHtmlTags(answer.content).substring(0, 80);
               return (
-                <Link
-                  key={answer.id}
-                  href={`/posts/${answer.post_id}`}
-                  className="block bg-white hover:shadow-md p-3 border border-gray-300 rounded-md transition-all"
-                >
-                  <div className="flex items-center gap-1.5 text-xs text-gray-500 mb-1">
-                    <Image
-                      src={answer.avatar_url}
-                      alt={answer.user_name}
-                      width={20}
-                      height={20}
-                      unoptimized
-                      className="w-5 h-5 rounded-full border border-gray-200"
-                    />
-                    <span className="font-medium text-gray-700">{answer.user_name}さんのベストアンサー</span>
-                  </div>
-                  <p className="text-gray-800 text-sm line-clamp-2">
-                    {contentPreview}...
-                  </p>
-                  <div className="mt-2 flex items-center justify-between gap-2 text-gray-500 text-xs">
-                    <span className="truncate flex-1 min-w-0">相談: {answer.post_title.substring(0, 40)}{answer.post_title.length > 40 ? '...' : ''}</span>
-                    {answer.category_name && (
-                      <span className="inline-block px-2 py-0.5 text-xs font-medium text-gray-600 bg-gray-200 rounded whitespace-nowrap shrink-0">
-                        {answer.category_name}
-                      </span>
-                    )}
-                  </div>
-                </Link>
+                <div key={answer.id} className="relative bg-white hover:shadow-md p-3 border border-gray-300 rounded-md transition-all">
+                  <Link href={`/posts/${answer.post_id}`} className="block pr-16">
+                    <div className="flex items-center gap-1.5 text-xs text-gray-500 mb-1">
+                      <Image
+                        src={answer.avatar_url}
+                        alt={answer.user_name}
+                        width={20}
+                        height={20}
+                        unoptimized
+                        className="w-5 h-5 rounded-full border border-gray-200"
+                      />
+                      <span className="font-medium text-gray-700">{answer.user_name}さんのベストアンサー</span>
+                    </div>
+                    <p className="text-gray-800 text-sm line-clamp-2">
+                      {contentPreview}...
+                    </p>
+                    <div className="mt-2 text-gray-500 text-xs">
+                      <span className="truncate">相談: {answer.post_title.substring(0, 40)}{answer.post_title.length > 40 ? '...' : ''}</span>
+                    </div>
+                  </Link>
+                  {answer.category_name && answer.category_id && (
+                    <Link
+                      href={`/category/${answer.category_id}`}
+                      className="absolute bottom-3 right-3 inline-block px-2 py-0.5 text-xs font-medium text-gray-600 bg-gray-200 rounded whitespace-nowrap hover:bg-gray-300 transition-colors z-10"
+                      onClick={(e) => e.stopPropagation()}
+                    >
+                      {answer.category_name}
+                    </Link>
+                  )}
+                </div>
               );
             })
           ) : (
@@ -129,33 +133,33 @@ export default function ResolvedSection({ bestAnswers, waitingPosts }: ResolvedS
               ? cleanContent.substring(0, 50) + (cleanContent.length > 50 ? '...' : '')
               : '';
             return (
-              <Link
-                key={post.id}
-                href={`/posts/${post.id}`}
-                className="block bg-white hover:shadow-md p-3 border border-gray-300 rounded-md transition-all"
-              >
-                <h4 className="font-bold text-gray-900 text-sm leading-relaxed">
-                  {post.title}
-                </h4>
-                {contentPreview && (
-                  <p className="mt-1 text-gray-600 text-xs line-clamp-1">
-                    {contentPreview}
-                  </p>
-                )}
-                <div className="mt-2 flex items-center justify-between gap-2 text-gray-500 text-xs">
-                  <div className="flex items-center min-w-0 flex-1 overflow-hidden">
+              <div key={post.id} className="relative bg-white hover:shadow-md p-3 border border-gray-300 rounded-md transition-all">
+                <Link href={`/posts/${post.id}`} className="block pr-16">
+                  <h4 className="font-bold text-gray-900 text-sm leading-relaxed">
+                    {post.title}
+                  </h4>
+                  {contentPreview && (
+                    <p className="mt-1 text-gray-600 text-xs line-clamp-1">
+                      {contentPreview}
+                    </p>
+                  )}
+                  <div className="mt-2 flex items-center gap-2 text-gray-500 text-xs">
                     <span className="truncate">{post.user_name || 'ゲスト'}さんからの相談</span>
                     {post.deadline_at && (
                       <span className="ml-2 flex-shrink-0 text-red-600">締切: {new Date(post.deadline_at).toLocaleDateString('ja-JP')}</span>
                     )}
                   </div>
-                  {post.categories?.name && (
-                    <span className="inline-block px-2 py-0.5 text-xs font-medium text-gray-600 bg-gray-200 rounded whitespace-nowrap flex-shrink-0">
-                      {post.categories.name}
-                    </span>
-                  )}
-                </div>
-              </Link>
+                </Link>
+                {post.categories?.name && post.category_id && (
+                  <Link
+                    href={`/category/${post.category_id}`}
+                    className="absolute bottom-3 right-3 inline-block px-2 py-0.5 text-xs font-medium text-gray-600 bg-gray-200 rounded whitespace-nowrap hover:bg-gray-300 transition-colors z-10"
+                    onClick={(e) => e.stopPropagation()}
+                  >
+                    {post.categories.name}
+                  </Link>
+                )}
+              </div>
             );
           })}
         </div>

@@ -1,44 +1,42 @@
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
-import Link from 'next/link';
 
-export default function ServiceGuidePage() {
+export default function MediaPage() {
   return (
     <div className="bg-gray-50 min-h-screen">
       <Header />
       
       <main className="mx-auto mt-14 md:mt-[70px] px-4 py-8 max-w-4xl">
-        <h1 className="mb-8 font-bold text-gray-900 text-3xl">アンケワークス</h1>
+        <h1 className="mb-8 font-bold text-gray-900 text-3xl">データ引用について</h1>
         
-        <div className="space-y-6">
-          <div className="bg-white shadow-sm p-6 rounded-lg">
-            <h2 className="mb-4 font-bold text-gray-900 text-xl">アンケワークスとは</h2>
-            <p className="mb-4 text-gray-700 leading-relaxed">
-              アンケワークスは、ハナシテが提供するアンケート回答サービスです。
-              企業や団体からの依頼を受けて、会員の皆様にアンケートにご回答いただき、
-              その対価としてポイントを獲得できます。
-            </p>
+        <div className="bg-white shadow-sm p-6 rounded-lg max-w-none prose prose-sm">
+          <h2>ハナシテのデータ引用について</h2>
+          <p>
+            ハナシテで実施されたアンケート結果は、メディア、ブログ、SNSなどで自由に引用していただけます。
+          </p>
+
+          <h2>引用時のお願い</h2>
+          <p>データを引用される際は、以下の点にご注意ください。</p>
+          <ul>
+            <li>info@dokujo.com元として「ハナシテ」を明記してください</li>
+            <li>可能な限り、該当するアンケートページへのリンクを設置してください</li>
+            <li>データの改変や歪曲はお控えください</li>
+            <li>商用利用の場合は、事前にご連絡いただけますと幸いです</li>
+          </ul>
+
+          <h2>引用例</h2>
+          <div className="bg-gray-50 p-4 rounded">
+            <p className="mb-2">info@dokujo.com: ハナシテ「〇〇に関する相談」</p>
+            <p className="text-gray-600 text-sm">https://anke.jp/posts/[アンケートID]</p>
           </div>
 
-          <div className="bg-white shadow-sm p-6 rounded-lg">
-            <h2 className="mb-4 font-bold text-gray-900 text-xl">ポイントの獲得方法</h2>
-            <ul className="space-y-2 text-gray-700 list-disc list-inside">
-              <li>アンケートに回答する</li>
-              <li>コメントを投稿する</li>
-              <li>アンケートを作成する</li>
-              <li>デイリーボーナス</li>
-            </ul>
-          </div>
-
-          <div className="bg-white shadow-sm p-6 rounded-lg">
-            <h2 className="mb-4 font-bold text-gray-900 text-xl">ポイント交換</h2>
-            <p className="mb-4 text-gray-700 leading-relaxed">
-              貯まったポイントは、Amazonギフト券やその他の電子マネーに交換できます。
-            </p>
-            <p className="text-gray-700 leading-relaxed">
-              詳細は<Link href="/point" className="text-blue-600 hover:text-blue-800 hover:underline">ポイントページ</Link>をご確認ください。
-            </p>
-          </div>
+          <h2>お問い合わせ</h2>
+          <p>
+            データ引用に関するご質問やご相談は、以下までお気軽にお問い合わせください。
+          </p>
+          <p>
+            メールアドレス: <a href="mailto:info@dokujo.com" className="text-blue-600 hover:text-blue-800 hover:underline">info@dokujo.com</a>
+          </p>
         </div>
       </main>
       

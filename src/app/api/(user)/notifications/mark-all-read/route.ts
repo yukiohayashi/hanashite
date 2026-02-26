@@ -12,6 +12,8 @@ export async function POST(request: Request) {
       );
     }
 
+    console.log(`[mark-all-read] userId: ${userId}`);
+
     // 全ての通知タイプを取得
     const notificationTypes = ['admin_post', 'worker_post', 'post_comment', 'reply'];
     
@@ -27,7 +29,7 @@ export async function POST(request: Request) {
           .eq('user_id', 1)
           .in('status', ['publish', 'published']);
         
-        notificationIds = posts?.map(p => `/posts/${p.id}`) || [];
+        notificationIds = posts?.map(p => String(p.id)) || [];
       } else if (type === 'worker_post') {
         // 運営者投稿（users.status: 3）
         const { data: posts } = await supabaseAdmin
@@ -36,16 +38,18 @@ export async function POST(request: Request) {
           .eq('users.status', 3)
           .in('status', ['publish', 'published']);
         
-        notificationIds = posts?.map(p => `/posts/${p.id}`) || [];
+        notificationIds = posts?.map(p => String(p.id)) || [];
       } else if (type === 'post_comment') {
         // 自分の投稿へのコメント
         const { data: comments } = await supabaseAdmin
           .from('comments')
           .select('id, post_id, posts!inner(user_id)')
           .eq('posts.user_id', userId)
+          .eq('parent_id', 0)
+          .neq('user_id', userId)
           .eq('status', 'approved');
         
-        notificationIds = comments?.map(c => `/posts/${c.post_id}#reply-${c.id}`) || [];
+        notificationIds = comments?.map(c => String(c.id)) || [];
       } else if (type === 'reply') {
         // 自分のコメントへの返信
         const { data: replies } = await supabaseAdmin
@@ -67,46 +71,35 @@ export async function POST(request: Request) {
           // 自分のコメントへの返信のみをフィルタ
           notificationIds = replies
             .filter(r => myCommentIds.includes(r.parent_id))
-            .map(r => `/posts/${r.post_id}#reply-${r.id}`);
+            .map(r => String(r.id));
         }
       }
 
-      // 既読レコードを一括挿入（新旧両方の形式に対応）
+      // 既読レコードを一括挿入
       if (notificationIds.length > 0) {
-        const records = notificationIds.flatMap(id => {
-          const baseRecord = {
-            user_id: parseInt(userId),
-            notification_type: type,
-            read_at: new Date().toISOString()
-          };
-          
-          // reply-形式のレコード
-          const newFormatRecord = {
-            ...baseRecord,
-            notification_id: id
-          };
-          
-          // anke-comment-形式のレコードも追加（既存データ対応）
-          const oldFormatId = id.replace(/#reply-/g, '#anke-comment-');
-          const oldFormatRecord = {
-            ...baseRecord,
-            notification_id: oldFormatId
-          };
-          
-          // 両方の形式が異なる場合のみ2つ返す
-          return id !== oldFormatId ? [newFormatRecord, oldFormatRecord] : [newFormatRecord];
-        });
+        const records = notificationIds.map(id => ({
+          user_id: userId,
+          notification_type: type,
+          target_id: parseInt(id),
+          read_at: new Date().toISOString()
+        }));
+
+        console.log(`[mark-all-read] ${type}: ${notificationIds.length}件の通知を既読にします`, records.slice(0, 3));
 
         const { error } = await supabaseAdmin
           .from('notification_reads')
           .upsert(records, { 
-            onConflict: 'user_id,notification_type,notification_id',
+            onConflict: 'user_id,notification_type,target_id',
             ignoreDuplicates: false 
           });
 
         if (error) {
           console.error(`${type}の既読処理エラー:`, error);
+        } else {
+          console.log(`[mark-all-read] ${type}: 既読処理成功`);
         }
+      } else {
+        console.log(`[mark-all-read] ${type}: 既読にする通知がありません`);
       }
     }
 

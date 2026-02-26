@@ -12,7 +12,7 @@ export default async function AtFirstPage() {
       
       <div className="wrapper" style={{ display: 'flex', maxWidth: '1260px', margin: '70px auto 0', justifyContent: 'center' }}>
         <main className="article__contents" style={{ minWidth: '690px', margin: '0 5px' }}>
-          <h1 className="mb-4 p-0 font-bold text-[#ff6b35] text-2xl">
+          <h1 className="mb-4 py-1 font-bold text-[#ff6b35] text-2xl">
             初めての方へ
           </h1>
           <div className="bg-white shadow-sm p-6 rounded-lg">

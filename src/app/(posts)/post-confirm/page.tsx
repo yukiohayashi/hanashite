@@ -24,7 +24,7 @@ export default async function PostConfirmPage() {
       
       <div className="wrapper md:flex md:max-w-7xl md:mx-auto md:mt-2 md:justify-center md:gap-4 pt-20 md:pt-4 mx-auto px-4 sm:px-6 lg:px-8">
         <main className="flex-1 max-w-[760px]">
-          <h1 className="mb-4 p-0 font-bold text-[#ff6b35] text-2xl">
+          <h1 className="mb-4 py-1 font-bold text-[#ff6b35] text-2xl">
             相談記事の確認画面
           </h1>
           
