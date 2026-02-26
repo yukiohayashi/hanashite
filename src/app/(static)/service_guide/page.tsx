@@ -12,14 +12,14 @@ export default function MediaPage() {
         <div className="bg-white shadow-sm p-6 rounded-lg max-w-none prose prose-sm">
           <h2>ハナシテのデータ引用について</h2>
           <p>
-            ハナシテで実施されたアンケート結果は、メディア、ブログ、SNSなどで自由に引用していただけます。
+            ハナシテで実施された相談結果は、メディア、ブログ、SNSなどで自由に引用していただけます。
           </p>
 
           <h2>引用時のお願い</h2>
           <p>データを引用される際は、以下の点にご注意ください。</p>
           <ul>
             <li>info@dokujo.com元として「ハナシテ」を明記してください</li>
-            <li>可能な限り、該当するアンケートページへのリンクを設置してください</li>
+            <li>可能な限り、該当する相談ページへのリンクを設置してください</li>
             <li>データの改変や歪曲はお控えください</li>
             <li>商用利用の場合は、事前にご連絡いただけますと幸いです</li>
           </ul>
@@ -27,7 +27,7 @@ export default function MediaPage() {
           <h2>引用例</h2>
           <div className="bg-gray-50 p-4 rounded">
             <p className="mb-2">info@dokujo.com: ハナシテ「〇〇に関する相談」</p>
-            <p className="text-gray-600 text-sm">https://anke.jp/posts/[アンケートID]</p>
+            <p className="text-gray-600 text-sm">https://dokujo.com/posts/[相談ID]</p>
           </div>
 
           <h2>お問い合わせ</h2>

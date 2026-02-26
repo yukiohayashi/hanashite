@@ -101,7 +101,7 @@ export default function PostEditForm({
   };
 
   const handleDelete = async () => {
-    if (!window.confirm('このアンケートを削除しますか？')) {
+    if (!window.confirm('この相談を削除しますか？')) {
       return;
     }
     
@@ -133,7 +133,7 @@ export default function PostEditForm({
         <Alert className="bg-green-50 mb-6 border-green-200">
           <AlertDescription className="text-green-800">
             <h4 className="mb-2 font-bold">✓ 更新完了</h4>
-            <p>アンケートを正常に更新しました。記事ページに移動します...</p>
+            <p>相談を正常に更新しました。記事ページに移動します...</p>
           </AlertDescription>
         </Alert>
       )}
@@ -154,7 +154,7 @@ export default function PostEditForm({
       <form onSubmit={handleSubmit} className="space-y-6">
         <div className="space-y-6">
           <div className="mb-4">
-            <label className="block mb-2 font-bold text-gray-700">アンケート内容</label>
+            <label className="block mb-2 font-bold text-gray-700">相談内容</label>
             
             <div className="space-y-3">
               <input

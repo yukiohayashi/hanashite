@@ -2,10 +2,10 @@ import { useEffect } from 'react';
 
 export function usePageTitle(title: string) {
   useEffect(() => {
-    document.title = `${title}｜アンケ`;
+    document.title = `${title}｜ハナシテ`;
     
     return () => {
-      document.title = 'アンケ｜ニュース × アンケート × コミュニティ。みんなの意見が見える新しいSNS';
+      document.title = 'ハナシテ｜恋愛・結婚・人間関係の総合相談プラットフォーム';
     };
   }, [title]);
 }

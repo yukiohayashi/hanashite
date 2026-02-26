@@ -14,7 +14,7 @@ export async function GET(request: Request) {
       );
     }
 
-    console.log('=== AI自動投票 CRON実行開始 ===');
+    console.log('=== AI自動コメント CRON実行開始 ===');
 
     // 設定を取得
     const { data: settingsData } = await supabase
@@ -28,10 +28,10 @@ export async function GET(request: Request) {
 
     // 有効化チェック
     if (settings.enabled !== 'true') {
-      console.log('AI自動投票が無効化されています');
+      console.log('AI自動コメントが無効化されています');
       return NextResponse.json({
         success: true,
-        message: 'AI自動投票が無効化されています',
+        message: 'AI自動コメントが無効化されています',
         skipped: true,
       });
     }
@@ -77,8 +77,8 @@ export async function GET(request: Request) {
       }
     }
 
-    // AI自動投票を実行
-    console.log('AI自動投票を実行します');
+    // AI自動コメントを実行
+    console.log('AI自動コメントを実行します');
     const executeResponse = await fetch(`${process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'}/api/auto-voter/execute-auto`, {
       method: 'POST',
       headers: {
@@ -99,20 +99,20 @@ export async function GET(request: Request) {
     await supabase.from('auto_voter_logs').insert({
       execution_type: 'cron',
       status: executeResponse.ok ? 'success' : 'error',
-      message: executeResult.message || 'AI自動投票を実行しました',
+      message: executeResult.message || 'AI自動コメントを実行しました',
       executed_at: executedAt.toISOString(),
     });
 
-    console.log('=== AI自動投票 CRON実行完了 ===');
+    console.log('=== AI自動コメント CRON実行完了 ===');
 
     return NextResponse.json({
       success: true,
-      message: 'AI自動投票を実行しました',
+      message: 'AI自動コメントを実行しました',
       result: executeResult,
     });
   } catch (error) {
-    console.error('AI自動投票 CRONエラー:', error);
-    const errorMessage = error instanceof Error ? error.message : 'AI自動投票の実行に失敗しました';
+    console.error('AI自動コメント CRONエラー:', error);
+    const errorMessage = error instanceof Error ? error.message : 'AI自動コメントの実行に失敗しました';
 
     // エラーログを記録
     await supabase.from('auto_voter_logs').insert({

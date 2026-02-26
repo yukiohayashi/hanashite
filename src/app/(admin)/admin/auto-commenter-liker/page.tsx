@@ -82,9 +82,9 @@ export default function AutoVoterDashboard() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-3xl font-bold text-gray-900">自動投票・コメント ダッシュボード</h1>
+        <h1 className="text-3xl font-bold text-gray-900">自動コメント・いいね ダッシュボード</h1>
         <p className="mt-2 text-sm text-gray-600">
-          アンケートへの自動投票・コメント・返信・いいね機能の管理
+          相談への自動コメント・返信・いいね機能の管理
         </p>
       </div>
 

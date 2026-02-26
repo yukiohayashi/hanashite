@@ -143,10 +143,10 @@ export async function POST(request: Request) {
       console.error('投票履歴の記録に失敗:', historyError);
     }
 
-    // アンケート作成者にwork_voteポイントを付与
-    // workidがある場合（アンケワークス経由）のみポイント付与
+    // 相談作成者にwork_voteポイントを付与
+    // workidがある場合のみポイント付与
     try {
-      // アンケート作成者とworkidを取得
+      // 相談作成者とworkidを取得
       const { data: post } = await supabase
         .from('posts')
         .select('user_id, workid')

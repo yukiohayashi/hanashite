@@ -254,7 +254,7 @@ export default function AutoCreatorSettings() {
       <div>
         <h1 className="text-3xl font-bold text-gray-900">AI自動投稿 設定</h1>
         <p className="mt-2 text-sm text-gray-600">
-          ニュース記事から自動でアンケートを作成する設定を管理します
+          ニュース記事から自動で相談を作成する設定を管理します
         </p>
       </div>
 
@@ -538,10 +538,10 @@ export default function AutoCreatorSettings() {
                 onChange={(e) => setSettings({ ...settings, title_prompt: e.target.value })}
                 className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 font-mono text-sm"
                 rows={10}
-                placeholder="記事の内容に基づいた簡潔なアンケート質問を1つ作成してください。"
+                placeholder="記事の内容に基づいた簡潔な相談質問を1つ作成してください。"
               />
               <p className="mt-1 text-xs text-gray-500">
-                ChatGPTがアンケートタイトルを生成する際のプロンプト（禁止ワード、推奨形式などを指定）
+                ChatGPTが相談タイトルを生成する際のプロンプト（禁止ワード、推奨形式などを指定）
               </p>
             </div>
 

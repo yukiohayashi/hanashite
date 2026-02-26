@@ -34,10 +34,10 @@ export default function AdminPanelLayout({
       '/admin/ng-words': 'NGワード管理',
       '/admin/keywords/history': '検索履歴',
       '/admin/keywords/stats': 'キーワード統計',
-      '/admin/auto-voter-commenter-liker': 'AI自動投票・コメント・いいね',
-      '/admin/auto-voter-commenter-liker/manual': '手動実行',
-      '/admin/auto-voter-commenter-liker/logs': '実行履歴',
-      '/admin/auto-voter-commenter-liker/settings': 'AI自動投票設定',
+      '/admin/auto-commenter-liker': 'AI自動コメント・いいね',
+      '/admin/auto-commenter-liker/manual': '手動実行',
+      '/admin/auto-commenter-liker/logs': '実行履歴',
+      '/admin/auto-commenter-liker/settings': 'AI自動コメント設定',
       '/admin/comments': 'コメント管理',
       '/admin/likes': 'いいね管理',
       '/admin/likes/stats': 'いいね統計',
@@ -206,36 +206,36 @@ export default function AdminPanelLayout({
             </div>
           </div>
 
-          {/* 自動投票・コメント・いいね */}
+          {/* 自動コメント・いいね */}
           <div>
             <Link
-              href="/admin/auto-voter-commenter-liker"
+              href="/admin/auto-commenter-liker"
               className={`flex items-center gap-2 px-3 py-1 text-gray-300 ${hoverBgColor} hover:text-white transition-colors`}
             >
               <MessageSquare className="w-5 h-5" />
-              <span className="text-sm">AI自動投票・コメント・いいね</span>
+              <span className="text-sm">AI自動コメント・いいね</span>
             </Link>
             <div className="ml-11 space-y-1">
               <Link
-                href="/admin/auto-voter-commenter-liker"
+                href="/admin/auto-commenter-liker"
                 className={`block px-3 py-1 text-sm text-gray-400 ${hoverBgColor} hover:text-white transition-colors`}
               >
                 ダッシュボード
               </Link>
               <Link
-                href="/admin/auto-voter-commenter-liker/manual"
+                href="/admin/auto-commenter-liker/manual"
                 className={`block px-3 py-1 text-sm text-gray-400 ${hoverBgColor} hover:text-white transition-colors`}
               >
                 手動実行
               </Link>
               <Link
-                href="/admin/auto-voter-commenter-liker/logs"
+                href="/admin/auto-commenter-liker/logs"
                 className={`block px-3 py-1 text-sm text-gray-400 ${hoverBgColor} hover:text-white transition-colors`}
               >
                 実行履歴
               </Link>
               <Link
-                href="/admin/auto-voter-commenter-liker/settings"
+                href="/admin/auto-commenter-liker/settings"
                 className={`block px-3 py-1 text-sm text-gray-400 ${hoverBgColor} hover:text-white transition-colors`}
               >
                 設定

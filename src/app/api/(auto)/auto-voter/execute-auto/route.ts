@@ -3,7 +3,7 @@ import { supabase } from '@/lib/supabase';
 
 export async function POST() {
   try {
-    console.log('=== AI自動投票 一括実行開始 ===');
+    console.log('=== AI自動コメント 一括実行開始 ===');
     
     // 設定を取得
     const { data: settingsData } = await supabase

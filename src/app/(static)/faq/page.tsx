@@ -13,8 +13,8 @@ export default function FAQPage() {
           <div className="bg-white shadow-sm p-6 rounded-lg">
             <h2 className="mb-3 font-bold text-gray-900 text-lg">Q. ハナシテとは何ですか？</h2>
             <p className="text-gray-700">
-              A. ハナシテは、誰でも簡単にアンケートを作成・回答できるコミュニティサイトです。
-              様々なテーマのアンケートに参加したり、自分でアンケートを作成して意見を集めることができます。
+              A. ハナシテは、恋愛・結婚・人間関係の悩みを相談できるコミュニティサイトです。
+              様々な悩みについて相談したり、他の人の相談に回答したりすることができます。
             </p>
           </div>
 
@@ -28,16 +28,15 @@ export default function FAQPage() {
           <div className="bg-white shadow-sm p-6 rounded-lg">
             <h2 className="mb-3 font-bold text-gray-900 text-lg">Q. 会員登録は必須ですか？</h2>
             <p className="text-gray-700">
-              A. アンケートの閲覧や回答は会員登録なしでも可能ですが、
-              アンケートの作成やコメント投稿、ポイント獲得には会員登録が必要です。
+              A. 相談の閲覧や回答は会員登録なしでも可能ですが、
+              相談の投稿やコメント投稿、ポイント獲得には会員登録が必要です。
             </p>
           </div>
 
           <div className="bg-white shadow-sm p-6 rounded-lg">
             <h2 className="mb-3 font-bold text-gray-900 text-lg">Q. ポイントはどのように貯まりますか？</h2>
             <p className="text-gray-700">
-              A. アンケートへの回答、コメント投稿、アンケート作成などでポイントが貯まります。
-              詳細はアンケワークスのページをご確認ください。
+              A. 相談への回答、コメント投稿、相談作成などでポイントが貯まります。
             </p>
           </div>
 

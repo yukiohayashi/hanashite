@@ -18,7 +18,7 @@ export async function POST(request: Request) {
       workid
     } = await request.json();
 
-    // 相談記事の場合は選択肢不要、アンケートの場合は選択肢必須
+    // 相談記事の場合は選択肢不要、投票機能の場合は選択肢必須
     if (!userId || !title || !content) {
       return NextResponse.json(
         { success: false, error: '必須項目が入力されていません' },
@@ -26,7 +26,7 @@ export async function POST(request: Request) {
       );
     }
 
-    // アンケートの場合は選択肢が2つ以上必要
+    // 投票機能の場合は選択肢が2つ以上必要
     if (choices && choices.length > 0 && choices.length < 2) {
       return NextResponse.json(
         { success: false, error: '選択肢は2つ以上必要です' },
@@ -96,7 +96,7 @@ export async function POST(request: Request) {
       );
     }
 
-    // 選択肢がある場合のみ投票オプションと選択肢を作成（アンケート用）
+    // 選択肢がある場合のみ投票オプションと選択肢を作成（投票機能用）
     if (choices && choices.length >= 2) {
       // 投票オプションを作成
       let closeAt = null;
@@ -273,8 +273,8 @@ export async function POST(request: Request) {
       }
     }
 
-    // アンケート作成ポイントを付与（work_post）
-    // workidが指定されている場合（アンケワークス経由）のみポイント付与
+    // 相談作成ポイントを付与（work_post）
+    // workidが指定されている場合のみポイント付与
     if (workid) {
       try {
         const { data: pointSetting } = await supabase
@@ -320,7 +320,7 @@ export async function POST(request: Request) {
     return NextResponse.json({
       success: true,
       postId: post.id,
-      message: choices && choices.length >= 2 ? 'アンケートを作成しました' : '相談記事を投稿しました'
+      message: choices && choices.length >= 2 ? '投票付き相談を作成しました' : '相談記事を投稿しました'
     });
   } catch (error) {
     console.error('Post create error:', error);

@@ -135,7 +135,7 @@ export default function NotificationList() {
       case 'admin_post':
         return '運営スタッフからのお知らせ';
       case 'worker_post':
-        return 'アンケワークス';
+        return 'ワーカー投稿';
       case 'post_comment':
         return 'さんがあなたの投稿にコメントしました';
       case 'reply':

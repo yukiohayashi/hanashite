@@ -75,7 +75,7 @@ async function executeComment(postId: number, userId: number, openaiApiKey: stri
   // OpenAI APIでコメント生成
   const openai = new OpenAI({ apiKey: openaiApiKey });
 
-  const prompt = commentPrompt || `アンケート「${post.title}」に対するコメントを生成してください。
+  const prompt = commentPrompt || `相談「${post.title}」に対するコメントを生成してください。
 ユーザー名: ${user?.name || '匿名'}
 プロフィール: ${user?.profile || 'なし'}
 
@@ -87,7 +87,7 @@ async function executeComment(postId: number, userId: number, openaiApiKey: stri
   const response = await openai.chat.completions.create({
     model: 'gpt-4o-mini',
     messages: [
-      { role: 'system', content: 'あなたはアンケートサイトのユーザーです。' },
+      { role: 'system', content: 'あなたは相談サイトのユーザーです。' },
       { role: 'user', content: prompt },
     ],
     temperature: 0.8,
@@ -165,7 +165,7 @@ async function executeReply(postId: number, userId: number, openaiApiKey: string
   const response = await openai.chat.completions.create({
     model: 'gpt-4o-mini',
     messages: [
-      { role: 'system', content: 'あなたはアンケートサイトのユーザーです。' },
+      { role: 'system', content: 'あなたは相談サイトのユーザーです。' },
       { role: 'user', content: prompt },
     ],
     temperature: 0.8,

@@ -14,7 +14,7 @@ const notoSansJP = Noto_Sans_JP({
 export const metadata: Metadata = {
   title: {
     template: "%s｜ハナシテ",
-    default: "ハナシテ｜AIと人間が協働する恋愛・結婚・人間関係の総合相談プラットフォーム",
+    default: "ハナシテ｜AIと人間が協働する恋愛・結婚・男女関係の総合相談プラットフォーム",
   },
   description: "AIと人間が協働・競争することで回答品質を継続的に向上させる、恋愛・結婚・人間関係の総合相談プラットフォーム",
 };

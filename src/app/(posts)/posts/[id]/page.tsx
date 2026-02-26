@@ -39,7 +39,7 @@ export async function generateMetadata({ params }: { params: Promise<{ id: strin
     .single();
 
   return {
-    title: post?.title || 'アンケート',
+    title: post?.title || '相談',
   };
 }
 
@@ -430,12 +430,12 @@ export default async function PostPage({ params, searchParams }: { params: Promi
                   </div>
                 )}
 
-{/* 投票セクションは一時的に非表示（アンケート機能はオプション） */}
+{/* 投票セクションは一時的に非表示（投票機能はオプション） */}
 
                 {/* カテゴリとキーワード表示 */}
                 {(category || keywords.length > 0) && (
                   <div className="mt-4 pt-4 border-t border-gray-200">
-                    <div className="flex flex-wrap gap-2">
+                    <div className="flex flex-wrap items-center gap-2">
                       {/* カテゴリ */}
                       {category && (
                         <Link
@@ -455,6 +455,13 @@ export default async function PostPage({ params, searchParams }: { params: Promi
                           {keyword.keyword}
                         </Link>
                       ))}
+                      {/* 通報するリンク */}
+                      <Link
+                        href={`/report?url=${encodeURIComponent(`https://dokujo.com/posts/${post.id}`)}`}
+                        className="ml-auto inline-flex items-center px-3 py-1 text-sm text-gray-600 hover:text-red-600 transition-colors"
+                      >
+                        通報する
+                      </Link>
                     </div>
                   </div>
                 )}

@@ -498,7 +498,7 @@ export default async function Home({ searchParams }: HomeProps) {
             {/* 検索時は以下を非表示 */}
             {!searchQuery && (
               <>
-            {/* みんなのアンケート（最新順時のみ表示） */}
+            {/* 注目の相談（最新順時のみ表示） */}
             {(sortBy === 'recommend' || sortBy === 'top_post') && featuredPosts.length > 0 && (
               <>
                 <h3 className="m-1.5 mb-2 px-0 font-bold text-base" style={{ color: '#ff6b35' }}>注目の相談</h3>

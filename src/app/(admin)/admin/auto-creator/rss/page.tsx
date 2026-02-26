@@ -61,7 +61,7 @@ export default function RSSArticlesPage() {
       const data = await response.json();
 
       if (data.success) {
-        setMessage(`✅ アンケートを作成しました（投稿ID: ${data.post_id}）`);
+        setMessage(`✅ 相談を作成しました（投稿ID: ${data.post_id}）`);
         // 記事一覧を再取得
         await fetchArticles();
       } else {
@@ -186,7 +186,7 @@ export default function RSSArticlesPage() {
         <h3 className="text-sm font-medium text-blue-800 mb-2">💡 使い方</h3>
         <ul className="text-sm text-blue-700 space-y-1">
           <li>• RSS記事は設定されたURLから自動取得されます</li>
-          <li>• 「このニュースで実行」ボタンで手動でアンケートを作成できます</li>
+          <li>• 「このニュースで実行」ボタンで手動で相談を作成できます</li>
           <li>• 作成済みの記事は「作成済」と表示され、再実行できません</li>
           <li>• 「再取得」ボタンで最新のRSS記事を取得できます</li>
         </ul>

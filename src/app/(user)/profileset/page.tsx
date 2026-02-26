@@ -43,7 +43,7 @@ export default async function ProfileSetPage() {
         <div className="flex flex-col md:flex-row justify-center gap-4 md:gap-5">
         <main className="flex-1 md:min-w-[690px] w-full">
           <h1 className="mb-4 p-0 font-bold text-orange-500 text-2xl">
-            {isFirstTime ? 'プロフィール登録' : 'プロフィール設定'}
+            {isFirstTime ? 'プロフィール登録' : 'プロフィール編集'}
           </h1>
           
           <ProfileSetForm 

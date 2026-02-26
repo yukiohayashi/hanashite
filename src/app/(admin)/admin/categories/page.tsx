@@ -16,7 +16,7 @@ interface Category {
   created_at: string;
   updated_at: string;
   post_count?: number;
-  // AI自動投票用の設定（ハードコード）
+  // AI自動コメント用の設定（ハードコード）
   target_days?: number;
   filter_logic?: 'and' | 'or';
   min_votes?: number;
@@ -49,7 +49,7 @@ export default function CategoriesPage() {
       .order('display_order', { ascending: true });
 
     if (data) {
-      // AI自動投票用の設定をハードコードで追加（カテゴリIDごと）
+      // AI自動コメント用の設定をハードコードで追加（カテゴリIDごと）
       const categorySettings: Record<number, { target_days: number; filter_logic: 'and' | 'or'; min_votes: number }> = {
         1: { target_days: 10, filter_logic: 'and', min_votes: 0 },    // アニメ・漫画
         2: { target_days: 10, filter_logic: 'and', min_votes: 0 },    // エンタメ
@@ -83,7 +83,7 @@ export default function CategoriesPage() {
             .eq('category_id', category.id)
             .in('status', ['publish', 'published']);
           
-          // AI自動投票用の設定を追加
+          // AI自動コメント用の設定を追加
           const settings = categorySettings[category.id] || { target_days: 3, filter_logic: 'or', min_votes: 100 };
           
           return { 
@@ -199,7 +199,7 @@ export default function CategoriesPage() {
         <div>
           <h1 className="text-2xl font-bold text-gray-900">カテゴリ管理</h1>
           <p className="mt-1 text-sm text-gray-600">
-            アンケートカテゴリの管理
+            相談カテゴリの管理
           </p>
         </div>
         <div className="flex gap-2">

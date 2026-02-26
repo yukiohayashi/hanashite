@@ -102,7 +102,7 @@ export default function PointsTable({ points: initialPoints }: PointsTableProps)
       case 'signup':
         return '新規登録';
       case 'profile':
-        return 'プロフィール設定';
+        return 'プロフィール編集';
       case 'post':
         return '投稿作成';
       default:

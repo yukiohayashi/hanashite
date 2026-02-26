@@ -83,7 +83,7 @@ export default function RightSidebar() {
       }
     };
 
-    // 最新アンケートを取得
+    // 最新相談を取得
     const fetchPosts = async () => {
       const { data } = await supabase
         .from('posts')
@@ -276,7 +276,7 @@ export default function RightSidebar() {
         </ul>
       </div>
 
-      {/* 最新アンケート */}
+      {/* 最新相談 */}
       <div>
         <h3 className="mt-4 mb-2 px-2 font-bold text-base" style={{ color: '#ff6b35' }}>
           最新の相談 <i className="fas fa-comments"></i>

@@ -277,7 +277,7 @@ export default function HomeRightSidebar() {
         </ul>
       </div>
 
-      {/* 最新アンケート */}
+      {/* 最新相談 */}
       <div>
         <h3 className="mt-4 mb-2 px-2 font-bold text-base" style={{ color: '#ff6b35' }}>
           最新の相談 <i className="fas fa-comments"></i>

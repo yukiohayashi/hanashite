@@ -51,7 +51,7 @@ export default async function AnkeEditPage({ params }: { params: Promise<{ slug:
         <main className="flex-1 px-4 max-w-4xl">
           <section>
             <h1 className="mb-4 p-0 font-bold text-orange-500 text-2xl">
-              アンケートを変更する
+              相談を変更する
             </h1>
             
             <PostEditForm 

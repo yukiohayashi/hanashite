@@ -374,6 +374,13 @@ export default function CommentSection({ postId, initialComments, totalCount, po
                           返信
                         </button>
                       )}
+                      
+                      <Link
+                        href={`/report?url=${encodeURIComponent(`https://dokujo.com/posts/${postId}#comment-${comment.id}`)}`}
+                        className="text-gray-600 hover:text-red-600 text-xs transition-colors ml-auto"
+                      >
+                        通報する
+                      </Link>
                     </div>
                   </div>
                 </div>
@@ -463,6 +470,13 @@ export default function CommentSection({ postId, initialComments, totalCount, po
                                   返信
                                 </button>
                               )}
+                              
+                              <Link
+                                href={`/report?url=${encodeURIComponent(`https://dokujo.com/posts/${postId}#comment-${reply.id}`)}`}
+                                className="text-gray-600 hover:text-red-600 text-xs transition-colors ml-auto"
+                              >
+                                通報する
+                              </Link>
                             </div>
                           </div>
                         </div>
@@ -549,6 +563,13 @@ export default function CommentSection({ postId, initialComments, totalCount, po
                                         返信
                                       </button>
                                     )}
+                                    
+                                    <Link
+                                      href={`/report?url=${encodeURIComponent(`https://dokujo.com/posts/${postId}#comment-${nestedReply.id}`)}`}
+                                      className="text-gray-600 hover:text-red-600 text-xs transition-colors ml-auto"
+                                    >
+                                      通報する
+                                    </Link>
                                   </div>
                                 </div>
                               </div>

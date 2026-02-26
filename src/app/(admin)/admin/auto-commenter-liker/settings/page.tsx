@@ -188,7 +188,7 @@ export default function AutoVoterSettings() {
 
       if (!error) {
         setSettings({ ...settings, enabled: newEnabled ? 'true' : 'false' });
-        setMessage(newEnabled ? 'AI自動投票を開始しました' : 'AI自動投票を停止しました');
+        setMessage(newEnabled ? 'AI自動コメントを開始しました' : 'AI自動コメントを停止しました');
         await fetchNextRunTime();
         setTimeout(() => setMessage(''), 3000);
       } else {
@@ -296,9 +296,9 @@ export default function AutoVoterSettings() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-3xl font-bold text-gray-900">AI自動投票・コメント・いいね 設定</h1>
+        <h1 className="text-3xl font-bold text-gray-900">AI自動コメント・いいね 設定</h1>
         <p className="mt-2 text-sm text-gray-600">
-          アンケートへの自動投票・コメント・返信・いいね機能の設定を管理します
+          相談への自動コメント・返信・いいね機能の設定を管理します
         </p>
       </div>
 
@@ -320,7 +320,7 @@ export default function AutoVoterSettings() {
               <span className={`text-2xl ${
                 settings.enabled === 'true' ? 'text-green-500' : 'text-gray-400'
               }`}>●</span>
-              <strong className="text-lg">AI自動投票・コメント・いいね</strong>
+              <strong className="text-lg">AI自動コメント・いいね</strong>
             </div>
             
             <div className="border-l border-gray-300 pl-4 flex items-center gap-3">
@@ -796,7 +796,7 @@ export default function AutoVoterSettings() {
                 onChange={(e) => setSettings({ ...settings, comment_prompt: e.target.value })}
                 className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 font-mono text-sm"
                 rows={10}
-                placeholder="アンケートに対するコメントを生成してください。"
+                placeholder="相談に対するコメントを生成してください。"
               />
               <p className="mt-1 text-xs text-gray-500">
                 ChatGPTがコメントを生成する際のプロンプト（ユーザープロフィールを考慮）

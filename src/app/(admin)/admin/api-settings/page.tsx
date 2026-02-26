@@ -100,7 +100,7 @@ export default function ApiSettingsPage() {
               このAPIキーは以下の機能で使用されます：
             </p>
             <ul className="mt-2 text-sm text-gray-500 list-disc list-inside space-y-1">
-              <li>自動投票・コメント生成</li>
+              <li>自動コメント生成</li>
               <li>AI会員のプロフィール生成</li>
               <li>AI自動投稿の記事生成</li>
               <li>その他のAI機能</li>

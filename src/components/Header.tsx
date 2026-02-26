@@ -87,7 +87,7 @@ export default function Header() {
             </Link>
             <div className="hidden md:block text-[0.45rem] text-gray-500 text-center">powered by DOKUJO</div>
             <div className="w-full text-[0.5rem] text-center text-gray-600">
-              AIと人間が協働する恋愛・結婚・人間関係の総合相談
+              AIと人間が協働する恋愛・結婚・男女関係の総合相談
             </div>
           </div>
 
@@ -134,7 +134,7 @@ export default function Header() {
         
         <div className="mx-auto px-4 sm:px-6 lg:px-8 max-w-7xl">
           <div className="flex justify-between items-stretch min-h-[60px]">
-            {/* ロゴとアンケート情報 */}
+            {/* ロゴと相談情報 */
             <div className="flex items-center gap-4 py-2">
               <Link href="/" className="flex flex-col items-center">
                 <div className="w-[120px] text-center">
@@ -149,13 +149,13 @@ export default function Header() {
                 <span className="text-[0.55rem] text-gray-500">powered by DOKUJO</span>
               </Link>
               
-              {/* アンケート統計情報 */}
+              {/* 相談統計情報 */}
               <div className="flex flex-col text-gray-600 text-xs">
                 <div className="font-semibold text-gray-800">
                   相談合計数: 300件超
                 </div>
                 <div className="mt-0.5 text-[0.65rem] leading-tight">
-                  AIと人間が協働する恋愛・結婚・人間関係の総合相談
+                  AIと人間が協働する恋愛・結婚・男女関係の総合相談
                 </div>
               </div>
             </div>
@@ -167,7 +167,7 @@ export default function Header() {
                 <HeaderClient />
               </div>
               
-              {/* アンケ/アンケワークス切り替えリンク */}
+              {/* ヘッダーリンク */}
               <HeaderLink />
             </div>
           </div>

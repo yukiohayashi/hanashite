@@ -75,7 +75,7 @@ export async function POST(request: Request) {
       );
     }
 
-    // ChatGPT APIでアンケート内容を生成
+    // ChatGPT APIで相談内容を生成
     const ankeData = await generateAnke({
       title: article_title,
       content: article_content,
@@ -144,7 +144,7 @@ export async function POST(request: Request) {
 
     const nextId = latestPost ? latestPost.id + 1 : 1;
 
-    // アンケート投稿を作成
+    // 相談投稿を作成
     const { data: post, error: postError } = await supabase
       .from('posts')
       .insert({
@@ -293,7 +293,7 @@ export async function POST(request: Request) {
 
     return NextResponse.json({
       success: true,
-      message: 'アンケートを作成しました',
+      message: '相談を作成しました',
       post_id: post.id,
       post_url: `/posts/${post.id}`,
       anke_data: ankeData,

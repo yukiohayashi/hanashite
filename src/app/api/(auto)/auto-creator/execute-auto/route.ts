@@ -236,7 +236,7 @@ export async function POST() {
           try {
             console.log(`処理開始: ${articleUrl}`);
 
-            // ChatGPT APIでアンケート内容を生成
+            // ChatGPT APIで相談内容を生成
             const ankeData = await generateAnke({
               title: rssItem.title || '',
               content: rssItem.contentSnippet || rssItem.content || '',
@@ -296,7 +296,7 @@ export async function POST() {
 
             const nextId = latestPost ? latestPost.id + 1 : 1;
 
-            // アンケート投稿を作成
+            // 相談投稿を作成
             const { data: post, error: postError } = await supabase
               .from('posts')
               .insert({
@@ -398,7 +398,7 @@ export async function POST() {
               .update({ post_id: post.id })
               .eq('article_url', articleUrl);
 
-            await logExecution('success', articleUrl, post.id, 'アンケートを作成しました');
+            await logExecution('success', articleUrl, post.id, '相談を作成しました');
 
             createdCount++;
             results.push({
@@ -424,7 +424,7 @@ export async function POST() {
 
     return NextResponse.json({
       success: true,
-      message: `${createdCount}件のアンケートを作成しました`,
+      message: `${createdCount}件の相談を作成しました`,
       created_count: createdCount,
       results,
     });
