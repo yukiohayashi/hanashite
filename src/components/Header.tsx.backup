@@ -13,14 +13,10 @@ import MobileRightSidebar from './MobileRightSidebar';
 export default function Header() {
   const { data: session, status } = useSession();
   const pathname = usePathname();
-  
   const [leftSidebarOpen, setLeftSidebarOpen] = useState(false);
   const [rightSidebarOpen, setRightSidebarOpen] = useState(false);
   const [avatarUrl, setAvatarUrl] = useState('');
   const [unreadCount, setUnreadCount] = useState(0);
-
-  useEffect(() => {
-  }, []);
 
   useEffect(() => {
     if (session?.user?.id) {
@@ -69,7 +65,7 @@ export default function Header() {
         {/* カラフルなボーダー */}
         <div className="bg-gradient-to-r from-pink-500 via-orange-500 to-yellow-500 h-1"></div>
         
-        <div className="キーワード一覧1">
+        <div className="relative flex justify-center items-center py-1">
           {/* 左: 検索アイコン */}
           <button
             className="top-1/2 left-[3%] z-[101] absolute text-gray-700 text-xl -translate-y-1/2"
@@ -138,7 +134,7 @@ export default function Header() {
         
         <div className="mx-auto px-4 sm:px-6 lg:px-8 max-w-7xl">
           <div className="flex justify-between items-stretch min-h-[60px]">
-            {/* ロゴと相談情報 */}
+            {/* ロゴと相談情報 */
             <div className="flex items-center gap-4 py-2">
               <Link href="/" className="flex flex-col items-center">
                 <div className="w-[120px] text-center">
@@ -171,7 +167,7 @@ export default function Header() {
                 <HeaderClient />
               </div>
               
-              {/* アンケ/アンケワークス切り替えリンク */}
+              {/* ヘッダーリンク */}
               <HeaderLink />
             </div>
           </div>
