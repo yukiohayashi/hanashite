@@ -20,7 +20,7 @@ export default function Footer() {
               </svg>
             </a>
             <a 
-              href="https://www.instagram.com/hanashite_sns" 
+              href="https://www.instagram.com/hanashite_jp" 
               target="_blank" 
               rel="noopener noreferrer"
               className="inline-flex justify-center items-center text-gray-700 hover:text-[#ff6b35] transition-colors duration-300"
