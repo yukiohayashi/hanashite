@@ -1,5 +1,10 @@
 import { supabase } from '@/lib/supabase';
 import { FileText, Users, MessageSquare, Heart } from 'lucide-react';
+import { Metadata } from 'next';
+
+export const metadata: Metadata = {
+  title: 'ダッシュボード｜ハナシテ',
+};
 
 async function getStats() {
   const [postsCount, usersCount, commentsCount, likesCount] = await Promise.all([

@@ -43,6 +43,7 @@ export default function PostsTable({ posts: initialPosts, initialCounts }: Posts
   const [selectedIds, setSelectedIds] = useState<number[]>([]);
   const [bulkDeleting, setBulkDeleting] = useState(false);
   const [counts, setCounts] = useState(initialCounts);
+  const [editingDeadline, setEditingDeadline] = useState<number | null>(null);
   const router = useRouter();
   const searchParams = useSearchParams();
 
@@ -214,6 +215,33 @@ export default function PostsTable({ posts: initialPosts, initialCounts }: Posts
       alert('削除に失敗しました');
     } finally {
       setLoading(null);
+    }
+  };
+
+  const handleDeadlineUpdate = async (postId: number, newDeadline: string) => {
+    try {
+      const response = await fetch(`/api/admin/posts/${postId}/update`, {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ 
+          deadline_at: newDeadline ? new Date(newDeadline + 'T00:00:00').toISOString() : null
+        }),
+      });
+
+      if (response.ok) {
+        setPosts(posts.map(p => 
+          p.id === postId ? { ...p, deadline_at: newDeadline ? new Date(newDeadline + 'T00:00:00').toISOString() : null } : p
+        ));
+        setEditingDeadline(null);
+        router.refresh();
+      } else {
+        alert('締切日時の更新に失敗しました');
+      }
+    } catch (error) {
+      console.error('Error updating deadline:', error);
+      alert('締切日時の更新に失敗しました');
     }
   };
 
@@ -442,16 +470,38 @@ export default function PostsTable({ posts: initialPosts, initialCounts }: Posts
                     {post.total_votes || 0}票
                   </span>
                 </td>
-                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                  {post.deadline_at ? (
-                    <>
-                      {new Date(post.deadline_at).toLocaleDateString('ja-JP')}
-                      <div className="text-xs">
-                        {new Date(post.deadline_at).toLocaleTimeString('ja-JP', { hour: '2-digit', minute: '2-digit' })}
-                      </div>
-                    </>
+                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500" onClick={(e) => e.stopPropagation()}>
+                  {editingDeadline === post.id ? (
+                    <input
+                      type="date"
+                      defaultValue={post.deadline_at ? new Date(post.deadline_at).toISOString().slice(0, 10) : ''}
+                      onBlur={(e) => handleDeadlineUpdate(post.id, e.target.value)}
+                      onKeyDown={(e) => {
+                        if (e.key === 'Enter') {
+                          handleDeadlineUpdate(post.id, (e.target as HTMLInputElement).value);
+                        } else if (e.key === 'Escape') {
+                          setEditingDeadline(null);
+                        }
+                      }}
+                      autoFocus
+                      className="w-full px-2 py-1 border border-blue-500 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    />
                   ) : (
-                    <span className="text-gray-400">—</span>
+                    <div
+                      onClick={() => setEditingDeadline(post.id)}
+                      className="cursor-pointer hover:bg-blue-50 px-2 py-1 rounded transition-colors"
+                    >
+                      {post.deadline_at ? (
+                        <>
+                          {new Date(post.deadline_at).toLocaleDateString('ja-JP')}
+                          <div className="text-xs">
+                            {new Date(post.deadline_at).toLocaleTimeString('ja-JP', { hour: '2-digit', minute: '2-digit' })}
+                          </div>
+                        </>
+                      ) : (
+                        <span className="text-gray-400">クリックして設定</span>
+                      )}
+                    </div>
                   )}
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
