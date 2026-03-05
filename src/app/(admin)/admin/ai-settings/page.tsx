@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { Plus, Edit2, Trash2, Eye, EyeOff } from 'lucide-react';
+import { Plus, Edit2, Trash2 } from 'lucide-react';
 
 interface ApiSetting {
   id: number;
@@ -22,7 +22,6 @@ export default function AiSettingsPage() {
   const [loading, setLoading] = useState(true);
   const [showModal, setShowModal] = useState(false);
   const [editingId, setEditingId] = useState<number | null>(null);
-  const [showSecrets, setShowSecrets] = useState<{ [key: number]: boolean }>({});
   const [formData, setFormData] = useState({
     api_name: '',
     api_key: '',
@@ -124,15 +123,6 @@ export default function AiSettingsPage() {
       is_active: true,
     });
     setEditingId(null);
-  };
-
-  const toggleSecret = (id: number) => {
-    setShowSecrets(prev => ({ ...prev, [id]: !prev[id] }));
-  };
-
-  const maskSecret = (secret: string | null) => {
-    if (!secret) return '-';
-    return '●'.repeat(Math.min(secret.length, 20));
   };
 
   return (
@@ -278,41 +268,19 @@ export default function AiSettingsPage() {
 
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
-                  APIキー
+                  APIキー <span className="text-red-500">*</span>
                 </label>
                 <input
                   type="text"
                   value={formData.api_key}
                   onChange={(e) => setFormData({ ...formData, api_key: e.target.value })}
+                  required
                   className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
-                  placeholder="APIキーを入力"
+                  placeholder="sk-proj-..."
                 />
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  APIシークレット
-                </label>
-                <input
-                  type="password"
-                  value={formData.api_secret}
-                  onChange={(e) => setFormData({ ...formData, api_secret: e.target.value })}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
-                  placeholder="APIシークレットを入力"
-                />
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  エンドポイントURL
-                </label>
-                <input
-                  type="url"
-                  value={formData.endpoint_url}
-                  onChange={(e) => setFormData({ ...formData, endpoint_url: e.target.value })}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
-                  placeholder="https://api.example.com/v1"
-                />
+                <p className="mt-1 text-xs text-gray-500">
+                  OpenAI APIキーまたは他のAI APIキーを入力
+                </p>
               </div>
 
               <div>
