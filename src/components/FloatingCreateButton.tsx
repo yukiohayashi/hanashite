@@ -23,11 +23,6 @@ export default function FloatingCreateButton() {
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
-  // ログインしていない場合は表示しない
-  if (!session) {
-    return null;
-  }
-
   return (
     <Link href="/post-create">
       <Button
@@ -40,7 +35,7 @@ export default function FloatingCreateButton() {
           transition-all duration-500
           flex flex-col items-center justify-center
           group
-          ${isVisible ? 'opacity-100 scale-100' : 'opacity-0 scale-90 pointer-events-none'}
+          ${!session || !isVisible ? 'opacity-0 scale-90 pointer-events-none' : 'opacity-100 scale-100'}
         `}
       >
         <span className="text-xs md:text-sm font-bold text-white text-center leading-tight">
