@@ -437,22 +437,21 @@ export default async function PostPage({ params, searchParams }: { params: Promi
 {/* 投票セクションは一時的に非表示（投票機能はオプション） */}
 
                 {/* カテゴリとキーワード表示 */}
-                {(category || keywords.length > 0) && (
-                  <div className="mt-4 pt-4 border-t border-gray-200">
-                    <div className="flex flex-wrap items-center gap-2">
-                      {/* カテゴリ */}
-                      {category ? (
-                        <Link
-                          href={`/category/${category.id}`}
-                          className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-blue-100 text-blue-800 hover:bg-blue-200 transition-colors"
-                        >
-                          {category.name}
-                        </Link>
-                      ) : (
-                        <span className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-gray-100 text-gray-600">
-                          未カテゴリ
-                        </span>
-                      )}
+                <div className="mt-4 pt-4 border-t border-gray-200">
+                  <div className="flex flex-wrap items-center gap-2">
+                    {/* カテゴリ */}
+                    {category ? (
+                      <Link
+                        href={`/category/${category.id}`}
+                        className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-blue-100 text-blue-800 hover:bg-blue-200 transition-colors"
+                      >
+                        {category.name}
+                      </Link>
+                    ) : (
+                      <span className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-gray-100 text-gray-600">
+                        未カテゴリ
+                      </span>
+                    )}
                       {/* キーワード */}
                       {keywords.map((keyword: any) => (
                         <Link
@@ -472,7 +471,6 @@ export default async function PostPage({ params, searchParams }: { params: Promi
                       </Link>
                     </div>
                   </div>
-                )}
               </div>
 
               {/* コメントセクション */}

@@ -15,7 +15,7 @@ export async function PUT(
     const { id } = await params;
     const postId = parseInt(id);
     const body = await request.json();
-    const { title, content, deadline_at, status } = body;
+    const { title, content, deadline_at, status, category_id } = body;
 
     // 投稿の所有者を確認
     const { data: post, error: postError } = await supabase
@@ -41,6 +41,7 @@ export async function PUT(
     if (content !== undefined) updateData.content = content;
     if (deadline_at !== undefined) updateData.deadline_at = deadline_at || null;
     if (status !== undefined) updateData.status = status;
+    if (category_id !== undefined) updateData.category_id = category_id;
 
     // 投稿を更新
     const { data, error } = await supabase
