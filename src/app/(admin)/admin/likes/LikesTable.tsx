@@ -17,6 +17,11 @@ interface Like {
     id: number;
     title: string;
   } | null | undefined;
+  comment: {
+    id: number;
+    content: string;
+    post_id: number;
+  } | null | undefined;
 }
 
 interface LikesTableProps {
@@ -168,6 +173,11 @@ export default function LikesTable({ likes: initialLikes }: LikesTableProps) {
                     <a href={`/posts/${like.target_id}`} target="_blank" className="text-blue-600 hover:underline">
                       {like.post.title.substring(0, 50)}
                       {like.post.title.length > 50 ? '...' : ''}
+                    </a>
+                  ) : like.like_type === 'comment' && like.comment ? (
+                    <a href={`/posts/${like.comment.post_id}#reply-${like.target_id}`} target="_blank" className="text-blue-600 hover:underline">
+                      {like.comment.content.replace(/<[^>]*>/g, '').substring(0, 50)}
+                      {like.comment.content.replace(/<[^>]*>/g, '').length > 50 ? '...' : ''}
                     </a>
                   ) : (
                     <span className="text-gray-500">

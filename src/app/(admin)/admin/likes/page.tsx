@@ -22,6 +22,7 @@ async function getLikes(likeType?: string, limit: number = 100) {
 
   const userIds = [...new Set(likes.map(l => l.user_id).filter(Boolean))];
   const postIds = [...new Set(likes.filter(l => l.like_type === 'post').map(l => l.target_id))];
+  const commentIds = [...new Set(likes.filter(l => l.like_type === 'comment').map(l => l.target_id))];
 
   // ユーザー情報を一括取得
   const { data: users } = await supabase
@@ -39,11 +40,20 @@ async function getLikes(likeType?: string, limit: number = 100) {
 
   const postMap = new Map(posts?.map(p => [p.id, p]) || []);
 
+  // コメント情報を一括取得
+  const { data: comments } = await supabase
+    .from('comments')
+    .select('id, content, post_id')
+    .in('id', commentIds);
+
+  const commentMap = new Map(comments?.map(c => [c.id, c]) || []);
+
   // データをマッピング
   const likesWithDetails = likes.map(like => ({
     ...like,
     user: userMap.get(like.user_id) || null,
     post: like.like_type === 'post' ? postMap.get(like.target_id) : null,
+    comment: like.like_type === 'comment' ? commentMap.get(like.target_id) : null,
   }));
 
   return likesWithDetails;
