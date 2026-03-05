@@ -1,8 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import sharp from 'sharp';
-import { writeFile, mkdir } from 'fs/promises';
-import { existsSync } from 'fs';
-import path from 'path';
+import { supabase } from '@/lib/supabase';
 
 export async function POST(request: NextRequest) {
   try {
@@ -29,23 +27,32 @@ export async function POST(request: NextRequest) {
       .jpeg({ quality: 85 })
       .toBuffer();
 
-    // 保存先ディレクトリを作成
-    const uploadDir = path.join(process.cwd(), 'public', 'uploads', 'posts');
-    if (!existsSync(uploadDir)) {
-      await mkdir(uploadDir, { recursive: true });
-    }
-
     // ファイル名を生成（タイムスタンプ + ランダム文字列）
     const timestamp = Date.now();
     const randomString = Math.random().toString(36).substring(2, 15);
     const filename = `${timestamp}-${randomString}.jpg`;
-    const filepath = path.join(uploadDir, filename);
+    const filePath = `posts/${filename}`;
 
-    // ファイルを保存
-    await writeFile(filepath, optimizedImage);
+    // Supabase Storageにアップロード
+    const { data, error } = await supabase.storage
+      .from('avatars')
+      .upload(filePath, optimizedImage, {
+        contentType: 'image/jpeg',
+        upsert: false
+      });
 
-    // 公開URLを生成
-    const publicUrl = `/uploads/posts/${filename}`;
+    if (error) {
+      console.error('Supabase upload error:', error);
+      return NextResponse.json(
+        { success: false, error: '画像のアップロードに失敗しました' },
+        { status: 500 }
+      );
+    }
+
+    // 公開URLを取得
+    const { data: { publicUrl } } = supabase.storage
+      .from('avatars')
+      .getPublicUrl(filePath);
 
     return NextResponse.json({
       success: true,

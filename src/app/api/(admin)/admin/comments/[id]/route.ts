@@ -5,7 +5,7 @@ import { supabase } from '@/lib/supabase';
 // 管理者チェック
 async function isAdmin() {
   const session = await auth();
-  return session?.user?.id ? Number(session.user.id) === 33 : false;
+  return session?.user?.status && (session.user.status === 1 || session.user.status === 2);
 }
 
 // コメント削除

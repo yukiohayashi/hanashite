@@ -7,7 +7,7 @@ async function isAdmin() {
   const session = await auth();
   console.log('Session:', session);
   console.log('User status:', session?.user?.status);
-  return session?.user?.status && session.user.status >= 2;
+  return session?.user?.status && (session.user.status === 1 || session.user.status === 2);
 }
 
 // ユーザー情報更新

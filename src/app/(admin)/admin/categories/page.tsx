@@ -483,7 +483,7 @@ export default function CategoriesPage() {
                   onChange={(e) => setFormData({ ...formData, description: e.target.value })}
                   className="w-full px-3 py-2 border border-gray-300 rounded-md"
                   rows={3}
-                  placeholder="恋愛に関する相談を共有しましょう"
+                  placeholder="恋愛に関する相談を共有しましょうIと人間が協働する恋愛・結婚・男女関係の総合相談"
                 />
               </div>
 

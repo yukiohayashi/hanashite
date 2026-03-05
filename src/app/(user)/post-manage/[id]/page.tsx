@@ -178,7 +178,7 @@ export default async function PostManagePage({
           <main className="flex-1 md:min-w-[690px] w-full">
             <div className="mb-4 flex items-center justify-between">
               <h1 className="p-0 font-bold text-[#ff6b35] text-2xl">
-                記事管理
+                トピック編集
               </h1>
               <Link 
                 href="/my-posts"
