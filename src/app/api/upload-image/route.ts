@@ -35,7 +35,7 @@ export async function POST(request: NextRequest) {
 
     // Supabase Storageにアップロード
     const { data, error } = await supabase.storage
-      .from('avatars')
+      .from('uploads')
       .upload(filePath, optimizedImage, {
         contentType: 'image/jpeg',
         upsert: false
@@ -51,7 +51,7 @@ export async function POST(request: NextRequest) {
 
     // 公開URLを取得
     const { data: { publicUrl } } = supabase.storage
-      .from('avatars')
+      .from('uploads')
       .getPublicUrl(filePath);
 
     return NextResponse.json({
