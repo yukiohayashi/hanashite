@@ -458,9 +458,13 @@ export default function PostsTable({ posts: initialPosts, initialCounts }: Posts
                 </td>
                 <td className="px-6 py-4 text-sm text-gray-900">
                   {post.categories ? (
-                    <span className="inline-flex px-2 py-1 text-xs bg-blue-100 text-blue-800 rounded">
+                    <a
+                      href="/admin/categories"
+                      className="inline-flex px-2 py-1 text-xs bg-blue-100 text-blue-800 rounded hover:bg-blue-200 transition-colors"
+                      onClick={(e) => e.stopPropagation()}
+                    >
                       {Array.isArray(post.categories) ? post.categories[0]?.name : post.categories.name}
-                    </span>
+                    </a>
                   ) : (
                     <span className="text-gray-400">—</span>
                   )}

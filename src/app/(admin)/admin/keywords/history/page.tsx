@@ -16,6 +16,8 @@ export default function SearchHistoryPage() {
   const [history, setHistory] = useState<SearchHistory[]>([]);
   const [loading, setLoading] = useState(true);
   const [dateFilter, setDateFilter] = useState('40');
+  const [selectedIds, setSelectedIds] = useState<number[]>([]);
+  const [deleting, setDeleting] = useState(false);
 
   const fetchHistory = async () => {
     setLoading(true);
@@ -40,6 +42,63 @@ export default function SearchHistoryPage() {
     }
 
     setLoading(false);
+  };
+
+  const handleSelectAll = (checked: boolean) => {
+    if (checked) {
+      setSelectedIds(history.map(h => h.id));
+    } else {
+      setSelectedIds([]);
+    }
+  };
+
+  const handleSelectItem = (id: number, checked: boolean) => {
+    if (checked) {
+      setSelectedIds([...selectedIds, id]);
+    } else {
+      setSelectedIds(selectedIds.filter(i => i !== id));
+    }
+  };
+
+  const handleDelete = async (id: number) => {
+    if (!confirm('この検索履歴を削除しますか？')) return;
+
+    const { error } = await supabase
+      .from('keyword_search_history')
+      .delete()
+      .eq('id', id);
+
+    if (error) {
+      alert('削除に失敗しました');
+      return;
+    }
+
+    setHistory(history.filter(h => h.id !== id));
+  };
+
+  const handleBulkDelete = async () => {
+    if (selectedIds.length === 0) {
+      alert('削除する項目を選択してください');
+      return;
+    }
+
+    if (!confirm(`選択した${selectedIds.length}件の検索履歴を削除しますか？`)) return;
+
+    setDeleting(true);
+    const { error } = await supabase
+      .from('keyword_search_history')
+      .delete()
+      .in('id', selectedIds);
+
+    if (error) {
+      alert('削除に失敗しました');
+      setDeleting(false);
+      return;
+    }
+
+    setHistory(history.filter(h => !selectedIds.includes(h.id)));
+    setSelectedIds([]);
+    setDeleting(false);
   };
 
   useEffect(() => {
@@ -73,21 +132,32 @@ export default function SearchHistoryPage() {
         </p>
       </div>
 
-      {/* フィルター */}
+      {/* フィルターと一括操作 */}
       <div className="bg-white rounded-lg shadow p-4">
-        <div className="flex items-center gap-4">
-          <label className="text-sm font-medium text-gray-700">期間:</label>
-          <select
-            value={dateFilter}
-            onChange={(e) => setDateFilter(e.target.value)}
-            className="px-3 py-2 border border-gray-300 rounded-md"
-          >
-            <option value="1">過去1日</option>
-            <option value="7">過去7日</option>
-            <option value="30">過去30日</option>
-            <option value="40">過去40日</option>
-            <option value="all">すべて</option>
-          </select>
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-4">
+            <label className="text-sm font-medium text-gray-700">期間:</label>
+            <select
+              value={dateFilter}
+              onChange={(e) => setDateFilter(e.target.value)}
+              className="px-3 py-2 border border-gray-300 rounded-md"
+            >
+              <option value="1">過去1日</option>
+              <option value="7">過去7日</option>
+              <option value="30">過去30日</option>
+              <option value="40">過去40日</option>
+              <option value="all">すべて</option>
+            </select>
+          </div>
+          {selectedIds.length > 0 && (
+            <button
+              onClick={handleBulkDelete}
+              disabled={deleting}
+              className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 disabled:bg-gray-400 text-sm font-medium"
+            >
+              {deleting ? '削除中...' : `選択した${selectedIds.length}件を削除`}
+            </button>
+          )}
         </div>
       </div>
 
@@ -117,6 +187,14 @@ export default function SearchHistoryPage() {
             <table className="min-w-full divide-y divide-gray-200">
               <thead className="bg-gray-50">
                 <tr>
+                  <th className="px-4 py-3 text-left">
+                    <input
+                      type="checkbox"
+                      checked={selectedIds.length === history.length && history.length > 0}
+                      onChange={(e) => handleSelectAll(e.target.checked)}
+                      className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
+                    />
+                  </th>
                   <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">
                     検索日時
                   </th>
@@ -132,11 +210,22 @@ export default function SearchHistoryPage() {
                   <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">
                     IPアドレス
                   </th>
+                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">
+                    操作
+                  </th>
                 </tr>
               </thead>
               <tbody className="bg-white divide-y divide-gray-200">
                 {history.map((item) => (
                   <tr key={item.id} className="hover:bg-gray-50">
+                    <td className="px-4 py-3">
+                      <input
+                        type="checkbox"
+                        checked={selectedIds.includes(item.id)}
+                        onChange={(e) => handleSelectItem(item.id, e.target.checked)}
+                        className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
+                      />
+                    </td>
                     <td className="px-4 py-3 text-sm text-gray-900">
                       {formatDate(item.created_at)}
                     </td>
@@ -151,6 +240,14 @@ export default function SearchHistoryPage() {
                     </td>
                     <td className="px-4 py-3 text-sm text-gray-500">
                       -
+                    </td>
+                    <td className="px-4 py-3 text-sm">
+                      <button
+                        onClick={() => handleDelete(item.id)}
+                        className="text-red-600 hover:text-red-800 font-medium"
+                      >
+                        削除
+                      </button>
                     </td>
                   </tr>
                 ))}

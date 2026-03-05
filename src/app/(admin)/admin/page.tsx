@@ -1,4 +1,4 @@
-import { supabase } from '@/lib/supabase';
+import { supabaseAdmin } from '@/lib/supabase';
 import { FileText, Users, MessageSquare, Heart } from 'lucide-react';
 import { Metadata } from 'next';
 
@@ -8,10 +8,10 @@ export const metadata: Metadata = {
 
 async function getStats() {
   const [postsCount, usersCount, commentsCount, likesCount] = await Promise.all([
-    supabase.from('posts').select('id', { count: 'exact', head: true }),
-    supabase.from('users').select('id', { count: 'exact', head: true }),
-    supabase.from('comments').select('id', { count: 'exact', head: true }),
-    supabase.from('likes').select('id', { count: 'exact', head: true }),
+    supabaseAdmin.from('posts').select('id', { count: 'exact', head: true }),
+    supabaseAdmin.from('users').select('id', { count: 'exact', head: true }),
+    supabaseAdmin.from('comments').select('id', { count: 'exact', head: true }),
+    supabaseAdmin.from('likes').select('id', { count: 'exact', head: true }),
   ]);
 
   return {
@@ -23,7 +23,7 @@ async function getStats() {
 }
 
 async function getRecentPosts() {
-  const { data } = await supabase
+  const { data } = await supabaseAdmin
     .from('posts')
     .select('id, title, created_at, users(nickname)')
     .order('created_at', { ascending: false })

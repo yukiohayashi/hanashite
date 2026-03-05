@@ -17,8 +17,6 @@ export default function PostCreateForm() {
     content: '',
     category_id: '',
     status: 'draft',
-    thumbnail_url: '',
-    og_image: '',
   });
 
   useEffect(() => {
@@ -128,36 +126,6 @@ export default function PostCreateForm() {
             </option>
           ))}
         </select>
-      </div>
-
-      {/* サムネイルURL */}
-      <div>
-        <label htmlFor="thumbnail_url" className="block text-sm font-medium text-gray-700 mb-2">
-          サムネイルURL
-        </label>
-        <input
-          type="url"
-          id="thumbnail_url"
-          value={formData.thumbnail_url}
-          onChange={(e) => setFormData({ ...formData, thumbnail_url: e.target.value })}
-          className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-          placeholder="https://example.com/image.jpg"
-        />
-      </div>
-
-      {/* OG画像URL */}
-      <div>
-        <label htmlFor="og_image" className="block text-sm font-medium text-gray-700 mb-2">
-          OG画像URL
-        </label>
-        <input
-          type="url"
-          id="og_image"
-          value={formData.og_image}
-          onChange={(e) => setFormData({ ...formData, og_image: e.target.value })}
-          className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-          placeholder="https://example.com/og-image.jpg"
-        />
       </div>
 
       {/* ステータス */}

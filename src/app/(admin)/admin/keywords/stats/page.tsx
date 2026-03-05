@@ -14,6 +14,7 @@ export default function KeywordStatsPage() {
   const [stats, setStats] = useState<KeywordStat[]>([]);
   const [loading, setLoading] = useState(true);
   const [sortBy, setSortBy] = useState<'search_count' | 'view_count' | 'post_count'>('search_count');
+  const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('desc');
 
   const fetchStats = async () => {
     setLoading(true);
@@ -21,7 +22,7 @@ export default function KeywordStatsPage() {
     const { data } = await supabase
       .from('keywords')
       .select('keyword, search_count, view_count, post_count')
-      .order(sortBy, { ascending: false })
+      .order(sortBy, { ascending: sortOrder === 'asc' })
       .limit(50);
 
     if (data) {
@@ -31,9 +32,18 @@ export default function KeywordStatsPage() {
     setLoading(false);
   };
 
+  const handleSort = (column: 'search_count' | 'view_count' | 'post_count') => {
+    if (sortBy === column) {
+      setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc');
+    } else {
+      setSortBy(column);
+      setSortOrder('desc');
+    }
+  };
+
   useEffect(() => {
     fetchStats();
-  }, [sortBy]);
+  }, [sortBy, sortOrder]);
 
   return (
     <div className="space-y-4">
@@ -77,14 +87,23 @@ export default function KeywordStatsPage() {
                   <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">
                     キーワード
                   </th>
-                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">
-                    検索回数
+                  <th 
+                    className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase cursor-pointer hover:bg-gray-100"
+                    onClick={() => handleSort('search_count')}
+                  >
+                    検索回数 {sortBy === 'search_count' && (sortOrder === 'asc' ? '↑' : '↓')}
                   </th>
-                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">
-                    閲覧数
+                  <th 
+                    className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase cursor-pointer hover:bg-gray-100"
+                    onClick={() => handleSort('view_count')}
+                  >
+                    閲覧数 {sortBy === 'view_count' && (sortOrder === 'asc' ? '↑' : '↓')}
                   </th>
-                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">
-                    投稿数
+                  <th 
+                    className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase cursor-pointer hover:bg-gray-100"
+                    onClick={() => handleSort('post_count')}
+                  >
+                    投稿数 {sortBy === 'post_count' && (sortOrder === 'asc' ? '↑' : '↓')}
                   </th>
                 </tr>
               </thead>

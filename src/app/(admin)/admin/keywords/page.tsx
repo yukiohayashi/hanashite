@@ -43,13 +43,11 @@ export default function KeywordsPage() {
     keyword: '',
     description: '',
     keyword_type: 'tag',
-    is_featured: false,
   });
   const [newKeyword, setNewKeyword] = useState({
     keyword: '',
     description: '',
     keyword_type: 'tag',
-    is_featured: false,
   });
 
   useEffect(() => {
@@ -87,7 +85,6 @@ export default function KeywordsPage() {
       keyword: newKeyword.keyword,
       description: newKeyword.description || null,
       keyword_type: newKeyword.keyword_type,
-      is_featured: newKeyword.is_featured,
     });
 
     if (error) {
@@ -100,7 +97,6 @@ export default function KeywordsPage() {
       keyword: '',
       description: '',
       keyword_type: 'tag',
-      is_featured: false,
     });
     fetchKeywords();
   };
@@ -167,7 +163,6 @@ export default function KeywordsPage() {
       keyword: keyword.keyword,
       description: keyword.description || '',
       keyword_type: keyword.keyword_type,
-      is_featured: keyword.is_featured,
     });
     setShowEditModal(true);
   };
@@ -184,7 +179,6 @@ export default function KeywordsPage() {
         keyword: editKeyword.keyword,
         description: editKeyword.description || null,
         keyword_type: editKeyword.keyword_type,
-        is_featured: editKeyword.is_featured,
       })
       .eq('id', editKeyword.id);
 
@@ -317,11 +311,6 @@ export default function KeywordsPage() {
                     <td className="px-4 py-3">
                       <div className="flex items-center gap-2">
                         <span className="font-medium text-gray-900">{keyword.keyword}</span>
-                        {keyword.is_featured && (
-                          <span className="px-2 py-0.5 text-xs bg-yellow-100 text-yellow-800 rounded">
-                            注目
-                          </span>
-                        )}
                       </div>
                       {keyword.description && (
                         <p className="text-sm text-gray-500 mt-1">{keyword.description}</p>
@@ -417,15 +406,6 @@ export default function KeywordsPage() {
                 </select>
               </div>
 
-              <div className="flex items-center">
-                <input
-                  type="checkbox"
-                  checked={newKeyword.is_featured}
-                  onChange={(e) => setNewKeyword({ ...newKeyword, is_featured: e.target.checked })}
-                  className="mr-2"
-                />
-                <label className="text-sm text-gray-700">注目キーワード</label>
-              </div>
             </div>
 
             <div className="flex gap-3 mt-6">
@@ -492,18 +472,6 @@ export default function KeywordsPage() {
                 </select>
               </div>
 
-              <div className="flex items-center">
-                <input
-                  type="checkbox"
-                  id="edit-featured"
-                  checked={editKeyword.is_featured}
-                  onChange={(e) => setEditKeyword({ ...editKeyword, is_featured: e.target.checked })}
-                  className="mr-2"
-                />
-                <label htmlFor="edit-featured" className="text-sm text-gray-700">
-                  注目キーワードとして表示
-                </label>
-              </div>
             </div>
 
             <div className="flex gap-3 mt-6">
