@@ -303,13 +303,89 @@ ssh -i ~/.ssh/hanashite.key ubuntu@133.18.125.19
 
 ---
 
-## 13. 関連リンク
+## 13. Webメール (Roundcube) 設定
+
+### 基本情報
+- **URL:** https://mail.dokujo.com
+- **ポート:** 8080 (内部)
+- **Nginx:** リバースプロキシ経由でアクセス
+
+### Google検索インデックス対策 (2026年3月5日実施)
+
+**問題:**
+- mail.dokujo.comがGoogleの検索結果に表示されていた
+- セキュリティ上、Webメールログイン画面は検索結果に表示すべきでない
+
+**対策:**
+
+1. **Nginx設定追加** (`/etc/nginx/sites-available/mail.dokujo.com`)
+   ```nginx
+   server {
+       listen 80;
+       server_name mail.dokujo.com;
+       
+       # Googleにインデックスされないようにする
+       add_header X-Robots-Tag "noindex, nofollow" always;
+       
+       location / {
+           return 301 https://$host$request_uri;
+       }
+   }
+
+   server {
+       listen 443 ssl http2;
+       server_name mail.dokujo.com;
+       
+       # Googleにインデックスされないようにする
+       add_header X-Robots-Tag "noindex, nofollow" always;
+       
+       ssl_certificate /etc/letsencrypt/live/dokujo.com/fullchain.pem;
+       ssl_certificate_key /etc/letsencrypt/live/dokujo.com/privkey.pem;
+       include /etc/letsencrypt/options-ssl-nginx.conf;
+       ssl_dhparam /etc/letsencrypt/ssl-dhparams.pem;
+       
+       location / {
+           proxy_pass http://localhost:8080;
+           proxy_set_header Host $host;
+           proxy_set_header X-Real-IP $remote_addr;
+           proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+           proxy_set_header X-Forwarded-Proto $scheme;
+       }
+   }
+   ```
+
+2. **設定適用コマンド**
+   ```bash
+   # シンボリックリンク作成
+   sudo ln -sf /etc/nginx/sites-available/mail.dokujo.com /etc/nginx/sites-enabled/
+   
+   # 設定テスト
+   sudo nginx -t
+   
+   # Nginx再起動
+   sudo systemctl reload nginx
+   ```
+
+3. **Google Search Console対応**
+   - 削除リクエスト送信: `https://mail.dokujo.com` (プレフィックス削除)
+   - ステータス: 処理中
+   - 予想完了時間: 1日程度
+
+**結果:**
+- ✅ X-Robots-Tagヘッダーが正常に追加され、新規ページはインデックスされない
+- ✅ 既存インデックスの削除リクエスト送信完了
+- ✅ 今後mail.dokujo.comはGoogle検索結果に表示されない
+
+---
+
+## 14. 関連リンク
 
 - **Webサイト:** https://dokujo.com
 - **管理画面:** https://dokujo.com/admin
+- **Webメール:** https://mail.dokujo.com (NOINDEX設定済み)
 - **Supabase:** https://supabase.com/dashboard/project/fdbkbbuvrihxbqfwgdkg
 
 ---
 
-**最終更新日:** 2026年2月26日  
+**最終更新日:** 2026年3月5日  
 **確認者:** システム管理者
