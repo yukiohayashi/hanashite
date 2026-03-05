@@ -358,9 +358,9 @@ export default async function PostPage({ params, searchParams }: { params: Promi
                     </div>
                   </div>
                 ) : imageUrl && (imageUrl.startsWith('data:image/') || imageUrl.startsWith('/uploads/') || imageUrl.includes('supabase.co/storage')) ? (
-                  // 手動画像アップロード：画像を左に小さく表示、本文を回り込ませ
+                  // 手動画像アップロード：PC版は右寄せ回り込み、スマホ版は100%幅
                   <div className="mb-1.5">
-                    <div className="float-left mr-3 mb-2 w-24 md:w-32">
+                    <div className="md:float-right md:ml-3 mb-2 w-full md:w-32">
                       <ClickableImage
                         src={imageUrl}
                         alt={post.title}

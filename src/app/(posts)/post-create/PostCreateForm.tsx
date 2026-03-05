@@ -372,6 +372,9 @@ export default function PostCreateForm() {
                     <Label htmlFor="file_photo">
                       画像をアップロード <i className="far fa-image"></i>
                     </Label>
+                    <p className="text-xs text-gray-600 mb-2">
+                      ※利用規約を遵守し、プライバシーを侵害する画像や著作権を侵害する画像は掲載しないでください。
+                    </p>
                     <Input
                       id="file_photo"
                       type="file"
