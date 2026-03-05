@@ -89,7 +89,7 @@ export default function AdminPanelLayout({
             className={`flex items-center gap-2 px-3 py-1 text-gray-300 ${hoverBgColor} hover:text-white transition-colors`}
           >
             <Trash2 className="w-5 h-5" />
-            <span className="text-sm">クリーンアップ（削除記事に対するコメント、いいね、フォローを削除）</span>
+            <span className="text-sm">クリーンアップ</span>
           </Link>
 
           <div>
