@@ -9,6 +9,7 @@ interface Comment {
   created_at: string;
   user_id: number | null;
   post_id: number;
+  is_best_answer?: boolean;
   users: {
     id: number;
     name: string;
@@ -92,17 +93,18 @@ export default function CommentsTable({ comments: initialComments }: CommentsTab
     return sorted;
   }, [comments, sortField, sortDirection]);
 
-  // 全選択/全解除
+  // 全選択/全解除（ベストアンサーは除外）
   const handleSelectAll = (checked: boolean) => {
     if (checked) {
-      setSelectedIds(sortedComments.map(c => c.id));
+      setSelectedIds(sortedComments.filter(c => !c.is_best_answer).map(c => c.id));
     } else {
       setSelectedIds([]);
     }
   };
 
-  // 個別選択
-  const handleSelectComment = (commentId: number, checked: boolean) => {
+  // 個別選択（ベストアンサーは選択不可）
+  const handleSelectComment = (commentId: number, checked: boolean, isBestAnswer: boolean) => {
+    if (isBestAnswer) return;
     if (checked) {
       setSelectedIds([...selectedIds, commentId]);
     } else {
@@ -111,15 +113,16 @@ export default function CommentsTable({ comments: initialComments }: CommentsTab
   };
 
   // 行クリックでチェックボックスをトグル
-  const handleRowClick = (commentId: number, e: React.MouseEvent) => {
+  const handleRowClick = (commentId: number, isBestAnswer: boolean, e: React.MouseEvent) => {
     // リンクやボタンをクリックした場合は無視
     const target = e.target as HTMLElement;
     if (target.tagName === 'A' || target.tagName === 'BUTTON' || target.tagName === 'INPUT' || target.closest('a') || target.closest('button')) {
       return;
     }
     
+    if (isBestAnswer) return;
     const isSelected = selectedIds.includes(commentId);
-    handleSelectComment(commentId, !isSelected);
+    handleSelectComment(commentId, !isSelected, isBestAnswer);
   };
 
   // 一括削除
@@ -156,7 +159,14 @@ export default function CommentsTable({ comments: initialComments }: CommentsTab
     }
   };
 
-  const handleDelete = async (commentId: number) => {
+  const handleDelete = async (commentId: number, isBestAnswer: boolean) => {
+    if (isBestAnswer) {
+      alert('ベストアンサーは削除できません');
+      return;
+    }
+    
+    if (!confirm('このコメントを削除しますか？')) return;
+    
     setLoading(commentId);
     try {
       const response = await fetch(`/api/admin/comments/${commentId}`, {
@@ -244,6 +254,9 @@ export default function CommentsTable({ comments: initialComments }: CommentsTab
               >
                 作成日 <SortIcon field="created_at" />
               </th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                ベストアンサー
+              </th>
               <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
                 操作
               </th>
@@ -253,15 +266,16 @@ export default function CommentsTable({ comments: initialComments }: CommentsTab
             {sortedComments.map((comment) => (
               <tr 
                 key={comment.id} 
-                className="hover:bg-gray-50 cursor-pointer"
-                onClick={(e) => handleRowClick(comment.id, e)}
+                className={`hover:bg-gray-50 cursor-pointer ${comment.is_best_answer ? 'bg-yellow-50' : ''}`}
+                onClick={(e) => handleRowClick(comment.id, !!comment.is_best_answer, e)}
               >
                 <td className="px-6 py-4">
                   <input
                     type="checkbox"
                     checked={selectedIds.includes(comment.id)}
-                    onChange={(e) => handleSelectComment(comment.id, e.target.checked)}
-                    className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
+                    onChange={(e) => handleSelectComment(comment.id, e.target.checked, !!comment.is_best_answer)}
+                    disabled={comment.is_best_answer}
+                    className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed"
                   />
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
@@ -309,12 +323,19 @@ export default function CommentsTable({ comments: initialComments }: CommentsTab
                     second: '2-digit'
                   })}
                 </td>
+                <td className="px-6 py-4 whitespace-nowrap text-sm">
+                  {comment.is_best_answer && (
+                    <span className="inline-flex items-center px-2 py-1 text-xs font-semibold bg-yellow-100 text-yellow-800 rounded">
+                      🏆 ベストアンサー
+                    </span>
+                  )}
+                </td>
                 <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                   <button
-                    onClick={() => handleDelete(comment.id)}
-                    disabled={loading === comment.id}
-                    className="text-red-600 hover:text-red-900 disabled:opacity-50"
-                    title="削除"
+                    onClick={() => handleDelete(comment.id, !!comment.is_best_answer)}
+                    disabled={loading === comment.id || comment.is_best_answer}
+                    className="text-red-600 hover:text-red-900 disabled:opacity-50 disabled:cursor-not-allowed"
+                    title={comment.is_best_answer ? 'ベストアンサーは削除できません' : '削除'}
                   >
                     <Trash2 className="w-5 h-5" />
                   </button>

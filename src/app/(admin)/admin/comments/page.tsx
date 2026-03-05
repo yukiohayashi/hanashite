@@ -34,20 +34,24 @@ async function getComments(limit: number = 100, searchQuery: string = '') {
 
   const userMap = new Map(users?.map(u => [u.id, u]) || []);
 
-  // 投稿情報を一括取得
+  // 投稿情報を一括取得（ベストアンサーIDも含む）
   const { data: posts } = await supabase
     .from('posts')
-    .select('id, title')
+    .select('id, title, best_answer_id')
     .in('id', postIds);
 
   const postMap = new Map(posts?.map(p => [p.id, p]) || []);
 
   // データをマッピング
-  const commentsWithDetails = comments.map(comment => ({
-    ...comment,
-    users: userMap.get(comment.user_id) || null,
-    posts: postMap.get(comment.post_id) || null,
-  }));
+  const commentsWithDetails = comments.map(comment => {
+    const post = postMap.get(comment.post_id);
+    return {
+      ...comment,
+      users: userMap.get(comment.user_id) || null,
+      posts: post || null,
+      is_best_answer: post?.best_answer_id === comment.id,
+    };
+  });
 
   return commentsWithDetails;
 }

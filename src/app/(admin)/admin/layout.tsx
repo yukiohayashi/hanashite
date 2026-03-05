@@ -212,7 +212,7 @@ export default function AdminPanelLayout({
             className={`flex items-center gap-2 px-3 py-1 text-gray-300 ${hoverBgColor} hover:text-white transition-colors`}
           >
             <MessageSquare className="w-5 h-5" />
-            <span className="text-sm">コメント管理</span>
+            <span className="text-sm">コメント一覧</span>
           </Link>
           {/* 自動コメント・いいね */}
           <div>
@@ -264,7 +264,7 @@ export default function AdminPanelLayout({
                 href="/admin/likes/stats"
                 className={`block px-3 py-1 text-sm text-gray-400 ${hoverBgColor} hover:text-white transition-colors`}
               >
-                統計
+                いいね統計
               </Link>
               <Link
                 href="/admin/likes"

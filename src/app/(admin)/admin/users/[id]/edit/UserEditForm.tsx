@@ -11,6 +11,9 @@ interface User {
   is_banned: boolean;
   user_description?: string;
   image?: string;
+  avatar_style?: string;
+  avatar_seed?: string;
+  use_custom_image?: boolean;
   sei?: string;
   mei?: string;
   kana_sei?: string;
@@ -35,7 +38,6 @@ export default function UserEditForm({ user }: UserEditFormProps) {
     name: user.name || '',
     email: user.email || '',
     status: user.status || 0,
-    is_banned: user.is_banned || false,
     user_description: user.user_description || '',
     sei: user.sei || '',
     mei: user.mei || '',
@@ -50,7 +52,16 @@ export default function UserEditForm({ user }: UserEditFormProps) {
     sns_x: user.sns_x || '',
   });
   const [avatarFile, setAvatarFile] = useState<File | null>(null);
-  const [avatarPreview, setAvatarPreview] = useState<string>(user.image || '');
+  const [avatarPreview, setAvatarPreview] = useState<string>(() => {
+    if (user.use_custom_image && user.image) {
+      return user.image;
+    }
+    if (user.avatar_seed) {
+      const style = user.avatar_style || 'fun-emoji';
+      return `https://api.dicebear.com/9.x/${style}/svg?seed=${encodeURIComponent(user.avatar_seed)}&size=96`;
+    }
+    return '';
+  });
   const [loading, setLoading] = useState(false);
 
   const handleAvatarChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -97,6 +108,7 @@ export default function UserEditForm({ user }: UserEditFormProps) {
         body: JSON.stringify({
           ...formData,
           image: imageUrl,
+          is_banned: user.status === 9,
         }),
       });
 
@@ -165,36 +177,19 @@ export default function UserEditForm({ user }: UserEditFormProps) {
 
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
-              権限
+            権限
             </label>
             <select
               value={formData.status}
               onChange={(e) => setFormData({ ...formData, status: parseInt(e.target.value) })}
               className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
             >
-              <option value="0">一般</option>
-              <option value="1">投稿者</option>
+              <option value="1">運営者</option>
               <option value="2">編集者</option>
-              <option value="3">管理者</option>
-              <option value="6">AIエディター</option>
+              <option value="3">会員</option>
+              <option value="4">AI会員</option>
+              <option value="9">停止</option>
             </select>
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              ステータス
-            </label>
-            <div className="flex items-center">
-              <input
-                type="checkbox"
-                checked={formData.is_banned}
-                onChange={(e) => setFormData({ ...formData, is_banned: e.target.checked })}
-                className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
-              />
-              <label className="ml-2 text-sm text-gray-700">
-                このユーザーをBANする
-              </label>
-            </div>
           </div>
 
           <div>

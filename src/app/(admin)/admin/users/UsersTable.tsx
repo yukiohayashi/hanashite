@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useMemo } from 'react';
-import { Ban, CheckCircle, ArrowUpDown, Trash2 } from 'lucide-react';
+import { ArrowUpDown, Trash2 } from 'lucide-react';
 
 interface User {
   id: number;
@@ -33,13 +33,7 @@ export default function UsersTable({ users: initialUsers }: UsersTableProps) {
   const [selectedUsers, setSelectedUsers] = useState<number[]>([]);
   const [bulkDeleting, setBulkDeleting] = useState(false);
 
-  const handleToggleBan = async (userId: number, currentBanStatus: boolean) => {
-    const action = currentBanStatus ? '解除' : 'BAN';
-    
-    if (!confirm(`このユーザーを${action}しますか？`)) {
-      return;
-    }
-
+  const handleDelete = async (userId: number) => {
     setLoading(userId);
     try {
       const response = await fetch(`/api/admin/users/${userId}`, {
@@ -47,20 +41,20 @@ export default function UsersTable({ users: initialUsers }: UsersTableProps) {
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ is_banned: !currentBanStatus }),
+        body: JSON.stringify({ is_banned: true }),
       });
 
       if (response.ok) {
         setUsers(users.map(u => 
-          u.id === userId ? { ...u, is_banned: !currentBanStatus } : u
+          u.id === userId ? { ...u, is_banned: true } : u
         ));
-        alert(`ユーザーを${action}しました`);
+        alert(`ユーザーを削除しました`);
       } else {
-        alert(`${action}に失敗しました`);
+        alert(`削除に失敗しました`);
       }
     } catch (error) {
-      console.error('Error toggling user ban:', error);
-      alert(`${action}に失敗しました`);
+      console.error('Error deleting user:', error);
+      alert(`削除に失敗しました`);
     } finally {
       setLoading(null);
     }
@@ -240,9 +234,6 @@ export default function UsersTable({ users: initialUsers }: UsersTableProps) {
                 </div>
               </th>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                ステータス
-              </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                 相談件数
               </th>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100" onClick={() => handleSort('created_at')}>
@@ -332,17 +323,6 @@ export default function UsersTable({ users: initialUsers }: UsersTableProps) {
                     <option value="9">停止</option>
                   </select>
                 </td>
-                <td className="px-6 py-4 whitespace-nowrap">
-                  <span
-                    className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
-                      user.is_banned
-                        ? 'bg-red-100 text-red-800'
-                        : 'bg-green-100 text-green-800'
-                    }`}
-                  >
-                    {user.is_banned ? 'BAN' : 'アクティブ'}
-                  </span>
-                </td>
                 <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                   <a
                     href={`/admin/users/${user.id}/posts`}
@@ -356,26 +336,11 @@ export default function UsersTable({ users: initialUsers }: UsersTableProps) {
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                   <button
-                    onClick={() => handleToggleBan(user.id, user.is_banned || false)}
+                    onClick={() => handleDelete(user.id)}
                     disabled={loading === user.id}
-                    className={`inline-flex items-center gap-1 px-3 py-1 rounded text-sm font-medium disabled:opacity-50 ${
-                      user.is_banned
-                        ? 'bg-green-100 text-green-700 hover:bg-green-200'
-                        : 'bg-red-100 text-red-700 hover:bg-red-200'
-                    }`}
-                    title={user.is_banned ? 'BAN解除' : 'BANする'}
+                    className="inline-flex items-center gap-1 px-3 py-1 rounded text-sm font-medium disabled:opacity-50 bg-red-100 text-red-700 hover:bg-red-200"
                   >
-                    {user.is_banned ? (
-                      <>
-                        <CheckCircle className="w-4 h-4" />
-                        BAN解除
-                      </>
-                    ) : (
-                      <>
-                        <Ban className="w-4 h-4" />
-                        BAN
-                      </>
-                    )}
+                    削除
                   </button>
                 </td>
               </tr>

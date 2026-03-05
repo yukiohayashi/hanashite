@@ -3,10 +3,13 @@ import { notFound } from 'next/navigation';
 import UserEditForm from './UserEditForm';
 
 async function getUser(id: string) {
+  // IDが数値かUUIDかを判定
+  const isNumericId = /^\d+$/.test(id);
+  
   const { data: user, error } = await supabase
     .from('users')
     .select('*')
-    .eq('id', parseInt(id))
+    .eq('id', isNumericId ? parseInt(id) : id)
     .single();
 
   if (error || !user) {
