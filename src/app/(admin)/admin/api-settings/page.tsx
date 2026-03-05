@@ -1,132 +1,362 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { supabase } from '@/lib/supabase';
+import { Plus, Edit2, Trash2 } from 'lucide-react';
 
-export default function ApiSettingsPage() {
-  const [apiKey, setApiKey] = useState('');
-  const [saving, setSaving] = useState(false);
-  const [message, setMessage] = useState('');
-  const [showApiKey, setShowApiKey] = useState(false);
+interface ApiSetting {
+  id: number;
+  api_name: string;
+  api_key: string | null;
+  api_secret: string | null;
+  endpoint_url: string | null;
+  description: string | null;
+  model: string | null;
+  is_active: boolean;
+  usage_count: number;
+  last_used_at: string | null;
+  created_at: string;
+  updated_at: string;
+}
 
-  const fetchSettings = async () => {
-    const { data, error } = await supabase
-      .from('auto_creator_settings')
-      .select('*')
-      .eq('setting_key', 'openai_api_key')
-      .single();
-
-    if (error) {
-      console.error('Error fetching API settings:', error);
-      return;
-    }
-
-    setApiKey(data?.setting_value || '');
-  };
+export default function AiSettingsPage() {
+  const [settings, setSettings] = useState<ApiSetting[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [showModal, setShowModal] = useState(false);
+  const [editingId, setEditingId] = useState<number | null>(null);
+  const [formData, setFormData] = useState({
+    api_name: '',
+    api_key: '',
+    api_secret: '',
+    endpoint_url: '',
+    description: '',
+    model: '',
+    is_active: true,
+  });
 
   useEffect(() => {
     fetchSettings();
   }, []);
 
-  const handleSave = async () => {
-    setSaving(true);
-    setMessage('');
+  const fetchSettings = async () => {
+    try {
+      const response = await fetch('/api/admin/api-settings');
+      if (response.ok) {
+        const data = await response.json();
+        setSettings(data);
+      }
+    } catch (error) {
+      console.error('Error fetching settings:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    try {
+      const url = editingId 
+        ? `/api/admin/api-settings/${editingId}`
+        : '/api/admin/api-settings';
+      
+      const response = await fetch(url, {
+        method: editingId ? 'PATCH' : 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(formData),
+      });
+
+      if (response.ok) {
+        alert(editingId ? 'API設定を更新しました' : 'API設定を追加しました');
+        setShowModal(false);
+        resetForm();
+        fetchSettings();
+      } else {
+        const data = await response.json();
+        alert(data.error || '保存に失敗しました');
+      }
+    } catch (error) {
+      console.error('Error saving setting:', error);
+      alert('保存に失敗しました');
+    }
+  };
+
+  const handleEdit = (setting: ApiSetting) => {
+    setEditingId(setting.id);
+    setFormData({
+      api_name: setting.api_name,
+      api_key: setting.api_key || '',
+      api_secret: setting.api_secret || '',
+      endpoint_url: setting.endpoint_url || '',
+      description: setting.description || '',
+      model: setting.model || '',
+      is_active: setting.is_active,
+    });
+    setShowModal(true);
+  };
+
+  const handleDelete = async (id: number) => {
+    if (!confirm('このAPI設定を削除しますか？')) return;
 
     try {
-      const { error } = await supabase
-        .from('auto_creator_settings')
-        .update({ 
-          setting_value: apiKey, 
-          updated_at: new Date().toISOString() 
-        })
-        .eq('setting_key', 'openai_api_key');
+      const response = await fetch(`/api/admin/api-settings/${id}`, {
+        method: 'DELETE',
+      });
 
-      if (error) throw error;
-
-      setMessage('設定を保存しました');
-      setTimeout(() => setMessage(''), 3000);
+      if (response.ok) {
+        alert('API設定を削除しました');
+        fetchSettings();
+      } else {
+        alert('削除に失敗しました');
+      }
     } catch (error) {
-      console.error('Error saving settings:', error);
-      setMessage('保存に失敗しました');
-    } finally {
-      setSaving(false);
+      console.error('Error deleting setting:', error);
+      alert('削除に失敗しました');
     }
+  };
+
+  const resetForm = () => {
+    setFormData({
+      api_name: '',
+      api_key: '',
+      api_secret: '',
+      endpoint_url: '',
+      description: '',
+      model: '',
+      is_active: true,
+    });
+    setEditingId(null);
   };
 
   return (
     <div className="space-y-6">
-      <div>
-        <h1 className="text-3xl font-bold text-gray-900">API設定</h1>
-        <p className="mt-2 text-sm text-gray-600">
-          すべてのAI機能で使用するAPIキーを一元管理します
-        </p>
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="text-3xl font-bold text-gray-900">API設定</h1>
+          <p className="mt-2 text-gray-600">自動投稿、自動コメント、自動いいねで使用するAPI設定を管理</p>
+        </div>
+        <button
+          onClick={() => {
+            resetForm();
+            setShowModal(true);
+          }}
+          className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700"
+        >
+          <Plus className="w-5 h-5" />
+          新規追加
+        </button>
       </div>
 
-      {message && (
-        <div className={`p-4 rounded-lg ${
-          message.includes('成功') || message.includes('保存しました')
-            ? 'bg-green-50 text-green-800'
-            : 'bg-red-50 text-red-800'
-        }`}>
-          {message}
-        </div>
-      )}
-
-      <div className="bg-white rounded-lg shadow">
-        <div className="p-6 space-y-6">
-          <div>
-            <label htmlFor="openai_api_key" className="block text-sm font-medium text-gray-700 mb-2">
-              OpenAI APIキー <span className="text-red-600">*</span>
-            </label>
-            <div className="relative">
-              <input
-                type={showApiKey ? 'text' : 'password'}
-                id="openai_api_key"
-                value={apiKey}
-                onChange={(e) => setApiKey(e.target.value)}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                placeholder="sk-..."
-                required
-              />
-              <button
-                type="button"
-                onClick={() => setShowApiKey(!showApiKey)}
-                className="absolute right-2 top-2 text-sm text-gray-600 hover:text-gray-800"
-              >
-                {showApiKey ? '隠す' : '表示'}
-              </button>
-            </div>
-            <p className="mt-2 text-sm text-gray-500">
-              このAPIキーは以下の機能で使用されます：
-            </p>
-            <ul className="mt-2 text-sm text-gray-500 list-disc list-inside space-y-1">
-              <li>自動コメント生成</li>
-              <li>AI会員のプロフィール生成</li>
-              <li>AI自動投稿の記事生成</li>
-              <li>その他のAI機能</li>
-            </ul>
-          </div>
-        </div>
-
-        <div className="px-6 py-4 bg-gray-50 border-t border-gray-200 flex justify-end">
-          <button
-            onClick={handleSave}
-            disabled={saving}
-            className="px-6 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:bg-gray-400 font-medium"
-          >
-            {saving ? '保存中...' : '設定を保存'}
-          </button>
-        </div>
-      </div>
-
+      {/* ヒントセクション */}
       <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-        <h3 className="text-sm font-medium text-blue-800 mb-2">💡 ヒント</h3>
-        <ul className="text-sm text-blue-700 space-y-1">
-          <li>• OpenAI APIキーは <a href="https://platform.openai.com/api-keys" target="_blank" rel="noopener noreferrer" className="underline">OpenAI Platform</a> で取得できます</li>
+        <h3 className="text-sm font-semibold text-blue-900 mb-2">💡 ヒント</h3>
+        <ul className="text-sm text-blue-800 space-y-1">
+          <li>• OpenAI APIキーは <a href="https://platform.openai.com/api-keys" target="_blank" rel="noopener noreferrer" className="underline hover:text-blue-600">OpenAI Platform</a> で取得できます</li>
           <li>• APIキーは安全に保管され、暗号化されて保存されます</li>
           <li>• APIキーを変更すると、すべてのAI機能に即座に反映されます</li>
         </ul>
       </div>
+
+      {loading ? (
+        <div className="text-center py-12">
+          <p className="text-gray-500">読み込み中...</p>
+        </div>
+      ) : (
+        <div className="bg-white rounded-lg shadow overflow-hidden">
+          <table className="min-w-full divide-y divide-gray-200">
+            <thead className="bg-gray-50">
+              <tr>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  API名
+                </th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  説明
+                </th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  モデル
+                </th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  使用回数
+                </th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  ステータス
+                </th>
+                <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  操作
+                </th>
+              </tr>
+            </thead>
+            <tbody className="bg-white divide-y divide-gray-200">
+              {settings.map((setting) => (
+                <tr key={setting.id} className="hover:bg-gray-50">
+                  <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+                    {setting.api_name}
+                  </td>
+                  <td className="px-6 py-4 text-sm text-gray-500">
+                    {setting.description || '-'}
+                  </td>
+                  <td className="px-6 py-4 text-sm text-gray-500">
+                    {setting.model || '-'}
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                    {setting.usage_count || 0}回
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap">
+                    <span
+                      className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
+                        setting.is_active
+                          ? 'bg-green-100 text-green-800'
+                          : 'bg-gray-100 text-gray-800'
+                      }`}
+                    >
+                      {setting.is_active ? '有効' : '無効'}
+                    </span>
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                    <button
+                      onClick={() => handleEdit(setting)}
+                      className="text-blue-600 hover:text-blue-900 mr-3"
+                      title="編集"
+                    >
+                      <Edit2 className="w-5 h-5" />
+                    </button>
+                    <button
+                      onClick={() => handleDelete(setting.id)}
+                      className="text-red-600 hover:text-red-900"
+                      title="削除"
+                    >
+                      <Trash2 className="w-5 h-5" />
+                    </button>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+
+          {settings.length === 0 && (
+            <div className="text-center py-12">
+              <p className="text-gray-500">API設定がありません</p>
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* モーダル */}
+      {showModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-lg shadow-xl max-w-2xl w-full mx-4 max-h-[90vh] overflow-y-auto">
+            <div className="px-6 py-4 border-b border-gray-200">
+              <h3 className="text-lg font-semibold text-gray-900 mb-4">
+                {editingId ? 'API設定を編集' : '新規API設定'}
+              </h3>
+            </div>
+
+            <form onSubmit={handleSubmit} className="p-6 space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  API名 <span className="text-red-500">*</span>
+                </label>
+                <input
+                  type="text"
+                  value={formData.api_name}
+                  onChange={(e) => setFormData({ ...formData, api_name: e.target.value })}
+                  required
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
+                  placeholder="例: OpenAI GPT-4"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  説明
+                </label>
+                <textarea
+                  value={formData.description}
+                  onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+                  rows={2}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
+                  placeholder="このAPIの用途や説明"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  モデル <span className="text-red-500">*</span>
+                </label>
+                <select
+                  value={formData.model}
+                  onChange={(e) => setFormData({ ...formData, model: e.target.value })}
+                  required
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
+                >
+                  <option value="">モデルを選択</option>
+                  <option value="gpt-4o">GPT-4o (最新・高性能)</option>
+                  <option value="gpt-4o-mini">GPT-4o mini (高速・低コスト)</option>
+                  <option value="gpt-4-turbo">GPT-4 Turbo</option>
+                  <option value="gpt-4">GPT-4</option>
+                  <option value="gpt-3.5-turbo">GPT-3.5 Turbo</option>
+                  <option value="o1">o1 (推論特化)</option>
+                  <option value="o1-mini">o1-mini (推論特化・低コスト)</option>
+                </select>
+                <p className="mt-1 text-xs text-gray-500">
+                  使用するOpenAIモデルを選択
+                </p>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  APIキー <span className="text-red-500">*</span>
+                </label>
+                <input
+                  type="text"
+                  value={formData.api_key}
+                  onChange={(e) => setFormData({ ...formData, api_key: e.target.value })}
+                  required
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
+                  placeholder="sk-proj-..."
+                />
+                <p className="mt-1 text-xs text-gray-500">
+                  OpenAI APIキーまたは他のAI APIキーを入力
+                </p>
+              </div>
+
+              <div>
+                <label className="flex items-center">
+                  <input
+                    type="checkbox"
+                    checked={formData.is_active}
+                    onChange={(e) => setFormData({ ...formData, is_active: e.target.checked })}
+                    className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
+                  />
+                  <span className="ml-2 text-sm font-medium text-gray-700">
+                    有効にする
+                  </span>
+                </label>
+              </div>
+
+              <div className="flex justify-end gap-3 pt-4">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setShowModal(false);
+                    resetForm();
+                  }}
+                  className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50"
+                >
+                  キャンセル
+                </button>
+                <button
+                  type="submit"
+                  className="px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-md hover:bg-blue-700"
+                >
+                  {editingId ? '更新' : '追加'}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

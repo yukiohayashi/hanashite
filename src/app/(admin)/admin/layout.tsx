@@ -52,7 +52,6 @@ export default function AdminPanelLayout({
       '/admin/mail/logs': 'メール送信履歴',
       '/admin/mail/settings': 'SMTP設定',
       '/admin/api-settings': 'API設定',
-      '/admin/ai-settings': 'AI設定',
     };
 
     const pageTitle = pageTitles[pathname] || 'ダッシュボード';
@@ -94,11 +93,11 @@ export default function AdminPanelLayout({
           </Link>
 
           <Link
-            href="/admin/ai-settings"
+            href="/admin/api-settings"
             className={`flex items-center gap-2 px-3 py-1 text-gray-300 ${hoverBgColor} hover:text-white transition-colors`}
           >
             <Settings className="w-5 h-5" />
-            <span className="text-sm">AI設定</span>
+            <span className="text-sm">API設定</span>
           </Link>
 
           <div>
