@@ -1,10 +1,22 @@
 import { supabase } from '@/lib/supabase';
 import { getKeywordById } from '@/lib/keywords';
+import { Metadata } from 'next';
 import Link from 'next/link';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
 import Sidebar from '@/components/Sidebar';
 import RightSidebar from '@/components/RightSidebar';
+
+export async function generateMetadata({ params }: { params: Promise<{ id: string }> }): Promise<Metadata> {
+  const { id } = await params;
+  const keyword = await getKeywordById(parseInt(id));
+  
+  const title = keyword ? `${keyword.keyword}｜ハナシテ` : 'ハナシテ';
+  
+  return {
+    title,
+  };
+}
 
 export default async function KeywordPage({ 
   params,

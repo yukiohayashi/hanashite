@@ -3,7 +3,7 @@
 import { useEffect } from 'react';
 import { usePathname } from 'next/navigation';
 import Link from 'next/link';
-import { LayoutDashboard, FileText, Users, MessageSquare, Heart, Coins, Mail, Bot, LogOut, Search, Trash2, Settings } from 'lucide-react';
+import { LayoutDashboard, FileText, Users, MessageSquare, Heart, Coins, Mail, Bot, Search, Trash2, Settings } from 'lucide-react';
 
 export default function AdminPanelLayout({
   children,
@@ -381,16 +381,6 @@ export default function AdminPanelLayout({
             <Settings className="w-5 h-5" />
             <span className="text-sm">API設定</span>
           </Link>
-
-          <div className={`border-t ${borderColor} mt-3 pt-3`}>
-            <Link
-              href="/" target="blank"
-              className={`flex items-center gap-2 px-3 py-1 text-gray-300 ${hoverBgColor} hover:text-white transition-colors`}
-            >
-              <LogOut className="w-5 h-5" />
-              <span className="text-sm">サイトに戻る</span>
-            </Link>
-          </div>
         </nav>
       </aside>
 

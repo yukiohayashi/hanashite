@@ -1,11 +1,23 @@
 import { auth } from '@/lib/auth';
 import { supabase } from '@/lib/supabase';
+import { Metadata } from 'next';
 import Link from 'next/link';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
 import Sidebar from '@/components/Sidebar';
 import MyPageMenu from '@/components/MyPageMenu';
 import { notFound } from 'next/navigation';
+
+export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }): Promise<Metadata> {
+  const { slug } = await params;
+  const user = await getUserById(slug);
+  
+  const title = user ? `${user.name}さん｜ハナシテ` : 'ハナシテ';
+  
+  return {
+    title,
+  };
+}
 
 interface User {
   id: string;
