@@ -54,6 +54,7 @@ interface ActivityItem {
   title: string;
   link: string;
   postTitle?: string;
+  postId?: number;
 }
 
 async function getUserById(userIdOrSlug: string) {
@@ -190,7 +191,8 @@ export default async function UserPage({ params }: { params: Promise<{ slug: str
       type: 'post' as const,
       date: post.created_at,
       title: post.title,
-      link: `/posts/${post.id}`
+      link: `/posts/${post.id}`,
+      postId: post.id
     })),
     ...comments.map(comment => ({
       type: 'comment' as const,
@@ -337,6 +339,18 @@ export default async function UserPage({ params }: { params: Promise<{ slug: str
                             )}
                           </Link>
                         </div>
+
+                        {/* 投稿の編集ボタンを表示 */}
+                        {activity.type === 'post' && activity.postId && (
+                          <div className="mt-2">
+                            <Link
+                              href={`/post-manage/${activity.postId}`}
+                              className="inline-block bg-gray-200 hover:bg-blue-100 px-3 py-1 rounded text-gray-700 hover:text-blue-600 text-xs transition-colors"
+                            >
+                              編集する
+                            </Link>
+                          </div>
+                        )}
                       </div>
                     </li>
                   ))}

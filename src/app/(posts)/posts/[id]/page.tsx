@@ -335,9 +335,13 @@ export default async function PostPage({ params, searchParams }: { params: Promi
                   <h1 className="font-bold text-gray-900 text-1.5xl">
                     {post.title}
                   </h1>
-                  {(session?.user?.status === 3 || session?.user?.id === post.user_id) && (
+                  {(session?.user?.status === 1 || session?.user?.status === 2 || session?.user?.id === post.user_id) && (
                     <Link
-                      href={session?.user?.status === 3 ? `/admin/posts/${post.id}/edit` : `/post-manage/${post.id}`}
+                      href={
+                        session?.user?.status === 1 || session?.user?.status === 2
+                          ? `/admin/posts/${post.id}/edit`
+                          : `/post-manage/${post.id}`
+                      }
                       className="ml-4 px-3 py-1 text-sm bg-blue-600 text-white rounded hover:bg-blue-700"
                     >
                       編集
