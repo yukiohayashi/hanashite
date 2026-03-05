@@ -72,12 +72,12 @@ async function getUserCounts() {
   
   const counts = {
     all: allUsers?.length || 0,
-    admin: allUsers?.filter(u => u.status === 3).length || 0,
+    admin: allUsers?.filter(u => u.status === 1).length || 0,
     editor: allUsers?.filter(u => u.status === 2).length || 0,
-    suspended: allUsers?.filter(u => u.status === 4).length || 0,
-    member: allUsers?.filter(u => u.status === 1).length || 0,
+    suspended: allUsers?.filter(u => u.status === 9).length || 0,
+    member: allUsers?.filter(u => u.status === 3).length || 0,
     ai_editor: allUsers?.filter(u => u.status === 2).length || 0,
-    ai_member: allUsers?.filter(u => u.status === 6).length || 0,
+    ai_member: allUsers?.filter(u => u.status === 4).length || 0,
     with_image: allUsers?.filter(u => u.image).length || 0,
   };
 
@@ -125,9 +125,9 @@ export default async function UsersManagementPage({
           </a>
           <span className="text-gray-400">|</span>
           <a
-            href="/admin/users?status=3"
+            href="/admin/users?status=1"
             className={`hover:text-blue-600 ${
-              statusFilter === 3 ? 'text-blue-600 font-semibold' : 'text-gray-600'
+              statusFilter === 1 ? 'text-blue-600 font-semibold' : 'text-gray-600'
             }`}
           >
             運営者 ({counts.admin})
@@ -143,27 +143,27 @@ export default async function UsersManagementPage({
           </a>
           <span className="text-gray-400">|</span>
           <a
-            href="/admin/users?status=4"
+            href="/admin/users?status=9"
             className={`hover:text-blue-600 ${
-              statusFilter === 4 ? 'text-blue-600 font-semibold' : 'text-gray-600'
+              statusFilter === 9 ? 'text-blue-600 font-semibold' : 'text-gray-600'
             }`}
           >
             停止 ({counts.suspended})
           </a>
           <span className="text-gray-400">|</span>
           <a
-            href="/admin/users?status=1"
+            href="/admin/users?status=3"
             className={`hover:text-blue-600 ${
-              statusFilter === 1 ? 'text-blue-600 font-semibold' : 'text-gray-600'
+              statusFilter === 3 ? 'text-blue-600 font-semibold' : 'text-gray-600'
             }`}
           >
             会員 ({counts.member})
           </a>
           <span className="text-gray-400">|</span>
           <a
-            href="/admin/users?status=6"
+            href="/admin/users?status=4"
             className={`hover:text-blue-600 ${
-              statusFilter === 6 ? 'text-blue-600 font-semibold' : 'text-gray-600'
+              statusFilter === 4 ? 'text-blue-600 font-semibold' : 'text-gray-600'
             }`}
           >
             AI会員 ({counts.ai_member})

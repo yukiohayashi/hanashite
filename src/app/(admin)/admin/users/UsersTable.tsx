@@ -172,11 +172,11 @@ export default function UsersTable({ users: initialUsers }: UsersTableProps) {
 
   const getStatusColor = (status?: number) => {
     switch (status) {
-      case 6: return 'bg-yellow-100 text-yellow-800';
-      case 4: return 'bg-red-100 text-red-800';
-      case 3: return 'bg-purple-100 text-purple-800';
+      case 1: return 'bg-purple-100 text-purple-800';
       case 2: return 'bg-blue-100 text-blue-800';
-      case 1: return 'bg-green-100 text-green-800';
+      case 3: return 'bg-green-100 text-green-800';
+      case 4: return 'bg-yellow-100 text-yellow-800';
+      case 9: return 'bg-red-100 text-red-800';
       default: return 'bg-gray-100 text-gray-800';
     }
   };
@@ -325,11 +325,11 @@ export default function UsersTable({ users: initialUsers }: UsersTableProps) {
                     disabled={loading === user.id}
                     className={`px-2 py-1 text-xs font-semibold rounded-full ${getStatusColor(user.status)} disabled:opacity-50`}
                   >
-                    <option value="1">会員</option>
+                    <option value="1">運営者</option>
                     <option value="2">編集者</option>
-                    <option value="3">運営者</option>
-                    <option value="4">停止</option>
-                    <option value="6">AI会員</option>
+                    <option value="3">会員</option>
+                    <option value="4">AI会員</option>
+                    <option value="9">停止</option>
                   </select>
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap">
