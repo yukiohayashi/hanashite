@@ -111,6 +111,7 @@ export default function ProfileSetForm({ user, categories, isFirstTime }: Profil
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [errors, setErrors] = useState<string[]>([]);
   const [success, setSuccess] = useState(false);
+  const [updatedFields, setUpdatedFields] = useState<string[]>([]);
 
   useEffect(() => {
     if (user.interest_categories) {
@@ -169,6 +170,24 @@ export default function ProfileSetForm({ user, categories, isFirstTime }: Profil
     console.log('Form submission started');
     console.log('Current imageMode:', imageMode);
     console.log('Avatar file:', avatarFile ? avatarFile.name : 'No file');
+    
+    // 変更された項目を追跡
+    const changedFields: string[] = [];
+    if (nickname !== user.name) changedFields.push('ニックネーム');
+    if (profile !== (user.user_description || '')) changedFields.push('プロフィール');
+    if (profileSlug !== (user.profile_slug || '')) changedFields.push('プロフィールURL');
+    if (snsX !== (user.sns_x || '')) changedFields.push('X(Twitter)');
+    if (participatePoints !== (user.participate_points || false)) changedFields.push('ポイント参加');
+    if (sex !== (user.sex || '')) changedFields.push('性別');
+    if (birthYear !== (user.birth_year || '')) changedFields.push('生まれ年');
+    if (prefecture !== (user.prefecture || '')) changedFields.push('都道府県');
+    if (marriage !== (user.marriage || 'not_specified')) changedFields.push('結婚状況');
+    if (childCount !== (user.child_count || 0)) changedFields.push('子供の人数');
+    if (job !== (user.job || '')) changedFields.push('職業');
+    if (emailSubscription !== (user.email_subscription ?? true)) changedFields.push('メール配信');
+    if (showPostHistory !== (user.show_post_history ?? false)) changedFields.push('相談・回答履歴の公開');
+    if (avatarFile) changedFields.push('プロフィール画像');
+    if (imageMode !== (user.use_custom_image ? 'upload' : (user.avatar_seed ? 'avatar' : 'none'))) changedFields.push('アバター設定');
     
     const newErrors: string[] = [];
     
@@ -248,6 +267,7 @@ export default function ProfileSetForm({ user, categories, isFirstTime }: Profil
       }
       
       if (data.success) {
+        setUpdatedFields(changedFields.slice(0, 3)); // 最大3項目
         setSuccess(true);
         setTimeout(() => {
           // ページをリロードして更新内容を反映
@@ -272,7 +292,10 @@ export default function ProfileSetForm({ user, categories, isFirstTime }: Profil
       {success && (
         <Alert className="bg-green-50 mb-4 border-green-200">
           <AlertDescription className="text-green-800 text-center">
-            <p className="font-bold">✅ プロフィールを更新しました（ポイント獲得: {participatePoints ? '参加中' : '不参加'}）</p>
+            <p className="font-bold">✅ プロフィールを更新しました</p>
+            {updatedFields.length > 0 && (
+              <p className="text-sm mt-1">更新項目: {updatedFields.join('、')}{updatedFields.length >= 3 ? '他' : ''}</p>
+            )}
           </AlertDescription>
         </Alert>
       )}

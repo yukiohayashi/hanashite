@@ -28,6 +28,7 @@ export default function CategoriesPage() {
   const [searchTerm, setSearchTerm] = useState('');
   const [showModal, setShowModal] = useState(false);
   const [editingCategory, setEditingCategory] = useState<Category | null>(null);
+  const [editingDisplayOrder, setEditingDisplayOrder] = useState<number | null>(null);
   const [formData, setFormData] = useState({
     name: '',
     slug: '',
@@ -189,6 +190,23 @@ export default function CategoriesPage() {
     fetchCategories();
   };
 
+  const handleDisplayOrderUpdate = async (categoryId: number, newOrder: number) => {
+    const { error } = await supabase
+      .from('categories')
+      .update({ display_order: newOrder })
+      .eq('id', categoryId);
+
+    if (error) {
+      alert('表示順の更新に失敗しました: ' + error.message);
+      return;
+    }
+
+    setCategories(categories.map(c => 
+      c.id === categoryId ? { ...c, display_order: newOrder } : c
+    ));
+    setEditingDisplayOrder(null);
+  };
+
   const filteredCategories = categories.filter((cat) =>
     cat.name.toLowerCase().includes(searchTerm.toLowerCase())
   );
@@ -312,8 +330,30 @@ export default function CategoriesPage() {
                     <td className="px-4 py-3 text-sm text-gray-600 font-mono">
                       {category.icon || '-'}
                     </td>
-                    <td className="px-4 py-3 text-sm text-gray-600">
-                      {category.display_order}
+                    <td className="px-4 py-3 text-sm text-gray-600" onClick={(e) => e.stopPropagation()}>
+                      {editingDisplayOrder === category.id ? (
+                        <input
+                          type="number"
+                          defaultValue={category.display_order}
+                          onBlur={(e) => handleDisplayOrderUpdate(category.id, parseInt(e.target.value) || 0)}
+                          onKeyDown={(e) => {
+                            if (e.key === 'Enter') {
+                              handleDisplayOrderUpdate(category.id, parseInt((e.target as HTMLInputElement).value) || 0);
+                            } else if (e.key === 'Escape') {
+                              setEditingDisplayOrder(null);
+                            }
+                          }}
+                          autoFocus
+                          className="w-20 px-2 py-1 border border-blue-500 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        />
+                      ) : (
+                        <div
+                          onClick={() => setEditingDisplayOrder(category.id)}
+                          className="cursor-pointer hover:bg-blue-50 px-2 py-1 rounded transition-colors"
+                        >
+                          {category.display_order}
+                        </div>
+                      )}
                     </td>
                     <td className="px-4 py-3 text-sm text-gray-900 font-semibold">
                       {category.post_count || 0}件
@@ -384,7 +424,7 @@ export default function CategoriesPage() {
                   value={formData.name}
                   onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                   className="w-full px-3 py-2 border border-gray-300 rounded-md"
-                  placeholder="アニメ・漫画"
+                  placeholder="恋愛"
                 />
               </div>
 
@@ -397,7 +437,7 @@ export default function CategoriesPage() {
                   value={formData.slug}
                   onChange={(e) => setFormData({ ...formData, slug: e.target.value })}
                   className="w-full px-3 py-2 border border-gray-300 rounded-md"
-                  placeholder="comics"
+                  placeholder="love"
                 />
                 <p className="mt-1 text-xs text-gray-500">
                   URLに使用される形式の名前です。半角小文字、英数字とハイフンのみが使われます。
@@ -413,7 +453,7 @@ export default function CategoriesPage() {
                   onChange={(e) => setFormData({ ...formData, description: e.target.value })}
                   className="w-full px-3 py-2 border border-gray-300 rounded-md"
                   rows={3}
-                  placeholder="アニメや漫画に関する情報交換の場。おすすめ作品や名シーン、最新情報を共有しましょう！"
+                  placeholder="恋愛に関する相談を共有しましょう"
                 />
               </div>
 
