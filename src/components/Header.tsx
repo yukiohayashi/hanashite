@@ -159,7 +159,7 @@ export default function Header() {
                   相談合計数: 300件超
                 </div>
                 <div className="mt-0.5 text-[0.65rem] leading-tight">
-                  AIと人間が協働する恋愛・結婚・男女関係の総合相談
+                  恋愛・結婚・男女関係の無料相談掲示板
                 </div>
               </div>
             </div>
