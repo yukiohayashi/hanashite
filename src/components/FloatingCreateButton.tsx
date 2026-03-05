@@ -32,7 +32,7 @@ export default function FloatingCreateButton() {
     <Link href="/post-create">
       <Button
         className={`
-          fixed bottom-4 right-4 md:bottom-6 md:right-8 z-50
+          fixed bottom-20 right-4 md:bottom-6 md:right-8 z-50
           w-16 h-16 md:w-20 md:h-20
           bg-gradient-to-r from-pink-400 to-orange-400
           hover:from-pink-500 hover:to-orange-500

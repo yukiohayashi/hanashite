@@ -152,12 +152,17 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
       if ((user || trigger === 'update') && token.id) {
         const { data: userData } = await supabaseAdmin
           .from('users')
-          .select('image')
+          .select('image, status')
           .eq('id', token.id as string)
           .single();
         
-        if (userData?.image) {
-          token.picture = userData.image;
+        if (userData) {
+          if (userData.image) {
+            token.picture = userData.image;
+          }
+          if (userData.status !== undefined) {
+            token.status = userData.status;
+          }
         }
       }
       
