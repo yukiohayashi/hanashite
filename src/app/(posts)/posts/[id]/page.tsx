@@ -357,7 +357,7 @@ export default async function PostPage({ params, searchParams }: { params: Promi
                       <div dangerouslySetInnerHTML={{ __html: (post.content || '').replace(/\\n/g, '<br>').replace(/\n/g, '<br>') }} />
                     </div>
                   </div>
-                ) : imageUrl && (imageUrl.startsWith('data:image/') || imageUrl.startsWith('/uploads/')) ? (
+                ) : imageUrl && (imageUrl.startsWith('data:image/') || imageUrl.startsWith('/uploads/') || imageUrl.includes('supabase.co/storage')) ? (
                   // 手動画像アップロード：画像を左に小さく表示、本文を回り込ませ
                   <div className="mb-1.5">
                     <div className="float-left mr-3 mb-2 w-24 md:w-32">

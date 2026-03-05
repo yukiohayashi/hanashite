@@ -68,6 +68,7 @@ export async function POST(request: Request) {
       status: 'published',
       thumbnail_url: finalImage,
       deadline_at: deadlineAt,
+      category_id: category && category !== 'auto' ? parseInt(category) : null,
       created_at: new Date().toISOString(),
       updated_at: new Date().toISOString()
     };
@@ -206,72 +207,8 @@ export async function POST(request: Request) {
       console.error('Keyword assignment error:', error);
     }
 
-    // カテゴリーを設定
-    if (category && category !== 'auto') {
-      // 手動選択の場合
-      const { error: categoryError } = await supabase
-        .from('post_categories')
-        .insert({
-          post_id: post.id,
-          category_id: parseInt(category)
-        });
-
-      if (categoryError) {
-        console.error('Category assignment error:', categoryError);
-      }
-    } else if (category === 'auto') {
-      // 自動選択の場合：内容に合ったカテゴリを自動付与
-      try {
-        const { data: categories } = await supabase
-          .from('categories')
-          .select('id, name')
-          .eq('is_active', true);
-
-        console.log('Auto category - Available categories:', categories?.length || 0);
-
-        if (categories && categories.length > 0) {
-          // HTMLタグを除去してからテキストを結合
-          const cleanContent = content.replace(/<[^>]*>/g, '').replace(/&nbsp;/g, ' ');
-          const combinedText = `${title} ${cleanContent}`.toLowerCase();
-          let bestMatch: { id: number; name: string } | null = null;
-
-          console.log('Auto category - Combined text:', combinedText.substring(0, 200));
-
-          // 各カテゴリ名が含まれているかチェック
-          for (const cat of categories) {
-            const catName = cat.name.toLowerCase();
-            console.log('Checking category:', cat.name);
-            
-            if (combinedText.includes(catName)) {
-              // カテゴリ名が含まれている場合、そのカテゴリを選択
-              bestMatch = { id: cat.id, name: cat.name };
-              console.log('Matched category:', cat.name, 'ID:', cat.id);
-              break;
-            }
-          }
-
-          // マッチしたカテゴリがあれば保存
-          if (bestMatch) {
-            const { error: catError } = await supabase
-              .from('post_categories')
-              .insert({
-                post_id: post.id,
-                category_id: bestMatch.id
-              });
-
-            if (catError) {
-              console.error('Category insert error:', catError);
-            } else {
-              console.log('Successfully assigned category:', bestMatch.name, 'to post:', post.id);
-            }
-          } else {
-            console.log('No matching category found for auto selection');
-          }
-        }
-      } catch (error) {
-        console.error('Auto category assignment error:', error);
-      }
-    }
+    // カテゴリーは既にpostsテーブルに保存済み（category_idカラム）
+    // post_categoriesテーブルは使用しない
 
     // 相談作成ポイントを付与（work_post）
     // workidが指定されている場合のみポイント付与
