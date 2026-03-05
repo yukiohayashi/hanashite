@@ -87,7 +87,7 @@ export default function ResolvedSection({ bestAnswers, waitingPosts }: ResolvedS
               const contentPreview = stripHtmlTags(answer.content).substring(0, 80);
               return (
                 <div key={answer.id} className="relative bg-white hover:shadow-md p-3 border border-gray-300 rounded-md transition-all">
-                  <Link href={`/posts/${answer.post_id}`} className="block pr-16">
+                  <Link href={`/posts/${answer.post_id}`} className="block pr-20">
                     <div className="flex items-center gap-1.5 text-xs text-gray-500 mb-1">
                       <Image
                         src={answer.avatar_url}
@@ -103,7 +103,7 @@ export default function ResolvedSection({ bestAnswers, waitingPosts }: ResolvedS
                       {contentPreview}...
                     </p>
                     <div className="mt-2 text-gray-500 text-xs">
-                      <span className="truncate">相談: {answer.post_title.substring(0, 40)}{answer.post_title.length > 40 ? '...' : ''}</span>
+                      <span className="block truncate">相談: {answer.post_title}</span>
                     </div>
                   </Link>
                   {answer.category_name && answer.category_id && (
