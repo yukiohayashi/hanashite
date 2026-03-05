@@ -255,7 +255,7 @@ export default async function UserPage({ params }: { params: Promise<{ slug: str
                     <span>{user.sex === 'male' ? '♂' : user.sex === 'female' ? '♀' : ''}</span>
                   )}
                   {user.birth_year && (
-                    <span>{new Date().getFullYear() - parseInt(user.birth_year)}代</span>
+                    <span>{Math.floor((new Date().getFullYear() - parseInt(user.birth_year)) / 10) * 10}代</span>
                   )}
                   {user.prefecture && (
                     <span>{user.prefecture}</span>

@@ -13,11 +13,8 @@ export default async function AdminLayout({
   console.log('Admin Layout - User ID:', session?.user?.id);
   console.log('Admin Layout - User Status:', session?.user?.status);
 
-  // 管理者権限チェック（status: 2=編集者, 3=管理者、または一時的にuser_id=33も許可）
-  const hasAccess = session && (
-    (session.user?.status && session.user.status >= 2) ||
-    (session.user?.id && Number(session.user.id) === 33)
-  );
+  // 管理者権限チェック（status: 1=運営者, 2=編集者）
+  const hasAccess = session && session.user?.status && (session.user.status === 1 || session.user.status === 2);
 
   if (!hasAccess) {
     console.log('Admin Layout - Access denied, redirecting to /');
