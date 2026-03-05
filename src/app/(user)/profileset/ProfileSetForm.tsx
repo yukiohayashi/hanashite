@@ -195,6 +195,9 @@ export default function ProfileSetForm({ user, categories, isFirstTime }: Profil
       newErrors.push('ニックネームを入力してください');
     }
     
+    if (selectedCategories.length === 0) {
+      newErrors.push('興味のあるカテゴリを1つ以上選択してください');
+    }
     
     if (profileSlug) {
       const isUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(profileSlug);
@@ -339,7 +342,13 @@ export default function ProfileSetForm({ user, categories, isFirstTime }: Profil
         <div className="mb-4">
           <label className="block mb-2 font-bold text-gray-700">メールアドレス</label>
           <p className="mb-2 text-gray-600 text-sm">
-            メールアドレスの変更は一度<a href="/logout" className="text-orange-500 hover:underline">ログアウト</a>してログインページの下にあるパスワードの再設定から行う必要があります。
+            {user.email?.includes('@line.dokujo.com') || user.email?.includes('@x.dokujo.com') ? (
+              'LINEまたはXで登録されたアカウントです。メールアドレスの変更はできません。'
+            ) : (
+              <>
+                メールアドレスの変更は一度<a href="/logout" className="text-orange-500 hover:underline">ログアウト</a>してログインページの下にあるパスワードの再設定から行う必要があります。
+              </>
+            )}
           </p>
           <Input type="text" value={user.email} disabled className="bg-gray-200" />
         </div>
@@ -486,13 +495,7 @@ export default function ProfileSetForm({ user, categories, isFirstTime }: Profil
                 {avatarFile ? `選択中: ${avatarFile.name}` : 'プロフィール画像をアップロードしてください。'}
               </div>
               <div className="text-xs text-gray-500 bg-white p-3 rounded border border-gray-200">
-                <div className="font-medium mb-1">アップロード要件：</div>
-                <ul className="list-disc list-inside space-y-1">
-                  <li>ファイルサイズ: 2MBまで</li>
-                  <li>ファイル形式: JPEG、PNG、WEBP</li>
-                  <li>他者の権利侵害や暴力的な表現は禁止</li>
-                  <li>性的な表現を含む画像はNG</li>
-                </ul>
+                2MBまで、JPEG/PNG/WEBP形式、権利侵害・暴力的・性的表現は禁止
               </div>
             </div>
           )}

@@ -200,7 +200,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
                   email: emailToSave,
                   image: user.image || '',
                   use_custom_image: user.image ? true : false,
-                  status: 1,
+                  status: 3,
                   created_at: new Date().toISOString(),
                 });
 
