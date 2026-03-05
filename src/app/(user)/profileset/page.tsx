@@ -24,13 +24,13 @@ export default async function ProfileSetPage() {
     redirect('/login');
   }
 
-  // カテゴリー一覧を取得（id=19の運営からのお知らせは除外）
+  // カテゴリー一覧を取得（id=1の運営からのお知らせは除外）
   const { data: categories } = await supabase
     .from('categories')
     .select('id, name, slug')
     .neq('slug', 'gambling')
     .neq('slug', 'news')
-    .neq('id', 19)
+    .neq('id', 1)
     .order('display_order', { ascending: true });
 
   const isFirstTime = !user.profile_registered;
