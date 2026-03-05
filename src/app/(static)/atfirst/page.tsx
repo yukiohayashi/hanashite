@@ -1,8 +1,13 @@
+import { Metadata } from 'next';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
 import RightSidebar from '@/components/RightSidebar';
 import MyPageMenu from '@/components/MyPageMenu';
 import LoginRequired from '@/components/LoginRequired';
+
+export const metadata: Metadata = {
+  title: '初めての方へ｜ハナシテ',
+};
 
 export default async function AtFirstPage() {
   return (

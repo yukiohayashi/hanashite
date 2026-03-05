@@ -1,9 +1,14 @@
 import { auth } from '@/lib/auth';
 import { redirect } from 'next/navigation';
+import { Metadata } from 'next';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
 import MyPageMenu from '@/components/MyPageMenu';
 import InquiryForm from './InquiryForm';
+
+export const metadata: Metadata = {
+  title: 'お問い合わせ｜ハナシテ',
+};
 
 export default async function InquiryPage() {
   const session = await auth();

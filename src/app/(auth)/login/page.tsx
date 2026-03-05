@@ -1,9 +1,14 @@
 import { redirect } from 'next/navigation';
 import { auth } from '@/lib/auth';
+import { Metadata } from 'next';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
 import LoginForm from './LoginForm';
 import SocialLoginButtons from './SocialLoginButtons';
+
+export const metadata: Metadata = {
+  title: 'ログイン｜ハナシテ',
+};
 
 export default async function LoginPage() {
   const session = await auth();

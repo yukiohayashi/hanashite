@@ -1,6 +1,11 @@
+import { Metadata } from 'next';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
 import ResetPasswordForm from './ResetPasswordForm';
+
+export const metadata: Metadata = {
+  title: 'パスワードリセット｜ハナシテ',
+};
 
 export default function ResetPasswordPage() {
   return (

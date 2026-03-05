@@ -1,9 +1,14 @@
 import { auth } from '@/lib/auth';
 import { redirect } from 'next/navigation';
+import { Metadata } from 'next';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
 import MyPageMenu from '@/components/MyPageMenu';
 import MyAnkeList from './MyAnkeList';
+
+export const metadata: Metadata = {
+  title: '投稿したトピック｜ハナシテ',
+};
 
 export default async function MyAnkePage() {
   const session = await auth();

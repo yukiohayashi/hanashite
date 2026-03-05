@@ -1,4 +1,5 @@
 import { supabase } from '@/lib/supabase';
+import { Metadata } from 'next';
 import Link from 'next/link';
 import Image from 'next/image';
 import Header from '@/components/Header';
@@ -22,6 +23,21 @@ function stripHtmlTags(html: string): string {
 
 interface HomeProps {
   searchParams: Promise<{ s?: string; sort?: string }>;
+}
+
+export async function generateMetadata({ searchParams }: HomeProps): Promise<Metadata> {
+  const params = await searchParams;
+  const searchQuery = params.s || '';
+  
+  if (searchQuery) {
+    return {
+      title: `${searchQuery}の検索結果｜ハナシテ`,
+    };
+  }
+  
+  return {
+    title: 'ハナシテ - AIと人間が協働する恋愛・結婚・男女関係の無料相談掲示板',
+  };
 }
 
 // リージョン変更後はリアルタイムでデータを取得

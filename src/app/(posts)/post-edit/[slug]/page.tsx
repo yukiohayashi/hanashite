@@ -1,9 +1,14 @@
 import { auth } from '@/lib/auth';
 import { redirect } from 'next/navigation';
+import { Metadata } from 'next';
 import { supabase } from '@/lib/supabase';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
 import PostEditForm from './PostEditForm';
+
+export const metadata: Metadata = {
+  title: '相談を変更する｜ハナシテ',
+};
 
 export default async function AnkeEditPage({ params }: { params: Promise<{ slug: string }> }) {
   const session = await auth();

@@ -1,10 +1,15 @@
 import { auth } from '@/lib/auth';
 import { redirect } from 'next/navigation';
+import { Metadata } from 'next';
 import { supabase } from '@/lib/supabase';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
 import MyPageMenu from '@/components/MyPageMenu';
 import ProfileSetForm from './ProfileSetForm';
+
+export const metadata: Metadata = {
+  title: 'プロフィール編集｜ハナシテ',
+};
 
 export default async function ProfileSetPage() {
   const session = await auth();
