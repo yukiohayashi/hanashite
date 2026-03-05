@@ -13,6 +13,12 @@ interface Post {
   deadline_at: string | null;
   status: string;
   best_answer_id: number | null;
+  category_id: number | null;
+}
+
+interface Category {
+  id: number;
+  name: string;
 }
 
 interface Comment {
@@ -27,9 +33,10 @@ interface Comment {
 interface PostManageFormProps {
   post: Post;
   comments: Comment[];
+  categories: Category[];
 }
 
-export default function PostManageForm({ post, comments }: PostManageFormProps) {
+export default function PostManageForm({ post, comments, categories }: PostManageFormProps) {
   // deadline_atをdate形式（YYYY-MM-DD）に変換
   const formatDeadlineForInput = (deadline: string | null) => {
     if (!deadline) return '';
@@ -47,6 +54,7 @@ export default function PostManageForm({ post, comments }: PostManageFormProps) 
   const [title, setTitle] = useState(post.title);
   const [content] = useState(post.content);
   const [deadline, setDeadline] = useState(formatDeadlineForInput(post.deadline_at));
+  const [categoryId, setCategoryId] = useState(post.category_id || null);
   const [addendum, setAddendum] = useState('');
   const [bestAnswerId, setBestAnswerId] = useState(post.best_answer_id || null);
   const [loading, setLoading] = useState(false);
@@ -93,6 +101,7 @@ export default function PostManageForm({ post, comments }: PostManageFormProps) 
           title,
           content: updatedContent,
           deadline_at: deadlineAt,
+          category_id: categoryId,
         };
 
       const response = await fetch(`/api/posts/${post.id}`, {
@@ -290,7 +299,7 @@ export default function PostManageForm({ post, comments }: PostManageFormProps) 
       {/* 記事編集フォーム */}
       <div className="bg-white shadow-sm p-6 rounded-lg">
         <div className="flex items-center justify-between mb-4">
-          <h2 className="text-lg font-semibold text-gray-900">記事の編集</h2>
+          <h2 className="text-lg font-semibold text-gray-900">トピックの編集</h2>
           <Link
             href={`/posts/${post.id}`}
             target="_blank"
@@ -325,6 +334,24 @@ export default function PostManageForm({ post, comments }: PostManageFormProps) 
             />
           </div>
           
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              カテゴリ
+            </label>
+            <select
+              value={categoryId || ''}
+              onChange={(e) => setCategoryId(e.target.value ? parseInt(e.target.value) : null)}
+              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent"
+            >
+              <option value="">カテゴリを選択してください</option>
+              {categories.map((category) => (
+                <option key={category.id} value={category.id}>
+                  {category.name}
+                </option>
+              ))}
+            </select>
+          </div>
+
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">
               締切日時（任意）

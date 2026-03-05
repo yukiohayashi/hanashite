@@ -250,6 +250,17 @@ export default async function UserPage({ params }: { params: Promise<{ slug: str
                   {user.name || '匿名'}
                   <span className="text-base font-normal">さん</span>
                 </h1>
+                <div className="flex items-center gap-2 mt-1 text-sm text-gray-600">
+                  {user.sex && (
+                    <span>{user.sex === 'male' ? '♂' : user.sex === 'female' ? '♀' : ''}</span>
+                  )}
+                  {user.birth_year && (
+                    <span>{new Date().getFullYear() - parseInt(user.birth_year)}代</span>
+                  )}
+                  {user.prefecture && (
+                    <span>{user.prefecture}</span>
+                  )}
+                </div>
                 <p className="text-gray-700 text-sm mt-2">
                   {user.user_description || ''}
                   {isOwnProfile && (

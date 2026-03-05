@@ -16,6 +16,12 @@ interface Post {
   deadline_at: string | null;
   status: string;
   best_answer_id: number | null;
+  category_id: number | null;
+}
+
+interface Category {
+  id: number;
+  name: string;
 }
 
 interface Comment {
@@ -30,7 +36,7 @@ interface Comment {
 async function getPost(postId: number, userId: string): Promise<Post | null> {
   const { data, error } = await supabase
     .from('posts')
-    .select('id, title, content, created_at, user_id, deadline_at, status, best_answer_id')
+    .select('id, title, content, created_at, user_id, deadline_at, status, best_answer_id, category_id')
     .eq('id', postId)
     .eq('user_id', userId)
     .single();
@@ -40,6 +46,20 @@ async function getPost(postId: number, userId: string): Promise<Post | null> {
   }
 
   return data as Post;
+}
+
+async function getCategories(): Promise<Category[]> {
+  const { data, error } = await supabase
+    .from('categories')
+    .select('id, name')
+    .neq('id', 1)
+    .order('display_order', { ascending: true });
+
+  if (error || !data) {
+    return [];
+  }
+
+  return data as Category[];
 }
 
 async function getComments(postId: number): Promise<Comment[]> {
@@ -143,8 +163,11 @@ export default async function PostManagePage({
     notFound();
   }
 
-  // コメントを取得
-  const comments = await getComments(postId);
+  // コメントとカテゴリを取得
+  const [comments, categories] = await Promise.all([
+    getComments(postId),
+    getCategories()
+  ]);
 
   return (
     <div className="bg-gray-50 min-h-screen">
@@ -161,11 +184,11 @@ export default async function PostManagePage({
                 href="/my-posts"
                 className="text-gray-600 hover:text-gray-800 text-sm"
               >
-                ← 相談した記事一覧に戻る
+                ← 相談したトピック一覧に戻る
               </Link>
             </div>
             
-            <PostManageForm post={post} comments={comments} />
+            <PostManageForm post={post} comments={comments} categories={categories} />
           </main>
           
           <aside className="hidden md:block w-full md:w-[280px] md:min-w-[280px]">

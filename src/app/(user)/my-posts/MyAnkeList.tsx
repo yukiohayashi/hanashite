@@ -131,7 +131,7 @@ export default function MyAnkeList() {
                     href={`/post-manage/${post.id}`}
                     className="bg-gray-200 hover:bg-blue-100 px-3 py-1 rounded text-gray-700 hover:text-blue-600 text-xs transition-colors"
                   >
-                    確認する
+                    編集する
                   </Link>
                 </div>
               </div>
