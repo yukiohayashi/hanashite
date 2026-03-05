@@ -189,7 +189,7 @@ export default async function Home({ searchParams }: HomeProps) {
 
     const { data: allPosts } = await query
       .order('created_at', { ascending: false })
-      .limit(10);
+      .limit(30);
     
     // 締切が過ぎた相談を除外（実行時に毎回判定）
     const now = new Date();

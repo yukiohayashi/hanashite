@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { useSession } from 'next-auth/react';
+import { usePathname } from 'next/navigation';
 import Link from 'next/link';
 import { Button } from "@/components/ui/button";
 import { PenSquare } from 'lucide-react';
@@ -9,6 +10,21 @@ import { PenSquare } from 'lucide-react';
 export default function FloatingCreateButton() {
   const [isVisible, setIsVisible] = useState(false);
   const { data: session } = useSession();
+  const pathname = usePathname();
+
+  // 表示を許可するページのパターン
+  const allowedPages = [
+    '/', // トップページ
+    /^\/posts\/\d+$/, // 記事詳細ページ
+    /^\/category\/\d+$/, // カテゴリページ
+    /^\/keyword\/\d+$/, // キーワードページ
+    /^\/users\/[^/]+$/, // ユーザーページ
+  ];
+
+  // 現在のページが許可されているかチェック
+  const isAllowedPage = allowedPages.some(pattern => 
+    typeof pattern === 'string' ? pathname === pattern : pattern.test(pathname)
+  );
 
   useEffect(() => {
     const handleScroll = () => {
@@ -35,7 +51,7 @@ export default function FloatingCreateButton() {
           transition-all duration-500
           flex flex-col items-center justify-center
           group
-          ${!session || !isVisible ? 'opacity-0 scale-90 pointer-events-none' : 'opacity-100 scale-100'}
+          ${!session || !isVisible || !isAllowedPage ? 'opacity-0 scale-90 pointer-events-none' : 'opacity-100 scale-100'}
         `}
       >
         <span className="text-xs md:text-sm font-bold text-white text-center leading-tight">
