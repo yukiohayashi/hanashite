@@ -58,8 +58,6 @@ export default async function Home({ searchParams }: HomeProps) {
       .select('id, title, created_at, deadline_at, user_id, og_image, thumbnail_url, total_votes, category_id, categories(name), users!inner(status)')
       .in('status', ['publish', 'published'])
       .neq('user_id', 1)
-      .neq('users.status', 3)
-      .gte('total_votes', 50)
       .order('total_votes', { ascending: false })
       .limit(10);
 
@@ -77,7 +75,6 @@ export default async function Home({ searchParams }: HomeProps) {
       .select('id, title, created_at, deadline_at, user_id, og_image, thumbnail_url, best_answer_id, best_answer_selected_at, category_id, categories(name), users!inner(status)')
       .in('status', ['publish', 'published'])
       .neq('user_id', 1)
-      .neq('users.status', 3)
       .is('best_answer_id', null)
       .is('best_answer_selected_at', null)
       .not('deadline_at', 'is', null)
@@ -103,7 +100,6 @@ export default async function Home({ searchParams }: HomeProps) {
         .select('id, title, created_at, deadline_at, user_id, og_image, thumbnail_url, best_answer_id, best_answer_selected_at, category_id, categories(name), users!inner(status)')
         .in('status', ['publish', 'published'])
         .neq('user_id', 1)
-        .neq('users.status', 3)
         .is('best_answer_id', null)
         .is('best_answer_selected_at', null)
         .order('created_at', { ascending: false })
@@ -144,7 +140,6 @@ export default async function Home({ searchParams }: HomeProps) {
       .select('id, title, created_at, deadline_at, user_id, og_image, thumbnail_url, best_answer_id, best_answer_selected_at, category_id, categories(name), users!inner(status)')
       .in('status', ['publish', 'published'])
       .neq('user_id', 1)
-      .neq('users.status', 3)
       .is('best_answer_id', null)
       .is('best_answer_selected_at', null)
       .gte('created_at', oneMonthAgo.toISOString())
@@ -172,7 +167,6 @@ export default async function Home({ searchParams }: HomeProps) {
       .select('id, title, created_at, deadline_at, user_id, og_image, thumbnail_url, best_answer_id, best_answer_selected_at, category_id, categories(name), users!inner(status, name, avatar_style, avatar_seed, use_custom_image, image)')
       .in('status', ['publish', 'published'])
       .neq('user_id', 1)
-      .neq('users.status', 3);
 
     // 運営からのお知らせカテゴリを除外
     if (announcementCategoryId) {
@@ -257,7 +251,6 @@ export default async function Home({ searchParams }: HomeProps) {
       .select('id, title, content, created_at, user_id, og_image, thumbnail_url, best_answer_id, best_answer_selected_at, category_id, categories(name), users!inner(status, name, avatar_style, avatar_seed, use_custom_image, image)')
       .in('status', ['publish', 'published'])
       .neq('user_id', 1)
-      .neq('users.status', 3)
       .is('best_answer_id', null)
       .is('best_answer_selected_at', null);
 
@@ -290,7 +283,6 @@ export default async function Home({ searchParams }: HomeProps) {
     .select('id, title, created_at, user_id, og_image, thumbnail_url, best_answer_id, total_votes, category_id, categories(name), users!inner(status, name, avatar_style, avatar_seed, use_custom_image, image)')
     .in('status', ['publish', 'published'])
     .neq('user_id', 1)
-    .neq('users.status', 3)
     .is('best_answer_id', null)
     .gte('total_votes', 1)
     .order('total_votes', { ascending: false })
@@ -339,7 +331,6 @@ export default async function Home({ searchParams }: HomeProps) {
     .select('id, title, created_at, deadline_at, user_id, og_image, thumbnail_url, best_answer_id, best_answer_selected_at, category_id, categories(name), users!inner(status, name, avatar_style, avatar_seed, use_custom_image, image)')
     .in('status', ['publish', 'published'])
     .neq('user_id', 1)
-    .neq('users.status', 3)
     .is('best_answer_id', null)
     .is('best_answer_selected_at', null)
     .not('deadline_at', 'is', null)
