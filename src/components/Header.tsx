@@ -91,7 +91,7 @@ export default function Header() {
             </Link>
             <div className="hidden md:block text-[0.45rem] text-gray-500 text-center">powered by DOKUJO</div>
             <div className="w-full text-[0.5rem] text-center text-gray-600">
-              AIと人間が協働する恋愛・結婚・男女関係の総合相談
+              AIと人間が協働する恋愛・結婚・男女関係の無料相談掲示板
             </div>
           </div>
 
