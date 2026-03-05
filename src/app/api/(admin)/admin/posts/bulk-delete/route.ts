@@ -6,7 +6,7 @@ export async function POST(request: Request) {
   try {
     // 管理者権限チェック
     const session = await auth();
-    if (!session || (session.user?.status && session.user.status < 2)) {
+    if (!session?.user?.status || (session.user.status !== 1 && session.user.status !== 2)) {
       return NextResponse.json(
         { success: false, error: '権限がありません' },
         { status: 403 }

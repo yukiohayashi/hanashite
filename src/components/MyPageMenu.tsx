@@ -96,7 +96,7 @@ export default function MyPageMenu() {
         <li>気になる相談</li>
       </Link>
       <Link href="/my-posts" className="block hover:bg-gray-100 mr-0.5 p-2.5 border-gray-200 border-b w-auto font-normal text-black text-sm text-left no-underline">
-        <li>相談したトピック</li>
+        <li>投稿したトピック</li>
       </Link>
       <Link href="/post-create" className="block hover:bg-gray-100 mr-0.5 p-2.5 border-gray-200 border-b w-auto font-normal text-black text-sm text-left no-underline">
         <li>相談する</li>

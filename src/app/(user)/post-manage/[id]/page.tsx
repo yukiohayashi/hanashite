@@ -184,7 +184,7 @@ export default async function PostManagePage({
                 href="/my-posts"
                 className="text-gray-600 hover:text-gray-800 text-sm"
               >
-                ← 相談したトピック一覧に戻る
+                ← 投稿したトピック一覧に戻る
               </Link>
             </div>
             
