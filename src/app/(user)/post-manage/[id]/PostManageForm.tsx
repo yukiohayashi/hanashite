@@ -252,6 +252,13 @@ export default function PostManageForm({ post, comments, categories }: PostManag
                 {updatedContent}
               </div>
             </div>
+
+            {categoryId && (
+              <div>
+                <p className="font-bold text-gray-700 text-sm">カテゴリ</p>
+                <p className="mt-1">{categories.find(c => c.id === categoryId)?.name || 'カテゴリ未選択'}</p>
+              </div>
+            )}
             
             {deadline && (
               <div>

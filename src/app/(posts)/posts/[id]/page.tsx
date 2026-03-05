@@ -410,8 +410,16 @@ export default async function PostPage({ params, searchParams }: { params: Promi
                   }
                 })()}
 
-                {/* 記事ID（右下に表示） */}
-                <div className="mb-4 text-right">
+                {/* 記事IDとカテゴリ（右下に表示） */}
+                <div className="mb-4 flex items-center justify-end gap-2">
+                  {category && (
+                    <Link
+                      href={`/category/${category.id}`}
+                      className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-blue-100 text-blue-800 hover:bg-blue-200 transition-colors"
+                    >
+                      {category.name}
+                    </Link>
+                  )}
                   <span className="text-gray-400 text-sm">ID: {post.id}</span>
                 </div>
 
