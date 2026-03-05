@@ -36,7 +36,7 @@ export default function FAQPage() {
           <div className="bg-white shadow-sm p-6 rounded-lg">
             <h2 className="mb-3 font-bold text-gray-900 text-lg">Q. ポイントはどのように貯まりますか？</h2>
             <p className="text-gray-700">
-              A. 相談への回答、コメント投稿、相談作成などでポイントが貯まります。
+              A. ベストアンサーでポイントが貯まります。
             </p>
           </div>
 

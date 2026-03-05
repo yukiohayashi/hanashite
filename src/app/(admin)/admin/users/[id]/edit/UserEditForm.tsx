@@ -134,7 +134,7 @@ export default function UserEditForm({ user }: UserEditFormProps) {
       <div className="bg-white rounded-lg shadow p-6">
         <h2 className="text-lg font-semibold text-gray-900 mb-4">基本情報</h2>
         
-        <div className="space-y-4">
+        <div className="grid grid-cols-5 gap-4 mb-4">
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
               ユーザーID
@@ -194,12 +194,50 @@ export default function UserEditForm({ user }: UserEditFormProps) {
 
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
+              登録日
+            </label>
+            <input
+              type="text"
+              value={new Date(user.created_at).toLocaleString('ja-JP')}
+              disabled
+              className="w-full px-3 py-2 border border-gray-300 rounded-md bg-gray-50 text-gray-500"
+            />
+          </div>
+        </div>
+
+        <div className="grid grid-cols-2 gap-4">
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              アバター画像
+            </label>
+            {avatarPreview && (
+              <div className="mb-2">
+                <img
+                  src={avatarPreview}
+                  alt="アバタープレビュー"
+                  className="w-24 h-24 rounded-full object-cover"
+                />
+              </div>
+            )}
+            <input
+              type="file"
+              accept="image/*"
+              onChange={handleAvatarChange}
+              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
+            />
+            <p className="mt-1 text-xs text-gray-500">
+              JPG, PNG, GIF形式の画像をアップロードできます。
+            </p>
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
               自己紹介
             </label>
             <textarea
               value={formData.user_description}
               onChange={(e) => setFormData({ ...formData, user_description: e.target.value })}
-              rows={4}
+              rows={7}
               className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
             />
           </div>
@@ -363,53 +401,6 @@ export default function UserEditForm({ user }: UserEditFormProps) {
               className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
             />
           </div>
-        </div>
-      </div>
-
-      {/* アバター画像 */}
-      <div className="bg-white rounded-lg shadow p-6">
-        <h2 className="text-lg font-semibold text-gray-900 mb-4">アバター画像</h2>
-        
-        <div className="space-y-4">
-          {avatarPreview && (
-            <div className="flex items-center gap-4">
-              <img
-                src={avatarPreview}
-                alt="アバタープレビュー"
-                className="w-24 h-24 rounded-full object-cover"
-              />
-              <div className="text-sm text-gray-600">
-                現在の画像
-              </div>
-            </div>
-          )}
-          
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              新しい画像をアップロード
-            </label>
-            <input
-              type="file"
-              accept="image/*"
-              onChange={handleAvatarChange}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
-            />
-            <p className="mt-1 text-xs text-gray-500">
-              JPG, PNG, GIF形式の画像をアップロードできます。
-            </p>
-          </div>
-        </div>
-      </div>
-
-      {/* その他の情報 */}
-      <div className="bg-white rounded-lg shadow p-6">
-        <h2 className="text-lg font-semibold text-gray-900 mb-4">その他の情報</h2>
-        
-        <div className="space-y-2 text-sm text-gray-600">
-          <p>
-            <span className="font-medium">登録日:</span>{' '}
-            {new Date(user.created_at).toLocaleString('ja-JP')}
-          </p>
         </div>
       </div>
 
