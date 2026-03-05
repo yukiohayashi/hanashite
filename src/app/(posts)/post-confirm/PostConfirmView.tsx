@@ -29,9 +29,28 @@ export default function PostConfirmView() {
   const [ngWordWarning, setNgWordWarning] = useState<string>('');
   const [isBlocked, setIsBlocked] = useState(false);
   const [needsApproval, setNeedsApproval] = useState(false);
+  const [categories, setCategories] = useState<{[key: string]: string}>({});
   const router = useRouter();
 
   useEffect(() => {
+    const fetchCategories = async () => {
+      try {
+        const response = await fetch('/api/categories');
+        const data = await response.json();
+        if (data.success) {
+          const categoryMap: {[key: string]: string} = {};
+          data.categories.forEach((cat: {id: number, name: string}) => {
+            categoryMap[cat.id.toString()] = cat.name;
+          });
+          setCategories(categoryMap);
+        }
+      } catch (error) {
+        console.error('Failed to fetch categories:', error);
+      }
+    };
+
+    fetchCategories();
+
     const savedData = sessionStorage.getItem('anke_create_data');
     if (savedData) {
       const data = JSON.parse(savedData);
@@ -170,14 +189,6 @@ export default function PostConfirmView() {
   }
 
   const getCategoryName = (category: string) => {
-    const categories: { [key: string]: string } = {
-      'auto': '自動選択',
-      '1': 'お金',
-      '2': '恋愛',
-      '3': '仕事',
-      '4': '生活',
-      '5': '趣味'
-    };
     return categories[category] || category;
   };
 

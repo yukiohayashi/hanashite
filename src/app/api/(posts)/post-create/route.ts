@@ -45,12 +45,12 @@ export async function POST(request: Request) {
     const nextId = latestPost ? latestPost.id + 1 : 1;
 
     // 投稿を作成
-    // imagePreviewがある場合はそれを優先、なければimageUrlを使用
-    // Base64データは保存せず、URLのみを保存（500文字制限のため）
-    let finalImage = imagePreview || imageUrl || null;
+    // imageUrlを優先（確認画面でアップロード済みのURL）、なければimagePreviewを使用
+    // Base64データは保存しない（500文字制限のため）
+    let finalImage = imageUrl || imagePreview || null;
     
-    // Base64データまたは500文字を超える場合はnullを保存
-    if (finalImage && (finalImage.startsWith('data:') || finalImage.length > 500)) {
+    // Base64データの場合はnullを保存（アップロードされたURLのみ保存）
+    if (finalImage && finalImage.startsWith('data:')) {
       finalImage = null;
     }
     
