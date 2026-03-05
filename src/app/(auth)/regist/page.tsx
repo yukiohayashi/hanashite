@@ -1,14 +1,12 @@
 'use client';
 
-import { Metadata } from 'next';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
 
-export const metadata: Metadata = {
-  title: '新規会員登録｜ハナシテ',
-};
-
 export default function RegistPage() {
+  useEffect(() => {
+    document.title = '新規会員登録｜ハナシテ';
+  }, []);
   const [email, setEmail] = useState('');
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState('');
