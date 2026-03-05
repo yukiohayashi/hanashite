@@ -66,7 +66,7 @@ export async function POST(request: Request) {
       content: content.trim(),
       user_id: userId,
       status: 'published',
-      og_image: finalImage,
+      thumbnail_url: finalImage,
       deadline_at: deadlineAt,
       created_at: new Date().toISOString(),
       updated_at: new Date().toISOString()

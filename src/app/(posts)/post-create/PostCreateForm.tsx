@@ -52,7 +52,7 @@ export default function PostCreateForm() {
   const [formData, setFormData] = useState({
     title: '',
     content: '',
-    category: 'auto',
+    category: '',
     multi: false,
     random: false,
     imageUrl: '',
@@ -236,6 +236,12 @@ export default function PostCreateForm() {
       return;
     }
 
+    if (!formData.category) {
+      setErrorMessage('カテゴリーを選択してください');
+      setSubmitting(false);
+      return;
+    }
+
     if (!formData.closeDate || !formData.closeTime) {
       setErrorMessage('締切日時を入力してください');
       setSubmitting(false);
@@ -313,16 +319,15 @@ export default function PostCreateForm() {
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="category">カテゴリー</Label>
+              <Label htmlFor="category">カテゴリー <span className="text-red-600">*</span></Label>
               <Select
                 value={formData.category}
                 onValueChange={(value) => setFormData({ ...formData, category: value })}
               >
                 <SelectTrigger className="border-gray-300">
-                  <SelectValue />
+                  <SelectValue placeholder="カテゴリーを選択してください" />
                 </SelectTrigger>
                 <SelectContent className="bg-white">
-                  <SelectItem value="auto">自動選択</SelectItem>
                   {categories.map((cat) => (
                     <SelectItem key={cat.id} value={cat.id.toString()}>
                       {cat.name}

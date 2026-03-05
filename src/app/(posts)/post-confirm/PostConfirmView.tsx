@@ -233,6 +233,12 @@ export default function PostConfirmView() {
             <p className="font-bold text-gray-700 text-sm">相談内容</p>
             <p className="mt-1 whitespace-pre-wrap">{ankeData.content}</p>
           </div>
+          {ankeData.imagePreview && (
+            <div>
+              <p className="font-bold text-gray-700 text-sm">画像</p>
+              <img src={ankeData.imagePreview} alt="アップロード画像" className="mt-2 max-w-md rounded border border-gray-300" />
+            </div>
+          )}
           <div>
             <p className="font-bold text-gray-700 text-sm">カテゴリー</p>
             <p className="mt-1">{getCategoryName(ankeData.category)}</p>
@@ -262,7 +268,7 @@ export default function PostConfirmView() {
           disabled={submitting || isBlocked}
           className="bg-[#ff6b35] hover:bg-[#e58a2f] px-10 py-6 rounded font-bold text-white text-base disabled:opacity-50 disabled:cursor-not-allowed"
         >
-          {submitting ? '投稿中...' : 'この内容で投稿する'}
+          {submitting ? '投稿中...' : 'このトピックを投稿する'}
         </Button>
       </div>
     </div>
