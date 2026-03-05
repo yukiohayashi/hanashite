@@ -10,6 +10,7 @@ interface ApiSetting {
   api_secret: string | null;
   endpoint_url: string | null;
   description: string | null;
+  model: string | null;
   is_active: boolean;
   usage_count: number;
   last_used_at: string | null;
@@ -28,6 +29,7 @@ export default function AiSettingsPage() {
     api_secret: '',
     endpoint_url: '',
     description: '',
+    model: '',
     is_active: true,
   });
 
@@ -88,6 +90,7 @@ export default function AiSettingsPage() {
       api_secret: setting.api_secret || '',
       endpoint_url: setting.endpoint_url || '',
       description: setting.description || '',
+      model: setting.model || '',
       is_active: setting.is_active,
     });
     setShowModal(true);
@@ -120,6 +123,7 @@ export default function AiSettingsPage() {
       api_secret: '',
       endpoint_url: '',
       description: '',
+      model: '',
       is_active: true,
     });
     setEditingId(null);
@@ -160,7 +164,7 @@ export default function AiSettingsPage() {
                   説明
                 </th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  エンドポイント
+                  モデル
                 </th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                   使用回数
@@ -183,7 +187,7 @@ export default function AiSettingsPage() {
                     {setting.description || '-'}
                   </td>
                   <td className="px-6 py-4 text-sm text-gray-500">
-                    {setting.endpoint_url || '-'}
+                    {setting.model || '-'}
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                     {setting.usage_count || 0}回
@@ -264,6 +268,30 @@ export default function AiSettingsPage() {
                   className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
                   placeholder="このAPIの用途や説明"
                 />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  モデル <span className="text-red-500">*</span>
+                </label>
+                <select
+                  value={formData.model}
+                  onChange={(e) => setFormData({ ...formData, model: e.target.value })}
+                  required
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
+                >
+                  <option value="">モデルを選択</option>
+                  <option value="gpt-4o">GPT-4o (最新・高性能)</option>
+                  <option value="gpt-4o-mini">GPT-4o mini (高速・低コスト)</option>
+                  <option value="gpt-4-turbo">GPT-4 Turbo</option>
+                  <option value="gpt-4">GPT-4</option>
+                  <option value="gpt-3.5-turbo">GPT-3.5 Turbo</option>
+                  <option value="o1">o1 (推論特化)</option>
+                  <option value="o1-mini">o1-mini (推論特化・低コスト)</option>
+                </select>
+                <p className="mt-1 text-xs text-gray-500">
+                  使用するOpenAIモデルを選択
+                </p>
               </div>
 
               <div>

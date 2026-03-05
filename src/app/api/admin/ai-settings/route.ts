@@ -23,11 +23,18 @@ export async function GET() {
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
-    const { api_name, api_key, api_secret, endpoint_url, description, is_active } = body;
+    const { api_name, api_key, api_secret, endpoint_url, description, model, is_active } = body;
 
     if (!api_name) {
       return NextResponse.json(
         { error: 'API名は必須です' },
+        { status: 400 }
+      );
+    }
+
+    if (!model) {
+      return NextResponse.json(
+        { error: 'モデルは必須です' },
         { status: 400 }
       );
     }
@@ -40,6 +47,7 @@ export async function POST(request: NextRequest) {
         api_secret,
         endpoint_url,
         description,
+        model,
         is_active: is_active ?? true,
       })
       .select()

@@ -8,7 +8,7 @@ export async function PATCH(
   try {
     const { id } = await params;
     const body = await request.json();
-    const { api_name, api_key, api_secret, endpoint_url, description, is_active } = body;
+    const { api_name, api_key, api_secret, endpoint_url, description, model, is_active } = body;
 
     const { data, error } = await supabaseAdmin
       .from('api_settings')
@@ -18,6 +18,7 @@ export async function PATCH(
         api_secret,
         endpoint_url,
         description,
+        model,
         is_active,
         updated_at: new Date().toISOString(),
       })
