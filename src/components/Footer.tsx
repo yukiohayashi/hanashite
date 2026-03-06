@@ -45,8 +45,7 @@ export default function Footer() {
           <div className="flex flex-col justify-center items-center bg-black px-0 py-2.5 w-full text-white">
             <div className="flex flex-wrap justify-center gap-1 md:gap-2">
               <a href="/company" className="md:p-2 px-2 py-1 text-white hover:text-gray-300 text-xs md:text-base text-center">運営情報</a>
-              <a href="/service_guide" className="md:p-2 px-2 py-1 text-white hover:text-gray-300 text-xs md:text-base text-center">サービスガイド</a>
-              <a href="/termsofservice" className="md:p-2 px-2 py-1 text-white hover:text-gray-300 text-xs md:text-base text-center">利用規約</a>
+             <a href="/termsofservice" className="md:p-2 px-2 py-1 text-white hover:text-gray-300 text-xs md:text-base text-center">利用規約</a>
               <a href="/privacy" className="md:p-2 px-2 py-1 text-white hover:text-gray-300 text-xs md:text-base text-center">プライバシー</a>
               <a href="/media" className="md:p-2 px-2 py-1 text-white hover:text-gray-300 text-xs md:text-base text-center">データ引用について</a>
               <a href="/faq" className="md:p-2 px-2 py-1 text-white hover:text-gray-300 text-xs md:text-base text-center">よくあるご質問</a>

@@ -202,7 +202,7 @@ export default function MobileRightSidebar({ isOpen, onClose }: MobileRightSideb
                     <li>投稿したトピック</li>
                   </Link>
                   <Link href="/post-create" className="block hover:bg-gray-100 mr-0.5 p-2.5 border-gray-200 border-b w-auto font-normal text-black text-sm text-left no-underline" onClick={onClose}>
-                    <li>相談する</li>
+                    <li>トピックを投稿する</li>
                   </Link>
                   {participatePoints && (
                     <>
