@@ -81,8 +81,17 @@ export default function CommentSection({ postId, initialComments, totalCount, po
   const isDeadlinePassed = deadlineAt ? new Date(deadlineAt) < new Date() : false;
   // 現在のユーザーが相談者かどうかを判定
   const isPostOwner = session?.user?.id && postUserId && Number(session.user.id) === Number(postUserId);
-  // 締め切り後は相談者のみ回答可能
-  const canComment = !isDeadlinePassed || isPostOwner;
+  
+  // ベストアンサーの回答者を取得
+  const bestAnswerComment = bestAnswerId ? comments.find(c => c.id === bestAnswerId) : null;
+  const isBestAnswerUser = bestAnswerComment && session?.user?.id && Number(session.user.id) === Number(bestAnswerComment.user_id);
+  
+  // コメント可能条件
+  // 1. ベストアンサーがない場合: 締め切り前、または締め切り後でも相談者なら可能
+  // 2. ベストアンサーがある場合: 相談者またはベストアンサー回答者のみ可能
+  const canComment = bestAnswerId 
+    ? (isPostOwner || isBestAnswerUser)
+    : (!isDeadlinePassed || isPostOwner);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -202,16 +211,23 @@ export default function CommentSection({ postId, initialComments, totalCount, po
         </div>
       )}
       
-      {/* ベストアンサーがある場合はコメント閉鎖 */}
+      {/* ベストアンサーがある場合の表示 */}
       {bestAnswerId ? (
-        <div className="mb-6 p-4 bg-yellow-50 border border-yellow-200 rounded-lg text-center">
-          <div className="flex flex-col items-center gap-2">
-            <div className="flex items-center gap-2 text-yellow-700">
+        canComment ? (
+          <div className="mb-6 p-4 bg-green-50 border border-green-200 rounded-lg">
+            <div className="flex items-center gap-2 text-green-700 mb-3">
               <i className="fas fa-trophy text-yellow-500"></i>
               <span className="font-medium">
-                この相談は{comments.find(c => c.id === bestAnswerId)?.users?.name || 'ゲスト'}さんがベストアンサーに選ばれたため、回答受付を終了しました
+                この相談は{comments.find(c => c.id === bestAnswerId)?.users?.name || 'ゲスト'}さんがベストアンサーに選ばれました
               </span>
             </div>
+            <p className="text-green-600 text-sm">
+              {isPostOwner && isBestAnswerUser 
+                ? '相談者とベストアンサー回答者として、引き続きコメントできます'
+                : isPostOwner 
+                ? '相談者として、引き続きコメントできます'
+                : 'ベストアンサー回答者として、引き続きコメントできます'}
+            </p>
             <button
               onClick={() => {
                 const element = document.getElementById(`reply-${bestAnswerId}`);
@@ -219,12 +235,34 @@ export default function CommentSection({ postId, initialComments, totalCount, po
                   element.scrollIntoView({ behavior: 'smooth', block: 'center' });
                 }
               }}
-              className="mt-2 px-4 py-2 bg-yellow-600 hover:bg-yellow-700 text-white rounded-md text-sm font-medium transition-colors"
+              className="mt-3 px-4 py-2 bg-yellow-600 hover:bg-yellow-700 text-white rounded-md text-sm font-medium transition-colors"
             >
               ベストアンサーをみる
             </button>
           </div>
-        </div>
+        ) : (
+          <div className="mb-6 p-4 bg-yellow-50 border border-yellow-200 rounded-lg text-center">
+            <div className="flex flex-col items-center gap-2">
+              <div className="flex items-center gap-2 text-yellow-700">
+                <i className="fas fa-trophy text-yellow-500"></i>
+                <span className="font-medium">
+                  この相談は{comments.find(c => c.id === bestAnswerId)?.users?.name || 'ゲスト'}さんがベストアンサーに選ばれたため、回答受付を終了しました
+                </span>
+              </div>
+              <button
+                onClick={() => {
+                  const element = document.getElementById(`reply-${bestAnswerId}`);
+                  if (element) {
+                    element.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                  }
+                }}
+                className="mt-2 px-4 py-2 bg-yellow-600 hover:bg-yellow-700 text-white rounded-md text-sm font-medium transition-colors"
+              >
+                ベストアンサーをみる
+              </button>
+            </div>
+          </div>
+        )
       ) : isDeadlinePassed && !isPostOwner ? (
         <div className="mb-6 p-6 bg-orange-50 border-2 border-orange-300 rounded-lg text-center">
           <div className="flex flex-col items-center gap-3">
