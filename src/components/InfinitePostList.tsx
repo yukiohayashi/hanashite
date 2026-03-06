@@ -147,29 +147,28 @@ export default function InfinitePostList({ initialPosts, sortBy: initialSortBy }
                 {contentPreview}
               </p>
             )}
-            <div className="mt-2 flex items-center justify-between gap-2 text-gray-500 text-xs">
-              <div className="flex items-center min-w-0 flex-1 overflow-hidden">
-                <img 
-                  src={post.avatar_url || 'https://api.dicebear.com/9.x/big-smile/svg?seed=guest&size=20'} 
-                  alt="相談者"
-                  className="w-4 h-4 rounded-full border border-gray-200 inline-block mr-1 flex-shrink-0"
-                />
-                <span className="truncate">{post.user_name || 'ゲスト'}さんからの相談</span>
-                {post.deadline_at && (
-                  <span className="ml-2 flex-shrink-0 hidden md:inline">締切: {new Date(post.deadline_at).toLocaleDateString('ja-JP')}</span>
-                )}
-              </div>
-              {post.category_name && post.category_id && (
-                <Link
-                  href={`/category/${post.category_id}`}
-                  onClick={(e) => e.stopPropagation()}
-                  className="inline-block px-2 py-0.5 text-xs font-medium text-gray-600 bg-gray-200 rounded whitespace-nowrap flex-shrink-0 hover:bg-gray-300 transition-colors"
-                >
-                  {post.category_name}
-                </Link>
+          </Link>
+          <div className="mt-2 flex items-center justify-between gap-2 text-gray-500 text-xs">
+            <div className="flex items-center min-w-0 flex-1 overflow-hidden">
+              <img 
+                src={post.avatar_url || 'https://api.dicebear.com/9.x/big-smile/svg?seed=guest&size=20'} 
+                alt="相談者"
+                className="w-4 h-4 rounded-full border border-gray-200 inline-block mr-1 flex-shrink-0"
+              />
+              <span className="truncate">{post.user_name || 'ゲスト'}さんからの相談</span>
+              {post.deadline_at && (
+                <span className="ml-2 flex-shrink-0 hidden md:inline">締切: {new Date(post.deadline_at).toLocaleDateString('ja-JP')}</span>
               )}
             </div>
-          </Link>
+            {post.category_name && post.category_id && (
+              <Link
+                href={`/category/${post.category_id}`}
+                className="inline-block px-2 py-0.5 text-xs font-medium text-gray-600 bg-gray-200 rounded whitespace-nowrap flex-shrink-0 hover:bg-gray-300 transition-colors"
+              >
+                {post.category_name}
+              </Link>
+            )}
+          </div>
           </div>
         );
       })}

@@ -155,7 +155,7 @@ export default async function KeywordPage({
         <div className="flex-1 px-4 max-w-[760px]">
           {/* キーワード情報 */}
           <div className="bg-white shadow-md mb-4 p-6 border border-gray-200 rounded">
-            <h1 className="mb-4 font-bold text-gray-900 text-3xl">
+             <h1 className="mb-4 font-bold text-gray-900 text-3xl">
               {keyword.keyword}
             </h1>
             

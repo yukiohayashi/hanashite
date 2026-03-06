@@ -11,10 +11,10 @@ export default function CompanyPage() {
     <div className="bg-gray-50 min-h-screen">
       <Header />
       
-      <main className="mx-auto mt-14 md:px-4 py-4 max-w-4xl">
-        <h1 className="mb-8 font-bold text-gray-900 text-3xl">運営情報</h1>
+      <main className="mx-auto mt-14 md:mt-2 px-4 py-2 max-w-4xl">
+         <h1 className="mb-4 font-bold text-gray-900 text-3xl">運営情報</h1>
         
-        <div className="bg-white shadow-sm p-6 rounded-lg">
+        <div className="bg-white shadow-sm p-3 rounded-lg">
           <table className="w-full">
             <tbody>
               <tr className="border-gray-200 border-b">

@@ -24,23 +24,29 @@ export default function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const isProduction = process.env.NODE_ENV === 'production';
+  
   return (
     <html lang="ja" suppressHydrationWarning>
       <head>
-        <script
-          async
-          src="https://www.googletagmanager.com/gtag/js?id=G-FZ0MZRX2DG"
-        />
-        <script
-          dangerouslySetInnerHTML={{
-            __html: `
-              window.dataLayer = window.dataLayer || [];
-              function gtag(){dataLayer.push(arguments);}
-              gtag('js', new Date());
-              gtag('config', 'G-FZ0MZRX2DG');
-            `,
-          }}
-        />
+        {isProduction && (
+          <>
+            <script
+              async
+              src="https://www.googletagmanager.com/gtag/js?id=G-FZ0MZRX2DG"
+            />
+            <script
+              dangerouslySetInnerHTML={{
+                __html: `
+                  window.dataLayer = window.dataLayer || [];
+                  function gtag(){dataLayer.push(arguments);}
+                  gtag('js', new Date());
+                  gtag('config', 'G-FZ0MZRX2DG');
+                `,
+              }}
+            />
+          </>
+        )}
         <link
           rel="stylesheet"
           href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"

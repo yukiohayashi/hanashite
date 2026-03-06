@@ -11,8 +11,8 @@ export default function TermsOfServicePage() {
     <div className="bg-gray-50 min-h-screen">
       <Header />
       
-      <main className="mx-auto mt-14 md:mt-[70px] px-4 py-8 max-w-4xl">
-        <h1 className="mb-8 font-bold text-gray-900 text-3xl">利用規約</h1>
+  <main className="mx-auto mt-14 md:mt-2 px-4 py-2 max-w-4xl">
+       <h1 className="mb-4 font-bold text-gray-900 text-3xl">利用規約</h1>
         
         <div className="bg-white shadow-sm p-6 rounded-lg max-w-none prose prose-sm">
           <h2>第1条（適用）</h2>

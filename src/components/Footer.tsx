@@ -8,7 +8,7 @@ export default function Footer() {
       <section className="w-full">
         <div className="w-full text-center">
           {/* SNSリンク */}
-          <div className="flex justify-center items-center gap-4 bg-[#f9f6f6] p-2.5 w-full">
+          <div className="flex justify-center items-center gap-4 p-2.5 w-full">
             <a 
               href="https://x.com/ym_haya" 
               target="_blank" 
