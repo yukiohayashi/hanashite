@@ -322,7 +322,7 @@ export default async function Home({ searchParams }: HomeProps) {
         .select('id, title, created_at, user_id, og_image, thumbnail_url, best_answer_id, category_id, categories(name), users!inner(status, name, avatar_style, avatar_seed, use_custom_image, image)')
         .in('id', sortedPostIds)
         .in('status', ['publish', 'published'])
-        .neq('user_id', 1)
+        .neq('user_id', '1')
         .is('best_answer_id', null);
 
       if (topPosts && topPosts.length > 0) {
