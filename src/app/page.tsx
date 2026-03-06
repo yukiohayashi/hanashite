@@ -290,37 +290,65 @@ export default async function Home({ searchParams }: HomeProps) {
     postsData = allPosts || [];
   }
 
-  // 注目の相談を取得（受付中の投稿を3件）
-  // 注目の相談を取得（total_votesが高い受付中の投稿）
+  // 注目の相談を取得（likesテーブルから投稿へのいいね数を集計）
   let featuredPosts: any[] = [];
   
-  const { data: topPosts } = await supabase
-    .from('posts')
-    .select('id, title, created_at, user_id, og_image, thumbnail_url, best_answer_id, total_votes, category_id, categories(name), users!inner(status, name, avatar_style, avatar_seed, use_custom_image, image)')
-    .in('status', ['publish', 'published'])
-    .neq('user_id', 1)
-    .is('best_answer_id', null)
-    .gte('total_votes', 1)
-    .order('total_votes', { ascending: false })
-    .limit(3);
+  // likesテーブルから投稿へのいいね数を集計
+  const { data: likedPosts } = await supabase
+    .from('likes')
+    .select('target_id')
+    .eq('like_type', 'post');
 
-  if (topPosts && topPosts.length > 0) {
-    featuredPosts = topPosts.map(post => {
-      const user = (post as any).users;
-      let avatarUrl: string;
-      if (user?.use_custom_image && user?.image) {
-        avatarUrl = user.image;
-      } else {
-        const seed = user?.avatar_seed || String(post.user_id) || 'guest';
-        const style = user?.avatar_style || 'big-smile';
-        avatarUrl = `https://api.dicebear.com/9.x/${style}/svg?seed=${encodeURIComponent(seed)}&size=20`;
+  if (likedPosts && likedPosts.length > 0) {
+    // target_idごとにいいね数をカウント
+    const likeCounts = likedPosts.reduce((acc: { [key: number]: number }, like) => {
+      const targetId = like.target_id;
+      if (targetId) {
+        acc[targetId] = (acc[targetId] || 0) + 1;
       }
-      return {
-        ...post,
-        user_name: user?.name || null,
-        avatar_url: avatarUrl
-      };
-    });
+      return acc;
+    }, {});
+
+    // いいね数が多い順にソート
+    const sortedPostIds = Object.entries(likeCounts)
+      .sort(([, a], [, b]) => (b as number) - (a as number))
+      .slice(0, 3)
+      .map(([id]) => parseInt(id));
+
+    if (sortedPostIds.length > 0) {
+      // 投稿情報を取得
+      const { data: topPosts } = await supabase
+        .from('posts')
+        .select('id, title, created_at, user_id, og_image, thumbnail_url, best_answer_id, category_id, categories(name), users!inner(status, name, avatar_style, avatar_seed, use_custom_image, image)')
+        .in('id', sortedPostIds)
+        .in('status', ['publish', 'published'])
+        .neq('user_id', 1)
+        .is('best_answer_id', null);
+
+      if (topPosts && topPosts.length > 0) {
+        // sortedPostIdsの順序に従って並べ替え
+        const orderedPosts = sortedPostIds
+          .map(id => topPosts.find(post => post.id === id))
+          .filter((post): post is NonNullable<typeof post> => post !== undefined);
+
+        featuredPosts = orderedPosts.map(post => {
+          const user = (post as any).users;
+          let avatarUrl: string;
+          if (user?.use_custom_image && user?.image) {
+            avatarUrl = user.image;
+          } else {
+            const seed = user?.avatar_seed || String(post.user_id) || 'guest';
+            const style = user?.avatar_style || 'big-smile';
+            avatarUrl = `https://api.dicebear.com/9.x/${style}/svg?seed=${encodeURIComponent(seed)}&size=20`;
+          }
+          return {
+            ...post,
+            user_name: user?.name || null,
+            avatar_url: avatarUrl
+          };
+        });
+      }
+    }
   }
 
   // ユーザー情報はJOINで取得済み
