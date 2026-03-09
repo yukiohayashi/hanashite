@@ -87,11 +87,11 @@ export default function CommentSection({ postId, initialComments, totalCount, po
   const isBestAnswerUser = bestAnswerComment && session?.user?.id && Number(session.user.id) === Number(bestAnswerComment.user_id);
   
   // コメント可能条件
-  // 1. ベストアンサーがない場合: 締め切り前、または締め切り後でも相談者なら可能
+  // 1. ベストアンサーがない場合: 締め切りに関係なく誰でも可能（締め切りは目安）
   // 2. ベストアンサーがある場合: 相談者またはベストアンサー回答者のみ可能
   const canComment = bestAnswerId 
     ? (isPostOwner || isBestAnswerUser)
-    : (!isDeadlinePassed || isPostOwner);
+    : true;
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
