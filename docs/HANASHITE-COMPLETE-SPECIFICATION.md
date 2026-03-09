@@ -212,6 +212,7 @@ erDiagram
 | | `mail_logs` | メール送信ログ。 |
 | **システム** | `api_settings` | API設定。 |
 | | `backup_logs` | バックアップログ。 |
+| | `site_settings` | サイト基本設定。 |
 
 ---
 
@@ -271,6 +272,7 @@ erDiagram
 | コメント管理 | ✅ | 承認、削除 |
 | カテゴリ管理 | ✅ | CRUD操作 |
 | メールテンプレート | ✅ | 問い合わせ、パスワードリセット |
+| サイト基本設定 | ✅ | サイト名、キャッチコピー、SNS URL等 |
 
 ### 4.6 メールシステム
 
@@ -500,6 +502,44 @@ CREATE TABLE nomination_requests (
   created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 ```
+
+### 4.10 `site_settings` — サイト基本設定
+
+- サイト名、キャッチコピー、SNS URLなどのサイト全体の設定を管理。
+
+```sql
+CREATE TABLE site_settings (
+  id BIGSERIAL PRIMARY KEY,
+  setting_key VARCHAR(100) NOT NULL UNIQUE,
+  setting_value TEXT,
+  setting_type VARCHAR(50) DEFAULT 'text',
+  description TEXT,
+  updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+  updated_by TEXT REFERENCES users(id)
+);
+
+CREATE INDEX idx_site_settings_key ON site_settings(setting_key);
+```
+
+#### 設定項目一覧
+
+| setting_key | setting_type | 説明 |
+|-------------|--------------|------|
+| `site_name` | text | サイト名 |
+| `site_catchphrase` | text | キャッチコピー |
+| `site_description` | text | サイト説明文 |
+| `site_url` | text | サイトURL |
+| `powered_by_text` | text | Powered byテキスト |
+| `total_posts_count` | number | 相談合計数 |
+| `company_name` | text | 会社名 |
+| `company_address` | text | 会社住所 |
+| `company_phone` | text | 電話番号 |
+| `company_email` | email | 会社メールアドレス |
+| `footer_copyright` | text | フッター著作権表示 |
+| `maintenance_mode` | boolean | メンテナンスモード |
+| `twitter_url` | text | X (Twitter) URL |
+| `instagram_url` | text | Instagram URL |
+| `tiktok_url` | text | TikTok URL |
 
 ---
 
