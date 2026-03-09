@@ -89,9 +89,17 @@ export default function PasswordChangeForm() {
         )}
 
         <div>
-          <label htmlFor="currentPassword" className="block mb-2 font-medium text-gray-700 text-sm">
-            現在のパスワード
-          </label>
+          <div className="flex justify-between items-center mb-2">
+            <label htmlFor="currentPassword" className="font-medium text-gray-700 text-sm">
+              現在のパスワード
+            </label>
+            <a
+              href="/resetpassword"
+              className="text-blue-600 hover:text-blue-800 text-xs hover:underline"
+            >
+              パスワードを忘れた場合
+            </a>
+          </div>
           <div className="relative">
             <input
               type={showCurrentPassword ? 'text' : 'password'}
