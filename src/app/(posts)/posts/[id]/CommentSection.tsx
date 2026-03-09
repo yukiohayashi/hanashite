@@ -319,7 +319,7 @@ export default function CommentSection({ postId, initialComments, totalCount, po
                   const style = users?.avatar_style || 'fun-emoji';
                   return `https://api.dicebear.com/9.x/${style}/svg?seed=${encodeURIComponent(users.avatar_seed)}&size=20`;
                 }
-                return '/images/default-avatar.svg';
+                return '/images/default-avatar.webp';
               };
               const avatarUrl = getCommentAvatarUrl();
               const replies = getReplies(comment.id);
@@ -416,7 +416,7 @@ export default function CommentSection({ postId, initialComments, totalCount, po
                         const style = replyUsers?.avatar_style || 'fun-emoji';
                         return `https://api.dicebear.com/9.x/${style}/svg?seed=${encodeURIComponent(replyUsers.avatar_seed)}&size=20`;
                       }
-                      return '/images/default-avatar.svg';
+                      return '/images/default-avatar.webp';
                     };
                     const replyAvatarUrl = getReplyAvatarUrl();
                     const nestedReplies = getReplies(reply.id);

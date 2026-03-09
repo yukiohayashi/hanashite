@@ -398,7 +398,7 @@ export default function ProfileSetForm({ user, categories, isFirstTime }: Profil
             <div className="relative">
               {imageMode === 'none' ? (
                 <img
-                  src="/images/default-avatar.svg"
+                  src="/images/default-avatar.webp"
                   alt="デフォルトアバター"
                   width={120}
                   height={120}
