@@ -4,11 +4,7 @@ import { auth } from '@/lib/auth';
 
 export async function GET() {
   try {
-    const session = await auth();
-    if (!session?.user?.id || session.user.id !== '1') {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-    }
-
+    // 設定の取得は誰でも可能（公開情報）
     const { data, error } = await supabaseAdmin
       .from('site_settings')
       .select('*')
