@@ -20,6 +20,7 @@ export default function AdminPanelLayout({
   useEffect(() => {
     const pageTitles: Record<string, string> = {
       '/admin': 'ダッシュボード',
+      '/admin/settings': '基本設定',
       '/admin/cleanup': 'クリーンアップ',
       '/admin/auto-creator': 'AI自動投稿',
       '/admin/auto-creator/rss': 'RSS記事一覧',
@@ -82,6 +83,14 @@ export default function AdminPanelLayout({
           >
             <LayoutDashboard className="w-4 h-4" />
             <span className="text-sm">ダッシュボード</span>
+          </Link>
+
+          <Link
+            href="/admin/settings"
+            className={`flex items-center gap-2 px-3 py-1 text-gray-300 ${hoverBgColor} hover:text-white transition-colors`}
+          >
+            <Settings className="w-5 h-5" />
+            <span className="text-sm">基本設定</span>
           </Link>
 
           <Link

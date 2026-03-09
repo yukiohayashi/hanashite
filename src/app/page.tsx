@@ -29,14 +29,23 @@ export async function generateMetadata({ searchParams }: HomeProps): Promise<Met
   const params = await searchParams;
   const searchQuery = params.s || '';
   
+  // サイト設定を取得
+  const { data: settings } = await supabase
+    .from('site_settings')
+    .select('setting_key, setting_value')
+    .in('setting_key', ['site_name', 'site_catchphrase']);
+  
+  const siteName = settings?.find(s => s.setting_key === 'site_name')?.setting_value || 'ハナシテ';
+  const catchphrase = settings?.find(s => s.setting_key === 'site_catchphrase')?.setting_value || '';
+  
   if (searchQuery) {
     return {
-      title: `${searchQuery}の検索結果｜ハナシテ`,
+      title: `${searchQuery}の検索結果｜${siteName}`,
     };
   }
   
   return {
-    title: 'ハナシテ - AIと人間が協働する恋愛・結婚・男女関係の無料相談掲示板',
+    title: catchphrase ? `${siteName} - ${catchphrase}` : siteName,
   };
 }
 

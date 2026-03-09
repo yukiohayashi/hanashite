@@ -10,7 +10,17 @@ import HeaderLink from './HeaderLink';
 import MobileLeftSidebar from './MobileLeftSidebar';
 import MobileRightSidebar from './MobileRightSidebar';
 
-export default function Header() {
+interface SiteSettings {
+  powered_by_text: string;
+  total_posts_count: string;
+  site_catchphrase: string;
+}
+
+interface HeaderProps {
+  siteSettings?: SiteSettings;
+}
+
+export default function Header({ siteSettings: initialSettings }: HeaderProps = {}) {
   const { data: session, status } = useSession();
   const pathname = usePathname();
   
@@ -18,9 +28,32 @@ export default function Header() {
   const [rightSidebarOpen, setRightSidebarOpen] = useState(false);
   const [avatarUrl, setAvatarUrl] = useState('');
   const [unreadCount, setUnreadCount] = useState(0);
+  const [siteSettings, setSiteSettings] = useState<SiteSettings>(initialSettings || {
+    powered_by_text: '',
+    total_posts_count: '',
+    site_catchphrase: '',
+  });
 
   useEffect(() => {
-  }, []);
+    // 初期値がない場合のみAPIから取得
+    if (!initialSettings) {
+      fetch('/api/admin/settings')
+        .then(res => res.json())
+        .then(data => {
+          if (data.success && data.data) {
+            const settings: SiteSettings = {
+              powered_by_text: data.data.find((s: any) => s.setting_key === 'powered_by_text')?.setting_value || '',
+              total_posts_count: data.data.find((s: any) => s.setting_key === 'total_posts_count')?.setting_value || '',
+              site_catchphrase: data.data.find((s: any) => s.setting_key === 'site_catchphrase')?.setting_value || '',
+            };
+            setSiteSettings(settings);
+          }
+        })
+        .catch(() => {
+          // エラー時は空文字のまま
+        });
+    }
+  }, [initialSettings]);
 
   useEffect(() => {
     if (session?.user?.id) {
@@ -89,9 +122,9 @@ export default function Header() {
                 className="w-full"
               />
             </Link>
-            <div className="hidden md:block text-[0.45rem] text-gray-500 text-center">powered by DOKUJO</div>
+            <div className="hidden md:block text-[0.45rem] text-gray-500 text-center">powered by {siteSettings.powered_by_text}</div>
             <div className="w-full text-[0.5rem] text-center text-gray-600">
-              AIと人間が協働する恋愛・結婚・男女関係の無料相談掲示板
+              {siteSettings.site_catchphrase}
             </div>
           </div>
 
@@ -150,16 +183,16 @@ export default function Header() {
                     className="w-full"
                   />
                 </div>
-                <span className="text-[0.55rem] text-gray-500">powered by DOKUJO</span>
+                <span className="text-[0.55rem] text-gray-500">powered by {siteSettings.powered_by_text}</span>
               </Link>
               
               {/* 相談統計情報 */}
               <div className="flex flex-col text-gray-600 text-xs">
                 <div className="font-semibold text-gray-800">
-                  相談合計数: 300件超
+                  相談合計数: {siteSettings.total_posts_count}件超
                 </div>
                 <div className="mt-0.5 text-[0.65rem] leading-tight">
-                  恋愛・結婚・男女関係の無料相談掲示板
+                  {siteSettings.site_catchphrase}
                 </div>
               </div>
             </div>
