@@ -882,7 +882,7 @@ hanashite/
 | エンドポイント | メソッド | 説明 |
 |---------|--------|------|
 | `/api/upload-image` | POST | 画像アップロード |
-| `/api/stats/posts-count` | GET | 投稿数統計 |
+| `/api/stats/posts-count` | GET | トピック数統計 |
 | `/api/test` | GET | テスト用 |
 
 ---

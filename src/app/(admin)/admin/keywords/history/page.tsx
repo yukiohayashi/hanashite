@@ -185,7 +185,7 @@ export default function SearchHistoryPage() {
         ) : (
           <div className="overflow-x-auto">
             <table className="min-w-full divide-y divide-gray-200">
-              <thead className="bg-gray-50">
+              <thead className="bg-white">
                 <tr>
                   <th className="px-4 py-3 text-left">
                     <input
@@ -217,7 +217,7 @@ export default function SearchHistoryPage() {
               </thead>
               <tbody className="bg-white divide-y divide-gray-200">
                 {history.map((item) => (
-                  <tr key={item.id} className="hover:bg-gray-50">
+                  <tr key={item.id} className="hover:bg-white">
                     <td className="px-4 py-3">
                       <input
                         type="checkbox"

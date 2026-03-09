@@ -134,7 +134,7 @@ export default function InfinitePostList({ initialPosts, sortBy: initialSortBy }
           ? cleanContent.substring(0, 50) + (cleanContent.length > 50 ? '...' : '')
           : '';
         return (
-          <div key={post.id} className="relative block bg-white hover:shadow-md p-3 border border-gray-300 rounded-md transition-all hover:-translate-y-1">
+          <div key={post.id} className="relative block bg-white hover:shadow-md p-3 border border-[#ffe0d6] rounded-md transition-all hover:-translate-y-1">
           <Link 
             href={`/posts/${post.id}`} 
             className="block"
@@ -163,7 +163,7 @@ export default function InfinitePostList({ initialPosts, sortBy: initialSortBy }
             {post.category_name && post.category_id && (
               <Link
                 href={`/category/${post.category_id}`}
-                className="inline-block px-2 py-0.5 text-xs font-medium text-gray-600 bg-gray-200 rounded whitespace-nowrap flex-shrink-0 hover:bg-gray-300 transition-colors"
+                className="inline-block px-2 py-0.5 text-xs font-semibold text-[#d32f2f] bg-white border border-[#d32f2f] rounded whitespace-nowrap flex-shrink-0 hover:bg-pink-50 transition-colors"
               >
                 {post.category_name}
               </Link>

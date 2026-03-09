@@ -35,7 +35,7 @@ export default async function KeywordPage({
 
   if (!keyword) {
     return (
-      <div className="flex justify-center items-center bg-gray-50 min-h-screen">
+      <div className="flex justify-center items-center bg-white min-h-screen">
         <div className="text-center">
           <h1 className="font-bold text-gray-900 text-1.5xl">キーワードが見つかりません</h1>
           <Link href="/" className="inline-block mt-4 text-indigo-600 hover:text-indigo-500">
@@ -65,7 +65,7 @@ export default async function KeywordPage({
 
   const postIds = postKeywords?.map(pk => pk.post_id) || [];
 
-  // 総投稿数を取得
+  // 総トピック数を取得
   let countQuery = supabase
     .from('posts')
     .select('*', { count: 'exact', head: true })
@@ -105,7 +105,7 @@ export default async function KeywordPage({
   if (postsError) {
     console.error('投稿取得エラー:', postsError);
   }
-  console.log('取得した投稿数:', posts?.length || 0);
+  console.log('取得したトピック数:', posts?.length || 0);
 
   // ユーザー情報とカテゴリ情報を別途取得
   let postsWithUsers = posts || [];
@@ -142,17 +142,17 @@ export default async function KeywordPage({
   }
 
   return (
-    <div className="bg-gray-50 min-h-screen">
+    <div className="bg-white min-h-screen">
       <Header />
 
-      <main className="md:flex md:justify-center mx-auto mt-14 md:mt-[70px] md:pt-0 max-w-7xl">
+      <main className="md:flex md:justify-center md:gap-4 mx-auto pt-[60px] md:pt-4 pb-4 max-w-7xl px-0 sm:px-6 lg:px-8">
         {/* 左サイドバー */}
-        <aside className="hidden md:block w-[220px]">
+        <aside className="hidden md:block w-[220px] bg-[#fff8f6] p-4 rounded-lg">
           <Sidebar />
         </aside>
 
         {/* メインコンテンツ */}
-        <div className="flex-1 px-4 max-w-[760px]">
+        <div className="flex-1">
           {/* キーワード情報 */}
           <div className="bg-white shadow-md mb-4 p-6 border border-gray-200 rounded">
              <h1 className="mb-4 font-bold text-gray-900 text-3xl">
@@ -164,7 +164,7 @@ export default async function KeywordPage({
             )}
 
             <div className="flex gap-4 text-gray-500 text-sm">
-              <span>投稿数: {totalPosts || 0}</span>
+              <span>トピック数: {totalPosts || 0}</span>
             </div>
           </div>
 
@@ -217,7 +217,7 @@ export default async function KeywordPage({
                 {currentPage > 1 && (
                   <Link
                     href={`/keyword/${id}?page=${currentPage - 1}`}
-                    className="px-4 py-2 bg-white border border-gray-300 rounded hover:bg-gray-50"
+                    className="px-4 py-2 bg-white border border-gray-300 rounded hover:bg-white"
                   >
                     前へ
                   </Link>
@@ -230,7 +230,7 @@ export default async function KeywordPage({
                 {currentPage < totalPages && (
                   <Link
                     href={`/keyword/${id}?page=${currentPage + 1}`}
-                    className="px-4 py-2 bg-white border border-gray-300 rounded hover:bg-gray-50"
+                    className="px-4 py-2 bg-white border border-gray-300 rounded hover:bg-white"
                   >
                     次へ
                   </Link>
@@ -241,7 +241,7 @@ export default async function KeywordPage({
         </div>
 
         {/* 右サイドバー */}
-        <aside className="hidden md:block w-[280px]">
+        <aside className="hidden md:block w-[280px] bg-[#fff0eb] p-4 rounded-lg">
           <RightSidebar />
         </aside>
       </main>

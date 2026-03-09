@@ -135,7 +135,7 @@ export default async function PostEditPage({
         <div className="flex items-center gap-3">
           <a
             href="/admin/posts"
-            className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50"
+            className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-white"
           >
             ← 投稿一覧に戻る
           </a>

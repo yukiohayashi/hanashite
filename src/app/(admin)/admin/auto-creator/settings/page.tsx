@@ -454,7 +454,7 @@ export default function AutoCreatorSettings() {
 
             <div>
               <label htmlFor="max_posts_per_execution" className="block text-sm font-medium text-gray-700 mb-2">
-                実行ごとの最大投稿数
+                実行ごとの最大トピック数
               </label>
               <input
                 type="number"
@@ -466,7 +466,7 @@ export default function AutoCreatorSettings() {
                 max="10"
               />
               <p className="mt-1 text-xs text-gray-500">
-                1回の実行で作成する最大投稿数（1〜10件）
+                1回の実行で作成する最大トピック数（1〜10件）
               </p>
             </div>
           </div>
@@ -565,7 +565,7 @@ export default function AutoCreatorSettings() {
           </div>
         </div>
 
-        <div className="px-6 py-4 bg-gray-50 border-t border-gray-200 flex justify-end">
+        <div className="px-6 py-4 bg-white border-t border-gray-200 flex justify-end">
           <button
             onClick={handleSave}
             disabled={saving}

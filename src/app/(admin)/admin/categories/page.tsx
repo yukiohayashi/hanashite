@@ -77,7 +77,7 @@ export default function CategoriesPage() {
         21: { target_days: 180, filter_logic: 'and', min_votes: 10 }, // 民族・宗教
       };
       
-      // 各カテゴリの投稿数を取得
+      // 各カテゴリのトピック数を取得
       const categoriesWithCount = await Promise.all(
         data.map(async (category) => {
           const { count } = await supabase
@@ -303,7 +303,7 @@ export default function CategoriesPage() {
         ) : (
           <div className="overflow-x-auto">
             <table className="min-w-full divide-y divide-gray-200">
-              <thead className="bg-gray-50">
+              <thead className="bg-white">
                 <tr>
                   <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase cursor-pointer hover:bg-gray-100" onClick={() => handleSort('id')}>
                     ID {sortBy === 'id' && (sortOrder === 'asc' ? '↑' : '↓')}
@@ -321,7 +321,7 @@ export default function CategoriesPage() {
                     表示順 {sortBy === 'display_order' && (sortOrder === 'asc' ? '↑' : '↓')}
                   </th>
                   <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase cursor-pointer hover:bg-gray-100" onClick={() => handleSort('post_count')}>
-                    投稿数 {sortBy === 'post_count' && (sortOrder === 'asc' ? '↑' : '↓')}
+                    トピック数 {sortBy === 'post_count' && (sortOrder === 'asc' ? '↑' : '↓')}
                   </th>
                   <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase cursor-pointer hover:bg-gray-100" onClick={() => handleSort('target_days')}>
                     対象期間 {sortBy === 'target_days' && (sortOrder === 'asc' ? '↑' : '↓')}
@@ -342,7 +342,7 @@ export default function CategoriesPage() {
               </thead>
               <tbody className="bg-white divide-y divide-gray-200">
                 {filteredCategories.map((category) => (
-                  <tr key={category.id} className="hover:bg-gray-50">
+                  <tr key={category.id} className="hover:bg-white">
                     <td className="px-4 py-3 text-sm text-gray-900">
                       {category.id}
                     </td>
@@ -502,7 +502,7 @@ export default function CategoriesPage() {
                   Font AwesomeアイコンのHTMLコードを入力してください。例: &lt;i class="fas fa-heart"&gt;&lt;/i&gt;
                 </p>
                 {formData.icon && (
-                  <div className="mt-2 p-2 bg-gray-50 rounded">
+                  <div className="mt-2 p-2 bg-white rounded">
                     <span className="text-sm text-gray-600">プレビュー: </span>
                     <span dangerouslySetInnerHTML={{ __html: formData.icon }} />
                   </div>

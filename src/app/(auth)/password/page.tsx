@@ -12,7 +12,7 @@ export const metadata: Metadata = {
 export default async function PasswordPage() {
   return (
     <LoginRequired pageName="パスワード変更">
-      <div className="bg-gray-50 min-h-screen">
+      <div className="bg-white min-h-screen">
         <Header />
       
       <div className="wrapper max-w-[1260px] mx-auto mt-16 md:mt-4 px-4 sm:px-6 lg:px-8">

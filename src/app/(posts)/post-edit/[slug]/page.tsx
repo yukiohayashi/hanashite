@@ -49,7 +49,7 @@ export default async function AnkeEditPage({ params }: { params: Promise<{ slug:
     .order('display_order', { ascending: true });
 
   return (
-    <div className="bg-gray-50 min-h-screen">
+    <div className="bg-white min-h-screen">
       <Header />
       
       <div className="md:flex md:justify-center md:mx-auto mt-14 md:mt-[70px] md:pt-0 md:max-w-7xl">

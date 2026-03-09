@@ -187,10 +187,7 @@ export default function SidebarClient({ categories }: SidebarClientProps) {
   }, [session?.user?.id]);
 
   const getBadgeColor = (rank: number) => {
-    if (rank === 1) return 'bg-[#f06292]';
-    if (rank === 2) return 'bg-[#ffb74d]';
-    if (rank === 3) return 'bg-[#4db6ac]';
-    return 'bg-[#ff6b35]';
+    return 'bg-[#ff6b6b]';
   };
 
   const getProfileUrl = (user: RankingUser) => {
@@ -206,7 +203,7 @@ export default function SidebarClient({ categories }: SidebarClientProps) {
     <nav className="space-y-4">
       {/* カテゴリ */}
       <div>
-        <h3 className="mb-2 px-0 font-bold text-base" style={{ color: '#ff6b35' }}>
+        <h3 className="mb-2 px-0 font-bold text-[#ff6b6b] text-base">
           カテゴリ
         </h3>
         <ul className="m-0 p-0 list-none">
@@ -233,7 +230,7 @@ export default function SidebarClient({ categories }: SidebarClientProps) {
 
       {/* ベストアンサー獲得ランキング */}
       <div>
-        <h3 className="mb-2 px-0 font-bold text-base" style={{ color: '#ff6b35' }}>
+        <h3 className="mb-2 px-0 font-bold text-[#ff6b6b] text-base">
           ベストアンサー獲得
         </h3>
         <ol className="m-0 p-0 list-none">
@@ -263,7 +260,7 @@ export default function SidebarClient({ categories }: SidebarClientProps) {
 
       {/* コメントいいね獲得ランキング */}
       <div>
-        <h3 className="mt-4 mb-2 px-0 font-bold text-base" style={{ color: '#ff6b35' }}>
+        <h3 className="mt-4 mb-2 px-0 font-bold text-[#ff6b6b] text-base">
           コメントいいね!獲得
         </h3>
         <ol className="m-0 p-0 list-none">

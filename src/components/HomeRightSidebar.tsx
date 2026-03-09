@@ -212,7 +212,7 @@ export default function HomeRightSidebar() {
       <div className="flex flex-col items-center my-2.5 w-full">
         <Link 
           href="/login" 
-          className="inline-flex justify-center items-center bg-green-600 hover:bg-green-700 px-6 py-3 rounded font-bold text-white text-sm no-underline transition-colors"
+          className="inline-flex justify-center items-center bg-[#388e3c] hover:bg-[#2e7d32] px-6 py-3 rounded font-bold text-white text-sm no-underline transition-colors"
           style={{ minWidth: '180px' }}
         >
           ログイン
@@ -224,7 +224,7 @@ export default function HomeRightSidebar() {
       <div className="flex justify-center w-full">
         <Link 
           href="/regist" 
-          className="inline-flex justify-center items-center bg-[#ff6b35] hover:bg-[#e58a2f] px-6 py-3 rounded font-bold text-white text-sm no-underline transition-colors"
+          className="inline-flex justify-center items-center bg-[#f4511e] hover:bg-[#e64a19] px-6 py-3 rounded font-bold text-white text-sm no-underline transition-colors"
           style={{ minWidth: '180px' }}
         >
           新規無料登録
@@ -240,13 +240,13 @@ export default function HomeRightSidebar() {
       {/* 運営からのお知らせ */}
       {announcements.length > 0 && (
         <div>
-          <h3 className="mb-2 px-2 font-bold text-base" style={{ color: '#ff6b35' }}>
+          <h3 className="mb-2 px-2 font-bold text-base" style={{ color: '#ff6b6b' }}>
             運営からのお知らせ <i className="fa fa-bullhorn" aria-hidden="true"></i>
           </h3>
-          <ul className="bg-white shadow m-0 p-0 rounded-lg list-none">
+          <ul className="bg-[#fffaf9] shadow m-0 p-0 rounded-lg list-none">
             {announcements.map((post) => (
               <li key={post.id} className="border-gray-200 border-b last:border-b-0">
-                <Link href={`/posts/${post.id}`} className="block hover:bg-gray-100 px-2 py-2 transition-colors">
+                <Link href={`/posts/${post.id}`} className="block hover:bg-pink-50 px-2 py-2 transition-colors">
                   <span className="text-gray-900 text-sm">{post.title}</span>
                 </Link>
               </li>
@@ -257,14 +257,14 @@ export default function HomeRightSidebar() {
 
       {/* 最新の回答*/}
       <div>
-        <h3 className="mt-4 mb-2 px-2 font-bold text-base" style={{ color: '#ff6b35' }}>
+        <h3 className="mt-4 mb-2 px-2 font-bold text-base" style={{ color: '#ff6b6b' }}>
           最新の回答<i className="fas fa-comment"></i>
         </h3>
-        <ul className="bg-white shadow m-0 p-0 rounded-lg list-none">
+        <ul className="bg-[#fffaf9] shadow m-0 p-0 rounded-lg list-none">
           {latestComments.length > 0 ? (
             latestComments.map((comment) => (
               <li key={comment.id} className="border-gray-200 border-b last:border-b-0">
-                <Link href={`/posts/${comment.post_id}`} className="block hover:bg-gray-100 px-2 py-2 transition-colors">
+                <Link href={`/posts/${comment.post_id}`} className="block hover:bg-pink-50 px-2 py-2 transition-colors">
                   <span className="block text-gray-900 text-sm">{truncateText(comment.content, 26)}</span>
                   <span className="block text-gray-500 text-xs">{comment.posts?.title || ''}</span>
                   <span className="text-gray-400 text-xs">{comment.user_name || 'ゲスト'}さん</span>
@@ -279,14 +279,14 @@ export default function HomeRightSidebar() {
 
       {/* 最新相談 */}
       <div>
-        <h3 className="mt-4 mb-2 px-2 font-bold text-base" style={{ color: '#ff6b35' }}>
+        <h3 className="mt-4 mb-2 px-2 font-bold text-base" style={{ color: '#ff6b6b' }}>
           最新の相談 <i className="fas fa-comments"></i>
         </h3>
-        <ul className="flex flex-col gap-2 bg-white shadow m-0 p-0 rounded-lg list-none">
+        <ul className="flex flex-col gap-2 bg-[#fffaf9] shadow m-0 p-0 rounded-lg list-none">
           {latestPosts.length > 0 ? (
             latestPosts.map((post) => (
               <li key={post.id} className="border-gray-200 border-b last:border-b-0">
-                <Link href={`/posts/${post.id}`} className="block hover:bg-gray-100 px-2 py-2 transition-colors">
+                <Link href={`/posts/${post.id}`} className="block hover:bg-pink-50 px-2 py-2 transition-colors">
                   <span className="block text-gray-900 text-sm">{post.title}</span>
                   <span className="text-gray-500 text-xs">{formatDate(post.created_at)}</span>
                 </Link>

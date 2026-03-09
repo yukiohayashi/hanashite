@@ -25,7 +25,7 @@ export default function LoginRequired({ children, pageName }: LoginRequiredProps
 
   if (status === 'loading') {
     return (
-      <div className="flex justify-center items-center bg-gray-50 min-h-screen">
+      <div className="flex justify-center items-center bg-white min-h-screen">
         <div className="text-center">
           <p className="text-gray-600">読み込み中...</p>
         </div>
@@ -35,7 +35,7 @@ export default function LoginRequired({ children, pageName }: LoginRequiredProps
 
   if (status === 'unauthenticated') {
     return (
-      <div className="bg-gray-50 min-h-screen">
+      <div className="bg-white min-h-screen">
         <div className="wrapper" style={{ display: 'flex', maxWidth: '1260px', margin: '70px auto 0', justifyContent: 'center' }}>
           <main className="article__contents" style={{ minWidth: '690px', margin: '0 5px' }}>
             <h1 className="mb-4 py-1 font-bold text-[#ff6b35] text-2xl">{pageName}</h1>

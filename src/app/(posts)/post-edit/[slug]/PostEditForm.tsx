@@ -191,7 +191,7 @@ export default function PostEditForm({
                   </select>
                 </div>
                 
-                <div className="bg-gray-50 mb-4 p-4 border border-gray-300 rounded">
+                <div className="bg-white mb-4 p-4 border border-gray-300 rounded">
                   <p className="text-gray-700 text-sm">
                     <strong>注意：</strong>アンケートの選択肢は変更できません。選択肢を変更したい場合は、このアンケートを削除して新規作成してください。
                   </p>

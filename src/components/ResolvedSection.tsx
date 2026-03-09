@@ -49,7 +49,7 @@ export default function ResolvedSection({ bestAnswers, waitingPosts }: ResolvedS
 
   return (
     <>
-      <h3 className="m-1.5 mb-2 px-0 font-bold text-base" style={{ color: '#ff6b35' }}>
+      <h3 className="m-1.5 mb-2 px-0 font-bold text-base" style={{ color: '#ff6b6b' }}>
         <i className="fas fa-trophy mr-1"></i>解決済み
       </h3>
 
@@ -86,7 +86,7 @@ export default function ResolvedSection({ bestAnswers, waitingPosts }: ResolvedS
             bestAnswers.map((answer) => {
               const contentPreview = stripHtmlTags(answer.content).substring(0, 80);
               return (
-                <div key={answer.id} className="relative bg-white hover:shadow-md p-3 border border-gray-300 rounded-md transition-all">
+                <div key={answer.id} className="relative bg-[#fffaf9] hover:shadow-md p-3 border border-[#ffe0d6] border-l-4 border-l-[#ffab91] rounded-md transition-all">
                   <Link href={`/posts/${answer.post_id}`} className="block pr-20">
                     <div className="flex items-center gap-1.5 text-xs text-gray-500 mb-1">
                       <Image
@@ -109,7 +109,7 @@ export default function ResolvedSection({ bestAnswers, waitingPosts }: ResolvedS
                   {answer.category_name && answer.category_id && (
                     <Link
                       href={`/category/${answer.category_id}`}
-                      className="absolute bottom-3 right-3 inline-block px-2 py-0.5 text-xs font-medium text-gray-600 bg-gray-200 rounded whitespace-nowrap hover:bg-gray-300 transition-colors z-10"
+                      className="absolute bottom-3 right-3 inline-block px-2 py-0.5 text-xs font-semibold text-[#d32f2f] bg-white border border-[#d32f2f] rounded whitespace-nowrap hover:bg-pink-50 transition-colors z-10"
                       onClick={(e) => e.stopPropagation()}
                     >
                       {answer.category_name}
@@ -133,7 +133,7 @@ export default function ResolvedSection({ bestAnswers, waitingPosts }: ResolvedS
               ? cleanContent.substring(0, 50) + (cleanContent.length > 50 ? '...' : '')
               : '';
             return (
-              <div key={post.id} className="relative bg-white hover:shadow-md p-3 border border-gray-300 rounded-md transition-all">
+              <div key={post.id} className="relative bg-[#fffaf9] hover:shadow-md p-3 border border-[#ffe0d6] border-l-4 border-l-[#ffab91] rounded-md transition-all">
                 <Link href={`/posts/${post.id}`} className="block pr-16">
                   <h4 className="font-bold text-gray-900 text-sm leading-relaxed">
                     {post.title}
@@ -153,7 +153,7 @@ export default function ResolvedSection({ bestAnswers, waitingPosts }: ResolvedS
                 {post.categories?.name && post.category_id && (
                   <Link
                     href={`/category/${post.category_id}`}
-                    className="absolute bottom-3 right-3 inline-block px-2 py-0.5 text-xs font-medium text-gray-600 bg-gray-200 rounded whitespace-nowrap hover:bg-gray-300 transition-colors z-10"
+                    className="absolute bottom-3 right-3 inline-block px-2 py-0.5 text-xs font-medium text-[#bf360c] bg-white border border-[#ffccbc] rounded whitespace-nowrap hover:bg-pink-50 transition-colors z-10"
                     onClick={(e) => e.stopPropagation()}
                   >
                     {post.categories.name}

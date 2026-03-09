@@ -320,7 +320,7 @@ export default function PostsTable({ posts: initialPosts, initialCounts }: Posts
       
       <div className="overflow-x-auto">
         <table className="min-w-full divide-y divide-gray-200">
-          <thead className="bg-gray-50">
+          <thead className="bg-white">
             <tr>
               <th className="px-6 py-3 text-left">
                 <input
@@ -369,7 +369,7 @@ export default function PostsTable({ posts: initialPosts, initialCounts }: Posts
             {posts.map((post) => (
               <tr 
                 key={post.id} 
-                className="hover:bg-gray-50 cursor-pointer"
+                className="hover:bg-white cursor-pointer"
                 onClick={(e) => {
                   // リンクやボタンのクリックは除外
                   if ((e.target as HTMLElement).tagName === 'A' || 

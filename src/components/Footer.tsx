@@ -50,7 +50,7 @@ export default function Footer({ siteSettings: initialSettings }: FooterProps = 
       <section className="w-full">
         <div className="w-full text-center">
           {/* SNSリンク */}
-          <div className="flex justify-center items-center gap-4 p-2.5 w-full">
+          <div className="flex justify-center items-center gap-4 p-2.5 w-full bg-[#fff0eb]">
             {siteSettings.twitter_url && (
               <a 
                 href={siteSettings.twitter_url} 
@@ -90,7 +90,7 @@ export default function Footer({ siteSettings: initialSettings }: FooterProps = 
           </div>
 
           {/* フッターリンク */}
-          <div className="flex flex-col justify-center items-center bg-black px-0 py-2.5 w-full text-white">
+          <div className="flex flex-col justify-center items-center bg-[#ff6b6b] px-0 py-2.5 w-full text-white">
             <div className="flex flex-wrap justify-center gap-1 md:gap-2">
               <a href="/company" className="md:p-2 px-2 py-1 text-white hover:text-gray-300 text-xs md:text-base text-center">運営情報</a>
              <a href="/termsofservice" className="md:p-2 px-2 py-1 text-white hover:text-gray-300 text-xs md:text-base text-center">利用規約</a>
@@ -98,7 +98,7 @@ export default function Footer({ siteSettings: initialSettings }: FooterProps = 
               <a href="/media" className="md:p-2 px-2 py-1 text-white hover:text-gray-300 text-xs md:text-base text-center">データ引用について</a>
               <a href="/faq" className="md:p-2 px-2 py-1 text-white hover:text-gray-300 text-xs md:text-base text-center">よくあるご質問</a>
             </div>
-            <span className="mt-2 text-[#8d8d8d] text-[0.7rem]">{siteSettings.footer_copyright}</span>
+            <span className="mt-2 text-white text-[0.7rem]">{siteSettings.footer_copyright}</span>
           </div>
         </div>
       </section>

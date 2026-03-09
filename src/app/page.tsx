@@ -492,17 +492,17 @@ export default async function Home({ searchParams }: HomeProps) {
   }
 
   return (
-    <div className="bg-gray-50 min-h-screen">
+    <div className="bg-white min-h-screen">
       <Header />
 
       <main className="md:flex md:justify-center mx-auto pt-[60px] md:pt-4 pb-4 max-w-7xl px-0 sm:px-6 lg:px-8">
         {/* 左サイドバー */}
-        <aside className="hidden md:block w-[220px]">
+        <aside className="hidden md:block w-[220px] bg-[#fff8f6] p-4 rounded-lg">
           <Sidebar />
         </aside>
 
         {/* メインコンテンツ */}
-        <div className="flex-1 max-w-[760px]">
+        <div className="flex-1 max-w-[760px] px-2 md:px-4">
           <section>
             {/* 検索ボックスとキーワード */}
             <div className="p-2.5">
@@ -545,7 +545,7 @@ export default async function Home({ searchParams }: HomeProps) {
             {/* 注目の相談（最新順時のみ表示） */}
             {(sortBy === 'recommend' || sortBy === 'top_post') && featuredPosts.length > 0 && (
               <>
-                <h3 className="m-1.5 mb-2 px-0 font-bold text-base" style={{ color: '#ff6b35' }}>注目の相談</h3>
+                <h3 className="m-1.5 mb-2 px-0 font-bold text-base" style={{ color: '#ff6b6b' }}>注目の相談</h3>
                 <div className="mx-1.5 mb-4">
                   {(() => {
                     const post = featuredPosts[0];
@@ -556,7 +556,7 @@ export default async function Home({ searchParams }: HomeProps) {
                       ? fullContent.substring(0, Math.min(halfLength, 100)) + (fullContent.length > Math.min(halfLength, 100) ? '...' : '')
                       : '';
                     return (
-                      <div className="relative bg-white p-3 border border-gray-300 rounded-md hover:shadow-md transition-shadow">
+                      <div className="relative bg-white p-3 border border-[#ffe0d6] rounded-md hover:shadow-md transition-shadow">
                         <Link href={`/posts/${post.id}`} className="block">
                           <h3 className="mb-2 font-extrabold text-gray-900 text-lg line-clamp-2">
                             {post.title}
@@ -579,7 +579,7 @@ export default async function Home({ searchParams }: HomeProps) {
                         {(post as any).categories?.name && (post as any).category_id && (
                           <Link
                             href={`/category/${(post as any).category_id}`}
-                            className="absolute bottom-3 right-3 inline-block px-2 py-0.5 text-xs font-medium text-gray-600 bg-gray-200 rounded whitespace-nowrap hover:bg-gray-300 transition-colors z-10"
+                            className="absolute bottom-3 right-3 inline-block px-2 py-0.5 text-xs font-medium text-[#bf360c] bg-white border border-[#ffccbc] rounded whitespace-nowrap hover:bg-pink-50 transition-colors z-10"
                           >
                             {(post as any).categories.name}
                           </Link>
@@ -601,7 +601,7 @@ export default async function Home({ searchParams }: HomeProps) {
                     ? cleanContent.substring(0, 50) + (cleanContent.length > 50 ? '...' : '')
                     : '';
                   return (
-                    <div key={post.id} className="relative flex flex-col bg-white hover:shadow-md border border-gray-300 rounded-md transition-all h-full p-2">
+                    <div key={post.id} className="relative flex flex-col bg-white hover:shadow-md border border-[#ffe0d6] rounded-md transition-all h-full p-2">
                       <Link href={`/posts/${post.id}`} className="flex flex-col flex-1 pb-5">
                         <div className="font-bold text-gray-900 text-sm line-clamp-2 leading-tight">
                           {post.title}
@@ -623,7 +623,7 @@ export default async function Home({ searchParams }: HomeProps) {
                       {(post as any).categories?.name && (post as any).category_id && (
                         <Link
                           href={`/category/${(post as any).category_id}`}
-                          className="absolute bottom-2 right-2 inline-block px-1.5 py-0.5 text-[10px] font-medium text-gray-600 bg-gray-200 rounded whitespace-nowrap hover:bg-gray-300 transition-colors z-10"
+                          className="absolute bottom-2 right-2 inline-block px-1.5 py-0.5 text-[10px] font-medium text-[#bf360c] bg-white border border-[#ffccbc] rounded whitespace-nowrap hover:bg-pink-50 transition-colors z-10"
                         >
                           {(post as any).categories.name}
                         </Link>
@@ -646,7 +646,7 @@ export default async function Home({ searchParams }: HomeProps) {
           
 
             {/* 相談受付中見出し */}
-            <h3 className="m-1.5 mb-2 px-0 font-bold text-base" style={{ color: '#ff6b35' }}>
+            <h3 className="m-1.5 mb-2 px-0 font-bold text-base" style={{ color: '#ff6b6b' }}>
               <i className="fas fa-comments mr-1"></i>相談受付中
             </h3>
 
@@ -683,7 +683,7 @@ export default async function Home({ searchParams }: HomeProps) {
 
           {/* スマホビュー: 最新のコメント */}
           <section className="md:hidden mt-6 px-2">
-            <h3 className="mb-2 px-2 font-bold text-base" style={{ color: '#ff6b35' }}>
+            <h3 className="mb-2 px-2 font-bold text-base" style={{ color: '#ff6b6b' }}>
               最新の回答<i className="fas fa-comment"></i>
             </h3>
             <LatestCommentsMobile />
@@ -691,7 +691,7 @@ export default async function Home({ searchParams }: HomeProps) {
         </div>
 
         {/* 右サイドバー */}
-        <aside className="hidden md:block w-[280px]">
+        <aside className="hidden md:block w-[280px] bg-[#fff0eb] p-4 rounded-lg">
           <HomeRightSidebar />
         </aside>
       </main>

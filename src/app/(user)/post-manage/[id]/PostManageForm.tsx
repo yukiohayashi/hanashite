@@ -248,7 +248,7 @@ export default function PostManageForm({ post, comments, categories }: PostManag
             
             <div>
               <p className="font-bold text-gray-700 text-sm">内容</p>
-              <div className="mt-1 whitespace-pre-wrap bg-gray-50 p-3 rounded border border-gray-200">
+              <div className="mt-1 whitespace-pre-wrap bg-white p-3 rounded border border-gray-200">
                 {updatedContent}
               </div>
             </div>
@@ -335,7 +335,7 @@ export default function PostManageForm({ post, comments, categories }: PostManag
               内容
             </label>
             <div
-              className="w-full px-3 py-2 border border-gray-300 rounded-md bg-gray-50 text-gray-600 min-h-[200px] whitespace-pre-wrap"
+              className="w-full px-3 py-2 border border-gray-300 rounded-md bg-white text-gray-600 min-h-[200px] whitespace-pre-wrap"
               style={{ minHeight: '800px' }}
               dangerouslySetInnerHTML={{ __html: content.replace(/\n/g, '<br>') }}
             />
@@ -396,7 +396,7 @@ export default function PostManageForm({ post, comments, categories }: PostManag
               type="button"
               onClick={handleMoveToTrash}
               disabled={loading || bestAnswerId !== null}
-              className="bg-gray-500 hover:bg-gray-600 disabled:opacity-50 disabled:cursor-not-allowed text-white font-medium py-2 px-4 rounded-md transition-colors"
+              className="bg-white0 hover:bg-gray-600 disabled:opacity-50 disabled:cursor-not-allowed text-white font-medium py-2 px-4 rounded-md transition-colors"
               title={bestAnswerId !== null ? 'ベストアンサーが選択されているため削除できません' : ''}
             >
               削除する

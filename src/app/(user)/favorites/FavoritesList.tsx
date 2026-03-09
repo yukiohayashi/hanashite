@@ -110,7 +110,7 @@ export default function FavoritesList() {
       <ul className="divide-y divide-gray-200">
         {posts.map((post) => {
           return (
-            <li key={post.id} className="hover:bg-gray-50 p-4 transition-colors">
+            <li key={post.id} className="hover:bg-white p-4 transition-colors">
               <div className="flex-1">
                 <Link href={`/posts/${post.id}`} className="block group">
                   <div className="flex items-center gap-2 mb-2">

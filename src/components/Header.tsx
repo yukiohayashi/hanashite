@@ -98,14 +98,11 @@ export default function Header({ siteSettings: initialSettings }: HeaderProps = 
   return (
     <>
       {/* スマホビュー用ヘッダー */}
-      <header className="md:hidden top-0 right-0 left-0 z-[50] fixed bg-white shadow-md">
-        {/* カラフルなボーダー */}
-        <div className="bg-gradient-to-r from-pink-500 via-orange-500 to-yellow-500 h-1"></div>
-        
-        <div className="relative flex justify-center items-center py-1">
+      <header className="md:hidden top-0 right-0 left-0 z-[50] fixed bg-[#ff6b6b] shadow-md">
+        <div className="relative flex justify-center items-center py-2">
           {/* 左: 検索アイコン */}
           <button
-            className="top-1/2 left-[3%] z-[101] absolute text-gray-700 text-xl -translate-y-1/2"
+            className="top-1/2 left-[3%] z-[101] absolute text-white text-xl -translate-y-1/2"
             onClick={() => setLeftSidebarOpen(true)}
           >
             <i className="fas fa-search"></i>
@@ -122,8 +119,8 @@ export default function Header({ siteSettings: initialSettings }: HeaderProps = 
                 className="w-full"
               />
             </Link>
-            <div className="hidden md:block text-[0.45rem] text-gray-500 text-center">powered by {siteSettings.powered_by_text}</div>
-            <div className="w-full text-[0.5rem] text-center text-gray-600">
+            <div className="hidden md:block text-[0.45rem] text-white text-center">powered by {siteSettings.powered_by_text}</div>
+            <div className="w-full text-[0.5rem] text-center text-white">
               {siteSettings.site_catchphrase}
             </div>
           </div>
@@ -140,10 +137,10 @@ export default function Header({ siteSettings: initialSettings }: HeaderProps = 
                     src={avatarUrl}
                     alt="プロフィール画像"
                     id="header-avatar"
-                    className="border-2 border-gray-300 rounded-full w-10 h-10 object-cover"
+                    className="bg-white border-2 border-gray-300 rounded-full w-10 h-10 object-cover"
                   />
                 ) : (
-                  <img src="/images/default-avatar.svg" alt="デフォルトアバター" id="header-avatar" className="rounded-full w-10 h-10 object-cover" />
+                  <img src="/images/default-avatar.webp" alt="デフォルトアバター" id="header-avatar" className="bg-white rounded-full w-10 h-10 object-cover" />
                 )}
                 {/* 通知ドット */}
                 {unreadCount > 0 && (
@@ -165,12 +162,9 @@ export default function Header({ siteSettings: initialSettings }: HeaderProps = 
       </header>
 
       {/* PC/タブレットビュー用ヘッダー */}
-      <header className="hidden md:block bg-white shadow-md">
-        {/* カラフルなボーダー */}
-        <div className="bg-gradient-to-r from-pink-500 via-orange-500 to-yellow-500 h-1"></div>
-        
+      <header className="hidden md:block bg-[#ff6b6b] shadow-md">
         <div className="mx-auto px-4 sm:px-6 lg:px-8 max-w-7xl">
-          <div className="flex justify-between items-stretch min-h-[60px]">
+          <div className="flex justify-between items-stretch min-h-[64px]">
             {/* ロゴと相談情報 */}
             <div className="flex items-center gap-4 py-2">
               <Link href="/" className="flex flex-col items-center">
@@ -183,12 +177,12 @@ export default function Header({ siteSettings: initialSettings }: HeaderProps = 
                     className="w-full"
                   />
                 </div>
-                <span className="text-[0.55rem] text-gray-500">powered by {siteSettings.powered_by_text}</span>
+                <span className="text-[0.55rem] text-white">powered by {siteSettings.powered_by_text}</span>
               </Link>
               
               {/* 相談統計情報 */}
-              <div className="flex flex-col text-gray-600 text-xs">
-                <div className="font-semibold text-gray-800">
+              <div className="flex flex-col text-white text-xs">
+                <div className="font-semibold text-white">
                   相談合計数: {siteSettings.total_posts_count}件超
                 </div>
                 <div className="mt-0.5 text-[0.65rem] leading-tight">

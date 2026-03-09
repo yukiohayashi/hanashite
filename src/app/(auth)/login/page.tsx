@@ -19,12 +19,12 @@ export default async function LoginPage() {
   }
 
   return (
-    <div className="bg-gray-50 min-h-screen">
+    <div className="bg-white min-h-screen">
       <Header />
       
       <div className="wrapper">
         <main className="article__contents">
-          <section className="mx-auto px-4 pt-20 max-w-2xl one_column_wrapper">
+          <section className="mx-auto px-4 pt-20 md:pt-6 max-w-2xl one_column_wrapper">
             <h1 className="mb-6 font-bold text-gray-800 text-3xl text-center">
               ログイン
             </h1>

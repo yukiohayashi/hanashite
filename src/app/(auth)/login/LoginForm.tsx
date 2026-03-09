@@ -87,7 +87,7 @@ export default function LoginForm() {
         <button
           type="submit"
           disabled={isLoading}
-          className="bg-[#ff6b35] hover:bg-[#e55a2b] disabled:opacity-50 shadow-md px-10 py-3 border-0 rounded w-full max-w-[400px] font-bold text-white text-base transition-colors cursor-pointer"
+          className="bg-[#388e3c] hover:bg-[#2e7d32] disabled:opacity-50 shadow-md px-10 py-3 border-0 rounded w-full max-w-[400px] font-bold text-white text-base transition-colors cursor-pointer"
         >
           {isLoading ? 'ログイン中...' : 'ログインする'}
         </button>
@@ -100,7 +100,7 @@ export default function LoginForm() {
       <div className="mt-4 text-center">
         <Link
           href="/regist"
-          className="inline-block bg-green-600 hover:bg-green-700 shadow-md px-10 py-3 rounded w-full max-w-[400px] font-bold text-white text-base text-center no-underline transition-colors"
+          className="inline-block bg-[#f4511e] hover:bg-[#e64a19] shadow-md px-10 py-3 rounded w-full max-w-[400px] font-bold text-white text-base text-center no-underline transition-colors"
         >
           無料会員登録はこちら
         </Link>

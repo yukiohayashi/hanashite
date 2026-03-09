@@ -23,7 +23,7 @@ export default function SearchKeywords() {
             <Link
               key={index}
               href={`/?search=${encodeURIComponent(keyword.keyword)}`}
-              className="hover:bg-gray-50 px-2 py-0.5 border border-gray-300 hover:border-gray-400 rounded-full text-black leading-relaxed transition-colors"
+              className="hover:bg-white px-2 py-0.5 border border-gray-300 hover:border-gray-400 rounded-full text-black leading-relaxed transition-colors"
             >
               {keyword.keyword}
             </Link>
@@ -39,7 +39,7 @@ export default function SearchKeywords() {
             <Link
               key={index}
               href={`/?s=${encodeURIComponent(keyword.keyword)}`}
-              className="hover:bg-gray-50 px-2 py-0.5 border border-gray-300 hover:border-gray-400 rounded-full text-black leading-relaxed transition-colors"
+              className="hover:bg-white px-2 py-0.5 border border-gray-300 hover:border-gray-400 rounded-full text-black leading-relaxed transition-colors"
             >
               {keyword.keyword}
             </Link>

@@ -28,7 +28,7 @@ export default function LogoutPage() {
   }, [router]);
 
   return (
-    <div className="flex justify-center items-center bg-gray-50 min-h-screen">
+    <div className="flex justify-center items-center bg-white min-h-screen">
       <div className="text-center">
         <p className="text-gray-600">ログアウト中...</p>
       </div>

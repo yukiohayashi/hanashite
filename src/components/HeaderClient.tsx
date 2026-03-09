@@ -79,11 +79,11 @@ export default function HeaderClient() {
                 <img 
                   src={avatarUrl}
                   alt="プロフィール画像" 
-                  className="border-1 border-gray-300 rounded-full w-10 h-10 object-cover"
+                  className="bg-white border-1 border-gray-300 rounded-full w-10 h-10 object-cover"
                   id="header-avatar"
                 />
               ) : (
-                <img src="/images/default-avatar.svg" alt="デフォルトアバター" id="header-avatar" className="rounded-full w-10 h-10 object-cover" />
+                <img src="/images/default-avatar.webp" alt="デフォルトアバター" id="header-avatar" className="bg-white rounded-full w-10 h-10 object-cover" />
               )}
             </div>
             {/* 未読通知ドット */}
@@ -96,7 +96,7 @@ export default function HeaderClient() {
         </>
       ) : (
         <Link href="/login" className="flex items-center">
-          <img src="/images/default-avatar.svg" alt="デフォルトアバター" id="header-avatar" className="rounded-full w-10 h-10 object-cover" />
+          <img src="/images/default-avatar.webp" alt="デフォルトアバター" id="header-avatar" className="rounded-full w-10 h-10 object-cover" />
         </Link>
       )}
     </div>

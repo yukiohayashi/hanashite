@@ -23,7 +23,7 @@ export async function GET(
     return NextResponse.json({ error: 'Category not found' }, { status: 404 });
   }
 
-  // 総投稿数を取得
+  // 総トピック数を取得
   const { count: totalCount } = await supabase
     .from('posts')
     .select('*', { count: 'exact', head: true })

@@ -65,7 +65,7 @@ export default function KeywordStatsPage() {
           >
             <option value="search_count">検索回数</option>
             <option value="view_count">閲覧数</option>
-            <option value="post_count">投稿数</option>
+            <option value="post_count">トピック数</option>
           </select>
         </div>
       </div>
@@ -79,7 +79,7 @@ export default function KeywordStatsPage() {
         ) : (
           <div className="overflow-x-auto">
             <table className="min-w-full divide-y divide-gray-200">
-              <thead className="bg-gray-50">
+              <thead className="bg-white">
                 <tr>
                   <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">
                     順位
@@ -103,13 +103,13 @@ export default function KeywordStatsPage() {
                     className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase cursor-pointer hover:bg-gray-100"
                     onClick={() => handleSort('post_count')}
                   >
-                    投稿数 {sortBy === 'post_count' && (sortOrder === 'asc' ? '↑' : '↓')}
+                    トピック数 {sortBy === 'post_count' && (sortOrder === 'asc' ? '↑' : '↓')}
                   </th>
                 </tr>
               </thead>
               <tbody className="bg-white divide-y divide-gray-200">
                 {stats.map((stat, index) => (
-                  <tr key={stat.keyword} className="hover:bg-gray-50">
+                  <tr key={stat.keyword} className="hover:bg-white">
                     <td className="px-4 py-3 text-sm text-gray-900">
                       {index + 1}
                     </td>
@@ -150,7 +150,7 @@ export default function KeywordStatsPage() {
         </div>
 
         <div className="bg-white rounded-lg shadow p-4">
-          <div className="text-sm font-medium text-gray-600">総投稿数</div>
+          <div className="text-sm font-medium text-gray-600">総トピック数</div>
           <div className="text-3xl font-bold text-gray-900 mt-2">
             {stats.reduce((sum, s) => sum + s.post_count, 0).toLocaleString()}
           </div>

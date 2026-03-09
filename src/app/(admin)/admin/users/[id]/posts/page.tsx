@@ -59,7 +59,7 @@ export default async function UserPostsPage({
       ) : (
         <div className="bg-white shadow rounded-lg overflow-hidden">
           <table className="min-w-full divide-y divide-gray-200">
-            <thead className="bg-gray-50">
+            <thead className="bg-white">
               <tr>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                   ID
@@ -77,7 +77,7 @@ export default async function UserPostsPage({
             </thead>
             <tbody className="bg-white divide-y divide-gray-200">
               {posts.map((post) => (
-                <tr key={post.id} className="hover:bg-gray-50">
+                <tr key={post.id} className="hover:bg-white">
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                     <Link
                       href={`/admin/posts/${post.id}/edit`}

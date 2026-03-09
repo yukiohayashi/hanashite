@@ -18,7 +18,7 @@ export default async function AnkeCreatePage() {
   }
 
   return (
-    <div className="bg-gray-50 min-h-screen">
+    <div className="bg-white min-h-screen">
       <Header />
       
       <div className="wrapper max-w-[1260px] mx-auto mt-16 md:mt-4 px-2 sm:px-6 lg:px-8">

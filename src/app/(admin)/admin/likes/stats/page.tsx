@@ -151,7 +151,7 @@ export default async function LikesStatsPage() {
         </div>
         <div className="overflow-x-auto">
           <table className="min-w-full divide-y divide-gray-200">
-            <thead className="bg-gray-50">
+            <thead className="bg-white">
               <tr>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-20">
                   順位
@@ -170,7 +170,7 @@ export default async function LikesStatsPage() {
             <tbody className="bg-white divide-y divide-gray-200">
               {stats.topPosts.length > 0 ? (
                 stats.topPosts.map((post, index) => (
-                  <tr key={post.id} className="hover:bg-gray-50">
+                  <tr key={post.id} className="hover:bg-white">
                     <td className="px-6 py-4 whitespace-nowrap text-center">
                       <span className="text-lg font-bold text-gray-900">{index + 1}</span>
                     </td>
@@ -211,7 +211,7 @@ export default async function LikesStatsPage() {
         </div>
         <div className="overflow-x-auto">
           <table className="min-w-full divide-y divide-gray-200">
-            <thead className="bg-gray-50">
+            <thead className="bg-white">
               <tr>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-20">
                   順位
@@ -227,7 +227,7 @@ export default async function LikesStatsPage() {
             <tbody className="bg-white divide-y divide-gray-200">
               {stats.topUsers.length > 0 ? (
                 stats.topUsers.map((user, index) => (
-                  <tr key={user.id} className="hover:bg-gray-50">
+                  <tr key={user.id} className="hover:bg-white">
                     <td className="px-6 py-4 whitespace-nowrap text-center">
                       <span className="text-lg font-bold text-gray-900">{index + 1}</span>
                     </td>

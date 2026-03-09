@@ -143,7 +143,7 @@ export default function UserEditForm({ user }: UserEditFormProps) {
               type="text"
               value={user.id}
               disabled
-              className="w-full px-3 py-2 border border-gray-300 rounded-md bg-gray-50 text-gray-500"
+              className="w-full px-3 py-2 border border-gray-300 rounded-md bg-white text-gray-500"
             />
             <p className="mt-1 text-xs text-gray-500">ユーザーIDは変更できません。</p>
           </div>
@@ -200,7 +200,7 @@ export default function UserEditForm({ user }: UserEditFormProps) {
               type="text"
               value={new Date(user.created_at).toLocaleString('ja-JP')}
               disabled
-              className="w-full px-3 py-2 border border-gray-300 rounded-md bg-gray-50 text-gray-500"
+              className="w-full px-3 py-2 border border-gray-300 rounded-md bg-white text-gray-500"
             />
           </div>
         </div>
@@ -415,7 +415,7 @@ export default function UserEditForm({ user }: UserEditFormProps) {
         </button>
         <a
           href="/admin/users"
-          className="px-6 py-2 text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50"
+          className="px-6 py-2 text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-white"
         >
           キャンセル
         </a>

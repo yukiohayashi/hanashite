@@ -74,7 +74,7 @@ echo "更新件数: {$updated}件\n";
 echo "投稿が見つからなかった件数: {$notFound}件\n";
 
 // 4. 結果を確認
-echo "\nカテゴリごとの投稿数を確認しています...\n";
+echo "\nカテゴリごとのトピック数を確認しています...\n";
 $result = $supabase->query("
     SELECT category_id, COUNT(*) as count
     FROM posts
@@ -83,7 +83,7 @@ $result = $supabase->query("
     ORDER BY count DESC
 ");
 
-echo "\nカテゴリID | 投稿数\n";
+echo "\nカテゴリID | トピック数\n";
 echo "----------+-------\n";
 foreach ($result as $row) {
     echo sprintf("%9d | %6d\n", $row['category_id'], $row['count']);

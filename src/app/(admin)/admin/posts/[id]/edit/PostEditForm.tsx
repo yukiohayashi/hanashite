@@ -219,7 +219,7 @@ export default function PostEditForm({ post, categories, allKeywords, postKeywor
               type="text"
               value={post.id}
               disabled
-              className="w-full px-2 py-2 border border-gray-300 rounded-md bg-gray-50 text-gray-500 text-sm text-center"
+              className="w-full px-2 py-2 border border-gray-300 rounded-md bg-white text-gray-500 text-sm text-center"
             />
           </div>
 
@@ -244,7 +244,7 @@ export default function PostEditForm({ post, categories, allKeywords, postKeywor
               type="text"
               value={post.users?.name || 'ゲスト'}
               disabled
-              className="w-full px-3 py-2 border border-gray-300 rounded-md bg-gray-50 text-gray-500 text-sm"
+              className="w-full px-3 py-2 border border-gray-300 rounded-md bg-white text-gray-500 text-sm"
             />
           </div>
 
@@ -317,7 +317,7 @@ export default function PostEditForm({ post, categories, allKeywords, postKeywor
 
           <a
             href="/admin/posts"
-            className="px-4 py-2 text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 text-sm whitespace-nowrap"
+            className="px-4 py-2 text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-white text-sm whitespace-nowrap"
           >
             キャンセル
           </a>
@@ -342,7 +342,7 @@ export default function PostEditForm({ post, categories, allKeywords, postKeywor
           <label className="block text-sm font-medium text-gray-700 mb-2">
             選択中のキーワード
           </label>
-          <div className="flex flex-wrap gap-2 min-h-[40px] p-2 border border-gray-300 rounded-md bg-gray-50">
+          <div className="flex flex-wrap gap-2 min-h-[40px] p-2 border border-gray-300 rounded-md bg-white">
             {selectedKeywords.length > 0 ? (
               selectedKeywords.map(keywordId => {
                 const keyword = allKeywords.find(k => k.id === keywordId);
@@ -551,7 +551,7 @@ export default function PostEditForm({ post, categories, allKeywords, postKeywor
                           ID: {comment.id}
                         </span>
                         {isPostAuthor && (
-                          <span className="inline-flex px-2 py-1 text-xs bg-gray-500 text-white rounded font-semibold">
+                          <span className="inline-flex px-2 py-1 text-xs bg-white0 text-white rounded font-semibold">
                             投稿者
                           </span>
                         )}

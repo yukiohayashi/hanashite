@@ -6,7 +6,7 @@ import RightSidebar from '@/components/RightSidebar';
 
 export default function NotFound() {
   return (
-    <div className="bg-gray-50 min-h-screen">
+    <div className="bg-white min-h-screen">
       <Header />
 
       <main className="md:flex md:justify-center mx-auto mt-14 md:mt-[70px] md:pt-0 max-w-7xl">

@@ -201,10 +201,7 @@ export default function MobileLeftSidebar({ isOpen, onClose }: MobileLeftSidebar
     : categories;
 
   const getBadgeColor = (rank: number) => {
-    if (rank === 1) return 'bg-[#f06292]';
-    if (rank === 2) return 'bg-[#ffb74d]';
-    if (rank === 3) return 'bg-[#4db6ac]';
-    return 'bg-[#ff6b35]';
+    return 'bg-[#ff6b6b]';
   };
 
   return (
@@ -238,16 +235,15 @@ export default function MobileLeftSidebar({ isOpen, onClose }: MobileLeftSidebar
           <div className="py-4">
             {/* みんなの検索ワード */}
             <div className="mb-6">
-              <h3 className="flex items-center gap-2 mb-3 font-bold text-orange-500">
-                <span>🔥</span>
-                <span>みんなの検索ワード：</span>
+              <h3 className="flex items-center gap-2 mb-3 font-bold text-[#ff6b6b]">
+                <span>🔥 みんなの検索ワード：</span>
               </h3>
               <div className="flex flex-wrap gap-2">
                 {popularKeywords.map((keyword) => (
                   <Link
                     key={keyword.id}
                     href={`/keyword/${keyword.id}`}
-                    className="inline-block bg-white hover:bg-gray-50 px-3 py-1.5 border border-gray-300 rounded-full text-gray-700 text-sm transition-colors"
+                    className="inline-block bg-white hover:bg-pink-50 px-3 py-1.5 border border-[#d32f2f] rounded-full text-[#d32f2f] text-sm font-semibold transition-colors"
                     onClick={onClose}
                   >
                     {keyword.keyword}
@@ -258,16 +254,15 @@ export default function MobileLeftSidebar({ isOpen, onClose }: MobileLeftSidebar
 
             {/* 最新キーワード */}
             <div className="mb-6">
-              <h3 className="flex items-center gap-2 mb-3 font-bold text-blue-500">
-                <span><i className="text-blue-500 fas fa-clock"></i></span>
-                <span>最新キーワード</span>
+              <h3 className="flex items-center gap-2 mb-3 font-bold text-[#ff6b6b]">
+                <i className="fas fa-clock"></i> 最新キーワード
               </h3>
               <div className="flex flex-wrap gap-2">
                 {latestKeywords.map((keyword) => (
                   <Link
                     key={keyword.id}
                     href={`/keyword/${keyword.id}`}
-                    className="inline-block bg-white hover:bg-gray-50 px-3 py-1.5 border border-gray-300 rounded-full text-gray-700 text-sm transition-colors"
+                    className="inline-block bg-white hover:bg-pink-50 px-3 py-1.5 border border-[#d32f2f] rounded-full text-[#d32f2f] text-sm font-semibold transition-colors"
                     onClick={onClose}
                   >
                     {keyword.keyword}
@@ -278,7 +273,7 @@ export default function MobileLeftSidebar({ isOpen, onClose }: MobileLeftSidebar
 
             {/* カテゴリ */}
             <div className="mb-6">
-              <h3 className="mb-3 font-bold text-orange-500">カテゴリ</h3>
+              <h3 className="mb-3 font-bold text-[#ff6b6b]">カテゴリ</h3>
               <ul className="m-0 p-0 list-none">
                 {displayCategories.map((category, index) => {
                   const color = MATERIAL_COLORS[(index + 1) % MATERIAL_COLORS.length];
@@ -304,7 +299,7 @@ export default function MobileLeftSidebar({ isOpen, onClose }: MobileLeftSidebar
 
             {/* ベストアンサー獲得 */}
             <div className="mb-6">
-              <h3 className="mb-3 font-bold text-orange-500">ベストアンサー獲得</h3>
+              <h3 className="mb-3 font-bold text-[#ff6b6b]">ベストアンサー獲得</h3>
               <ol className="m-0 p-0 list-none">
                 {bestAnswerRanking.length > 0 ? (
                   bestAnswerRanking.map((user, index) => {
@@ -333,7 +328,7 @@ export default function MobileLeftSidebar({ isOpen, onClose }: MobileLeftSidebar
 
             {/* コメントいいね!獲得 */}
             <div className="mb-6">
-              <h3 className="mb-3 font-bold text-orange-500">コメントいいね!獲得</h3>
+              <h3 className="mb-3 font-bold text-[#ff6b6b]">コメントいいね!獲得</h3>
               <ol className="m-0 p-0 list-none">
                 {commentLikesRanking.length > 0 ? (
                   commentLikesRanking.map((user, index) => {

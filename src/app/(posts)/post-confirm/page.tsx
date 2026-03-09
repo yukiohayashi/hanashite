@@ -19,7 +19,7 @@ export default async function PostConfirmPage() {
   }
 
   return (
-    <div className="bg-gray-50 min-h-screen">
+    <div className="bg-white min-h-screen">
       <Header />
       
       <div className="wrapper md:flex md:max-w-7xl md:mx-auto md:mt-2 md:justify-center md:gap-4 pt-20 md:pt-4 mx-auto px-4 sm:px-6 lg:px-8">

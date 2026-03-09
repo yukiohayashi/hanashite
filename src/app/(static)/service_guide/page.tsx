@@ -8,7 +8,7 @@ export const metadata: Metadata = {
 
 export default function MediaPage() {
   return (
-    <div className="bg-gray-50 min-h-screen">
+    <div className="bg-white min-h-screen">
       <Header />
       
      <main className="mx-auto mt-14 md:mt-2 px-4 py-2 max-w-4xl">
@@ -30,7 +30,7 @@ export default function MediaPage() {
           </ul>
 
           <h2>引用例</h2>
-          <div className="bg-gray-50 p-4 rounded">
+          <div className="bg-white p-4 rounded">
             <p className="mb-2">info@dokujo.com: ハナシテ「〇〇に関する相談」</p>
             <p className="text-gray-600 text-sm">https://dokujo.com/posts/[相談ID]</p>
           </div>

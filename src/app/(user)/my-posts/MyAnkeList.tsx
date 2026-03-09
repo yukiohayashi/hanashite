@@ -102,7 +102,7 @@ export default function MyAnkeList() {
           return (
             <li 
               key={post.id}
-              className="hover:bg-gray-50 p-4 transition-colors"
+              className="hover:bg-white p-4 transition-colors"
             >
               <div className="flex-1">
                 <Link href={`/posts/${post.id}`} className="block group">

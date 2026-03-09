@@ -206,7 +206,7 @@ async function assignKeywords(postId: number, keywords: string[]) {
         });
     }
 
-    // キーワードの投稿数を更新
+    // キーワードのトピック数を更新
     await supabase.rpc('increment_keyword_post_count', {
       keyword_id: keywordId,
     });

@@ -261,7 +261,7 @@ export default function VoteSection({
                 {choices.map((choice, index) => {
                   const percentage = totalVotes > 0 ? (choice.vote_count / totalVotes) * 100 : 0;
                   return (
-                    <div key={choice.id} className="flex justify-between items-center py-2 px-3 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors">
+                    <div key={choice.id} className="flex justify-between items-center py-2 px-3 bg-white rounded-lg hover:bg-gray-100 transition-colors">
                       <div className="flex items-center gap-3">
                         <div 
                           className="w-5 h-5 rounded-md flex-shrink-0 shadow-sm"
@@ -280,7 +280,7 @@ export default function VoteSection({
           )}
           
           {/* 投票情報バー */}
-          <div className="bg-gray-50 px-3 py-2 rounded text-gray-600 text-xs flex justify-between items-center">
+          <div className="bg-white px-3 py-2 rounded text-gray-600 text-xs flex justify-between items-center">
             <div>
               {closeAt && closeAt !== '0000-00-00' && (
                 <>

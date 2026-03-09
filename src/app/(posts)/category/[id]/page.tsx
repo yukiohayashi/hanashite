@@ -87,7 +87,7 @@ export default async function CategoryPage({
 
   if (categoryError || !category) {
     return (
-      <div className="flex justify-center items-center bg-gray-50 min-h-screen">
+      <div className="flex justify-center items-center bg-white min-h-screen">
         <div className="text-center">
           <h1 className="font-bold text-gray-900 text-1.5xl">カテゴリが見つかりません</h1>
           <Link href="/" className="inline-block mt-4 text-indigo-600 hover:text-indigo-500">
@@ -98,7 +98,7 @@ export default async function CategoryPage({
     );
   }
 
-  // 総投稿数を取得
+  // 総トピック数を取得
   const { count: totalCount } = await supabase
     .from('posts')
     .select('*', { count: 'exact', head: true })
@@ -136,12 +136,12 @@ export default async function CategoryPage({
   const categoryColor = MATERIAL_COLORS[(categoryId) % MATERIAL_COLORS.length];
 
   return (
-    <div className="bg-gray-50 min-h-screen">
+    <div className="bg-white min-h-screen">
       <Header />
 
       <main className="md:flex md:justify-center md:gap-4 mx-auto pt-[60px] md:pt-4 pb-4 max-w-7xl px-0 sm:px-6 lg:px-8">
         {/* 左サイドバー */}
-        <aside className="hidden md:block w-[220px]">
+        <aside className="hidden md:block w-[220px] bg-[#fff8f6] p-4 rounded-lg">
           <Sidebar />
         </aside>
 
@@ -156,7 +156,7 @@ export default async function CategoryPage({
               <h1 className="font-bold text-gray-900 text-3xl">{category.name}</h1>
             </div>
             <div className="flex gap-4 text-gray-500 text-sm">
-              <span>投稿数: {totalCount || 0}</span>
+              <span>トピック数: {totalCount || 0}</span>
             </div>
           </div>
 
@@ -212,7 +212,7 @@ export default async function CategoryPage({
               {currentPage > 1 && (
                 <Link
                   href={`/category/${id}?page=${currentPage - 1}`}
-                  className="px-4 py-2 bg-white border border-gray-300 rounded-lg hover:bg-gray-50"
+                  className="px-4 py-2 bg-white border border-gray-300 rounded-lg hover:bg-white"
                 >
                   前へ
                 </Link>
@@ -223,7 +223,7 @@ export default async function CategoryPage({
               {currentPage < totalPages && (
                 <Link
                   href={`/category/${id}?page=${currentPage + 1}`}
-                  className="px-4 py-2 bg-white border border-gray-300 rounded-lg hover:bg-gray-50"
+                  className="px-4 py-2 bg-white border border-gray-300 rounded-lg hover:bg-white"
                 >
                   次へ
                 </Link>

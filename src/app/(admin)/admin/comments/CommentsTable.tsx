@@ -214,7 +214,7 @@ export default function CommentsTable({ comments: initialComments }: CommentsTab
       
       <div className="overflow-x-auto">
         <table className="min-w-full divide-y divide-gray-200">
-          <thead className="bg-gray-50">
+          <thead className="bg-white">
             <tr>
               <th className="px-6 py-3 text-left">
                 <input
@@ -266,7 +266,7 @@ export default function CommentsTable({ comments: initialComments }: CommentsTab
             {sortedComments.map((comment) => (
               <tr 
                 key={comment.id} 
-                className={`hover:bg-gray-50 cursor-pointer ${comment.is_best_answer ? 'bg-yellow-50' : ''}`}
+                className={`hover:bg-white cursor-pointer ${comment.is_best_answer ? 'bg-yellow-50' : ''}`}
                 onClick={(e) => handleRowClick(comment.id, !!comment.is_best_answer, e)}
               >
                 <td className="px-6 py-4">

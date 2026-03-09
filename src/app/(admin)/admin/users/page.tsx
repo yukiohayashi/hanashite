@@ -236,7 +236,7 @@ export default async function UsersManagementPage({
                     limit: limit.toString(),
                     page: Math.max(1, page - 1).toString()
                   })}`}
-                  className={`relative inline-flex items-center rounded-l-md px-2 py-2 text-gray-400 ring-1 ring-inset ring-gray-300 hover:bg-gray-50 ${
+                  className={`relative inline-flex items-center rounded-l-md px-2 py-2 text-gray-400 ring-1 ring-inset ring-gray-300 hover:bg-white ${
                     page === 1 ? 'pointer-events-none opacity-50' : ''
                   }`}
                 >
@@ -266,7 +266,7 @@ export default async function UsersManagementPage({
                       className={`relative inline-flex items-center px-4 py-2 text-sm font-semibold ${
                         page === pageNum
                           ? 'z-10 bg-blue-600 text-white'
-                          : 'text-gray-900 ring-1 ring-inset ring-gray-300 hover:bg-gray-50'
+                          : 'text-gray-900 ring-1 ring-inset ring-gray-300 hover:bg-white'
                       }`}
                     >
                       {pageNum}
@@ -280,7 +280,7 @@ export default async function UsersManagementPage({
                     limit: limit.toString(),
                     page: Math.min(totalPages, page + 1).toString()
                   })}`}
-                  className={`relative inline-flex items-center rounded-r-md px-2 py-2 text-gray-400 ring-1 ring-inset ring-gray-300 hover:bg-gray-50 ${
+                  className={`relative inline-flex items-center rounded-r-md px-2 py-2 text-gray-400 ring-1 ring-inset ring-gray-300 hover:bg-white ${
                     page === totalPages ? 'pointer-events-none opacity-50' : ''
                   }`}
                 >
@@ -303,7 +303,7 @@ export default async function UsersManagementPage({
                 ...(statusFilter !== undefined && { status: statusFilter.toString() }),
                 page: Math.max(1, page - 1).toString()
               })}`}
-              className={`relative inline-flex items-center rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 ${
+              className={`relative inline-flex items-center rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-white ${
                 page === 1 ? 'pointer-events-none opacity-50' : ''
               }`}
             >
@@ -314,7 +314,7 @@ export default async function UsersManagementPage({
                 ...(statusFilter !== undefined && { status: statusFilter.toString() }),
                 page: Math.min(totalPages, page + 1).toString()
               })}`}
-              className={`relative ml-3 inline-flex items-center rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 ${
+              className={`relative ml-3 inline-flex items-center rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-white ${
                 page === totalPages ? 'pointer-events-none opacity-50' : ''
               }`}
             >
@@ -337,7 +337,7 @@ export default async function UsersManagementPage({
                     limit: limit.toString(),
                     page: Math.max(1, page - 1).toString()
                   })}`}
-                  className={`relative inline-flex items-center rounded-l-md px-2 py-2 text-gray-400 ring-1 ring-inset ring-gray-300 hover:bg-gray-50 focus:z-20 focus:outline-offset-0 ${
+                  className={`relative inline-flex items-center rounded-l-md px-2 py-2 text-gray-400 ring-1 ring-inset ring-gray-300 hover:bg-white focus:z-20 focus:outline-offset-0 ${
                     page === 1 ? 'pointer-events-none opacity-50' : ''
                   }`}
                 >
@@ -370,7 +370,7 @@ export default async function UsersManagementPage({
                       className={`relative inline-flex items-center px-4 py-2 text-sm font-semibold ${
                         page === pageNum
                           ? 'z-10 bg-blue-600 text-white focus:z-20 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-600'
-                          : 'text-gray-900 ring-1 ring-inset ring-gray-300 hover:bg-gray-50 focus:z-20 focus:outline-offset-0'
+                          : 'text-gray-900 ring-1 ring-inset ring-gray-300 hover:bg-white focus:z-20 focus:outline-offset-0'
                       }`}
                     >
                       {pageNum}
@@ -384,7 +384,7 @@ export default async function UsersManagementPage({
                     limit: limit.toString(),
                     page: Math.min(totalPages, page + 1).toString()
                   })}`}
-                  className={`relative inline-flex items-center rounded-r-md px-2 py-2 text-gray-400 ring-1 ring-inset ring-gray-300 hover:bg-gray-50 focus:z-20 focus:outline-offset-0 ${
+                  className={`relative inline-flex items-center rounded-r-md px-2 py-2 text-gray-400 ring-1 ring-inset ring-gray-300 hover:bg-white focus:z-20 focus:outline-offset-0 ${
                     page === totalPages ? 'pointer-events-none opacity-50' : ''
                   }`}
                 >

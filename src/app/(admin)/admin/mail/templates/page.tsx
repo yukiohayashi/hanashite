@@ -26,7 +26,7 @@ export default async function MailTemplatesPage() {
 
       <div className="bg-white rounded-lg shadow overflow-hidden">
         <table className="min-w-full divide-y divide-gray-200">
-          <thead className="bg-gray-50">
+          <thead className="bg-white">
             <tr>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                 ID
@@ -50,7 +50,7 @@ export default async function MailTemplatesPage() {
           </thead>
           <tbody className="bg-white divide-y divide-gray-200">
             {templates.map((template) => (
-              <tr key={template.id} className="hover:bg-gray-50">
+              <tr key={template.id} className="hover:bg-white">
                 <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                   {template.id}
                 </td>

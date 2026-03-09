@@ -203,7 +203,7 @@ export default async function PostPage({ params, searchParams }: { params: Promi
 
   if (!post || post.status === 'trash') {
     return (
-      <div className="bg-gray-50 min-h-screen">
+      <div className="bg-white min-h-screen">
         <Header />
 
         <main className="md:flex md:justify-center mx-auto pt-[60px] md:pt-4 pb-4 max-w-7xl">
@@ -251,17 +251,17 @@ export default async function PostPage({ params, searchParams }: { params: Promi
   console.log('投稿詳細 - imageUrl:', imageUrl);
 
   return (
-    <div className="bg-gray-50 min-h-screen">
+    <div className="bg-white min-h-screen">
       <Header />
 
       <main className="md:flex md:justify-center mx-auto pt-16 md:pt-4 pb-4 max-w-7xl px-2 sm:px-6 lg:px-8">
         {/* 左サイドバー */}
-        <aside className="hidden md:block w-[220px]">
+        <aside className="hidden md:block w-[220px] bg-[#fff8f6] p-4 rounded-lg">
           <Sidebar />
         </aside>
 
         {/* メインコンテンツ */}
-        <div className="flex-1 max-w-[760px]">
+        <div className="flex-1 max-w-[760px] px-2 md:px-4">
           {/* 更新成功メッセージ */}
           {showUpdatedMessage && (
             <div className="mb-4 p-4 bg-green-50 border border-green-200 rounded-md">
@@ -272,7 +272,7 @@ export default async function PostPage({ params, searchParams }: { params: Promi
           <section>
             <article className="px-0 md:px-2.5">
               {/* 投稿情報エリア（single.phpと同じデザイン） */}
-              <div className="relative bg-white shadow-md mt-4 mb-4 p-2.5 border-t-4 border-t-orange-500 border-x border-b border-gray-200 rounded">
+              <div className="relative bg-white shadow-md mb-4 p-2.5 border-t-4 border-t-orange-500 border-x border-b border-gray-200 rounded">
                 <div className="flex items-start">
                   {/* アバター画像 */}
                   <div className="flex-shrink-0 mr-1.5">
@@ -419,8 +419,8 @@ export default async function PostPage({ params, searchParams }: { params: Promi
                 {post.deadline_at && (
                   <div className="mb-4 flex items-center gap-2">
                     {new Date(post.deadline_at) > new Date() ? (
-                      <span className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-green-100 text-green-800">
-                        <span className="w-2 h-2 mr-2 bg-green-500 rounded-full animate-pulse"></span>
+                      <span className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-[#fff0eb] text-[#ff6b6b] border border-[#ff6b6b]">
+                        <span className="w-2 h-2 mr-2 bg-[#ff6b6b] rounded-full animate-pulse"></span>
                         回答受付中
                       </span>
                     ) : (
@@ -456,7 +456,7 @@ export default async function PostPage({ params, searchParams }: { params: Promi
                     {category ? (
                       <Link
                         href={`/category/${category.id}`}
-                        className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-blue-100 text-blue-800 hover:bg-blue-200 transition-colors"
+                        className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-[#fff0eb] text-[#ff6b6b] border border-[#ff6b6b] hover:bg-pink-50 transition-colors"
                       >
                         {category.name}
                       </Link>
@@ -478,7 +478,7 @@ export default async function PostPage({ params, searchParams }: { params: Promi
                       {/* 通報するリンク */}
                       <Link
                         href={`/report?url=${encodeURIComponent(`https://dokujo.com/posts/${post.id}`)}`}
-                        className="ml-auto inline-flex items-center px-3 py-1 text-sm text-gray-600 hover:text-red-600 transition-colors"
+                        className="ml-auto inline-flex items-center px-3 py-1 text-sm text-[#ffab91] hover:text-[#ff6b6b] transition-colors"
                       >
                         通報する
                       </Link>
@@ -493,7 +493,7 @@ export default async function PostPage({ params, searchParams }: { params: Promi
         </div>
 
         {/* 右サイドバー */}
-        <aside className="hidden md:block w-[280px]">
+        <aside className="hidden md:block w-[280px] bg-[#fff0eb] p-4 rounded-lg">
           <HomeRightSidebar />
         </aside>
       </main>

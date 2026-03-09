@@ -222,7 +222,7 @@ export default async function UserPage({ params }: { params: Promise<{ slug: str
   const limitedActivities = activities.slice(0, 100);
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-white">
       <Header />
 
       <main className="md:flex md:justify-center md:gap-4 mx-auto pt-[60px] md:pt-4 pb-4 max-w-7xl px-4 sm:px-6 lg:px-8">
@@ -322,7 +322,7 @@ export default async function UserPage({ params }: { params: Promise<{ slug: str
               {limitedActivities.length > 0 ? (
                 <ul className="divide-y divide-gray-200">
                   {limitedActivities.map((activity, index) => (
-                    <li key={index} className="p-4 hover:bg-gray-50 transition-colors">
+                    <li key={index} className="p-4 hover:bg-white transition-colors">
                       <div className="flex flex-col gap-1">
                         <div className="text-sm text-gray-700">
                           {activity.type === 'post' ? (

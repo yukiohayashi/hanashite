@@ -12,7 +12,7 @@ export const metadata: Metadata = {
 export default async function AtFirstPage() {
   return (
     <LoginRequired pageName="初めての方へ">
-      <div className="bg-gray-50 min-h-screen">
+      <div className="bg-white min-h-screen">
         <Header />
       
       <div className="wrapper" style={{ display: 'flex', maxWidth: '1260px', margin: '70px auto 0', justifyContent: 'center' }}>

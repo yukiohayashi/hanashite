@@ -326,7 +326,7 @@ export default function ProfileSetForm({ user, categories, isFirstTime }: Profil
           </label>
           <div className="gap-x-1 gap-y-1 grid grid-cols-3 md:grid-cols-6">
             {categories.map((category) => (
-              <label key={category.id} className="items-center space-x-1 hover:bg-gray-50 p-1 rounded whitespace-nowrap cursor-pointer">
+              <label key={category.id} className="items-center space-x-1 hover:bg-white p-1 rounded whitespace-nowrap cursor-pointer">
                 <input
                   type="checkbox"
                   checked={selectedCategories.includes(category.slug)}
@@ -490,7 +490,7 @@ export default function ProfileSetForm({ user, categories, isFirstTime }: Profil
 
           {/* 画像アップロードモード */}
           {imageMode === 'upload' && (
-            <div className="space-y-4 bg-gray-50 p-4 rounded-lg">
+            <div className="space-y-4 bg-white p-4 rounded-lg">
               <div className="text-sm text-gray-700">
                 {avatarFile ? `選択中: ${avatarFile.name}` : 'プロフィール画像をアップロードしてください。'}
               </div>
@@ -502,7 +502,7 @@ export default function ProfileSetForm({ user, categories, isFirstTime }: Profil
 
           {/* アバター選択モード */}
           {imageMode === 'avatar' && (
-            <div className="bg-gray-50 p-4 rounded-lg space-y-6">
+            <div className="bg-white p-4 rounded-lg space-y-6">
               <div className="max-h-[600px] overflow-y-auto border border-gray-200 rounded-lg bg-white p-3 space-y-6">
 
                 {([
@@ -554,7 +554,7 @@ export default function ProfileSetForm({ user, categories, isFirstTime }: Profil
 
           {/* 未設定モード */}
           {imageMode === 'none' && (
-            <div className="bg-gray-50 p-4 rounded-lg">
+            <div className="bg-white p-4 rounded-lg">
               <div className="text-sm text-gray-600 text-center">
                 プロフィール画像が未設定の場合、デフォルトのアバターが自動的に表示されます。
               </div>
@@ -754,7 +754,7 @@ export default function ProfileSetForm({ user, categories, isFirstTime }: Profil
           </div>
         )}
         
-        <div className="bg-gray-50 my-6 p-4 border border-gray-300 rounded-lg">
+        <div className="bg-white my-6 p-4 border border-gray-300 rounded-lg">
           <label className="flex items-center cursor-pointer">
             <input
               type="checkbox"

@@ -165,7 +165,7 @@ export default function AiSettingsPage() {
       ) : (
         <div className="bg-white rounded-lg shadow overflow-hidden">
           <table className="min-w-full divide-y divide-gray-200">
-            <thead className="bg-gray-50">
+            <thead className="bg-white">
               <tr>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                   API名
@@ -189,7 +189,7 @@ export default function AiSettingsPage() {
             </thead>
             <tbody className="bg-white divide-y divide-gray-200">
               {settings.map((setting) => (
-                <tr key={setting.id} className="hover:bg-gray-50">
+                <tr key={setting.id} className="hover:bg-white">
                   <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
                     {setting.api_name}
                   </td>
@@ -342,7 +342,7 @@ export default function AiSettingsPage() {
                     setShowModal(false);
                     resetForm();
                   }}
-                  className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50"
+                  className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-white"
                 >
                   キャンセル
                 </button>

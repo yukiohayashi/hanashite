@@ -277,7 +277,7 @@ export default function KeywordsPage() {
         ) : (
           <div className="overflow-x-auto">
             <table className="min-w-full divide-y divide-gray-200">
-              <thead className="bg-gray-50">
+              <thead className="bg-white">
                 <tr>
                   <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">
                     キーワード
@@ -286,7 +286,7 @@ export default function KeywordsPage() {
                     タイプ
                   </th>
                   <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase cursor-pointer hover:bg-gray-100" onClick={() => handleSort('post_count')}>
-                    投稿数 {sortBy === 'post_count' && (sortOrder === 'asc' ? '↑' : '↓')}
+                    トピック数 {sortBy === 'post_count' && (sortOrder === 'asc' ? '↑' : '↓')}
                   </th>
                   <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase cursor-pointer hover:bg-gray-100" onClick={() => handleSort('search_count')}>
                     検索回数 {sortBy === 'search_count' && (sortOrder === 'asc' ? '↑' : '↓')}
@@ -307,7 +307,7 @@ export default function KeywordsPage() {
               </thead>
               <tbody className="bg-white divide-y divide-gray-200">
                 {filteredKeywords.map((keyword) => (
-                  <tr key={keyword.id} className="hover:bg-gray-50">
+                  <tr key={keyword.id} className="hover:bg-white">
                     <td className="px-4 py-3">
                       <div className="flex items-center gap-2">
                         <span className="font-medium text-gray-900">{keyword.keyword}</span>
@@ -516,7 +516,7 @@ export default function KeywordsPage() {
                   <Link
                     key={post.id}
                     href={`/admin/posts/${post.id}/edit`}
-                    className="block bg-white hover:bg-gray-50 p-3 border border-gray-300 rounded-md"
+                    className="block bg-white hover:bg-white p-3 border border-gray-300 rounded-md"
                   >
                     <div className="flex items-center justify-between">
                       <div className="flex-1">

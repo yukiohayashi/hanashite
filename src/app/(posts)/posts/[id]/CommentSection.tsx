@@ -185,11 +185,11 @@ export default function CommentSection({ postId, initialComments, totalCount, po
       </div>
 
       {!session && (
-        <div className="bg-blue-50 mb-6 p-4 border border-blue-200 rounded-lg text-center">
-          <p className="mb-2 text-blue-800 text-sm">
+        <div className="bg-[#fff0eb] mb-6 p-4 border border-[#ffab91] rounded-lg text-center">
+          <p className="mb-2 text-[#d84315] text-sm">
             💡 <strong>ログインして回答すると</strong>
           </p>
-          <ul className="space-y-1 mb-3 text-blue-700 text-xs text-left inline-block">
+          <ul className="space-y-1 mb-3 text-[#d84315] text-xs text-left inline-block">
             <li>返信があったらマイページに通知が届きます</li>
             <li>ニックネームとアバターで投稿できます</li>
             <li>投稿した回答の削除・編集が可能です</li>
@@ -197,7 +197,7 @@ export default function CommentSection({ postId, initialComments, totalCount, po
           <div className="flex justify-center">
             <Link
               href="/login"
-              className="inline-flex justify-center items-center bg-green-600 hover:bg-green-700 px-6 py-3 rounded font-bold text-white text-sm no-underline transition-colors"
+              className="inline-flex justify-center items-center bg-[#388e3c] hover:bg-[#2e7d32] px-6 py-3 rounded font-bold text-white text-sm no-underline transition-colors"
               style={{ minWidth: '180px' }}
             >
               ログイン
@@ -212,14 +212,14 @@ export default function CommentSection({ postId, initialComments, totalCount, po
       {/* ベストアンサーがある場合の表示 */}
       {bestAnswerId ? (
         canComment ? (
-          <div className="mb-6 p-4 bg-green-50 border border-green-200 rounded-lg">
-            <div className="flex items-center gap-2 text-green-700 mb-3">
-              <i className="fas fa-trophy text-yellow-500"></i>
+          <div className="mb-6 p-4 bg-[#fff8ef] border-l-4 border-[#f4511e] rounded-lg">
+            <div className="flex items-center gap-2 text-[#f4511e] mb-3">
+              <i className="fas fa-trophy"></i>
               <span className="font-medium">
                 この相談は{comments.find(c => c.id === bestAnswerId)?.users?.name || 'ゲスト'}さんがベストアンサーに選ばれました
               </span>
             </div>
-            <p className="text-green-600 text-sm">
+            <p className="text-[#f4511e] text-sm">
               {isPostOwner && isBestAnswerUser 
                 ? '相談者とベストアンサー回答者として、引き続きコメントできます'
                 : isPostOwner 
@@ -233,16 +233,16 @@ export default function CommentSection({ postId, initialComments, totalCount, po
                   element.scrollIntoView({ behavior: 'smooth', block: 'center' });
                 }
               }}
-              className="mt-3 px-4 py-2 bg-yellow-600 hover:bg-yellow-700 text-white rounded-md text-sm font-medium transition-colors"
+              className="mt-3 px-4 py-2 bg-[#f4511e] hover:bg-[#e64a19] text-white rounded-md text-sm font-medium transition-colors"
             >
               ベストアンサーをみる
             </button>
           </div>
         ) : (
-          <div className="mb-6 p-4 bg-yellow-50 border border-yellow-200 rounded-lg text-center">
+          <div className="mb-6 p-4 bg-[#fff8ef] border-l-4 border-[#f4511e] rounded-lg text-center">
             <div className="flex flex-col items-center gap-2">
-              <div className="flex items-center gap-2 text-yellow-700">
-                <i className="fas fa-trophy text-yellow-500"></i>
+              <div className="flex items-center gap-2 text-[#f4511e]">
+                <i className="fas fa-trophy"></i>
                 <span className="font-medium">
                   この相談は{comments.find(c => c.id === bestAnswerId)?.users?.name || 'ゲスト'}さんがベストアンサーに選ばれたため、回答受付を終了しました
                 </span>
@@ -254,7 +254,7 @@ export default function CommentSection({ postId, initialComments, totalCount, po
                     element.scrollIntoView({ behavior: 'smooth', block: 'center' });
                   }
                 }}
-                className="mt-2 px-4 py-2 bg-yellow-600 hover:bg-yellow-700 text-white rounded-md text-sm font-medium transition-colors"
+                className="mt-2 px-4 py-2 bg-[#f4511e] hover:bg-[#e64a19] text-white rounded-md text-sm font-medium transition-colors"
               >
                 ベストアンサーをみる
               </button>
@@ -329,12 +329,12 @@ export default function CommentSection({ postId, initialComments, totalCount, po
               return (
                 <div key={comment.id} id={`reply-${comment.id}`}>
                   {isBestAnswer && (
-                    <div className="flex items-center gap-2 mb-2 mt-2 px-3 py-2 bg-yellow-50 border border-yellow-300 rounded-lg">
-                      <span className="text-yellow-600 text-lg">🏆</span>
-                      <span className="font-bold text-yellow-700 text-sm">ベストアンサー</span>
+                    <div className="flex items-center gap-2 mb-2 mt-2 px-3 py-2 bg-[#fff8ef] border border-[#f4511e] rounded-lg">
+                      <span className="text-[#f4511e] text-lg">🏆</span>
+                      <span className="font-bold text-[#f4511e] text-sm">ベストアンサー</span>
                     </div>
                   )}
-                  <div className={`flex flex-wrap py-2.5 border-t border-gray-100 pt-2.5 ${isBestAnswer ? 'bg-yellow-50 -mx-2 px-2 rounded-lg' : ''}`}>
+                  <div className={`flex flex-wrap py-2.5 border-t border-gray-100 pt-2.5 ${isBestAnswer ? 'bg-[#fff8f6] border-l-3 border-[#ff6b6b] -mx-2 px-2 rounded-lg' : ''}`}>
                   <div className="shrink-0 mr-1">
                     {comment.user_id ? (
                       <Link href={`/users/${comment.user_id}`}>
@@ -425,9 +425,9 @@ export default function CommentSection({ postId, initialComments, totalCount, po
                     return (
                       <div key={reply.id} id={`reply-${reply.id}`} className="ml-12 mt-2">
                         {isReplyBestAnswer && (
-                          <div className="flex items-center gap-2 mb-2 px-3 py-2 bg-yellow-50 border border-yellow-300 rounded-lg">
-                            <span className="text-yellow-600 text-lg">🏆</span>
-                            <span className="font-bold text-yellow-700 text-sm">ベストアンサー</span>
+                          <div className="flex items-center gap-2 mb-2 px-3 py-2 bg-[#fff8ef] border border-[#f4511e] rounded-lg">
+                            <span className="text-[#f4511e] text-lg">🏆</span>
+                            <span className="font-bold text-[#f4511e] text-sm">ベストアンサー</span>
                           </div>
                         )}
                         <div className="flex flex-wrap py-2.5">

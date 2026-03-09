@@ -2,6 +2,8 @@
 
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
+import Header from '@/components/Header';
+import Footer from '@/components/Footer';
 
 export default function RegistPage() {
   useEffect(() => {
@@ -44,38 +46,31 @@ export default function RegistPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
-      <div className="max-w-md w-full space-y-8">
-        <div>
-          <Link href="/" className="flex justify-center">
-            <img 
-              src="/images/logo.png" 
-              alt="ハナシテ" 
-              className="h-16 w-auto"
-            />
-          </Link>
-          <h2 className="mt-6 text-center text-3xl font-bold text-gray-900">
-            新規会員登録
-          </h2>
-          <p className="mt-2 text-center text-sm text-gray-600">
-            無料で会員登録できます
-          </p>
-        </div>
+    <div className="bg-white min-h-screen">
+      <Header />
+      
+      <div className="wrapper">
+        <main className="article__contents">
+          <section className="mx-auto px-4 pt-20 md:pt-6 max-w-2xl one_column_wrapper">
+            <h1 className="mb-6 font-bold text-gray-800 text-3xl text-center">
+              新規会員登録
+            </h1>
+            <p className="mb-8 text-gray-600 text-center">無料で会員登録できます</p>
 
-        {message && (
-          <div className="bg-green-50 border border-green-200 text-green-800 px-4 py-3 rounded-lg">
-            <p className="font-medium">{message}</p>
-          </div>
-        )}
+            {message && (
+              <div className="bg-green-50 border border-green-200 text-green-800 px-4 py-3 rounded-lg">
+                <p className="font-medium">{message}</p>
+              </div>
+            )}
 
-        {error && (
-          <div className="bg-red-50 border border-red-200 text-red-800 px-4 py-3 rounded-lg">
-            <p className="font-medium">{error}</p>
-          </div>
-        )}
+            {error && (
+              <div className="bg-red-50 border border-red-200 text-red-800 px-4 py-3 rounded-lg">
+                <p className="font-medium">{error}</p>
+              </div>
+            )}
 
-        {!message && (
-          <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
+            {!message && (
+              <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
             <div>
               <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-2">
                 メールアドレス
@@ -95,7 +90,7 @@ export default function RegistPage() {
               <button
                 type="submit"
                 disabled={loading}
-                className="group relative w-full flex justify-center py-3 px-4 border border-transparent font-bold rounded text-white bg-[#ff6b35] hover:bg-[#e58a2f] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-orange-500 disabled:bg-gray-400 disabled:cursor-not-allowed transition-colors text-sm"
+                className="group relative w-full flex justify-center py-3 px-4 border border-transparent font-bold rounded text-white bg-[#f4511e] hover:bg-[#e64a19] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-orange-500 disabled:bg-gray-400 disabled:cursor-not-allowed transition-colors text-sm"
               >
                 {loading ? '送信中...' : '認証メールを送る'}
               </button>
@@ -106,7 +101,7 @@ export default function RegistPage() {
                 <div className="w-full border-t border-gray-300"></div>
               </div>
               <div className="relative flex justify-center text-sm">
-                <span className="px-2 bg-gray-50 text-gray-500">または</span>
+                <span className="px-2 bg-white text-gray-500">または</span>
               </div>
             </div>
 
@@ -136,15 +131,19 @@ export default function RegistPage() {
               <p>※受信トレイにメールがない場合は、迷惑メールをご確認ください</p>
               <p>※パスワードは自動生成されます（登録後に変更可）</p>
             </div>
-          </form>
-        )}
+              </form>
+            )}
 
-        <div className="text-center">
-          <Link href="/login" className="text-sm text-orange-600 hover:text-orange-500">
-            既にアカウントをお持ちの方はこちら
-          </Link>
-        </div>
+            <div className="text-center mt-6">
+              <Link href="/login" className="text-sm text-orange-600 hover:text-orange-500">
+                既にアカウントをお持ちの方はこちら
+              </Link>
+            </div>
+          </section>
+        </main>
       </div>
+      
+      <Footer />
     </div>
   );
 }

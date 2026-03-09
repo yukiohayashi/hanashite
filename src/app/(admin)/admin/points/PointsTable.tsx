@@ -161,7 +161,7 @@ export default function PointsTable({ points: initialPoints }: PointsTableProps)
       
       <div className="overflow-x-auto">
         <table className="min-w-full divide-y divide-gray-200">
-          <thead className="bg-gray-50">
+          <thead className="bg-white">
             <tr>
               <th className="px-6 py-3 text-left">
                 <input
@@ -193,7 +193,7 @@ export default function PointsTable({ points: initialPoints }: PointsTableProps)
           </thead>
           <tbody className="bg-white divide-y divide-gray-200">
             {points.map((point) => (
-              <tr key={point.id} className="hover:bg-gray-50">
+              <tr key={point.id} className="hover:bg-white">
                 <td className="px-6 py-4">
                   <input
                     type="checkbox"

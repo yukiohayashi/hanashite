@@ -86,7 +86,7 @@ async function migrateCategories() {
     console.log(`エラー件数: ${errors}件`);
 
     // 結果を確認
-    console.log('\nカテゴリごとの投稿数を確認しています...');
+    console.log('\nカテゴリごとのトピック数を確認しています...');
     const { data: result, error: resultError } = await supabase
       .from('posts')
       .select('category_id')
@@ -101,7 +101,7 @@ async function migrateCategories() {
         counts[row.category_id] = (counts[row.category_id] || 0) + 1;
       });
 
-      console.log('\nカテゴリID | 投稿数');
+      console.log('\nカテゴリID | トピック数');
       console.log('----------+-------');
       Object.entries(counts)
         .sort((a, b) => b[1] - a[1])

@@ -13,15 +13,15 @@ export default async function KeywordsSection() {
       {/* みんなの検索ワード */}
       {popularKeywords.length > 0 && (
         <div className="mb-4">
-          <span className="block mb-2 font-bold text-sm">
-            <i className="text-orange-500 fas fa-fire"></i> みんなの検索ワード：
+          <span className="block mb-2 font-bold text-sm text-[#ff6b6b]">
+            <i className="fas fa-fire"></i> みんなの検索ワード：
           </span>
           <div className="flex flex-wrap gap-2">
             {popularKeywords.map((item, index) => (
               <a
                 key={index}
                 href={`/?s=${encodeURIComponent(item.keyword)}`}
-                className="hover:bg-gray-50 px-3 py-1 border border-gray-300 hover:border-gray-400 rounded-full text-gray-700 text-sm transition-colors"
+                className="hover:bg-pink-50 px-3 py-1 border border-[#d32f2f] rounded-full text-[#d32f2f] text-sm font-semibold transition-colors"
               >
                 {item.keyword}
               </a>
@@ -33,15 +33,15 @@ export default async function KeywordsSection() {
       {/* 最新キーワード */}
       {latestKeywords.length > 0 && (
         <div>
-          <span className="block mb-2 font-bold text-sm">
-            <i className="text-blue-500 fas fa-clock"></i> 最新キーワード：
+          <span className="block mb-2 font-bold text-sm text-[#ff6b6b]">
+            <i className="fas fa-clock"></i> 最新キーワード：
           </span>
           <div className="flex flex-wrap gap-2">
             {latestKeywords.map((keyword) => (
               <Link
                 key={keyword.id}
                 href={`/keyword/${keyword.id}`}
-                className="hover:bg-gray-50 px-3 py-1 border border-gray-300 hover:border-gray-400 rounded-full text-gray-700 text-sm transition-colors"
+                className="hover:bg-pink-50 px-3 py-1 border border-[#d32f2f] rounded-full text-[#d32f2f] text-sm font-semibold transition-colors"
               >
                 {keyword.keyword}
               </Link>

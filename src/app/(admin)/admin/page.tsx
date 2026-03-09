@@ -48,7 +48,7 @@ export default async function AdminDashboard() {
         <div className="bg-white rounded-lg shadow p-6">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm font-medium text-gray-600">投稿数</p>
+              <p className="text-sm font-medium text-gray-600">トピック数</p>
               <p className="mt-2 text-3xl font-bold text-gray-900">
                 {stats.posts.toLocaleString()}
               </p>
@@ -109,7 +109,7 @@ export default async function AdminDashboard() {
         </div>
         <div className="divide-y divide-gray-200">
           {recentPosts.map((post) => (
-            <div key={post.id} className="px-6 py-4 hover:bg-gray-50">
+            <div key={post.id} className="px-6 py-4 hover:bg-white">
               <div className="flex items-center justify-between">
                 <div className="flex-1 min-w-0">
                   <p className="text-sm font-medium text-gray-900 truncate">

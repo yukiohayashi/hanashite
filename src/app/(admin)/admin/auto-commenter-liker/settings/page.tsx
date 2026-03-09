@@ -853,7 +853,7 @@ export default function AutoVoterSettings() {
           </div>
         </div>
 
-        <div className="px-6 py-4 bg-gray-50 border-t border-gray-200 flex justify-end">
+        <div className="px-6 py-4 bg-white border-t border-gray-200 flex justify-end">
           <button
             onClick={handleSave}
             disabled={saving}

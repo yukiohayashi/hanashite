@@ -53,3 +53,6 @@ backups/
 UPDATE_ENV_INSTRUCTIONS.md
 docs/SUPABASE_PROJECT_SETUP.md
 .env.local
+
+# デザインファイル
+*.psd
