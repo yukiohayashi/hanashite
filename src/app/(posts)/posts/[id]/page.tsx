@@ -424,13 +424,26 @@ export default async function PostPage({ params, searchParams }: { params: Promi
                         回答受付中
                       </span>
                     ) : (
-                      <span className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-gray-100 text-gray-600">
-                        締め切り済み
+                      <div className="flex flex-col gap-2 p-3 bg-orange-50 border-2 border-orange-400 rounded-lg w-full">
+                        <div className="flex items-center gap-2">
+                          <span className="inline-flex items-center px-3 py-1 rounded-full text-sm font-bold bg-orange-500 text-white shadow-md">
+                            <i className="fas fa-clock mr-2"></i>
+                            締め切り済み
+                          </span>
+                          <span className="text-sm text-orange-700 font-medium">
+                            締め切り: {new Date(post.deadline_at).toLocaleDateString('ja-JP', { year: 'numeric', month: 'long', day: 'numeric' })}
+                          </span>
+                        </div>
+                        <p className="text-sm text-orange-800 font-medium">
+                          💬 締め切り後もコメント投稿は可能です！あなたの経験やアドバイスをぜひシェアしてください
+                        </p>
+                      </div>
+                    )}
+                    {new Date(post.deadline_at) > new Date() && (
+                      <span className="text-sm text-gray-500">
+                        締め切り: {new Date(post.deadline_at).toLocaleDateString('ja-JP', { year: 'numeric', month: 'long', day: 'numeric' })}
                       </span>
                     )}
-                    <span className="text-sm text-gray-500">
-                      締め切り: {new Date(post.deadline_at).toLocaleDateString('ja-JP', { year: 'numeric', month: 'long', day: 'numeric' })}
-                    </span>
                   </div>
                 )}
 
