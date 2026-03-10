@@ -418,11 +418,13 @@ export default function CommentSection({ postId, initialComments, totalCount, po
                       if (replyUsers?.use_custom_image && replyUsers?.image) {
                         return replyUsers.image;
                       }
-                      if (replyUsers?.avatar_seed) {
-                        const style = replyUsers?.avatar_style || 'fun-emoji';
-                        return `https://api.dicebear.com/9.x/${style}/svg?seed=${encodeURIComponent(replyUsers.avatar_seed)}&size=20`;
+                      if (replyUsers?.avatar_seed && (replyUsers.avatar_seed.startsWith('f20_') || replyUsers.avatar_seed.startsWith('f30_') || replyUsers.avatar_seed.startsWith('f40_') || 
+                                 replyUsers.avatar_seed.startsWith('m20_') || replyUsers.avatar_seed.startsWith('m30_') || replyUsers.avatar_seed.startsWith('m40_') ||
+                                 replyUsers.avatar_seed.startsWith('cat_') || replyUsers.avatar_seed.startsWith('dog_') || replyUsers.avatar_seed.startsWith('rabbit_') ||
+                                 replyUsers.avatar_seed.startsWith('bear_') || replyUsers.avatar_seed.startsWith('other_'))) {
+                        return `/images/local-avatars/${replyUsers.avatar_seed}.webp`;
                       }
-                      return '/images/default-avatar.webp';
+                      return '/images/local-avatars/f20_01.webp';
                     };
                     const replyAvatarUrl = getReplyAvatarUrl();
                     const nestedReplies = getReplies(reply.id);
@@ -516,9 +518,13 @@ export default function CommentSection({ postId, initialComments, totalCount, po
                             if (nestedUsers?.use_custom_image && nestedUsers?.image) {
                               return nestedUsers.image;
                             }
-                            const seed = nestedUsers?.avatar_seed || (nestedReply.user_id ? String(nestedReply.user_id) : 'guest');
-                            const style = nestedUsers?.avatar_style || 'big-smile';
-                            return `https://api.dicebear.com/9.x/${style}/svg?seed=${encodeURIComponent(seed)}&size=20`;
+                            if (nestedUsers?.avatar_seed && (nestedUsers.avatar_seed.startsWith('f20_') || nestedUsers.avatar_seed.startsWith('f30_') || nestedUsers.avatar_seed.startsWith('f40_') || 
+                                       nestedUsers.avatar_seed.startsWith('m20_') || nestedUsers.avatar_seed.startsWith('m30_') || nestedUsers.avatar_seed.startsWith('m40_') ||
+                                       nestedUsers.avatar_seed.startsWith('cat_') || nestedUsers.avatar_seed.startsWith('dog_') || nestedUsers.avatar_seed.startsWith('rabbit_') ||
+                                       nestedUsers.avatar_seed.startsWith('bear_') || nestedUsers.avatar_seed.startsWith('other_'))) {
+                              return `/images/local-avatars/${nestedUsers.avatar_seed}.webp`;
+                            }
+                            return '/images/local-avatars/f20_01.webp';
                           };
                           const nestedAvatarUrl = getNestedAvatarUrl();
                           const isNestedBestAnswer = bestAnswerId === nestedReply.id;
