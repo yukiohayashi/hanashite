@@ -48,7 +48,9 @@ export default function LikeButton({ postId }: LikeButtonProps) {
 
   const handleLike = async () => {
     if (!userId) {
-      alert('いいねするにはログインが必要です');
+      if (confirm('いいねするにはログインが必要です。ログインページに移動しますか？')) {
+        window.location.href = '/login';
+      }
       return;
     }
 

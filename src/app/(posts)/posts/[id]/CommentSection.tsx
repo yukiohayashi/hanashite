@@ -131,7 +131,9 @@ export default function CommentSection({ postId, initialComments, totalCount, po
   const handleLike = async (commentId: number) => {
     // ログインチェック
     if (!session) {
-      alert('いいねするにはログインが必要です');
+      if (confirm('いいねするにはログインが必要です。ログインページに移動しますか？')) {
+        window.location.href = '/login';
+      }
       return;
     }
 
