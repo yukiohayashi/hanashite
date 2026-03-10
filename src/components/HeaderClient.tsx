@@ -81,16 +81,16 @@ export default function HeaderClient() {
                 <img 
                   src={avatarUrl}
                   alt="プロフィール画像" 
-                  className="bg-[#ff6b6b] border-1 border-gray-300 rounded-full w-10 h-10 object-cover"
+                  className="rounded-full w-12 h-12 object-cover"
                   id="header-avatar"
                 />
               ) : (
-                <div className="bg-[#ff6b6b] rounded-full w-10 h-10" />
+                <div className="bg-[#ff6b6b] rounded-full w-12 h-12" />
               )}
             </div>
             {/* 未読通知ドット */}
             {unreadCount > 0 && (
-              <div className="top-[23px] right-0 z-50 absolute flex justify-center items-center bg-red-600 rounded-full w-4 h-4 text-[0.7rem] text-white text-center leading-4 animate-pulse">
+              <div className="top-[28px] right-0 z-50 absolute flex justify-center items-center bg-red-600 rounded-full w-4 h-4 text-[0.7rem] text-white text-center leading-4 animate-pulse">
                 {unreadCount}
               </div>
             )}

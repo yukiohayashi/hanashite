@@ -317,11 +317,13 @@ export default function CommentSection({ postId, initialComments, totalCount, po
                 if (users?.use_custom_image && users?.image) {
                   return users.image;
                 }
-                if (users?.avatar_seed) {
-                  const style = users?.avatar_style || 'fun-emoji';
-                  return `https://api.dicebear.com/9.x/${style}/svg?seed=${encodeURIComponent(users.avatar_seed)}&size=20`;
+                if (users?.avatar_seed && (users.avatar_seed.startsWith('f20_') || users.avatar_seed.startsWith('f30_') || users.avatar_seed.startsWith('f40_') || 
+                           users.avatar_seed.startsWith('m20_') || users.avatar_seed.startsWith('m30_') || users.avatar_seed.startsWith('m40_') ||
+                           users.avatar_seed.startsWith('cat_') || users.avatar_seed.startsWith('dog_') || users.avatar_seed.startsWith('rabbit_') ||
+                           users.avatar_seed.startsWith('bear_') || users.avatar_seed.startsWith('other_'))) {
+                  return `/images/local-avatars/${users.avatar_seed}.webp`;
                 }
-                return '/images/default-avatar.webp';
+                return '/images/local-avatars/f20_01.webp';
               };
               const avatarUrl = getCommentAvatarUrl();
               const replies = getReplies(comment.id);
