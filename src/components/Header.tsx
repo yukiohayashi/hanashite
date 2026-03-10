@@ -26,7 +26,10 @@ export default function Header({ siteSettings: initialSettings }: HeaderProps = 
   
   const [leftSidebarOpen, setLeftSidebarOpen] = useState(false);
   const [rightSidebarOpen, setRightSidebarOpen] = useState(false);
-  const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
+  
+  // セッション情報から初期アバターURLを取得
+  const initialAvatarUrl = session?.user?.image || null;
+  const [avatarUrl, setAvatarUrl] = useState<string | null>(initialAvatarUrl);
   const [unreadCount, setUnreadCount] = useState(0);
   const [siteSettings, setSiteSettings] = useState<SiteSettings>(initialSettings || {
     powered_by_text: '',
@@ -55,14 +58,20 @@ export default function Header({ siteSettings: initialSettings }: HeaderProps = 
     }
   }, [initialSettings]);
 
+  // セッション変更時に初期アバターURLを更新
+  useEffect(() => {
+    if (session?.user?.image) {
+      setAvatarUrl(session.user.image);
+    } else if (!session) {
+      setAvatarUrl(null);
+      setUnreadCount(0);
+    }
+  }, [session?.user?.image, session]);
+
+  // ユーザーのアバター画像を取得（DiceBear対応）
   useEffect(() => {
     if (session?.user?.id) {
-      // セッション情報から即座にアバターURLを設定（もしあれば）
-      if (session.user.image) {
-        setAvatarUrl(session.user.image);
-      }
-      
-      // APIから詳細情報を取得して更新
+      // APIから詳細情報を取得
       fetch(`/api/user/${session.user.id}`)
         .then(res => res.json())
         .then(data => {
@@ -71,18 +80,13 @@ export default function Header({ siteSettings: initialSettings }: HeaderProps = 
           } else if (data.avatar_seed) {
             const style = data.avatar_style || 'big-smile';
             setAvatarUrl(`https://api.dicebear.com/9.x/${style}/svg?seed=${encodeURIComponent(data.avatar_seed)}&size=40`);
-          } else {
-            setAvatarUrl(null);
           }
         })
         .catch(() => {
-          // エラー時はセッション情報のアバターを維持
+          // エラー時は何もしない（セッション情報のアバターを維持）
         });
-    } else {
-      setAvatarUrl(null);
-      setUnreadCount(0);
     }
-  }, [session]);
+  }, [session?.user?.id]);
 
   // 未読通知数を取得（ページ遷移時に再取得）
   useEffect(() => {
