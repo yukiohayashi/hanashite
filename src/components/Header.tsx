@@ -26,7 +26,7 @@ export default function Header({ siteSettings: initialSettings }: HeaderProps = 
   
   const [leftSidebarOpen, setLeftSidebarOpen] = useState(false);
   const [rightSidebarOpen, setRightSidebarOpen] = useState(false);
-  const [avatarUrl, setAvatarUrl] = useState('');
+  const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
   const [unreadCount, setUnreadCount] = useState(0);
   const [siteSettings, setSiteSettings] = useState<SiteSettings>(initialSettings || {
     powered_by_text: '',
@@ -57,7 +57,12 @@ export default function Header({ siteSettings: initialSettings }: HeaderProps = 
 
   useEffect(() => {
     if (session?.user?.id) {
-      // ユーザーのアバター画像を取得
+      // セッション情報から即座にアバターURLを設定（もしあれば）
+      if (session.user.image) {
+        setAvatarUrl(session.user.image);
+      }
+      
+      // APIから詳細情報を取得して更新
       fetch(`/api/user/${session.user.id}`)
         .then(res => res.json())
         .then(data => {
@@ -67,14 +72,14 @@ export default function Header({ siteSettings: initialSettings }: HeaderProps = 
             const style = data.avatar_style || 'big-smile';
             setAvatarUrl(`https://api.dicebear.com/9.x/${style}/svg?seed=${encodeURIComponent(data.avatar_seed)}&size=40`);
           } else {
-            setAvatarUrl('');
+            setAvatarUrl(null);
           }
         })
         .catch(() => {
-          setAvatarUrl('');
+          // エラー時はセッション情報のアバターを維持
         });
     } else {
-      setAvatarUrl('');
+      setAvatarUrl(null);
       setUnreadCount(0);
     }
   }, [session]);

@@ -9,11 +9,17 @@ export default function HeaderClient() {
   const { data: session, status } = useSession();
   const pathname = usePathname();
   const [unreadCount, setUnreadCount] = useState(0);
-  const [avatarUrl, setAvatarUrl] = useState('');
+  const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
 
   // ユーザーのアバター画像を取得（DiceBear対応）
   useEffect(() => {
     if (session?.user?.id) {
+      // セッション情報から即座にアバターURLを設定（もしあれば）
+      if (session.user.image) {
+        setAvatarUrl(session.user.image);
+      }
+      
+      // APIから詳細情報を取得して更新
       fetch(`/api/user/${session.user.id}`)
         .then(res => res.json())
         .then(data => {
@@ -23,14 +29,14 @@ export default function HeaderClient() {
             const style = data.avatar_style || 'big-smile';
             setAvatarUrl(`https://api.dicebear.com/9.x/${style}/svg?seed=${encodeURIComponent(data.avatar_seed)}&size=40`);
           } else {
-            setAvatarUrl('');
+            setAvatarUrl(null);
           }
         })
         .catch(() => {
-          setAvatarUrl('');
+          // エラー時はセッション情報のアバターを維持
         });
     } else {
-      setAvatarUrl('');
+      setAvatarUrl(null);
     }
   }, [session]);
 
