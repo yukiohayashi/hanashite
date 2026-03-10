@@ -248,10 +248,10 @@ export default function HomeRightSidebar() {
         </div>
       )}
 
-      {/* 最新の回答*/}
+      {/* 最新のコメント*/}
       <div>
         <h3 className="mt-4 mb-2 px-2 font-bold text-base" style={{ color: '#ff6b6b' }}>
-          最新の回答<i className="fas fa-comment"></i>
+          最新のコメント<i className="fas fa-comment"></i>
         </h3>
         <ul className="bg-[#fffaf9] shadow m-0 p-0 rounded-lg list-none">
           {latestComments.length > 0 ? (
