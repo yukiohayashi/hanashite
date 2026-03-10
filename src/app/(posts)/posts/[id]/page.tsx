@@ -56,7 +56,7 @@ export default async function PostPage({ params, searchParams }: { params: Promi
   
   const { data: post } = await supabase
     .from('posts')
-    .select('id, title, content, created_at, user_id, og_image, thumbnail_url, source_url, og_title, og_description, status, category_id, deadline_at, best_answer_id, users(name, image, sex, birth_year, prefecture, avatar_style, avatar_seed, use_custom_image), categories(id, name)')
+    .select('id, title, content, created_at, user_id, og_image, thumbnail_url, source_url, og_title, og_description, status, category_id, deadline_at, best_answer_id, users(name, image, sex, birth_year, prefecture, avatar_seed, use_custom_image), categories(id, name)')
     .eq('id', id)
     .single() as { data: any | null, error: { message: string } | null };
 
@@ -66,7 +66,6 @@ export default async function PostPage({ params, searchParams }: { params: Promi
   const userSex = user?.sex || null;
   const userBirthYear = user?.birth_year || null;
   const userPrefecture = user?.prefecture || null;
-  const userAvatarStyle = user?.avatar_style || null;
   const userAvatarSeed = user?.avatar_seed || null;
   const userUseCustomImage = user?.use_custom_image || false;
   
@@ -149,7 +148,7 @@ export default async function PostPage({ params, searchParams }: { params: Promi
   // コメントとユーザー情報をJOINで一度に取得
   const { data: commentsData } = await supabase
     .from('comments')
-    .select('id, content, created_at, user_id, parent_id, users(name, image, avatar_style, avatar_seed, use_custom_image)')
+    .select('id, content, created_at, user_id, parent_id, users(name, image, avatar_seed, use_custom_image)')
     .eq('post_id', parseInt(id))
     .eq('status', 'approved')
     .order('created_at', { ascending: false });
@@ -182,7 +181,6 @@ export default async function PostPage({ params, searchParams }: { params: Promi
       users: {
         name: commentUser?.name || 'ゲスト',
         image: commentUser?.image || null,
-        avatar_style: commentUser?.avatar_style || null,
         avatar_seed: commentUser?.avatar_seed || null,
         use_custom_image: commentUser?.use_custom_image || false
       },
@@ -269,7 +267,7 @@ export default async function PostPage({ params, searchParams }: { params: Promi
                       <Link href={`/users/${post.user_id}`}>
                         <div className="w-5 h-5 rounded-full overflow-hidden">
                           <img 
-                            src={getAvatarUrl(String(post.user_id), userAvatar, userUseCustomImage, userAvatarStyle, userAvatarSeed, 20)}
+                            src={getAvatarUrl(String(post.user_id), userAvatar, userUseCustomImage, null, userAvatarSeed, 20)}
                             alt={userName}
                             className="rounded-full w-full h-full object-cover scale-125 hover:opacity-80 transition-opacity cursor-pointer"
                           />
@@ -278,7 +276,7 @@ export default async function PostPage({ params, searchParams }: { params: Promi
                     ) : (
                       <div className="w-5 h-5 rounded-full overflow-hidden">
                         <img 
-                          src={getAvatarUrl('guest', null, false, 'big-smile', null, 20)}
+                          src={getAvatarUrl('guest', null, false, null, null, 20)}
                           alt="ゲスト"
                           className="rounded-full w-full h-full object-cover scale-125"
                         />

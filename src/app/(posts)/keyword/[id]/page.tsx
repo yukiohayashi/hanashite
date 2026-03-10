@@ -187,7 +187,7 @@ export default async function KeywordPage({
                            user.avatar_seed.startsWith('bear_') || user.avatar_seed.startsWith('other_'))) {
                   avatarUrl = `/images/local-avatars/${user.avatar_seed}.webp`;
                 } else {
-                  avatarUrl = '/images/local-avatars/f20_01.webp';
+                  avatarUrl = '/images/local-avatars/default-avatar.webp';
                 }
                 const categoryName = (post as any).categories?.name;
                 return (

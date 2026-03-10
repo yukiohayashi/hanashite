@@ -28,5 +28,5 @@ export function getAvatarUrl(
   }
 
   // デフォルトアバター（f20_01）
-  return `/images/local-avatars/f20_01.webp`;
+  return `/images/local-avatars/default-avatar.webp`;
 }

@@ -151,7 +151,7 @@ export default function InfinitePostList({ initialPosts, sortBy: initialSortBy }
           <div className="mt-2 flex items-center justify-between gap-2 text-gray-500 text-xs">
             <div className="flex items-center min-w-0 flex-1 overflow-hidden">
               <img 
-                src={post.avatar_url || '/images/local-avatars/f20_01.webp'} 
+                src={post.avatar_url || '/images/local-avatars/default-avatar.webp'} 
                 alt="相談者"
                 className="w-4 h-4 rounded-full border border-gray-200 inline-block mr-1 flex-shrink-0"
               />

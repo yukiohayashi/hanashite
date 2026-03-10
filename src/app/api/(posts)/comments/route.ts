@@ -41,11 +41,11 @@ export async function POST(request: Request) {
     }
 
     // ユーザー情報を取得（アバター含む）
-    let userInfo: { name: string; image?: string | null; avatar_style?: string | null; avatar_seed?: string | null; use_custom_image?: boolean | null } = { name: 'ゲスト' };
+    let userInfo: { name: string; image?: string | null; avatar_seed?: string | null; use_custom_image?: boolean | null } = { name: 'ゲスト' };
     if (comment.user_id) {
       const { data: user } = await supabase
         .from('users')
-        .select('name, image, avatar_style, avatar_seed, use_custom_image')
+        .select('name, image, avatar_seed, use_custom_image')
         .eq('id', comment.user_id)
         .single();
       
@@ -53,7 +53,6 @@ export async function POST(request: Request) {
         userInfo = {
           name: user.name || 'ゲスト',
           image: user.image,
-          avatar_style: user.avatar_style,
           avatar_seed: user.avatar_seed,
           use_custom_image: user.use_custom_image,
         };

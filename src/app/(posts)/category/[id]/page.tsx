@@ -107,7 +107,7 @@ export default async function CategoryPage({
   // 投稿を取得（ユーザー情報付き）
   const { data: rawPosts } = await supabase
     .from('posts')
-    .select('id, title, content, created_at, user_id, og_image, thumbnail_url, best_answer_id, users(name, avatar_style, avatar_seed, use_custom_image, image)')
+    .select('id, title, content, created_at, user_id, og_image, thumbnail_url, best_answer_id, users(name, avatar_seed, use_custom_image, image)')
     .eq('category_id', categoryId)
     .in('status', ['publish', 'published'])
     .order('created_at', { ascending: false })
@@ -124,7 +124,7 @@ export default async function CategoryPage({
                user.avatar_seed.startsWith('bear_') || user.avatar_seed.startsWith('other_'))) {
       avatarUrl = `/images/local-avatars/${user.avatar_seed}.webp`;
     } else {
-      avatarUrl = '/images/local-avatars/f20_01.webp';
+      avatarUrl = '/images/local-avatars/default-avatar.webp';
     }
     return {
       ...post,
@@ -187,7 +187,7 @@ export default async function CategoryPage({
                     )}
                     <div className="mt-2 flex items-center gap-2 text-gray-500 text-xs">
                       <img
-                        src={post.avatar_url || '/images/local-avatars/f20_01.webp'}
+                        src={post.avatar_url || '/images/local-avatars/default-avatar.webp'}
                         alt="相談者"
                         className="w-4 h-4 rounded-full border border-gray-200 shrink-0"
                       />

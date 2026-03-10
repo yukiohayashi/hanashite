@@ -36,7 +36,6 @@ interface User {
   profile_slug?: string;
   profile_slug_updated_at?: string;
   image?: string;
-  avatar_style?: AvatarStyle;
   avatar_seed?: string;
   use_custom_image?: boolean;
   show_post_history?: boolean;
@@ -96,7 +95,7 @@ export default function ProfileSetForm({ user, categories, isFirstTime }: Profil
   const [avatarFile, setAvatarFile] = useState<File | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   
-  // DiceBearアバター関連の状態
+  // ローカルアバター関連の状態
   const [imageMode, setImageMode] = useState<ImageMode>(() => {
     console.log('Initializing imageMode:', {
       use_custom_image: user.use_custom_image,
@@ -105,7 +104,7 @@ export default function ProfileSetForm({ user, categories, isFirstTime }: Profil
     });
     return user.use_custom_image ? 'upload' : (user.avatar_seed ? 'avatar' : 'none');
   });
-  const [avatarStyle, setAvatarStyle] = useState<AvatarStyle>(user.avatar_style || 'fun-emoji');
+  const [avatarStyle, setAvatarStyle] = useState<AvatarStyle>('fun-emoji');
   const [avatarSeed, setAvatarSeed] = useState<string>(user.avatar_seed || '');
   
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -398,7 +397,7 @@ export default function ProfileSetForm({ user, categories, isFirstTime }: Profil
             <div className="relative">
               {imageMode === 'none' ? (
                 <img
-                  src="/images/local-avatars/f20_01.webp"
+                  src="/images/local-avatars/default-avatar.webp"
                   alt="デフォルトアバター"
                   width={120}
                   height={120}
@@ -406,7 +405,7 @@ export default function ProfileSetForm({ user, categories, isFirstTime }: Profil
                 />
               ) : imageMode === 'upload' ? (
                 <img
-                  src={avatarFile ? URL.createObjectURL(avatarFile) : (user.image || '/images/local-avatars/f20_01.webp')}
+                  src={avatarFile ? URL.createObjectURL(avatarFile) : (user.image || '/images/local-avatars/default-avatar.webp')}
                   alt="プロフィール画像"
                   width={120}
                   height={120}

@@ -190,7 +190,7 @@ export default async function Home({ searchParams }: HomeProps) {
 
     let query = supabase
       .from('posts')
-      .select('id, title, created_at, deadline_at, user_id, og_image, thumbnail_url, best_answer_id, best_answer_selected_at, category_id, categories(name), users!inner(status, name, avatar_style, avatar_seed, use_custom_image, image)')
+      .select('id, title, created_at, deadline_at, user_id, og_image, thumbnail_url, best_answer_id, best_answer_selected_at, category_id, categories(name), users!inner(status, name, avatar_seed, use_custom_image, image)')
       .in('status', ['publish', 'published'])
       .neq('user_id', 1)
 
@@ -274,7 +274,7 @@ export default async function Home({ searchParams }: HomeProps) {
     // オススメ（デフォルト）（受付中のみ）
     let query = supabase
       .from('posts')
-      .select('id, title, content, created_at, user_id, og_image, thumbnail_url, best_answer_id, best_answer_selected_at, category_id, categories(name), users!inner(status, name, avatar_style, avatar_seed, use_custom_image, image)')
+      .select('id, title, content, created_at, user_id, og_image, thumbnail_url, best_answer_id, best_answer_selected_at, category_id, categories(name), users!inner(status, name, avatar_seed, use_custom_image, image)')
       .in('status', ['publish', 'published'])
       .neq('user_id', 1)
       .is('best_answer_id', null)
@@ -329,7 +329,7 @@ export default async function Home({ searchParams }: HomeProps) {
       // 投稿情報を取得
       const { data: topPosts } = await supabase
         .from('posts')
-        .select('id, title, created_at, user_id, og_image, thumbnail_url, best_answer_id, category_id, categories(name), users!inner(status, name, avatar_style, avatar_seed, use_custom_image, image)')
+        .select('id, title, created_at, user_id, og_image, thumbnail_url, best_answer_id, category_id, categories(name), users!inner(status, name, avatar_seed, use_custom_image, image)')
         .in('id', sortedPostIds)
         .in('status', ['publish', 'published'])
         .neq('user_id', '1')
@@ -352,7 +352,7 @@ export default async function Home({ searchParams }: HomeProps) {
                      user.avatar_seed.startsWith('bear_') || user.avatar_seed.startsWith('other_'))) {
             avatarUrl = `/images/local-avatars/${user.avatar_seed}.webp`;
           } else {
-            avatarUrl = '/images/local-avatars/f20_01.webp';
+            avatarUrl = '/images/local-avatars/default-avatar.webp';
           }
           return {
             ...post,
@@ -376,7 +376,7 @@ export default async function Home({ searchParams }: HomeProps) {
                user.avatar_seed.startsWith('bear_') || user.avatar_seed.startsWith('other_'))) {
       avatarUrl = `/images/local-avatars/${user.avatar_seed}.webp`;
     } else {
-      avatarUrl = '/images/local-avatars/f20_01.webp';
+      avatarUrl = '/images/local-avatars/default-avatar.webp';
     }
     return {
       ...post,
@@ -388,7 +388,7 @@ export default async function Home({ searchParams }: HomeProps) {
   // ベストアンサー待ちの投稿を取得（締め切りが過ぎてもベストアンサーがない投稿）
   const { data: waitingPosts } = await supabase
     .from('posts')
-    .select('id, title, created_at, deadline_at, user_id, og_image, thumbnail_url, best_answer_id, best_answer_selected_at, category_id, categories(name), users!inner(status, name, avatar_style, avatar_seed, use_custom_image, image)')
+    .select('id, title, created_at, deadline_at, user_id, og_image, thumbnail_url, best_answer_id, best_answer_selected_at, category_id, categories(name), users!inner(status, name, avatar_seed, use_custom_image, image)')
     .in('status', ['publish', 'published'])
     .neq('user_id', 1)
     .is('best_answer_id', null)
@@ -407,10 +407,13 @@ export default async function Home({ searchParams }: HomeProps) {
       let avatarUrl: string;
       if (user?.use_custom_image && user?.image) {
         avatarUrl = user.image;
+      } else if (user?.avatar_seed && (user.avatar_seed.startsWith('f20_') || user.avatar_seed.startsWith('f30_') || user.avatar_seed.startsWith('f40_') || 
+                 user.avatar_seed.startsWith('m20_') || user.avatar_seed.startsWith('m30_') || user.avatar_seed.startsWith('m40_') ||
+                 user.avatar_seed.startsWith('cat_') || user.avatar_seed.startsWith('dog_') || user.avatar_seed.startsWith('rabbit_') ||
+                 user.avatar_seed.startsWith('bear_') || user.avatar_seed.startsWith('other_'))) {
+        avatarUrl = `/images/local-avatars/${user.avatar_seed}.webp`;
       } else {
-        const seed = user?.avatar_seed || String(post.user_id) || 'guest';
-        const style = user?.avatar_style || 'big-smile';
-        avatarUrl = `https://api.dicebear.com/9.x/${style}/svg?seed=${encodeURIComponent(seed)}&size=20`;
+        avatarUrl = '/images/local-avatars/default-avatar.webp';
       }
       return {
         ...post,
@@ -465,7 +468,7 @@ export default async function Home({ searchParams }: HomeProps) {
       const baUserIds = [...new Set(bestComments.map(c => c.user_id).filter(id => id !== null))];
       const { data: baUsersData } = await supabase
         .from('users')
-        .select('id, name, avatar_style, avatar_seed, use_custom_image, image')
+        .select('id, name, avatar_seed, use_custom_image, image')
         .in('id', baUserIds);
 
       bestAnswersWithUsers = bestComments.map(comment => {
@@ -476,10 +479,13 @@ export default async function Home({ searchParams }: HomeProps) {
         let avatarUrl: string;
         if (user?.use_custom_image && user?.image) {
           avatarUrl = user.image;
+        } else if (user?.avatar_seed && (user.avatar_seed.startsWith('f20_') || user.avatar_seed.startsWith('f30_') || user.avatar_seed.startsWith('f40_') || 
+                   user.avatar_seed.startsWith('m20_') || user.avatar_seed.startsWith('m30_') || user.avatar_seed.startsWith('m40_') ||
+                   user.avatar_seed.startsWith('cat_') || user.avatar_seed.startsWith('dog_') || user.avatar_seed.startsWith('rabbit_') ||
+                   user.avatar_seed.startsWith('bear_') || user.avatar_seed.startsWith('other_'))) {
+          avatarUrl = `/images/local-avatars/${user.avatar_seed}.webp`;
         } else {
-          const seed = user?.avatar_seed || String(comment.user_id) || 'guest';
-          const style = user?.avatar_style || 'big-smile';
-          avatarUrl = `https://api.dicebear.com/9.x/${style}/svg?seed=${encodeURIComponent(seed)}&size=24`;
+          avatarUrl = '/images/local-avatars/default-avatar.webp';
         }
         
         return {
@@ -575,7 +581,7 @@ export default async function Home({ searchParams }: HomeProps) {
                           )}
                           <div className="mt-2 flex items-center gap-2 text-gray-500 text-xs">
                             <img 
-                              src={(post as any).avatar_url || 'https://api.dicebear.com/9.x/big-smile/svg?seed=guest&size=20'} 
+                              src={(post as any).avatar_url || '/images/local-avatars/default-avatar.webp'} 
                               alt="相談者"
                               className="w-4 h-4 rounded-full border border-gray-200 inline-block mr-1 shrink-0"
                             />
@@ -620,7 +626,7 @@ export default async function Home({ searchParams }: HomeProps) {
                         )}
                         <div className="mt-1 flex items-center gap-1 font-normal text-[10px] text-gray-400">
                           <img 
-                            src={(post as any).avatar_url || 'https://api.dicebear.com/9.x/big-smile/svg?seed=guest&size=20'} 
+                            src={(post as any).avatar_url || '/images/local-avatars/default-avatar.webp'} 
                             alt="相談者"
                             className="w-4 h-4 rounded-full border border-gray-200 inline-block mr-1 shrink-0"
                           />
@@ -681,7 +687,7 @@ export default async function Home({ searchParams }: HomeProps) {
                 created_at: post.created_at,
                 deadline_at: (post as any).deadline_at || null,
                 user_name: (post as any).user_name || null,
-                avatar_url: (post as any).avatar_url || 'https://api.dicebear.com/9.x/big-smile/svg?seed=guest&size=20',
+                avatar_url: (post as any).avatar_url || '/images/local-avatars/default-avatar.webp',
                 category_id: (post as any).category_id || null,
                 category_name: (post as any).categories?.name || null
               })) || []}
@@ -805,7 +811,7 @@ async function InterestCategoriesSection({ userId }: { userId: string | number |
     categories.map(async (category) => {
       const { data: posts } = await supabase
         .from('posts')
-        .select('id, title, created_at, category_id, categories(name), users!inner(name, avatar_style, avatar_seed, use_custom_image, image)')
+        .select('id, title, created_at, category_id, categories(name), users!inner(name, avatar_seed, use_custom_image, image)')
         .eq('category_id', category.id)
         .in('status', ['publish', 'published'])
         .is('best_answer_id', null)
@@ -823,10 +829,13 @@ async function InterestCategoriesSection({ userId }: { userId: string | number |
       let avatarUrl: string;
       if (user?.use_custom_image && user?.image) {
         avatarUrl = user.image;
+      } else if (user?.avatar_seed && (user.avatar_seed.startsWith('f20_') || user.avatar_seed.startsWith('f30_') || user.avatar_seed.startsWith('f40_') || 
+                 user.avatar_seed.startsWith('m20_') || user.avatar_seed.startsWith('m30_') || user.avatar_seed.startsWith('m40_') ||
+                 user.avatar_seed.startsWith('cat_') || user.avatar_seed.startsWith('dog_') || user.avatar_seed.startsWith('rabbit_') ||
+                 user.avatar_seed.startsWith('bear_') || user.avatar_seed.startsWith('other_'))) {
+        avatarUrl = `/images/local-avatars/${user.avatar_seed}.webp`;
       } else {
-        const seed = user?.avatar_seed || String(post.user_id) || 'guest';
-        const style = user?.avatar_style || 'big-smile';
-        avatarUrl = `https://api.dicebear.com/9.x/${style}/svg?seed=${encodeURIComponent(seed)}&size=20`;
+        avatarUrl = '/images/local-avatars/default-avatar.webp';
       }
       return { ...post, user_name: user?.name || null, avatar_url: avatarUrl };
     })
@@ -849,7 +858,7 @@ async function InterestCategoriesSection({ userId }: { userId: string | number |
               </h3>
               <div className="mt-2 flex items-center gap-2 text-gray-500 text-xs">
                 <img
-                  src={post.avatar_url || 'https://api.dicebear.com/9.x/big-smile/svg?seed=guest&size=20'}
+                  src={post.avatar_url || '/images/local-avatars/default-avatar.webp'}
                   alt="相談者"
                   className="w-4 h-4 rounded-full border border-gray-200 inline-block mr-1 shrink-0"
                 />

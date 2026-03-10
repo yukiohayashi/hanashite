@@ -98,7 +98,7 @@ async function getComments(postId: number): Promise<Comment[]> {
           // 複数のカラム名を試して正しいユーザー名を取得
           const userName = user?.display_name || user?.user_name || user?.name || '匿名';
           
-          // アバターURLの優先順位：avatar_url > image > avatar_style+avatar_seedで生成
+          // アバターURLの優先順位：avatar_url > image > ローカルアバター
           let avatarUrl = user?.avatar_url || user?.image;
           
           // avatar_urlとimageが両方nullの場合、ローカルアバターを使用
@@ -108,7 +108,7 @@ async function getComments(postId: number): Promise<Comment[]> {
                      user.avatar_seed.startsWith('bear_') || user.avatar_seed.startsWith('other_'))) {
             avatarUrl = `/images/local-avatars/${user.avatar_seed}.webp`;
           } else if (!avatarUrl) {
-            avatarUrl = '/images/local-avatars/f20_01.webp';
+            avatarUrl = '/images/local-avatars/default-avatar.webp';
           }
 
           console.log('Final username:', userName);

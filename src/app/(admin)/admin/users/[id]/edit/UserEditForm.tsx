@@ -11,7 +11,6 @@ interface User {
   is_banned: boolean;
   user_description?: string;
   image?: string;
-  avatar_style?: string;
   avatar_seed?: string;
   use_custom_image?: boolean;
   sei?: string;
@@ -62,7 +61,7 @@ export default function UserEditForm({ user }: UserEditFormProps) {
                user.avatar_seed.startsWith('bear_') || user.avatar_seed.startsWith('other_'))) {
       return `/images/local-avatars/${user.avatar_seed}.webp`;
     }
-    return '/images/local-avatars/f20_01.webp';
+    return '/images/local-avatars/default-avatar.webp';
   });
   const [loading, setLoading] = useState(false);
 

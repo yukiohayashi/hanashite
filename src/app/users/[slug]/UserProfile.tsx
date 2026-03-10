@@ -12,7 +12,6 @@ interface User {
   sns_x?: string;
   created_at: string;
   profile_slug?: string;
-  avatar_style?: string;
   avatar_seed?: string;
   use_custom_image?: boolean;
 }
@@ -119,7 +118,12 @@ export default function UserProfile({ user, posts, comments, isOwnProfile }: Use
           <img 
             src={user.use_custom_image && user.image 
               ? user.image 
-              : `https://api.dicebear.com/9.x/${user.avatar_style || 'big-smile'}/svg?seed=${encodeURIComponent(user.avatar_seed || String(user.id))}&size=80`
+              : user.avatar_seed && (user.avatar_seed.startsWith('f20_') || user.avatar_seed.startsWith('f30_') || user.avatar_seed.startsWith('f40_') || 
+                     user.avatar_seed.startsWith('m20_') || user.avatar_seed.startsWith('m30_') || user.avatar_seed.startsWith('m40_') ||
+                     user.avatar_seed.startsWith('cat_') || user.avatar_seed.startsWith('dog_') || user.avatar_seed.startsWith('rabbit_') ||
+                     user.avatar_seed.startsWith('bear_') || user.avatar_seed.startsWith('other_'))
+                ? `/images/local-avatars/${user.avatar_seed}.webp`
+                : '/images/local-avatars/default-avatar.webp'
             } 
             alt={user.name} 
             className="w-20 h-20 rounded-full object-cover"

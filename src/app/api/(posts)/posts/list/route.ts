@@ -46,7 +46,7 @@ export async function GET(request: Request) {
     const userIds = [...new Set(postsData.map(p => p.user_id).filter(id => id !== null))];
     const { data: usersData } = await supabase
       .from('users')
-      .select('id, name, avatar_style, avatar_seed, use_custom_image, image')
+      .select('id, name, avatar_seed, use_custom_image, image')
       .in('id', userIds);
 
     const posts = postsData.map(post => {
@@ -60,7 +60,7 @@ export async function GET(request: Request) {
                  user.avatar_seed.startsWith('bear_') || user.avatar_seed.startsWith('other_'))) {
         avatarUrl = `/images/local-avatars/${user.avatar_seed}.webp`;
       } else {
-        avatarUrl = '/images/local-avatars/f20_01.webp';
+        avatarUrl = '/images/local-avatars/default-avatar.webp';
       }
       return {
         id: post.id,

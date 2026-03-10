@@ -14,7 +14,6 @@ interface Comment {
   users?: {
     name: string;
     image?: string | null;
-    avatar_style?: string | null;
     avatar_seed?: string | null;
     use_custom_image?: boolean | null;
   };
@@ -323,7 +322,7 @@ export default function CommentSection({ postId, initialComments, totalCount, po
                            users.avatar_seed.startsWith('bear_') || users.avatar_seed.startsWith('other_'))) {
                   return `/images/local-avatars/${users.avatar_seed}.webp`;
                 }
-                return '/images/local-avatars/f20_01.webp';
+                return '/images/local-avatars/default-avatar.webp';
               };
               const avatarUrl = getCommentAvatarUrl();
               const replies = getReplies(comment.id);
@@ -424,7 +423,7 @@ export default function CommentSection({ postId, initialComments, totalCount, po
                                  replyUsers.avatar_seed.startsWith('bear_') || replyUsers.avatar_seed.startsWith('other_'))) {
                         return `/images/local-avatars/${replyUsers.avatar_seed}.webp`;
                       }
-                      return '/images/local-avatars/f20_01.webp';
+                      return '/images/local-avatars/default-avatar.webp';
                     };
                     const replyAvatarUrl = getReplyAvatarUrl();
                     const nestedReplies = getReplies(reply.id);
@@ -524,7 +523,7 @@ export default function CommentSection({ postId, initialComments, totalCount, po
                                        nestedUsers.avatar_seed.startsWith('bear_') || nestedUsers.avatar_seed.startsWith('other_'))) {
                               return `/images/local-avatars/${nestedUsers.avatar_seed}.webp`;
                             }
-                            return '/images/local-avatars/f20_01.webp';
+                            return '/images/local-avatars/default-avatar.webp';
                           };
                           const nestedAvatarUrl = getNestedAvatarUrl();
                           const isNestedBestAnswer = bestAnswerId === nestedReply.id;

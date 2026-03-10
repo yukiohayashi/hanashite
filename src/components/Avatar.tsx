@@ -2,8 +2,8 @@
  * Avatar.tsx
  * ハナシテ - ユーザーアバター表示コンポーネント
  * 
- * DiceBearを使用してデフォルトアバターを生成
- * ユーザーが画像をアップロードしていない場合、選択したスタイルのアバターを表示
+ * ローカルアバターを使用してデフォルトアバターを表示
+ * ユーザーが画像をアップロードしていない場合、ローカルアバターを表示
  */
 
 import { useMemo } from 'react';
@@ -21,9 +21,9 @@ export type AvatarStyle =
 interface AvatarProps {
   /** ユーザーID（アバター生成のシードとして使用） */
   userId: string;
-  /** ユーザーがアップロードした画像URL（nullの場合はDiceBearアバターを表示） */
+  /** ユーザーがアップロードした画像URL（nullの場合はローカルアバターを表示） */
   imageUrl?: string | null;
-  /** DiceBearのスタイル（デフォルト: 'fun-emoji'） */
+  /** アバタースタイル（デフォルト: 'fun-emoji'） */
   style?: AvatarStyle;
   /** アバターのサイズ（px）（デフォルト: 40） */
   size?: number;
@@ -41,13 +41,13 @@ export function Avatar({
   alt,
   className = '',
 }: AvatarProps) {
-  // DiceBear HTTP APIのURL生成
-  const dicebearUrl = useMemo(() => {
-    return `https://api.dicebear.com/9.x/${style}/svg?seed=${encodeURIComponent(userId)}&size=${size}`;
-  }, [userId, style, size]);
+  // ローカルアバターのURL生成
+  const localAvatarUrl = useMemo(() => {
+    return '/images/local-avatars/default-avatar.webp';
+  }, []);
 
-  // 表示する画像URL（アップロード画像 or DiceBearアバター）
-  const displayUrl = imageUrl || dicebearUrl;
+  // 表示する画像URL（アップロード画像 or ローカルアバター）
+  const displayUrl = imageUrl || localAvatarUrl;
 
   // 代替テキスト
   const altText = alt || `${userId}のアバター`;
@@ -66,7 +66,7 @@ export function Avatar({
 
 /**
  * AvatarWithFallback
- * 画像読み込み失敗時にDiceBearアバターにフォールバックするコンポーネント
+ * 画像読み込み失敗時にローカルアバターにフォールバックするコンポーネント
  */
 interface AvatarWithFallbackProps extends AvatarProps {
   /** 画像読み込み失敗時のコールバック */
@@ -82,17 +82,17 @@ export function AvatarWithFallback({
   className = '',
   onError,
 }: AvatarWithFallbackProps) {
-  const dicebearUrl = useMemo(() => {
-    return `https://api.dicebear.com/9.x/${style}/svg?seed=${encodeURIComponent(userId)}&size=${size}`;
-  }, [userId, style, size]);
+  const localAvatarUrl = useMemo(() => {
+    return '/images/local-avatars/default-avatar.webp';
+  }, []);
 
   const handleError = (e: React.SyntheticEvent<HTMLImageElement, Event>) => {
-    // 画像読み込み失敗時、DiceBearアバターにフォールバック
-    e.currentTarget.src = dicebearUrl;
+    // 画像読み込み失敗時、ローカルアバターにフォールバック
+    e.currentTarget.src = localAvatarUrl;
     onError?.();
   };
 
-  const displayUrl = imageUrl || dicebearUrl;
+  const displayUrl = imageUrl || localAvatarUrl;
   const altText = alt || `${userId}のアバター`;
 
   return (

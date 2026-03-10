@@ -12,7 +12,6 @@ interface User {
   is_banned?: boolean;
   status?: number;
   profile_slug?: string | null;
-  avatar_style?: string | null;
   avatar_seed?: string | null;
   use_custom_image?: boolean | null;
   post_count?: number;
@@ -289,7 +288,7 @@ export default function UsersTable({ users: initialUsers }: UsersTableProps) {
                       />
                     ) : (
                       <img
-                        src="/images/local-avatars/f20_01.webp"
+                        src="/images/local-avatars/default-avatar.webp"
                         alt={user.name}
                         className="w-full h-full object-cover"
                       />

@@ -37,7 +37,6 @@ interface User {
   child_count: number | null;
   job: string | null;
   prefecture: string | null;
-  avatar_style: string | null;
   avatar_seed: string | null;
   use_custom_image: boolean | null;
   show_post_history: boolean | null;
@@ -260,7 +259,7 @@ export default async function UserPage({ params }: { params: Promise<{ slug: str
                 ) : (
                   <div className="w-20 h-20 rounded-full overflow-hidden">
                     <img 
-                      src="/images/local-avatars/f20_01.webp"
+                      src="/images/local-avatars/default-avatar.webp"
                       alt={user.name || '匿名'} 
                       className="w-full h-full rounded-full object-cover scale-125"
                     />

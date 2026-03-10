@@ -70,12 +70,12 @@ export default function Header({ siteSettings: initialSettings }: HeaderProps = 
                      data.avatar_seed?.startsWith('bear_') || data.avatar_seed?.startsWith('other_')) {
             setAvatarUrl(`/images/local-avatars/${data.avatar_seed}.webp`);
           } else {
-            setAvatarUrl('/images/local-avatars/f20_01.webp');
+            setAvatarUrl('/images/local-avatars/default-avatar.webp');
           }
         })
         .catch(() => {
           // エラー時はデフォルトアバター
-          setAvatarUrl('/images/local-avatars/f20_01.webp');
+          setAvatarUrl('/images/local-avatars/default-avatar.webp');
         });
     } else {
       setAvatarUrl('');
