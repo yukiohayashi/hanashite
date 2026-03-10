@@ -853,7 +853,7 @@ async function InterestCategoriesSection({ userId }: { userId: string | number |
             {post.categories?.name && post.category_id && (
               <Link
                 href={`/category/${post.category_id}`}
-                className="absolute bottom-3 right-3 inline-block px-2 py-0.5 text-xs font-medium text-gray-600 bg-gray-200 rounded whitespace-nowrap hover:bg-gray-300 transition-colors z-10"
+                className="absolute bottom-3 right-3 inline-block px-2 py-0.5 text-xs font-medium text-[#bf360c] bg-white border border-[#ffccbc] rounded whitespace-nowrap hover:bg-pink-50 transition-colors z-10"
               >
                 {post.categories.name}
               </Link>
