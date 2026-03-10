@@ -26,10 +26,7 @@ export default function Header({ siteSettings: initialSettings }: HeaderProps = 
   
   const [leftSidebarOpen, setLeftSidebarOpen] = useState(false);
   const [rightSidebarOpen, setRightSidebarOpen] = useState(false);
-  
-  // セッション情報から初期アバターURLを取得
-  const initialAvatarUrl = session?.user?.image || null;
-  const [avatarUrl, setAvatarUrl] = useState<string | null>(initialAvatarUrl);
+  const [avatarUrl, setAvatarUrl] = useState<string>('');
   const [unreadCount, setUnreadCount] = useState(0);
   const [siteSettings, setSiteSettings] = useState<SiteSettings>(initialSettings || {
     powered_by_text: '',
@@ -58,16 +55,6 @@ export default function Header({ siteSettings: initialSettings }: HeaderProps = 
     }
   }, [initialSettings]);
 
-  // セッション変更時に初期アバターURLを更新
-  useEffect(() => {
-    if (session?.user?.image) {
-      setAvatarUrl(session.user.image);
-    } else if (!session) {
-      setAvatarUrl(null);
-      setUnreadCount(0);
-    }
-  }, [session?.user?.image, session]);
-
   // ユーザーのアバター画像を取得（DiceBear対応）
   useEffect(() => {
     if (session?.user?.id) {
@@ -83,8 +70,11 @@ export default function Header({ siteSettings: initialSettings }: HeaderProps = 
           }
         })
         .catch(() => {
-          // エラー時は何もしない（セッション情報のアバターを維持）
+          // エラー時は何もしない
         });
+    } else {
+      setAvatarUrl('');
+      setUnreadCount(0);
     }
   }, [session?.user?.id]);
 

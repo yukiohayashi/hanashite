@@ -9,19 +9,7 @@ export default function HeaderClient() {
   const { data: session } = useSession();
   const pathname = usePathname();
   const [unreadCount, setUnreadCount] = useState(0);
-  
-  // セッション情報から初期アバターURLを取得
-  const initialAvatarUrl = session?.user?.image || null;
-  const [avatarUrl, setAvatarUrl] = useState<string | null>(initialAvatarUrl);
-
-  // セッション変更時に初期アバターURLを更新
-  useEffect(() => {
-    if (session?.user?.image) {
-      setAvatarUrl(session.user.image);
-    } else if (!session) {
-      setAvatarUrl(null);
-    }
-  }, [session?.user?.image, session]);
+  const [avatarUrl, setAvatarUrl] = useState<string>('');
 
   // ユーザーのアバター画像を取得（DiceBear対応）
   useEffect(() => {
@@ -38,8 +26,10 @@ export default function HeaderClient() {
           }
         })
         .catch(() => {
-          // エラー時は何もしない（セッション情報のアバターを維持）
+          // エラー時は何もしない
         });
+    } else {
+      setAvatarUrl('');
     }
   }, [session?.user?.id]);
 
