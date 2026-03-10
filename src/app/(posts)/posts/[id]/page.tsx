@@ -273,7 +273,7 @@ export default async function PostPage({ params, searchParams }: { params: Promi
           <section>
             <article className="px-0 md:px-2.5">
               {/* 投稿情報エリア（single.phpと同じデザイン） */}
-              <div className="relative bg-white shadow-md mb-4 p-2.5 border-t-4 border-t-orange-500 border-x border-b border-gray-200 rounded">
+              <div className={`relative shadow-md mb-4 p-2.5 border-t-4 border-t-orange-500 border-x border-b border-gray-200 rounded ${post.best_answer_id ? 'bg-orange-50' : 'bg-white'}`}>
                 <div className="flex items-start">
                   {/* アバター画像 */}
                   <div className="flex-shrink-0 mr-1.5">
@@ -416,6 +416,11 @@ export default async function PostPage({ params, searchParams }: { params: Promi
                   <span className="text-gray-400 text-sm">ID: {post.id}</span>
                 </div>
 
+                {/* Google広告（本文内） */}
+                <div className="mb-4">
+                  <GoogleAdPost />
+                </div>
+
                 {/* 回答受付状況 */}
                 {post.deadline_at && (
                   <div className="mb-4 flex items-center gap-2">
@@ -486,9 +491,6 @@ export default async function PostPage({ params, searchParams }: { params: Promi
                     </div>
                   </div>
               </div>
-
-              {/* Google広告（記事下） */}
-              <GoogleAdPost />
 
               {/* コメントセクション */}
               <CommentSection postId={post.id} initialComments={comments || []} totalCount={totalCommentCount || 0} postUserId={post.user_id as any} bestAnswerId={post.best_answer_id ? Number(post.best_answer_id) : undefined} deadlineAt={post.deadline_at} />

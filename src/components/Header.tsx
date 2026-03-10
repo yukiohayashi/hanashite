@@ -149,7 +149,7 @@ export default function Header({ siteSettings: initialSettings }: HeaderProps = 
                     className="bg-white border-2 border-gray-300 rounded-full w-10 h-10 object-cover"
                   />
                 ) : (
-                  <img src="/images/default-avatar.webp" alt="デフォルトアバター" id="header-avatar" className="bg-white rounded-full w-10 h-10 object-cover" />
+                  <div className="bg-[#ff6b6b] rounded-full w-10 h-10" />
                 )}
                 {/* 通知ドット */}
                 {unreadCount > 0 && (

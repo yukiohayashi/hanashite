@@ -90,7 +90,7 @@ export default function HeaderClient() {
                   id="header-avatar"
                 />
               ) : (
-                <img src="/images/default-avatar.webp" alt="デフォルトアバター" id="header-avatar" className="bg-white rounded-full w-10 h-10 object-cover" />
+                <div className="bg-[#ff6b6b] rounded-full w-10 h-10" />
               )}
             </div>
             {/* 未読通知ドット */}
@@ -103,7 +103,7 @@ export default function HeaderClient() {
         </>
       ) : (
         <Link href="/login" className="flex items-center">
-          <img src="/images/default-avatar.webp" alt="デフォルトアバター" id="header-avatar" className="rounded-full w-10 h-10 object-cover" />
+          <img src="/images/default-avatar.webp" alt="デフォルトアバター" id="header-avatar" className="bg-white rounded-full w-10 h-10 object-cover" />
         </Link>
       )}
     </div>
