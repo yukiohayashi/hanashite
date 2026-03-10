@@ -76,12 +76,12 @@ export default function HeaderClient() {
       {session ? (
         <>
           <Link href="/notifications" className="relative flex flex-col items-center">
-            <div className="relative">
+            <div className="relative w-12 h-12 rounded-full overflow-hidden">
               {avatarUrl ? (
                 <img 
                   src={avatarUrl}
                   alt="プロフィール画像" 
-                  className="rounded-full w-12 h-12 object-cover"
+                  className="rounded-full w-full h-full object-cover scale-125"
                   id="header-avatar"
                 />
               ) : (

@@ -135,13 +135,13 @@ export default function Header({ siteSettings: initialSettings }: HeaderProps = 
               className="top-1/2 right-[2%] z-[99999] absolute text-center cursor-pointer -translate-y-1/2"
               onClick={() => setRightSidebarOpen(true)}
             >
-              <div className="relative">
+              <div className="relative w-12 h-12 rounded-full overflow-hidden">
                 {avatarUrl ? (
                   <img
                     src={avatarUrl}
                     alt="プロフィール画像"
                     id="header-avatar"
-                    className="rounded-full w-12 h-12 object-cover"
+                    className="rounded-full w-full h-full object-cover scale-125"
                   />
                 ) : (
                   <div className="bg-[#ff6b6b] rounded-full w-12 h-12" />
