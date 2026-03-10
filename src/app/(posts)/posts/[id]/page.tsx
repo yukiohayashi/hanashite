@@ -499,7 +499,7 @@ export default async function PostPage({ params, searchParams }: { params: Promi
         </div>
 
         {/* 右サイドバー */}
-        <aside className="hidden md:block w-[280px] bg-[#fff0eb] p-4 rounded-lg">
+        <aside className="hidden md:block w-[280px] bg-[#fff0eb] p-2 rounded-lg">
           <HomeRightSidebar />
         </aside>
       </main>
