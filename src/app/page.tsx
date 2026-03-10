@@ -580,11 +580,13 @@ export default async function Home({ searchParams }: HomeProps) {
                             </p>
                           )}
                           <div className="mt-2 flex items-center gap-2 text-gray-500 text-xs">
-                            <img 
-                              src={(post as any).avatar_url || '/images/local-avatars/default-avatar.webp'} 
-                              alt="相談者"
-                              className="w-4 h-4 rounded-full border border-gray-200 inline-block mr-1 shrink-0"
-                            />
+                            <div className="w-4 h-4 rounded-full overflow-hidden border border-gray-200 inline-block mr-1 shrink-0">
+                              <img 
+                                src={(post as any).avatar_url || '/images/local-avatars/default-avatar.webp'} 
+                                alt="相談者"
+                                className="w-full h-full object-cover scale-125"
+                              />
+                            </div>
                             <span className="truncate">{(post as any).user_name || 'ゲスト'}さんからの相談</span>
                             <span className="ml-2 shrink-0 hidden md:inline">{new Date(post.created_at).toLocaleDateString('ja-JP')}</span>
                           </div>
@@ -625,11 +627,13 @@ export default async function Home({ searchParams }: HomeProps) {
                           </p>
                         )}
                         <div className="mt-1 flex items-center gap-1 font-normal text-[10px] text-gray-400">
-                          <img 
-                            src={(post as any).avatar_url || '/images/local-avatars/default-avatar.webp'} 
-                            alt="相談者"
-                            className="w-4 h-4 rounded-full border border-gray-200 inline-block mr-1 shrink-0"
-                          />
+                          <div className="w-4 h-4 rounded-full overflow-hidden border border-gray-200 inline-block mr-1 shrink-0">
+                            <img 
+                              src={(post as any).avatar_url || '/images/local-avatars/default-avatar.webp'} 
+                              alt="相談者"
+                              className="w-full h-full object-cover scale-125"
+                            />
+                          </div>
                           <span className="truncate">{(post as any).user_name || 'ゲスト'}さん</span>
                         </div>
                       </Link>
@@ -857,11 +861,13 @@ async function InterestCategoriesSection({ userId }: { userId: string | number |
                 {post.title}
               </h3>
               <div className="mt-2 flex items-center gap-2 text-gray-500 text-xs">
-                <img
-                  src={post.avatar_url || '/images/local-avatars/default-avatar.webp'}
-                  alt="相談者"
-                  className="w-4 h-4 rounded-full border border-gray-200 inline-block mr-1 shrink-0"
-                />
+                <div className="w-4 h-4 rounded-full overflow-hidden border border-gray-200 inline-block mr-1 shrink-0">
+                  <img
+                    src={post.avatar_url || '/images/local-avatars/default-avatar.webp'}
+                    alt="相談者"
+                    className="w-full h-full object-cover scale-125"
+                  />
+                </div>
                 <span className="truncate">{post.user_name || 'ゲスト'}さんからの相談</span>
               </div>
             </Link>

@@ -150,11 +150,13 @@ export default function InfinitePostList({ initialPosts, sortBy: initialSortBy }
           </Link>
           <div className="mt-2 flex items-center justify-between gap-2 text-gray-500 text-xs">
             <div className="flex items-center min-w-0 flex-1 overflow-hidden">
-              <img 
-                src={post.avatar_url || '/images/local-avatars/default-avatar.webp'} 
-                alt="相談者"
-                className="w-4 h-4 rounded-full border border-gray-200 inline-block mr-1 flex-shrink-0"
-              />
+              <div className="w-4 h-4 rounded-full overflow-hidden border border-gray-200 inline-block mr-1 flex-shrink-0">
+                <img 
+                  src={post.avatar_url || '/images/local-avatars/default-avatar.webp'} 
+                  alt="相談者"
+                  className="w-full h-full object-cover scale-125"
+                />
+              </div>
               <span className="truncate">{post.user_name || 'ゲスト'}さんからの相談</span>
               {post.deadline_at && (
                 <span className="ml-2 flex-shrink-0 hidden md:inline">締切: {new Date(post.deadline_at).toLocaleDateString('ja-JP')}</span>
