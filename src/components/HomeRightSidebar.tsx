@@ -209,23 +209,16 @@ export default function HomeRightSidebar() {
     </>
   ) : (
     <>
-      <div className="flex flex-col items-center my-2.5 w-full">
+      <div className="flex flex-col gap-2 my-2.5 w-full">
         <Link 
           href="/login" 
-          className="inline-flex justify-center items-center bg-[#388e3c] hover:bg-[#2e7d32] px-6 py-3 rounded font-bold text-white text-sm no-underline transition-colors"
-          style={{ minWidth: '180px' }}
+          className="inline-flex justify-center items-center bg-[#4caf50] hover:bg-[#45a049] px-6 py-3 rounded-lg font-bold text-white text-sm no-underline transition-colors w-full"
         >
           ログイン
         </Link>
-       
-      </div>
-     
-    
-      <div className="flex justify-center w-full">
         <Link 
           href="/regist" 
-          className="inline-flex justify-center items-center bg-[#f4511e] hover:bg-[#e64a19] px-6 py-3 rounded font-bold text-white text-sm no-underline transition-colors"
-          style={{ minWidth: '180px' }}
+          className="inline-flex justify-center items-center bg-[#ff6b35] hover:bg-[#e85d2a] px-6 py-3 rounded-lg font-bold text-white text-sm no-underline transition-colors w-full"
         >
           新規無料登録
         </Link>

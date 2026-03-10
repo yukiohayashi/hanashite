@@ -213,14 +213,14 @@ export default function SidebarClient({ categories }: SidebarClientProps) {
               <li key={category.id} className="mb-1">
                 <Link
                   href={`/category/${category.id}`}
-                  className="block hover:bg-gray-100 px-2 py-1 text-gray-900 transition-colors"
+                  className="flex items-center hover:bg-gray-100 px-2 py-1 text-gray-900 transition-colors"
                 >
                   {category.icon ? (
-                    <span className="mr-2" style={{ color }} dangerouslySetInnerHTML={{ __html: category.icon }} />
+                    <span className="inline-flex items-center justify-center w-6 mr-2 shrink-0" style={{ color }} dangerouslySetInnerHTML={{ __html: category.icon }} />
                   ) : (
-                    <span className="mr-2" style={{ color }}>●</span>
+                    <span className="inline-flex items-center justify-center w-6 mr-2 shrink-0" style={{ color }}>●</span>
                   )}
-                  {category.name}
+                  <span>{category.name}</span>
                 </Link>
               </li>
             );

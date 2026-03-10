@@ -233,7 +233,7 @@ export default async function CategoryPage({
         </div>
 
         {/* 右サイドバー */}
-        <aside className="hidden lg:block w-[280px]">
+        <aside className="hidden lg:block w-[280px] bg-[#fff0eb] p-4 rounded-lg">
           <RightSidebar />
         </aside>
       </main>

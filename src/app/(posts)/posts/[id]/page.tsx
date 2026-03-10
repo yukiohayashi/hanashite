@@ -262,7 +262,7 @@ export default async function PostPage({ params, searchParams }: { params: Promi
         </aside>
 
         {/* メインコンテンツ */}
-        <div className="flex-1 max-w-[760px] px-2 md:px-4">
+        <div className="flex-1 max-w-[760px] md:px-4">
           {/* 更新成功メッセージ */}
           {showUpdatedMessage && (
             <div className="mb-4 p-4 bg-green-50 border border-green-200 rounded-md">

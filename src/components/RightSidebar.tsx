@@ -1,6 +1,6 @@
 'use client';
 
-import { useSession, signIn } from 'next-auth/react';
+import { useSession } from 'next-auth/react';
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { supabase } from '@/lib/supabase';
@@ -173,54 +173,16 @@ export default function RightSidebar() {
     </>
   ) : (
     <>
-      <div className="flex flex-col items-center my-2.5 w-full">
-        <button 
-          onClick={() => signIn('line')}
-          className="inline-flex justify-center items-center gap-1 px-6 py-3 rounded font-bold text-white text-sm no-underline transition-colors"
-          style={{ minWidth: '180px', backgroundColor: '#06C755' }}
-        >
-          <span style={{ fontWeight: 'bold' }}>LINE</span>でログイン
-        </button>
-      </div>
-      
-      <div className="flex flex-col items-center my-2.5 w-full">
-        <button 
-          onClick={() => signIn('twitter')}
-          className="inline-flex justify-center items-center gap-0 bg-black hover:bg-gray-800 px-6 py-3 rounded font-bold text-white text-sm no-underline transition-colors"
-          style={{ minWidth: '180px' }}
-        >
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" className="mr-1">
-            <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"></path>
-          </svg>
-          でログイン
-        </button>
-      </div>
-      
-      <div className="my-2.5 text-center">
-        <p className="text-gray-600 text-xs">または</p>
-      </div>
-      
-      <div className="flex flex-col items-center my-2.5 w-full">
+      <div className="flex flex-col gap-2 my-2.5 w-full">
         <Link 
           href="/login" 
-          className="inline-flex justify-center items-center bg-green-600 hover:bg-green-700 px-6 py-3 rounded font-bold text-white text-sm no-underline transition-colors"
-          style={{ minWidth: '180px' }}
+          className="inline-flex justify-center items-center bg-[#4caf50] hover:bg-[#45a049] px-6 py-3 rounded-lg font-bold text-white text-sm no-underline transition-colors w-full"
         >
           ログイン
         </Link>
-        <div className="mt-2">
-          <Link href="/resetpassword" className="text-[#ff6b35] hover:text-[#e55a2b] text-xs underline">
-            パスワードを忘れた方はこちら
-          </Link>
-        </div>
-      </div>
-     
-     
-      <div className="flex justify-center w-full">
         <Link 
           href="/regist" 
-          className="inline-flex justify-center items-center bg-[#ff6b35] hover:bg-[#e58a2f] px-6 py-3 rounded font-bold text-white text-sm no-underline transition-colors"
-          style={{ minWidth: '180px' }}
+          className="inline-flex justify-center items-center bg-[#ff6b35] hover:bg-[#e85d2a] px-6 py-3 rounded-lg font-bold text-white text-sm no-underline transition-colors w-full"
         >
           新規無料登録
         </Link>
