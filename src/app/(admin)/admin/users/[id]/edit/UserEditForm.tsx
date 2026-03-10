@@ -56,11 +56,13 @@ export default function UserEditForm({ user }: UserEditFormProps) {
     if (user.use_custom_image && user.image) {
       return user.image;
     }
-    if (user.avatar_seed) {
-      const style = user.avatar_style || 'fun-emoji';
-      return `https://api.dicebear.com/9.x/${style}/svg?seed=${encodeURIComponent(user.avatar_seed)}&size=96`;
+    if (user.avatar_seed && (user.avatar_seed.startsWith('f20_') || user.avatar_seed.startsWith('f30_') || user.avatar_seed.startsWith('f40_') || 
+               user.avatar_seed.startsWith('m20_') || user.avatar_seed.startsWith('m30_') || user.avatar_seed.startsWith('m40_') ||
+               user.avatar_seed.startsWith('cat_') || user.avatar_seed.startsWith('dog_') || user.avatar_seed.startsWith('rabbit_') ||
+               user.avatar_seed.startsWith('bear_') || user.avatar_seed.startsWith('other_'))) {
+      return `/images/local-avatars/${user.avatar_seed}.webp`;
     }
-    return '';
+    return '/images/local-avatars/f20_01.webp';
   });
   const [loading, setLoading] = useState(false);
 

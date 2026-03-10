@@ -443,7 +443,7 @@ export default function PostManageForm({ post, comments, categories }: PostManag
                     className="block"
                   >
                     <Image
-                      src={comment.avatar_url || `https://api.dicebear.com/9.x/adventurer/svg?seed=${comment.user_id}&size=40`}
+                      src={comment.avatar_url || '/images/local-avatars/f20_01.webp'}
                       alt={comment.user_name}
                       width={40}
                       height={40}

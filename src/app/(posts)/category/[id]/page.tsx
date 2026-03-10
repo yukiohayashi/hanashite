@@ -118,10 +118,13 @@ export default async function CategoryPage({
     let avatarUrl: string;
     if (user?.use_custom_image && user?.image) {
       avatarUrl = user.image;
+    } else if (user?.avatar_seed && (user.avatar_seed.startsWith('f20_') || user.avatar_seed.startsWith('f30_') || user.avatar_seed.startsWith('f40_') || 
+               user.avatar_seed.startsWith('m20_') || user.avatar_seed.startsWith('m30_') || user.avatar_seed.startsWith('m40_') ||
+               user.avatar_seed.startsWith('cat_') || user.avatar_seed.startsWith('dog_') || user.avatar_seed.startsWith('rabbit_') ||
+               user.avatar_seed.startsWith('bear_') || user.avatar_seed.startsWith('other_'))) {
+      avatarUrl = `/images/local-avatars/${user.avatar_seed}.webp`;
     } else {
-      const seed = user?.avatar_seed || String(post.user_id) || 'guest';
-      const style = user?.avatar_style || 'big-smile';
-      avatarUrl = `https://api.dicebear.com/9.x/${style}/svg?seed=${encodeURIComponent(seed)}&size=20`;
+      avatarUrl = '/images/local-avatars/f20_01.webp';
     }
     return {
       ...post,
@@ -184,7 +187,7 @@ export default async function CategoryPage({
                     )}
                     <div className="mt-2 flex items-center gap-2 text-gray-500 text-xs">
                       <img
-                        src={post.avatar_url || 'https://api.dicebear.com/9.x/big-smile/svg?seed=guest&size=20'}
+                        src={post.avatar_url || '/images/local-avatars/f20_01.webp'}
                         alt="相談者"
                         className="w-4 h-4 rounded-full border border-gray-200 shrink-0"
                       />

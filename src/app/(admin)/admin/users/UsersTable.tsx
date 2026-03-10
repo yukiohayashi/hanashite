@@ -278,9 +278,18 @@ export default function UsersTable({ users: initialUsers }: UsersTableProps) {
                           e.currentTarget.parentElement!.innerHTML = '<div class="w-full h-full flex items-center justify-center text-gray-400">?</div>';
                         }}
                       />
+                    ) : user.avatar_seed && (user.avatar_seed.startsWith('f20_') || user.avatar_seed.startsWith('f30_') || user.avatar_seed.startsWith('f40_') || 
+                               user.avatar_seed.startsWith('m20_') || user.avatar_seed.startsWith('m30_') || user.avatar_seed.startsWith('m40_') ||
+                               user.avatar_seed.startsWith('cat_') || user.avatar_seed.startsWith('dog_') || user.avatar_seed.startsWith('rabbit_') ||
+                               user.avatar_seed.startsWith('bear_') || user.avatar_seed.startsWith('other_')) ? (
+                      <img
+                        src={`/images/local-avatars/${user.avatar_seed}.webp`}
+                        alt={user.name}
+                        className="w-full h-full object-cover"
+                      />
                     ) : (
                       <img
-                        src={`https://api.dicebear.com/9.x/${user.avatar_style || 'big-smile'}/svg?seed=${encodeURIComponent(user.avatar_seed || user.id)}&size=40`}
+                        src="/images/local-avatars/f20_01.webp"
                         alt={user.name}
                         className="w-full h-full object-cover"
                       />

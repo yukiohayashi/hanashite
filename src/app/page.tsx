@@ -346,10 +346,13 @@ export default async function Home({ searchParams }: HomeProps) {
           let avatarUrl: string;
           if (user?.use_custom_image && user?.image) {
             avatarUrl = user.image;
+          } else if (user?.avatar_seed && (user.avatar_seed.startsWith('f20_') || user.avatar_seed.startsWith('f30_') || user.avatar_seed.startsWith('f40_') || 
+                     user.avatar_seed.startsWith('m20_') || user.avatar_seed.startsWith('m30_') || user.avatar_seed.startsWith('m40_') ||
+                     user.avatar_seed.startsWith('cat_') || user.avatar_seed.startsWith('dog_') || user.avatar_seed.startsWith('rabbit_') ||
+                     user.avatar_seed.startsWith('bear_') || user.avatar_seed.startsWith('other_'))) {
+            avatarUrl = `/images/local-avatars/${user.avatar_seed}.webp`;
           } else {
-            const seed = user?.avatar_seed || String(post.user_id) || 'guest';
-            const style = user?.avatar_style || 'big-smile';
-            avatarUrl = `https://api.dicebear.com/9.x/${style}/svg?seed=${encodeURIComponent(seed)}&size=20`;
+            avatarUrl = '/images/local-avatars/f20_01.webp';
           }
           return {
             ...post,
@@ -367,10 +370,13 @@ export default async function Home({ searchParams }: HomeProps) {
     let avatarUrl: string;
     if (user?.use_custom_image && user?.image) {
       avatarUrl = user.image;
+    } else if (user?.avatar_seed && (user.avatar_seed.startsWith('f20_') || user.avatar_seed.startsWith('f30_') || user.avatar_seed.startsWith('f40_') || 
+               user.avatar_seed.startsWith('m20_') || user.avatar_seed.startsWith('m30_') || user.avatar_seed.startsWith('m40_') ||
+               user.avatar_seed.startsWith('cat_') || user.avatar_seed.startsWith('dog_') || user.avatar_seed.startsWith('rabbit_') ||
+               user.avatar_seed.startsWith('bear_') || user.avatar_seed.startsWith('other_'))) {
+      avatarUrl = `/images/local-avatars/${user.avatar_seed}.webp`;
     } else {
-      const seed = user?.avatar_seed || String(post.user_id) || 'guest';
-      const style = user?.avatar_style || 'big-smile';
-      avatarUrl = `https://api.dicebear.com/9.x/${style}/svg?seed=${encodeURIComponent(seed)}&size=20`;
+      avatarUrl = '/images/local-avatars/f20_01.webp';
     }
     return {
       ...post,

@@ -101,9 +101,14 @@ async function getComments(postId: number): Promise<Comment[]> {
           // アバターURLの優先順位：avatar_url > image > avatar_style+avatar_seedで生成
           let avatarUrl = user?.avatar_url || user?.image;
           
-          // avatar_urlとimageが両方nullの場合、avatar_styleとavatar_seedで生成
-          if (!avatarUrl && user?.avatar_style && user?.avatar_seed) {
-            avatarUrl = `https://api.dicebear.com/9.x/${user.avatar_style}/svg?seed=${user.avatar_seed}&size=40`;
+          // avatar_urlとimageが両方nullの場合、ローカルアバターを使用
+          if (!avatarUrl && user?.avatar_seed && (user.avatar_seed.startsWith('f20_') || user.avatar_seed.startsWith('f30_') || user.avatar_seed.startsWith('f40_') || 
+                     user.avatar_seed.startsWith('m20_') || user.avatar_seed.startsWith('m30_') || user.avatar_seed.startsWith('m40_') ||
+                     user.avatar_seed.startsWith('cat_') || user.avatar_seed.startsWith('dog_') || user.avatar_seed.startsWith('rabbit_') ||
+                     user.avatar_seed.startsWith('bear_') || user.avatar_seed.startsWith('other_'))) {
+            avatarUrl = `/images/local-avatars/${user.avatar_seed}.webp`;
+          } else if (!avatarUrl) {
+            avatarUrl = '/images/local-avatars/f20_01.webp';
           }
 
           console.log('Final username:', userName);

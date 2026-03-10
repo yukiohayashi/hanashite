@@ -177,7 +177,18 @@ export default async function KeywordPage({
             {postsWithUsers && postsWithUsers.length > 0 ? (
               postsWithUsers.map((post) => {
                 const userName = (post as any).users?.name || 'ゲスト';
-                const avatarUrl = (post as any).users?.image || 'https://api.dicebear.com/9.x/big-smile/svg?seed=guest&size=20';
+                const user = (post as any).users;
+                let avatarUrl: string;
+                if (user?.use_custom_image && user?.image) {
+                  avatarUrl = user.image;
+                } else if (user?.avatar_seed && (user.avatar_seed.startsWith('f20_') || user.avatar_seed.startsWith('f30_') || user.avatar_seed.startsWith('f40_') || 
+                           user.avatar_seed.startsWith('m20_') || user.avatar_seed.startsWith('m30_') || user.avatar_seed.startsWith('m40_') ||
+                           user.avatar_seed.startsWith('cat_') || user.avatar_seed.startsWith('dog_') || user.avatar_seed.startsWith('rabbit_') ||
+                           user.avatar_seed.startsWith('bear_') || user.avatar_seed.startsWith('other_'))) {
+                  avatarUrl = `/images/local-avatars/${user.avatar_seed}.webp`;
+                } else {
+                  avatarUrl = '/images/local-avatars/f20_01.webp';
+                }
                 const categoryName = (post as any).categories?.name;
                 return (
                   <Link 
