@@ -40,7 +40,7 @@ export default function FloatingCreateButton() {
   }, []);
 
   return (
-    <Link href="/post-create">
+    <Link href={session ? "/post-create" : "/login"}>
       <Button
         className={`
           fixed bottom-24 right-4 md:bottom-6 md:right-8 z-50
@@ -51,11 +51,11 @@ export default function FloatingCreateButton() {
           transition-all duration-500
           flex flex-col items-center justify-center
           group
-          ${!session || !isVisible || !isAllowedPage ? 'opacity-0 scale-90 pointer-events-none' : 'opacity-100 scale-100'}
+          ${!isVisible || !isAllowedPage ? 'opacity-0 scale-90 pointer-events-none' : 'opacity-100 scale-100'}
         `}
       >
-        <span className="text-xs md:text-sm font-bold text-white text-center leading-tight">
-          相談する
+        <span className="text-sm md:text-base font-bold text-white text-center leading-tight">
+          相談<br />する
         </span>
         <div className="absolute bottom-0 right-0 w-6 h-6 bg-white rounded-full flex items-center justify-center shadow-md group-hover:scale-110 transition-transform">
           <PenSquare className="w-3 h-3 text-pink-500" />

@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import FloatingCreateButton from './FloatingCreateButton';
+import GoogleAdFooter from './GoogleAdFooter';
 
 interface SiteSettings {
   twitter_url: string;
@@ -46,6 +47,10 @@ export default function Footer({ siteSettings: initialSettings }: FooterProps = 
   return (
     <>
       <FloatingCreateButton />
+      
+      {/* Google広告（フッター上） */}
+      <GoogleAdFooter />
+      
       <footer className="flex flex-col justify-center items-center mt-5 md:mt-2.5 w-full text-white">
       <section className="w-full">
         <div className="w-full text-center">

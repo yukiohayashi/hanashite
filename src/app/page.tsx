@@ -14,6 +14,7 @@ import AdSense from '@/components/AdSense';
 import ResolvedSection from '@/components/ResolvedSection';
 import SearchHistoryRecorder from '@/components/SearchHistoryRecorder';
 import FloatingCreateButton from '@/components/FloatingCreateButton';
+import GoogleAdTop from '@/components/GoogleAdTop';
 import { auth } from '@/lib/auth';
 
 // HTMLタグを除去するヘルパー関数
@@ -636,6 +637,9 @@ export default async function Home({ searchParams }: HomeProps) {
 
             {/* カテゴリ */}
             {session && <InterestCategoriesSection userId={userId} />}
+
+            {/* Google広告 */}
+            <GoogleAdTop />
 
             {/* 解決済み */}
             <ResolvedSection 
