@@ -70,20 +70,8 @@ export default async function PostPage({ params, searchParams }: { params: Promi
   const userAvatarSeed = user?.avatar_seed || null;
   const userUseCustomImage = user?.use_custom_image || false;
   
-  // DiceBearアバターURLを生成
-  const getDiceBearUrl = (seed: string, style: string = 'big-smile', size: number = 40) => {
-    return `https://api.dicebear.com/9.x/${style}/svg?seed=${encodeURIComponent(seed)}&size=${size}`;
-  };
-  
-  // アバター表示用のURLを取得
-  const getAvatarUrl = (userId: string, customImage: string | null, useCustom: boolean, style: string | null, seed: string | null, size: number = 40) => {
-    if (useCustom && customImage) {
-      return customImage;
-    }
-    const avatarSeed = seed || userId;
-    const avatarStyle = style || 'big-smile';
-    return getDiceBearUrl(avatarSeed, avatarStyle, size);
-  };
+  // アバター表示用のヘルパー関数をインポート
+  const { getAvatarUrl } = await import('@/lib/avatarUtils');
 
   // 性別を記号に変換
   const getSexSymbol = (sex: string | null) => {
@@ -287,7 +275,7 @@ export default async function PostPage({ params, searchParams }: { params: Promi
                       </Link>
                     ) : (
                       <img 
-                        src={getDiceBearUrl('guest', 'big-smile', 20)}
+                        src={getAvatarUrl('guest', null, false, 'big-smile', null, 20)}
                         alt="ゲスト"
                         className="rounded-full w-5 h-5 object-cover"
                       />
