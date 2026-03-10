@@ -507,56 +507,51 @@ export default function ProfileSetForm({ user, categories, isFirstTime }: Profil
           {/* アバター選択モード */}
           {imageMode === 'avatar' && (
             <div className="bg-white p-4 rounded-lg space-y-6">
-              <div className="max-h-[600px] overflow-y-auto border border-gray-200 rounded-lg bg-white p-3 space-y-6">
-                {[
-                  { prefix: 'f20', label: '👩 女性 20代', count: 10 },
-                  { prefix: 'f30', label: '👩 女性 30代', count: 10 },
-                  { prefix: 'f40', label: '👩 女性 40代', count: 10 },
-                  { prefix: 'm20', label: '👨 男性 20代', count: 10 },
-                  { prefix: 'm30', label: '👨 男性 30代', count: 10 },
-                  { prefix: 'm40', label: '👨 男性 40代', count: 10 },
-                  { prefix: 'cat', label: '🐱 ねこ', count: 10 },
-                  { prefix: 'dog', label: '🐶 いぬ', count: 8 },
-                  { prefix: 'rabbit', label: '🐰 うさぎ', count: 4 },
-                  { prefix: 'bear', label: '🐻 くま・パンダ', count: 4 },
-                  { prefix: 'other', label: '🦊 その他動物', count: 4 },
-                ].map(({ prefix, label, count }) => (
-                  <div key={prefix}>
-                    <div className="text-sm font-medium text-gray-700 mb-2 sticky top-0 bg-white py-1 z-10">
-                      {label}
-                    </div>
-                    <div className="grid grid-cols-5 md:grid-cols-10 gap-2">
-                      {Array.from({ length: count }, (_, i) => {
-                        const avatarId = `${prefix}_${String(i + 1).padStart(2, '0')}`;
-                        const isSelected = avatarSeed === avatarId;
-                        return (
-                          <button
-                            key={avatarId}
-                            type="button"
-                            onClick={() => { 
-                              setAvatarStyle('local' as AvatarStyle); 
-                              setAvatarSeed(avatarId); 
-                            }}
-                            className={`p-1 rounded-lg transition-all ${isSelected ? 'ring-2 ring-orange-500 bg-orange-50' : 'hover:bg-gray-100'}`}
-                            title={`${label} ${i + 1}`}
-                          >
-                            <img
-                              src={`/images/local-avatars/${avatarId}.webp`}
-                              alt={`${label} ${i + 1}`}
-                              width={40}
-                              height={40}
-                              loading="lazy"
-                              className="rounded"
-                            />
-                          </button>
-                        );
-                      })}
-                    </div>
-                  </div>
-                ))}
+              <div className="max-h-[600px] overflow-y-auto border border-gray-200 rounded-lg bg-white p-3">
+                <div className="grid grid-cols-5 md:grid-cols-5 gap-2 md:gap-4">
+                  {[
+                    { prefix: 'f20', count: 10 },
+                    { prefix: 'f30', count: 10 },
+                    { prefix: 'f40', count: 10 },
+                    { prefix: 'm20', count: 10 },
+                    { prefix: 'm30', count: 10 },
+                    { prefix: 'm40', count: 10 },
+                    { prefix: 'cat', count: 10 },
+                    { prefix: 'dog', count: 8 },
+                    { prefix: 'rabbit', count: 4 },
+                    { prefix: 'bear', count: 4 },
+                    { prefix: 'other', count: 4 },
+                  ].flatMap(({ prefix, count }) =>
+                    Array.from({ length: count }, (_, i) => {
+                      const avatarId = `${prefix}_${String(i + 1).padStart(2, '0')}`;
+                      const isSelected = avatarSeed === avatarId;
+                      return (
+                        <button
+                          key={avatarId}
+                          type="button"
+                          onClick={() => { 
+                            setAvatarStyle('local' as AvatarStyle); 
+                            setAvatarSeed(avatarId); 
+                          }}
+                          className={`p-1 rounded-lg transition-all ${isSelected ? 'ring-2 ring-orange-500 bg-orange-50' : 'hover:bg-gray-100'}`}
+                          title={`アバター ${avatarId}`}
+                        >
+                          <img
+                            src={`/images/local-avatars/${avatarId}.webp`}
+                            alt={`アバター ${avatarId}`}
+                            width={80}
+                            height={80}
+                            loading="lazy"
+                            className="rounded w-full h-auto"
+                          />
+                        </button>
+                      );
+                    })
+                  )}
+                </div>
               </div>
               <div className="text-xs text-gray-500 text-center">
-                90種類のアバターから選べます（人物60個 + 動物30個）
+                90種類のアバターから選べます
               </div>
             </div>
           )}
