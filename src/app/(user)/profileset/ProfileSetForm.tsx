@@ -5,7 +5,7 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { Avatar, AvatarStyle } from '@/components/Avatar';
+import { AvatarStyle } from '@/components/Avatar';
 import { supabase } from '@/lib/supabase';
 
 interface Category {
@@ -398,23 +398,27 @@ export default function ProfileSetForm({ user, categories, isFirstTime }: Profil
             <div className="relative">
               {imageMode === 'none' ? (
                 <img
-                  src="/images/default-avatar.webp"
+                  src="/images/local-avatars/f20_01.webp"
                   alt="デフォルトアバター"
                   width={120}
                   height={120}
                   className="rounded-full object-cover border-4 border-white shadow-lg"
                 />
+              ) : imageMode === 'upload' ? (
+                <img
+                  src={avatarFile ? URL.createObjectURL(avatarFile) : (user.image || '/images/local-avatars/f20_01.webp')}
+                  alt="プロフィール画像"
+                  width={120}
+                  height={120}
+                  className="rounded-full object-cover border-4 border-white shadow-lg"
+                />
               ) : (
-                <Avatar
-                  userId={imageMode === 'avatar' ? avatarSeed : user.id}
-                  imageUrl={
-                    imageMode === 'upload'
-                      ? (avatarFile ? URL.createObjectURL(avatarFile) : user.image)
-                      : null
-                  }
-                  style={avatarStyle}
-                  size={120}
-                  className="border-4 border-white shadow-lg"
+                <img
+                  src={`/images/local-avatars/${avatarSeed}.webp`}
+                  alt="選択中のアバター"
+                  width={120}
+                  height={120}
+                  className="rounded-full object-cover border-4 border-white shadow-lg"
                 />
               )}
               {imageMode === 'none' && (
