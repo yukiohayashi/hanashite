@@ -6,7 +6,7 @@ import { usePathname } from 'next/navigation';
 import Link from 'next/link';
 
 export default function HeaderClient() {
-  const { data: session, status } = useSession();
+  const { data: session } = useSession();
   const pathname = usePathname();
   const [unreadCount, setUnreadCount] = useState(0);
   const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
@@ -75,9 +75,7 @@ export default function HeaderClient() {
 
   return (
     <div className="flex items-center gap-4">
-      {status === 'loading' ? (
-        <span className="text-gray-500 text-sm">読み込み中...</span>
-      ) : session ? (
+      {session ? (
         <>
           <Link href="/notifications" className="relative flex flex-col items-center">
             <div className="relative">
