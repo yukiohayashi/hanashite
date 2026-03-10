@@ -238,7 +238,7 @@ export default function ProfileSetForm({ user, categories, isFirstTime }: Profil
       formData.append('showPostHistory', showPostHistory ? '1' : '0');
       formData.append('interestCategories', JSON.stringify(selectedCategories));
       
-      // DiceBearアバター関連の情報を追加
+      // ローカルアバター関連の情報を追加
       formData.append('imageMode', imageMode);
       formData.append('avatarStyle', imageMode === 'avatar' ? avatarStyle : '');
       formData.append('avatarSeed', imageMode === 'avatar' ? avatarSeed : '');
@@ -388,7 +388,7 @@ export default function ProfileSetForm({ user, categories, isFirstTime }: Profil
           </label>
         </div>
         
-        {/* プロフィール画像選択（DiceBear統合版） */}
+        {/* プロフィール画像選択 */}
         <div className="mb-4">
           <label className="block mb-2 font-bold text-gray-700">プロフィール画像</label>
           

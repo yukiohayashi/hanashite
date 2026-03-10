@@ -34,7 +34,7 @@ export async function POST(request: Request) {
     const interestCategories = formData.get('interestCategories') as string;
     const avatarFile = formData.get('avatar') as File | null;
     
-    // DiceBearアバター関連
+    // ローカルアバター関連
     const imageMode = formData.get('imageMode') as string;
     const avatarStyle = formData.get('avatarStyle') as string;
     const avatarSeed = formData.get('avatarSeed') as string;
