@@ -2,7 +2,6 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
-import Image from 'next/image';
 
 interface BestAnswer {
   id: number;
@@ -87,16 +86,8 @@ export default function ResolvedSection({ bestAnswers, waitingPosts }: ResolvedS
               const contentPreview = stripHtmlTags(answer.content).substring(0, 80);
               return (
                 <div key={answer.id} className="relative bg-[#fffaf9] hover:shadow-md p-3 border border-[#ffe0d6] border-l-4 border-l-[#ffab91] rounded-md transition-all">
-                  <Link href={`/posts/${answer.post_id}`} className="block pr-20">
-                    <div className="flex items-center gap-1.5 text-xs text-gray-500 mb-1">
-                      <Image
-                        src={answer.avatar_url}
-                        alt={answer.user_name}
-                        width={20}
-                        height={20}
-                        unoptimized
-                        className="w-5 h-5 rounded-full border border-gray-200"
-                      />
+                  <Link href={`/posts/${answer.post_id}`} className="block">
+                    <div className="text-xs text-gray-500 mb-1">
                       <span className="font-medium text-gray-700">{answer.user_name}さんのベストアンサー</span>
                     </div>
                     <p className="text-gray-800 text-sm line-clamp-2">
@@ -106,15 +97,6 @@ export default function ResolvedSection({ bestAnswers, waitingPosts }: ResolvedS
                       <span className="block truncate">相談: {answer.post_title}</span>
                     </div>
                   </Link>
-                  {answer.category_name && answer.category_id && (
-                    <Link
-                      href={`/category/${answer.category_id}`}
-                      className="absolute bottom-3 right-3 inline-block px-2 py-0.5 text-xs font-semibold text-[#d32f2f] bg-white border border-[#d32f2f] rounded whitespace-nowrap hover:bg-pink-50 transition-colors z-10"
-                      onClick={(e) => e.stopPropagation()}
-                    >
-                      {answer.category_name}
-                    </Link>
-                  )}
                 </div>
               );
             })
