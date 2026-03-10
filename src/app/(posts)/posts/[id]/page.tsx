@@ -267,18 +267,22 @@ export default async function PostPage({ params, searchParams }: { params: Promi
                   <div className="flex-shrink-0 mr-1.5">
                     {post?.user_id ? (
                       <Link href={`/users/${post.user_id}`}>
-                        <img 
-                          src={getAvatarUrl(String(post.user_id), userAvatar, userUseCustomImage, userAvatarStyle, userAvatarSeed, 20)}
-                          alt={userName}
-                          className="rounded-full w-5 h-5 object-cover hover:opacity-80 transition-opacity cursor-pointer"
-                        />
+                        <div className="w-5 h-5 rounded-full overflow-hidden">
+                          <img 
+                            src={getAvatarUrl(String(post.user_id), userAvatar, userUseCustomImage, userAvatarStyle, userAvatarSeed, 20)}
+                            alt={userName}
+                            className="rounded-full w-full h-full object-cover scale-125 hover:opacity-80 transition-opacity cursor-pointer"
+                          />
+                        </div>
                       </Link>
                     ) : (
-                      <img 
-                        src={getAvatarUrl('guest', null, false, 'big-smile', null, 20)}
-                        alt="ゲスト"
-                        className="rounded-full w-5 h-5 object-cover"
-                      />
+                      <div className="w-5 h-5 rounded-full overflow-hidden">
+                        <img 
+                          src={getAvatarUrl('guest', null, false, 'big-smile', null, 20)}
+                          alt="ゲスト"
+                          className="rounded-full w-full h-full object-cover scale-125"
+                        />
+                      </div>
                     )}
                   </div>
                   

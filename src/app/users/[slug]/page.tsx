@@ -239,21 +239,31 @@ export default async function UserPage({ params }: { params: Promise<{ slug: str
               {/* アバター */}
               <div className="shrink-0">
                 {user.use_custom_image && user.image ? (
-                  <img 
-                    src={user.image} 
-                    alt={user.name || '匿名'} 
-                    className="w-20 h-20 rounded-full object-cover"
-                  />
-                ) : user.avatar_seed ? (
-                  <img 
-                    src={`https://api.dicebear.com/9.x/${user.avatar_style || 'fun-emoji'}/svg?seed=${encodeURIComponent(user.avatar_seed)}&size=80`}
-                    alt={user.name || '匿名'} 
-                    className="w-20 h-20 rounded-full object-cover"
-                  />
+                  <div className="w-20 h-20 rounded-full overflow-hidden">
+                    <img 
+                      src={user.image} 
+                      alt={user.name || '匿名'} 
+                      className="w-full h-full rounded-full object-cover scale-125"
+                    />
+                  </div>
+                ) : user.avatar_seed && (user.avatar_seed.startsWith('f20_') || user.avatar_seed.startsWith('f30_') || user.avatar_seed.startsWith('f40_') || 
+                           user.avatar_seed.startsWith('m20_') || user.avatar_seed.startsWith('m30_') || user.avatar_seed.startsWith('m40_') ||
+                           user.avatar_seed.startsWith('cat_') || user.avatar_seed.startsWith('dog_') || user.avatar_seed.startsWith('rabbit_') ||
+                           user.avatar_seed.startsWith('bear_') || user.avatar_seed.startsWith('other_')) ? (
+                  <div className="w-20 h-20 rounded-full overflow-hidden">
+                    <img 
+                      src={`/images/local-avatars/${user.avatar_seed}.webp`}
+                      alt={user.name || '匿名'} 
+                      className="w-full h-full rounded-full object-cover scale-125"
+                    />
+                  </div>
                 ) : (
-                  <div className="relative bg-gray-300 rounded-full w-20 h-20 overflow-hidden">
-                    <div className="absolute top-[16px] left-1/2 bg-white rounded-full w-[36px] h-[36px] -translate-x-1/2"></div>
-                    <div className="absolute top-[44px] left-1/2 bg-white rounded-[50%_50%_50%_50%/60%_60%_40%_40%] w-[54px] h-[40px] -translate-x-1/2"></div>
+                  <div className="w-20 h-20 rounded-full overflow-hidden">
+                    <img 
+                      src="/images/local-avatars/f20_01.webp"
+                      alt={user.name || '匿名'} 
+                      className="w-full h-full rounded-full object-cover scale-125"
+                    />
                   </div>
                 )}
               </div>

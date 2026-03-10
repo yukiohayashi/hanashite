@@ -342,11 +342,13 @@ export default function CommentSection({ postId, initialComments, totalCount, po
                   <div className="shrink-0 mr-1">
                     {comment.user_id ? (
                       <Link href={`/users/${comment.user_id}`}>
-                        <img 
-                          src={avatarUrl} 
-                          alt={userName} 
-                          className="rounded-full w-5 h-5 object-cover hover:opacity-80 transition-opacity cursor-pointer"
-                        />
+                        <div className="w-5 h-5 rounded-full overflow-hidden">
+                          <img 
+                            src={avatarUrl} 
+                            alt={userName} 
+                            className="rounded-full w-full h-full object-cover scale-125 hover:opacity-80 transition-opacity cursor-pointer"
+                          />
+                        </div>
                       </Link>
                     ) : (
                       <GuestAvatar size={20} />
@@ -438,11 +440,13 @@ export default function CommentSection({ postId, initialComments, totalCount, po
                           <div className="shrink-0 mr-1">
                             {reply.user_id ? (
                               <Link href={`/users/${reply.user_id}`}>
-                                <img 
-                                  src={replyAvatarUrl} 
-                                  alt={replyUserName} 
-                                  className="rounded-full w-5 h-5 object-cover hover:opacity-80 transition-opacity cursor-pointer"
-                                />
+                                <div className="w-5 h-5 rounded-full overflow-hidden">
+                                  <img 
+                                    src={replyAvatarUrl} 
+                                    alt={replyUserName} 
+                                    className="rounded-full w-full h-full object-cover scale-125 hover:opacity-80 transition-opacity cursor-pointer"
+                                  />
+                                </div>
                               </Link>
                             ) : (
                               <GuestAvatar size={20} />
@@ -531,11 +535,13 @@ export default function CommentSection({ postId, initialComments, totalCount, po
                                 <div className="shrink-0 mr-1">
                                   {nestedReply.user_id ? (
                                     <Link href={`/users/${nestedReply.user_id}`}>
-                                      <img 
-                                        src={nestedAvatarUrl} 
-                                        alt={nestedUserName} 
-                                        className="rounded-full w-5 h-5 object-cover hover:opacity-80 transition-opacity cursor-pointer"
-                                      />
+                                      <div className="w-5 h-5 rounded-full overflow-hidden">
+                                        <img 
+                                          src={nestedAvatarUrl} 
+                                          alt={nestedUserName} 
+                                          className="rounded-full w-full h-full object-cover scale-125 hover:opacity-80 transition-opacity cursor-pointer"
+                                        />
+                                      </div>
                                     </Link>
                                   ) : (
                                     <GuestAvatar size={20} />
