@@ -146,7 +146,7 @@ export default function Header({ siteSettings: initialSettings }: HeaderProps = 
                     src={avatarUrl}
                     alt="プロフィール画像"
                     id="header-avatar"
-                    className="bg-white border-2 border-gray-300 rounded-full w-10 h-10 object-cover"
+                    className="bg-[#ff6b6b] border-2 border-gray-300 rounded-full w-10 h-10 object-cover"
                   />
                 ) : (
                   <div className="bg-[#ff6b6b] rounded-full w-10 h-10" />

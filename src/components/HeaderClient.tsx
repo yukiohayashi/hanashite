@@ -86,7 +86,7 @@ export default function HeaderClient() {
                 <img 
                   src={avatarUrl}
                   alt="プロフィール画像" 
-                  className="bg-white border-1 border-gray-300 rounded-full w-10 h-10 object-cover"
+                  className="bg-[#ff6b6b] border-1 border-gray-300 rounded-full w-10 h-10 object-cover"
                   id="header-avatar"
                 />
               ) : (
