@@ -55,7 +55,7 @@ export default function Header({ siteSettings: initialSettings }: HeaderProps = 
     }
   }, [initialSettings]);
 
-  // ユーザーのアバター画像を取得（DiceBear対応）
+  // ユーザーのアバター画像を取得（ローカルアバター対応）
   useEffect(() => {
     if (session?.user?.id) {
       // APIから詳細情報を取得
@@ -64,13 +64,18 @@ export default function Header({ siteSettings: initialSettings }: HeaderProps = 
         .then(data => {
           if (data.use_custom_image && data.image) {
             setAvatarUrl(data.image);
-          } else if (data.avatar_seed) {
-            const style = data.avatar_style || 'big-smile';
-            setAvatarUrl(`https://api.dicebear.com/9.x/${style}/svg?seed=${encodeURIComponent(data.avatar_seed)}&size=40`);
+          } else if (data.avatar_seed && data.avatar_seed.startsWith('f20_') || data.avatar_seed?.startsWith('f30_') || data.avatar_seed?.startsWith('f40_') || 
+                     data.avatar_seed?.startsWith('m20_') || data.avatar_seed?.startsWith('m30_') || data.avatar_seed?.startsWith('m40_') ||
+                     data.avatar_seed?.startsWith('cat_') || data.avatar_seed?.startsWith('dog_') || data.avatar_seed?.startsWith('rabbit_') ||
+                     data.avatar_seed?.startsWith('bear_') || data.avatar_seed?.startsWith('other_')) {
+            setAvatarUrl(`/images/local-avatars/${data.avatar_seed}.webp`);
+          } else {
+            setAvatarUrl('/images/local-avatars/f20_01.webp');
           }
         })
         .catch(() => {
-          // エラー時は何もしない
+          // エラー時はデフォルトアバター
+          setAvatarUrl('/images/local-avatars/f20_01.webp');
         });
     } else {
       setAvatarUrl('');

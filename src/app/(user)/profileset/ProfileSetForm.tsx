@@ -402,7 +402,7 @@ export default function ProfileSetForm({ user, categories, isFirstTime }: Profil
                   alt="デフォルトアバター"
                   width={120}
                   height={120}
-                  className="rounded-full object-cover border-4 border-white shadow-lg"
+                  className="rounded-full object-cover shadow-lg"
                 />
               ) : imageMode === 'upload' ? (
                 <img
@@ -410,7 +410,7 @@ export default function ProfileSetForm({ user, categories, isFirstTime }: Profil
                   alt="プロフィール画像"
                   width={120}
                   height={120}
-                  className="rounded-full object-cover border-4 border-white shadow-lg"
+                  className="rounded-full object-cover shadow-lg"
                 />
               ) : (
                 <img
@@ -418,7 +418,7 @@ export default function ProfileSetForm({ user, categories, isFirstTime }: Profil
                   alt="選択中のアバター"
                   width={120}
                   height={120}
-                  className="rounded-full object-cover border-4 border-white shadow-lg"
+                  className="rounded-full object-cover shadow-lg"
                 />
               )}
               {imageMode === 'none' && (
