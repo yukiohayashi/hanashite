@@ -521,7 +521,7 @@ export default function ProfileSetForm({ user, categories, isFirstTime }: Profil
                     <div className="text-sm font-medium text-gray-700 mb-2 sticky top-0 bg-white py-1 z-10">
                       {label}
                     </div>
-                    <div className="grid grid-cols-5 md:grid-cols-10 gap-2">
+                    <div className="grid grid-cols-10 gap-2">
                       {Array.from({ length: count }, (_, i) => {
                         const avatarId = `${prefix}_${String(i + 1).padStart(2, '0')}`;
                         const isSelected = avatarSeed === avatarId;
