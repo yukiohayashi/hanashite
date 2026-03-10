@@ -10,6 +10,7 @@ import HomeRightSidebar from '@/components/HomeRightSidebar';
 import ClickableImage from '@/components/ClickableImage';
 import LikeButton from './LikeButton';
 import FavoriteButton from './FavoriteButton';
+import GoogleAdPost from '@/components/GoogleAdPost';
 import type { Metadata } from 'next';
 
 interface Post {
@@ -485,6 +486,9 @@ export default async function PostPage({ params, searchParams }: { params: Promi
                     </div>
                   </div>
               </div>
+
+              {/* Google広告（記事下） */}
+              <GoogleAdPost />
 
               {/* コメントセクション */}
               <CommentSection postId={post.id} initialComments={comments || []} totalCount={totalCommentCount || 0} postUserId={post.user_id as any} bestAnswerId={post.best_answer_id ? Number(post.best_answer_id) : undefined} deadlineAt={post.deadline_at} />

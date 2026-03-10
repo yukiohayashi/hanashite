@@ -54,7 +54,7 @@ export default function FloatingCreateButton() {
           ${!isVisible || !isAllowedPage ? 'opacity-0 scale-90 pointer-events-none' : 'opacity-100 scale-100'}
         `}
       >
-        <span className="text-sm md:text-base font-bold text-white text-center leading-tight">
+        <span className="text-base md:text-lg font-bold text-white text-center leading-tight">
           相談<br />する
         </span>
         <div className="absolute bottom-0 right-0 w-6 h-6 bg-white rounded-full flex items-center justify-center shadow-md group-hover:scale-110 transition-transform">
