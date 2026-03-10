@@ -147,7 +147,7 @@ export default async function KeywordPage({
 
       <main className="md:flex md:justify-center md:gap-4 mx-auto pt-[60px] md:pt-4 pb-4 max-w-7xl px-0 sm:px-6 lg:px-8">
         {/* 左サイドバー */}
-        <aside className="hidden md:block w-[220px] bg-[#fff8f6] p-4 rounded-lg">
+        <aside className="hidden md:block w-[220px] bg-[#fff8f6] p-2 rounded-lg">
           <Sidebar />
         </aside>
 

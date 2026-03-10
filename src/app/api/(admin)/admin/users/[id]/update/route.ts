@@ -50,7 +50,7 @@ export async function PATCH(
 
   if (name !== undefined) updateData.name = name;
   if (email !== undefined) updateData.email = email;
-  if (typeof status === 'number' && (status >= 0 && status <= 3 || status === 6)) {
+  if (typeof status === 'number' && (status >= 0 && status <= 4 || status === 6 || status === 9)) {
     updateData.status = status;
   }
   if (typeof is_banned === 'boolean') updateData.is_banned = is_banned;
