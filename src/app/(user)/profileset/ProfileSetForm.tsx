@@ -537,7 +537,7 @@ export default function ProfileSetForm({ user, categories, isFirstTime }: Profil
                             title={`${label} ${i + 1}`}
                           >
                             <img
-                              src={`/images/local-avatars/${avatarId}.png`}
+                              src={`/images/local-avatars/${avatarId}.webp`}
                               alt={`${label} ${i + 1}`}
                               width={40}
                               height={40}
