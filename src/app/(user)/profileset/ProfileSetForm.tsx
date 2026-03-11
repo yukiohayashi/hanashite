@@ -323,16 +323,16 @@ export default function ProfileSetForm({ user, categories, isFirstTime }: Profil
           <label className="block mb-2 font-bold text-gray-700">
             興味のあるカテゴリ（１つ以上選択して下さい）
           </label>
-          <div className="gap-x-1 gap-y-1 grid grid-cols-3 md:grid-cols-6">
+          <div className="gap-x-0.5 gap-y-2 grid grid-cols-3 md:grid-cols-6">
             {categories.map((category) => (
-              <label key={category.id} className="items-center space-x-1 hover:bg-white p-1 rounded whitespace-nowrap cursor-pointer">
+              <label key={category.id} className="flex items-start space-x-0.5 hover:bg-white p-0.5 rounded cursor-pointer min-w-0">
                 <input
                   type="checkbox"
                   checked={selectedCategories.includes(category.slug)}
                   onChange={(e) => handleCategoryChange(category.slug, e.target.checked)}
-                  className="rounded focus:ring-orange-400 w-4 h-4 text-orange-500"
+                  className="flex-shrink-0 rounded focus:ring-orange-400 w-3.5 h-3.5 text-orange-500 mt-0.5"
                 />
-                <span className="text-gray-700 text-sm leading-none">{category.name}</span>
+                <span className="text-gray-700 text-xs leading-tight break-words min-w-0">{category.name}</span>
               </label>
             ))}
           </div>
