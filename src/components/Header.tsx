@@ -26,7 +26,12 @@ export default function Header({ siteSettings: initialSettings }: HeaderProps = 
   
   const [leftSidebarOpen, setLeftSidebarOpen] = useState(false);
   const [rightSidebarOpen, setRightSidebarOpen] = useState(false);
-  const [avatarUrl, setAvatarUrl] = useState<string>('');
+  const [avatarUrl, setAvatarUrl] = useState<string>(() => {
+    if (typeof window !== 'undefined') {
+      return sessionStorage.getItem('header-avatar-url') || '';
+    }
+    return '';
+  });
   const [unreadCount, setUnreadCount] = useState(0);
   const [siteSettings, setSiteSettings] = useState<SiteSettings>(initialSettings || {
     powered_by_text: '',
@@ -62,24 +67,21 @@ export default function Header({ siteSettings: initialSettings }: HeaderProps = 
       fetch(`/api/user/${session.user.id}`)
         .then(res => res.json())
         .then(data => {
+          let url = '/images/local-avatars/default-avatar.webp';
           if (data.use_custom_image && data.image) {
-            setAvatarUrl(data.image);
-          } else if (data.avatar_seed && data.avatar_seed.startsWith('f20_') || data.avatar_seed?.startsWith('f30_') || data.avatar_seed?.startsWith('f40_') || 
-                     data.avatar_seed?.startsWith('m20_') || data.avatar_seed?.startsWith('m30_') || data.avatar_seed?.startsWith('m40_') ||
-                     data.avatar_seed?.startsWith('cat_') || data.avatar_seed?.startsWith('dog_') || data.avatar_seed?.startsWith('rabbit_') ||
-                     data.avatar_seed?.startsWith('bear_') || data.avatar_seed?.startsWith('other_')) {
-            setAvatarUrl(`/images/local-avatars/${data.avatar_seed}.webp`);
-          } else {
-            setAvatarUrl('/images/local-avatars/default-avatar.webp');
+            url = data.image;
+          } else if (data.avatar_seed && (data.avatar_seed.startsWith('f20_') || data.avatar_seed.startsWith('f30_') || data.avatar_seed.startsWith('f40_') || 
+                     data.avatar_seed.startsWith('m20_') || data.avatar_seed.startsWith('m30_') || data.avatar_seed.startsWith('m40_') ||
+                     data.avatar_seed.startsWith('cat_') || data.avatar_seed.startsWith('dog_') || data.avatar_seed.startsWith('rabbit_') ||
+                     data.avatar_seed.startsWith('bear_') || data.avatar_seed.startsWith('other_'))) {
+            url = `/images/local-avatars/${data.avatar_seed}.webp`;
           }
+          setAvatarUrl(url);
+          sessionStorage.setItem('header-avatar-url', url);
         })
         .catch(() => {
-          // エラー時はデフォルトアバター
           setAvatarUrl('/images/local-avatars/default-avatar.webp');
         });
-    } else {
-      setAvatarUrl('');
-      setUnreadCount(0);
     }
   }, [session?.user?.id]);
 
