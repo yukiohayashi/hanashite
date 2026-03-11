@@ -143,9 +143,9 @@ export default function Header({ siteSettings: initialSettings }: HeaderProps = 
           </div>
 
           {/* 右: アバターアイコン */}
-          {status === 'loading' ? (
+          {status === 'loading' && !avatarUrl ? (
             <div className="top-1/2 right-[2%] z-[99999] absolute -translate-y-1/2 w-12 h-12" />
-          ) : session ? (
+          ) : (status === 'loading' && avatarUrl) || session ? (
             <button
               className="top-1/2 right-[2%] z-[99999] absolute text-center cursor-pointer -translate-y-1/2"
               onClick={() => setRightSidebarOpen(true)}
