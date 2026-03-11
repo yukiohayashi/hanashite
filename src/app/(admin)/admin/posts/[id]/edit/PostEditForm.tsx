@@ -561,9 +561,36 @@ export default function PostEditForm({ post, categories, allKeywords, postKeywor
                           </span>
                         )}
                       </div>
-                      <span className="text-xs text-gray-500">
-                        {new Date(comment.created_at).toLocaleDateString('ja-JP')}
-                      </span>
+                      <div className="flex items-center gap-2">
+                        <span className="text-xs text-gray-500">
+                          {new Date(comment.created_at).toLocaleDateString('ja-JP')}
+                        </span>
+                        <button
+                          type="button"
+                          onClick={async (e) => {
+                            e.stopPropagation();
+                            if (!confirm(`コメントID: ${comment.id} を削除しますか？`)) return;
+                            
+                            try {
+                              const res = await fetch(`/api/admin/comments/${comment.id}`, {
+                                method: 'DELETE',
+                              });
+                              
+                              if (res.ok) {
+                                alert('コメントを削除しました');
+                                window.location.reload();
+                              } else {
+                                alert('削除に失敗しました');
+                              }
+                            } catch (error) {
+                              alert('エラーが発生しました');
+                            }
+                          }}
+                          className="px-2 py-1 text-xs bg-red-600 text-white rounded hover:bg-red-700 transition-colors"
+                        >
+                          削除
+                        </button>
+                      </div>
                     </div>
                     <div 
                       className={`text-sm line-clamp-3 ${isPostAuthor ? 'text-gray-500' : 'text-gray-700'}`}
