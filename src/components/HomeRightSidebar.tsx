@@ -180,13 +180,16 @@ export default function HomeRightSidebar() {
   const userSection = status === 'authenticated' && session ? (
     <>
       <div className="my-2.5 text-center">
-        <div className="md:hidden relative bg-gray-300 rounded-full w-20 h-20 overflow-hidden mx-auto mb-2">
-          <div className="absolute top-[16px] left-1/2 bg-white rounded-full w-[36px] h-[36px] -translate-x-1/2"></div>
-          <div className="absolute top-[44px] left-1/2 bg-white rounded-[50%_50%_50%_50%/60%_60%_40%_40%] w-[54px] h-[40px] -translate-x-1/2"></div>
+        <div className="md:hidden w-20 h-20 rounded-full overflow-hidden mx-auto mb-2">
+          <img 
+            src="/images/local-avatars/default-avatar.webp"
+            alt="デフォルトアバター"
+            className="w-full h-full object-cover scale-125"
+          />
         </div>
         {userName ? (
           <>
-            <Link href="/profileset" className="text-[#ff6b35]">
+            <Link href={profileSlug ? `/users/${profileSlug}` : `/users/${session.user.id}`} className="text-[#ff6b35]">
               {userName}
             </Link>
             さん
@@ -199,11 +202,11 @@ export default function HomeRightSidebar() {
       
       <div className="flex justify-center my-2.5 w-full pc">
         <Link 
-          href={profileSlug ? `/users/${profileSlug}` : `/users/${session.user.id}`}
+          href="/profileset"
           className="inline-flex justify-center items-center bg-[#ff6b35] hover:bg-[#e58a2f] px-6 py-3 rounded font-bold text-white text-sm no-underline transition-colors"
           style={{ minWidth: '180px' }}
         >
-          プロフィール
+          プロフィール編集
         </Link>
       </div>
     </>

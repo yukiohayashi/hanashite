@@ -64,7 +64,7 @@ export default function MyPageMenu() {
         )}
         {userName ? (
           <>
-            <Link href="/profileset" className="text-[#ff6b35]">
+            <Link href={profileUrl} className="text-[#ff6b35]">
               {userName}
             </Link>
             さん
@@ -76,11 +76,11 @@ export default function MyPageMenu() {
       
       <div className="flex justify-center my-2.5 w-full pc">
         <Link 
-          href={profileUrl}
+          href="/profileset"
           className="inline-flex justify-center items-center bg-[#ff6b35] hover:bg-[#e58a2f] px-6 py-3 rounded font-bold text-white text-sm no-underline transition-colors"
           style={{ minWidth: '180px' }}
         >
-          プロフィール
+          プロフィール編集
         </Link>
       </div>
 
