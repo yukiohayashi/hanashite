@@ -92,9 +92,7 @@ export default function MyPageMenu() {
       <Link href="/notifications" className="block hover:bg-gray-100 mr-0.5 p-2.5 border-gray-200 border-b w-auto font-normal text-black text-sm text-left no-underline">
         <li>通知</li>
       </Link>
-      <Link href="/profileset" className="block hover:bg-gray-100 mr-0.5 p-2.5 border-gray-200 border-b w-auto font-normal text-black text-sm text-left no-underline">
-        <li>プロフィール編集</li>
-      </Link>
+   
       <Link href="/favorites" className="block hover:bg-gray-100 mr-0.5 p-2.5 border-gray-200 border-b w-auto font-normal text-black text-sm text-left no-underline">
         <li>気になる相談</li>
       </Link>

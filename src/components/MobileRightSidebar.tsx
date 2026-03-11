@@ -169,7 +169,7 @@ export default function MobileRightSidebar({ isOpen, onClose }: MobileRightSideb
                   )}
                   {userName ? (
                     <>
-                      <Link href="/profileset" className="text-[#ff6b35]" onClick={onClose}>
+                      <Link href={profileSlug ? `/users/${profileSlug}` : `/users/${session?.user?.id}`} className="text-[#ff6b35]" onClick={onClose}>
                         {userName}
                       </Link>
                       さん
@@ -181,12 +181,12 @@ export default function MobileRightSidebar({ isOpen, onClose }: MobileRightSideb
                 
                 <div className="flex justify-center my-2.5 w-full">
                   <Link 
-                    href={profileSlug ? `/users/${profileSlug}` : `/users/${session?.user?.id}`}
+                    href="/profileset"
                     className="inline-flex justify-center items-center bg-[#ff6b35] hover:bg-[#e58a2f] px-6 py-3 rounded font-bold text-white text-sm no-underline transition-colors"
                     style={{ minWidth: '180px' }}
                     onClick={onClose}
                   >
-                    プロフィール
+                    プロフィール編集
                   </Link>
                 </div>
 
@@ -195,9 +195,7 @@ export default function MobileRightSidebar({ isOpen, onClose }: MobileRightSideb
                   <Link href="/notifications" className="block hover:bg-gray-100 mr-0.5 p-2.5 border-gray-200 border-b w-auto font-normal text-black text-sm text-left no-underline" onClick={onClose}>
                     <li>通知</li>
                   </Link>
-                  <Link href="/profileset" className="block hover:bg-gray-100 mr-0.5 p-2.5 border-gray-200 border-b w-auto font-normal text-black text-sm text-left no-underline" onClick={onClose}>
-                    <li>プロフィール編集</li>
-                  </Link>
+                 
                   <Link href="/favorites" className="block hover:bg-gray-100 mr-0.5 p-2.5 border-gray-200 border-b w-auto font-normal text-black text-sm text-left no-underline" onClick={onClose}>
                     <li>気になる相談</li>
                   </Link>
