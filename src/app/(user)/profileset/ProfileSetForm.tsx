@@ -82,7 +82,7 @@ export default function ProfileSetForm({ user, categories, isFirstTime }: Profil
   const defaultBirthYear = currentYear - 30; // デフォルト30歳
   const [birthYear, setBirthYear] = useState(user.birth_year || '');
   const [prefecture, setPrefecture] = useState(user.prefecture || '');
-  const [marriage, setMarriage] = useState(user.marriage || 'not_specified');
+  const [marriage, setMarriage] = useState<string | null>(user.marriage || null);
   const [childCount, setChildCount] = useState(user.child_count || 0);
   const [job, setJob] = useState(user.job || '');
   const [kanaSei, setKanaSei] = useState(user.kana_sei || '');
@@ -227,7 +227,7 @@ export default function ProfileSetForm({ user, categories, isFirstTime }: Profil
       formData.append('sex', sex);
       formData.append('birthYear', birthYear);
       formData.append('prefecture', prefecture);
-      formData.append('marriage', marriage);
+      formData.append('marriage', marriage || '');
       formData.append('childCount', childCount.toString());
       formData.append('job', job);
       formData.append('kanaSei', kanaSei);
