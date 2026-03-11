@@ -10,7 +10,7 @@ import HomeRightSidebar from '@/components/HomeRightSidebar';
 import ClickableImage from '@/components/ClickableImage';
 import LikeButton from './LikeButton';
 import FavoriteButton from './FavoriteButton';
-import GoogleAdPost from '@/components/GoogleAdPost';
+// import GoogleAdPost from '@/components/GoogleAdPost'; // 一時的に非表示
 import type { Metadata } from 'next';
 
 interface Post {
@@ -406,10 +406,13 @@ export default async function PostPage({ params, searchParams }: { params: Promi
                   <span className="text-gray-400 text-sm">ID: {post.id}</span>
                 </div>
 
-                {/* Google広告（本文内） */}
-                <div className="mb-4">
+                {/* ========================================
+                    Google広告（本文内）- 一時的に非表示
+                    復活する際は下記のコメントを外してください
+                ======================================== */}
+                {/* <div className="mb-4">
                   <GoogleAdPost />
-                </div>
+                </div> */}
 
                 {/* 回答受付状況 */}
                 {post.deadline_at && (
