@@ -56,7 +56,7 @@ export default async function PostPage({ params, searchParams }: { params: Promi
   
   const { data: post } = await supabase
     .from('posts')
-    .select('id, title, content, created_at, user_id, og_image, thumbnail_url, source_url, og_title, og_description, status, category_id, deadline_at, best_answer_id, users(name, image, sex, birth_year, prefecture, avatar_seed, use_custom_image), categories(id, name)')
+    .select('id, title, content, created_at, user_id, og_image, thumbnail_url, source_url, og_title, og_description, status, category_id, deadline_at, best_answer_id, users(name, image, sex, birth_year, prefecture, avatar_seed, use_custom_image, marriage), categories(id, name)')
     .eq('id', id)
     .single() as { data: any | null, error: { message: string } | null };
 
@@ -68,6 +68,7 @@ export default async function PostPage({ params, searchParams }: { params: Promi
   const userPrefecture = user?.prefecture || null;
   const userAvatarSeed = user?.avatar_seed || null;
   const userUseCustomImage = user?.use_custom_image || false;
+  const userMarriage = user?.marriage || null;
   
   // アバター表示用のヘルパー関数をインポート
   const { getAvatarUrl } = await import('@/lib/avatarUtils');
@@ -286,7 +287,7 @@ export default async function PostPage({ params, searchParams }: { params: Promi
                   
                   {/* ユーザー名と日付 */}
                   <div className="flex flex-col">
-                    <div className="mb-0 text-gray-700 text-sm">
+                    <div className="mb-0 text-gray-700 text-sm flex items-center gap-2">
                       {post?.user_id ? (
                         <Link href={`/users/${post.user_id}`} className="hover:text-blue-600 transition-colors">
                           {userName}さん
@@ -294,8 +295,17 @@ export default async function PostPage({ params, searchParams }: { params: Promi
                       ) : (
                         <span>{userName}さん</span>
                       )}
+                      {userMarriage && userMarriage !== 'private' && (
+                        <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-orange-100 text-orange-800">
+                          {userMarriage === 'single' && '独身'}
+                          {userMarriage === 'dating' && '交際中'}
+                          {userMarriage === 'married' && '既婚'}
+                          {userMarriage === 'divorced' && '離婚経験'}
+                          {userMarriage === 'other' && 'その他'}
+                        </span>
+                      )}
                       {(userSex || userBirthYear || userPrefecture) && (
-                        <span className="ml-2 text-gray-500 text-xs">
+                        <span className="text-gray-500 text-xs">
                           {getSexSymbol(userSex)}
                           {getAgeGroup(userBirthYear) && ` ${getAgeGroup(userBirthYear)}`}
                           {userPrefecture && ` ${userPrefecture}`}
