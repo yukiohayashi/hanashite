@@ -48,7 +48,7 @@ export default function ResolvedSection({ bestAnswers, waitingPosts }: ResolvedS
 
   return (
     <>
-      <h3 className="m-1.5 mb-2 px-0 font-bold text-base" style={{ color: '#ff6b6b' }}>
+      <h3 className="m-1.5 mb-2 px-0 font-bold text-base text-[#ff6b6b]">
         <i className="fas fa-trophy mr-1"></i>解決済み
       </h3>
 

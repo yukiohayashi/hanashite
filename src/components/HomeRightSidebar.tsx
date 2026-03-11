@@ -233,7 +233,7 @@ export default function HomeRightSidebar() {
       {/* 運営からのお知らせ */}
       {announcements.length > 0 && (
         <div>
-          <h3 className="mb-2 px-2 font-bold text-base" style={{ color: '#ff6b6b' }}>
+          <h3 className="mb-2 px-2 font-bold text-base text-[#ff6b6b]">
             運営からのお知らせ <i className="fa fa-bullhorn" aria-hidden="true"></i>
           </h3>
           <ul className="bg-[#fffaf9] shadow m-0 p-0 rounded-lg list-none">
@@ -250,7 +250,7 @@ export default function HomeRightSidebar() {
 
       {/* 最新のコメント*/}
       <div>
-        <h3 className="mt-4 mb-2 px-2 font-bold text-base" style={{ color: '#ff6b6b' }}>
+        <h3 className="mt-4 mb-2 px-2 font-bold text-base text-[#ff6b6b]">
           最新のコメント<i className="fas fa-comment"></i>
         </h3>
         <ul className="bg-[#fffaf9] shadow m-0 p-0 rounded-lg list-none">
@@ -272,7 +272,7 @@ export default function HomeRightSidebar() {
 
       {/* 最新相談 */}
       <div>
-        <h3 className="mt-4 mb-2 px-2 font-bold text-base" style={{ color: '#ff6b6b' }}>
+        <h3 className="mt-4 mb-2 px-2 font-bold text-base text-[#ff6b6b]">
           最新の相談 <i className="fas fa-comments"></i>
         </h3>
         <ul className="flex flex-col gap-2 bg-[#fffaf9] shadow m-0 p-0 rounded-lg list-none">

@@ -534,7 +534,7 @@ export default async function Home({ searchParams }: HomeProps) {
               {/* 検索結果表示 */}
               {searchQuery && (
                 <div className="my-2.5">
-                  <div className="mx-2.5 my-5 font-bold" style={{ color: '#ff6b35' }}>
+                  <div className="mx-2.5 my-5 font-bold text-[#ff6b35]">
                     「{searchQuery}」が含まれる相談 {posts?.length || 0}件
                   </div>
                   {posts && posts.length > 0 && (
@@ -558,7 +558,7 @@ export default async function Home({ searchParams }: HomeProps) {
             {/* 注目の相談（最新順時のみ表示） */}
             {(sortBy === 'recommend' || sortBy === 'top_post') && featuredPosts.length > 0 && (
               <>
-                <h3 className="m-1.5 mb-2 px-0 font-bold text-base" style={{ color: '#ff6b6b' }}>注目の相談</h3>
+                <h3 className="m-1.5 mb-2 px-0 font-bold text-base text-[#ff6b6b]">注目の相談</h3>
                 <div className="mx-1.5 mb-4">
                   {(() => {
                     const post = featuredPosts[0];
@@ -666,7 +666,7 @@ export default async function Home({ searchParams }: HomeProps) {
           
 
             {/* 相談受付中見出し */}
-            <h3 className="m-1.5 mb-2 px-0 font-bold text-base" style={{ color: '#ff6b6b' }}>
+            <h3 className="m-1.5 mb-2 px-0 font-bold text-base text-[#ff6b6b]">
               <i className="fas fa-comments mr-1"></i>相談受付中
             </h3>
 
@@ -703,7 +703,7 @@ export default async function Home({ searchParams }: HomeProps) {
 
           {/* スマホビュー: 最新のコメント */}
           <section className="md:hidden mt-6 px-2">
-            <h3 className="mb-2 px-2 font-bold text-base" style={{ color: '#ff6b6b' }}>
+            <h3 className="mb-2 px-2 font-bold text-base text-[#ff6b6b]">
               最新の回答<i className="fas fa-comment"></i>
             </h3>
             <LatestCommentsMobile />
@@ -847,7 +847,7 @@ async function InterestCategoriesSection({ userId }: { userId: string | number |
 
   return (
     <div className="mb-4">
-      <h3 className="m-1.5 mb-2 px-0 font-bold text-base" style={{ color: '#ff6b35' }}>
+      <h3 className="m-1.5 mb-2 px-0 font-bold text-base text-[#ff6b35]">
         カテゴリ
         <Link href="/profileset/" className="ml-2 text-sm">
           追加 <i className="fas fa-plus-square"></i>

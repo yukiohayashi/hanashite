@@ -196,7 +196,7 @@ export default function RightSidebar() {
       
       {/* 運営からお知らせ */}
       <div>
-        <h3 className="mb-2 px-2 font-bold text-base" style={{ color: '#ff6b35' }}>
+        <h3 className="mb-2 px-2 font-bold text-base text-[#ff6b35]">
           運営からお知らせ <i className="fa fa-info-circle" aria-hidden="true"></i>
         </h3>
         <ul className="bg-white shadow m-0 p-0 rounded-lg list-none">
@@ -218,7 +218,7 @@ export default function RightSidebar() {
 
       {/* 最新の回答*/}
       <div>
-        <h3 className="mt-4 mb-2 px-2 font-bold text-base" style={{ color: '#ff6b35' }}>
+        <h3 className="mt-4 mb-2 px-2 font-bold text-base text-[#ff6b35]">
           最新の回答<i className="fas fa-comment"></i>
         </h3>
         <ul className="bg-white shadow m-0 p-0 rounded-lg list-none">
@@ -240,7 +240,7 @@ export default function RightSidebar() {
 
       {/* 最新相談 */}
       <div>
-        <h3 className="mt-4 mb-2 px-2 font-bold text-base" style={{ color: '#ff6b35' }}>
+        <h3 className="mt-4 mb-2 px-2 font-bold text-base text-[#ff6b35]">
           最新の相談 <i className="fas fa-comments"></i>
         </h3>
         <ul className="flex flex-col gap-2 bg-white shadow m-0 p-0 rounded-lg list-none">
