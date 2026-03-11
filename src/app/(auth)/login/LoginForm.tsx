@@ -28,7 +28,15 @@ export default function LoginForm() {
       if (result?.error) {
         setError('メールアドレスまたはパスワードが正しくありません。');
       } else {
-        router.push('/');
+        // ログイン成功後、プロフィール登録状況を確認
+        const profileResponse = await fetch('/api/user/profile-status');
+        const profileData = await profileResponse.json();
+        
+        if (profileData.profile_registered) {
+          router.push('/');
+        } else {
+          router.push('/profileset');
+        }
         router.refresh();
       }
     } catch (err) {
