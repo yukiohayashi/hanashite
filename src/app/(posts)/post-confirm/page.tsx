@@ -31,7 +31,7 @@ export default async function PostConfirmPage() {
           <PostConfirmView />
         </main>
         
-        <aside className="hidden md:block w-[280px]">
+        <aside className="hidden md:block w-[280px] bg-[#fff8f6] p-2 rounded-lg">
           <MyPageMenu />
         </aside>
       </div>

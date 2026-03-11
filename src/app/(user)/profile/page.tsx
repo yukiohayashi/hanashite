@@ -20,7 +20,7 @@ export default async function ProfilePage() {
           </div>
         </main>
         
-        <aside className="hidden md:block w-full md:w-[280px] md:min-w-[280px]">
+        <aside className="hidden md:block w-full md:w-[280px] md:min-w-[280px] bg-[#fff8f6] p-2 rounded-lg">
           <MyPageMenu />
         </aside>
         </div>

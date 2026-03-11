@@ -29,7 +29,9 @@ export default async function AtFirstPage() {
           <div className="mb-4">
             <RightSidebar />
           </div>
-          <MyPageMenu />
+          <div className="bg-[#fff8f6] p-2 rounded-lg">
+            <MyPageMenu />
+          </div>
         </aside>
       </div>
       

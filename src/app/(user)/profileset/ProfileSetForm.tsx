@@ -384,7 +384,7 @@ export default function ProfileSetForm({ user, categories, isFirstTime }: Profil
               onChange={(e) => setShowPostHistory(e.target.checked)}
               className="mr-2 rounded focus:ring-orange-400 w-4 h-4 text-orange-500"
             />
-            <span className="text-gray-700">相談・回答履歴を<a href={profileSlug ? `/users/${profileSlug}` : `/users/${user.id}`} className="text-orange-500 hover:underline" target="_blank">プロフィール</a>に公開する</span>
+            <span className="text-gray-700">相談・回答履歴を<a href={profileSlug ? `/users/${profileSlug}` : `/users/${user.id}`} className="text-orange-500 hover:underline">プロフィール</a>に公開する</span>
           </label>
         </div>
         

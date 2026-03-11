@@ -95,7 +95,7 @@ export default function PasswordChangeForm() {
             </label>
             <a
               href="/resetpassword"
-              className="text-blue-600 hover:text-blue-800 text-xs hover:underline"
+              className="text-[#ff6b35] hover:text-[#e55a2b] text-xs hover:underline"
             >
               パスワードを忘れた場合
             </a>
