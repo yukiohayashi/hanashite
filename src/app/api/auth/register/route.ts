@@ -47,9 +47,6 @@ export async function POST(request: NextRequest) {
     const tempPassword = crypto.randomBytes(12).toString('hex');
     const hashedPassword = await bcrypt.hash(tempPassword, 10);
 
-    // ニックネーム生成（メールアドレスの@前部分）
-    const defaultNickname = email.split('@')[0].replace(/[^a-zA-Z0-9]/g, '');
-
     // UUIDを生成
     const userId = crypto.randomUUID();
 
@@ -60,7 +57,7 @@ export async function POST(request: NextRequest) {
         id: userId,
         email,
         user_pass: hashedPassword,
-        name: defaultNickname,
+        name: '匿名', // 匿名ニックネームを設定
         status: 0, // 仮登録
         created_at: new Date().toISOString(),
         updated_at: new Date().toISOString(),

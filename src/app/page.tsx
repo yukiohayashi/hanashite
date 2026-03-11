@@ -15,6 +15,7 @@ import ResolvedSection from '@/components/ResolvedSection';
 import SearchHistoryRecorder from '@/components/SearchHistoryRecorder';
 import FloatingCreateButton from '@/components/FloatingCreateButton';
 import GoogleAdTop from '@/components/GoogleAdTop';
+import ProfileGuidance from '@/components/ProfileGuidance';
 import { auth } from '@/lib/auth';
 
 // HTMLタグを除去するヘルパー関数
@@ -57,6 +58,17 @@ export default async function Home({ searchParams }: HomeProps) {
   // 現在のユーザーを取得（セッションから）
   const session = await auth();
   const userId = session?.user?.id || null;
+
+  // ログインユーザーの情報を取得
+  let currentUser = null;
+  if (userId) {
+    const { data } = await supabase
+      .from('users')
+      .select('name, bio')
+      .eq('id', userId)
+      .single();
+    currentUser = data;
+  }
 
   const params = await searchParams;
   const searchQuery = params.s || '';
@@ -507,6 +519,11 @@ export default async function Home({ searchParams }: HomeProps) {
   return (
     <div className="bg-white min-h-screen">
       <Header />
+      
+      {/* プロフィール未完了ガイダンス */}
+      {currentUser && (
+        <ProfileGuidance userName={currentUser.name} userBio={currentUser.bio} />
+      )}
 
       <main className="md:flex md:justify-center mx-auto pt-[60px] md:pt-4 pb-4 max-w-7xl px-0 sm:px-6 lg:px-8">
         {/* 左サイドバー */}

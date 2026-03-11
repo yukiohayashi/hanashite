@@ -45,7 +45,6 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
   pages: {
     signIn: "/login",
     signOut: "/",
-    newUser: "/auth-callback", // LINE/Twitter新規登録後のコールバック
   },
   providers: [
     Credentials({
@@ -197,7 +196,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
                 .from('users')
                 .insert({
                   id: user.id,
-                  name: user.name || '',
+                  name: '匿名', // 匿名ニックネームを設定
                   email: emailToSave,
                   image: user.image || '',
                   use_custom_image: user.image ? true : false,
