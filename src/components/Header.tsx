@@ -135,20 +135,22 @@ export default function Header({ siteSettings: initialSettings }: HeaderProps = 
               className="top-1/2 right-[2%] z-[99999] absolute text-center cursor-pointer -translate-y-1/2"
               onClick={() => setRightSidebarOpen(true)}
             >
-              <div className="relative w-12 h-12 rounded-full overflow-hidden">
-                {avatarUrl ? (
-                  <img
-                    src={avatarUrl}
-                    alt="プロフィール画像"
-                    id="header-avatar"
-                    className="rounded-full w-full h-full object-cover scale-125"
-                  />
-                ) : (
-                  <div className="bg-[#ff6b6b] rounded-full w-12 h-12" />
-                )}
+              <div className="relative w-12 h-12">
+                <div className="rounded-full overflow-hidden w-full h-full">
+                  {avatarUrl ? (
+                    <img
+                      src={avatarUrl}
+                      alt="プロフィール画像"
+                      id="header-avatar"
+                      className="rounded-full w-full h-full object-cover scale-125"
+                    />
+                  ) : (
+                    <div className="bg-[#ff6b6b] rounded-full w-12 h-12" />
+                  )}
+                </div>
                 {/* 通知ドット */}
                 {unreadCount > 0 && (
-                  <span className="top-0 right-0 absolute flex justify-center items-center bg-red-500 rounded-full w-4 h-4 text-[10px] text-white font-bold">
+                  <span className="top-0 right-0 absolute flex justify-center items-center bg-red-500 rounded-full w-4 h-4 text-[10px] text-white font-bold z-10">
                     {unreadCount > 9 ? '9+' : unreadCount}
                   </span>
                 )}

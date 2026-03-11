@@ -46,9 +46,12 @@ export default function UserRightSidebar() {
     return (
       <>
         <div className="my-2.5 text-center">
-          <div className="md:hidden relative bg-gray-300 rounded-full w-20 h-20 overflow-hidden mx-auto mb-2">
-            <div className="absolute top-[16px] left-1/2 bg-white rounded-full w-[36px] h-[36px] -translate-x-1/2"></div>
-            <div className="absolute top-[44px] left-1/2 bg-white rounded-[50%_50%_50%_50%/60%_60%_40%_40%] w-[54px] h-[40px] -translate-x-1/2"></div>
+          <div className="md:hidden w-20 h-20 rounded-full overflow-hidden mx-auto mb-2">
+            <img 
+              src="/images/local-avatars/default-avatar.webp"
+              alt="デフォルトアバター"
+              className="w-full h-full object-cover scale-125"
+            />
           </div>
           {userName ? (
             <>

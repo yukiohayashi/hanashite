@@ -17,12 +17,22 @@ export async function GET(request: Request) {
 
     const notifications: any[] = [];
 
-    // 1. 運営スタッフからのお知らせ（user_id=33の投稿）全件取得
+    // ユーザーの登録日時を取得
+    const { data: currentUser } = await supabase
+      .from('users')
+      .select('created_at')
+      .eq('id', userId)
+      .single();
+
+    const userCreatedAt = currentUser?.created_at;
+
+    // 1. 運営スタッフからのお知らせ（user_id=1の投稿）ユーザー登録後の投稿のみ取得
     const { data: adminPosts } = await supabase
       .from('posts')
       .select('id, title, created_at')
       .eq('user_id', 1)
       .in('status', ['publish', 'published'])
+      .gte('created_at', userCreatedAt) // ユーザー登録日時以降の投稿のみ
       .order('created_at', { ascending: false });
 
     // 運営スタッフのアバター画像を取得

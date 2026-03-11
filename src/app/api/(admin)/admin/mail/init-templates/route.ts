@@ -12,7 +12,7 @@ export async function POST() {
         body: `<div style="font-family: sans-serif; max-width: 600px; margin: 0 auto;">
   <h2>メールアドレスの認証</h2>
   <p>メールアドレスの認証が完了しました。</p>
-  <p>ハナシテへの会員登録が完了しました。</p>
+  <p>ハナシテへの仮会員登録が完了しました。</p>
   <p>下記のリンクをクリックして、本登録を完了してください。</p>
   <p style="margin: 30px 0;">
     <a href="{{activationLink}}" style="background-color: #5ac971; color: white; padding: 12px 24px; text-decoration: none; border-radius: 5px; display: inline-block;">
@@ -45,7 +45,6 @@ export async function POST() {
         subject: '【ハナシテ】本登録完了',
         body: `<div style="font-family: sans-serif; max-width: 600px; margin: 0 auto;">
   <h2>{{nickname}} 様</h2>
-  <p>メールアドレスの認証が完了しました。</p>
   <p>ハナシテへの会員登録が完了しました。</p>
   <hr style="margin: 20px 0; border: none; border-top: 1px solid #ddd;">
   <h3>ログイン情報</h3>
