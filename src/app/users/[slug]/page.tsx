@@ -283,6 +283,15 @@ export default async function UserPage({ params }: { params: Promise<{ slug: str
                   {user.prefecture && (
                     <span>{user.prefecture}</span>
                   )}
+                  {user.marriage && user.marriage !== 'private' && (
+                    <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-orange-100 text-orange-800">
+                      {user.marriage === 'single' && '独身'}
+                      {user.marriage === 'dating' && '交際中'}
+                      {user.marriage === 'married' && '既婚'}
+                      {user.marriage === 'divorced' && '離婚経験'}
+                      {user.marriage === 'other' && 'その他'}
+                    </span>
+                  )}
                 </div>
                 <p className="text-gray-700 text-sm mt-2">
                   {user.user_description || ''}

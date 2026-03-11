@@ -580,6 +580,26 @@ export default function ProfileSetForm({ user, categories, isFirstTime }: Profil
             <option value="other">その他</option>
           </select>
         </div>
+
+        <div className="mb-4">
+          <label className="block mb-2 font-bold text-gray-700">
+            恋愛ステータス
+            <span className="ml-2 text-gray-500 text-xs font-normal">※ニックネーム横にバッジ表示されます</span>
+          </label>
+          <select
+            value={marriage || ''}
+            onChange={(e) => setMarriage(e.target.value || null)}
+            className="p-2.5 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-orange-400 w-full"
+          >
+            <option value="">未設定（バッジ非表示）</option>
+            <option value="private">非公開（バッジ非表示）</option>
+            <option value="single">独身・恋人なし</option>
+            <option value="dating">恋愛中・交際中</option>
+            <option value="married">既婚</option>
+            <option value="divorced">離婚・別居</option>
+            <option value="other">その他</option>
+          </select>
+        </div>
         
         <div className="mb-4">
           <label className="block mb-2 font-bold text-gray-700">
@@ -683,26 +703,6 @@ export default function ProfileSetForm({ user, categories, isFirstTime }: Profil
                 {JOBS.map((j) => (
                   <option key={j} value={j}>{j}</option>
                 ))}
-              </select>
-            </div>
-
-            <div className="mb-4">
-              <label className="block mb-2 font-bold text-gray-700">
-                恋愛ステータス
-                <span className="ml-2 text-gray-500 text-xs font-normal">※ニックネーム横にバッジ表示されます</span>
-              </label>
-              <select
-                value={marriage || ''}
-                onChange={(e) => setMarriage(e.target.value || null)}
-                className="p-2.5 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-orange-400 w-full"
-              >
-                <option value="">未設定（バッジ非表示）</option>
-                <option value="private">非公開（バッジ非表示）</option>
-                <option value="single">独身・恋人なし</option>
-                <option value="dating">恋愛中・交際中</option>
-                <option value="married">既婚</option>
-                <option value="divorced">離婚・別居</option>
-                <option value="other">その他</option>
               </select>
             </div>
             

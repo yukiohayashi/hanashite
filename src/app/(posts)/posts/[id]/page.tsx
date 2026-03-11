@@ -148,7 +148,7 @@ export default async function PostPage({ params, searchParams }: { params: Promi
   // コメントとユーザー情報をJOINで一度に取得
   const { data: commentsData } = await supabase
     .from('comments')
-    .select('id, content, created_at, user_id, parent_id, users(name, image, avatar_seed, use_custom_image)')
+    .select('id, content, created_at, user_id, parent_id, users(name, image, avatar_seed, use_custom_image, marriage)')
     .eq('post_id', parseInt(id))
     .eq('status', 'approved')
     .order('created_at', { ascending: false });
