@@ -45,6 +45,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
   pages: {
     signIn: "/login",
     signOut: "/",
+    newUser: "/auth-callback", // LINE/Twitter新規登録後のコールバック
   },
   providers: [
     Credentials({
@@ -191,7 +192,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
             const emailToSave = user.email || `${account.provider}_${user.id}@dokujo.com`;
 
             if (!existingUser) {
-              // 新規ユーザーの場合、usersテーブルに挿入
+              // 新規ユーザーの場合、usersテーブルに挿入（会員として登録）
               const { error: insertError } = await supabaseAdmin
                 .from('users')
                 .insert({
@@ -200,7 +201,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
                   email: emailToSave,
                   image: user.image || '',
                   use_custom_image: user.image ? true : false,
-                  status: 3,
+                  status: 3, // 会員として登録
                   created_at: new Date().toISOString(),
                 });
 

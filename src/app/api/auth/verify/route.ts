@@ -71,7 +71,7 @@ export async function POST(request: NextRequest) {
 
     // ユーザーのステータスを本登録に更新（profile_slugが未設定の場合はidを設定）
     const slugUpdate: Record<string, string | number> = {
-      status: 1,
+      status: 3, // 会員として登録
       user_pass: hashedPassword,
       updated_at: new Date().toISOString(),
     };
