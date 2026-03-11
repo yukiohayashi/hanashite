@@ -74,7 +74,7 @@ function VerifyContent() {
               </div>
               <h1 className="text-2xl font-bold text-gray-800 mb-2">認証完了</h1>
               <p className="text-gray-600 mb-4">{message}</p>
-              <p className="text-sm text-gray-500">3秒後にログインページへ移動します...</p>
+              <p className="text-sm text-gray-500">メールアドレスにパスワードを送信しましたので、大切に保管してください。3秒後にログインページへ移動します...</p>
               <div className="mt-6">
                 <Link
                   href="/login"

@@ -98,7 +98,9 @@ export default function HeaderClient() {
         </>
       ) : (
         <Link href="/login" className="flex items-center">
-          <img src="/images/local-avatars/default-avatar.webp" alt="デフォルトアバター" id="header-avatar" className="bg-white rounded-full w-10 h-10 object-cover" />
+          <div className="w-10 h-10 rounded-full overflow-hidden bg-white">
+            <img src="/images/local-avatars/default-avatar.webp" alt="デフォルトアバター" id="header-avatar" className="w-full h-full object-cover scale-125" />
+          </div>
         </Link>
       )}
     </div>
