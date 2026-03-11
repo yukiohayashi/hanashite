@@ -36,10 +36,24 @@ export default function MobileRightSidebar({ isOpen, onClose }: MobileRightSideb
             setProfileSlug(data.profile_slug);
           }
           setUserName(data.name || session.user.name || 'ゲスト');
-          setAvatarUrl(data.image || '');
           setParticipatePoints(data.participate_points || false);
+          
+          // アバター画像の設定（ローカルアバター対応）
+          if (data.use_custom_image && data.image) {
+            setAvatarUrl(data.image);
+          } else if (data.avatar_seed && (data.avatar_seed.startsWith('f20_') || data.avatar_seed.startsWith('f30_') || data.avatar_seed.startsWith('f40_') || 
+                     data.avatar_seed.startsWith('m20_') || data.avatar_seed.startsWith('m30_') || data.avatar_seed.startsWith('m40_') ||
+                     data.avatar_seed.startsWith('cat_') || data.avatar_seed.startsWith('dog_') || data.avatar_seed.startsWith('rabbit_') ||
+                     data.avatar_seed.startsWith('bear_') || data.avatar_seed.startsWith('other_'))) {
+            setAvatarUrl(`/images/local-avatars/${data.avatar_seed}.webp`);
+          } else {
+            setAvatarUrl('/images/local-avatars/default-avatar.webp');
+          }
         })
-        .catch(err => console.error('ユーザー情報取得エラー:', err));
+        .catch(err => {
+          console.error('ユーザー情報取得エラー:', err);
+          setAvatarUrl('/images/local-avatars/default-avatar.webp');
+        });
 
       // ポイント情報を取得
       fetch(`/api/phistory?userId=${session.user.id}`)
