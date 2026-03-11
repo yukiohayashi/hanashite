@@ -159,7 +159,7 @@ export default function Header({ siteSettings: initialSettings }: HeaderProps = 
               href="/login"
               className="top-1/2 right-[2%] z-[99999] absolute text-center cursor-pointer -translate-y-1/2"
             >
-              <img src="/images/default-avatar.webp" alt="デフォルトアバター" id="header-avatar" className="bg-white rounded-full w-10 h-10 object-cover" />
+              <img src="/images/local-avatars/default-avatar.webp" alt="デフォルトアバター" id="header-avatar" className="bg-white rounded-full w-10 h-10 object-cover" />
             </Link>
           )}
         </div>
