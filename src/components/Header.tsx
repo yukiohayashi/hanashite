@@ -33,10 +33,19 @@ export default function Header({ siteSettings: initialSettings }: HeaderProps = 
     return '';
   });
   const [unreadCount, setUnreadCount] = useState(0);
-  const [siteSettings, setSiteSettings] = useState<SiteSettings>(initialSettings || {
-    powered_by_text: '',
-    total_posts_count: '',
-    site_catchphrase: '',
+  const [siteSettings, setSiteSettings] = useState<SiteSettings>(() => {
+    if (initialSettings) return initialSettings;
+    if (typeof window !== 'undefined') {
+      const cached = sessionStorage.getItem('site-settings');
+      if (cached) {
+        try { return JSON.parse(cached); } catch { /* ignore */ }
+      }
+    }
+    return {
+      powered_by_text: '',
+      total_posts_count: '',
+      site_catchphrase: '',
+    };
   });
 
   useEffect(() => {
@@ -52,10 +61,11 @@ export default function Header({ siteSettings: initialSettings }: HeaderProps = 
               site_catchphrase: data.data.find((s: any) => s.setting_key === 'site_catchphrase')?.setting_value || '',
             };
             setSiteSettings(settings);
+            sessionStorage.setItem('site-settings', JSON.stringify(settings));
           }
         })
         .catch(() => {
-          // エラー時は空文字のまま
+          // エラー時はキャッシュのまま
         });
     }
   }, [initialSettings]);
@@ -122,12 +132,13 @@ export default function Header({ siteSettings: initialSettings }: HeaderProps = 
                 alt="ハナシテ" 
                 width={120} 
                 height={32}
+                priority
                 className="w-full"
               />
             </Link>
             <div className="hidden md:block text-[0.45rem] text-white text-center">powered by {siteSettings.powered_by_text}</div>
-            <div className="w-full text-[0.5rem] text-center text-white">
-              {siteSettings.site_catchphrase}
+            <div className="w-full text-[0.5rem] text-center text-white min-h-[1em]">
+              {siteSettings.site_catchphrase || '\u00A0'}
             </div>
           </div>
 
@@ -186,6 +197,7 @@ export default function Header({ siteSettings: initialSettings }: HeaderProps = 
                     alt="ハナシテ" 
                     width={120} 
                     height={32}
+                    priority
                     className="w-full"
                   />
                 </div>
