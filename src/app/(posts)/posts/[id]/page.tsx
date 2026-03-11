@@ -183,7 +183,8 @@ export default async function PostPage({ params, searchParams }: { params: Promi
         name: commentUser?.name || 'ゲスト',
         image: commentUser?.image || null,
         avatar_seed: commentUser?.avatar_seed || null,
-        use_custom_image: commentUser?.use_custom_image || false
+        use_custom_image: commentUser?.use_custom_image || false,
+        marriage: commentUser?.marriage || null
       },
       like_count: likeCounts[comment.id] || 0
     };
