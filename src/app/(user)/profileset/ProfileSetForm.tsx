@@ -616,23 +616,6 @@ export default function ProfileSetForm({ user, categories, isFirstTime }: Profil
         
         <div className="mb-4">
           <label className="block mb-2 font-bold text-gray-700">
-            職種
-            <span className="ml-2 text-gray-500 text-xs font-normal">※表示されません</span>
-          </label>
-          <select
-            value={job}
-            onChange={(e) => setJob(e.target.value)}
-            className="p-2.5 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-orange-400 w-full"
-          >
-            <option value="">選択してください</option>
-            {JOBS.map((j) => (
-              <option key={j} value={j}>{j}</option>
-            ))}
-          </select>
-        </div>
-        
-        <div className="mb-4">
-          <label className="block mb-2 font-bold text-gray-700">
             プロフィールURL
             {!canChangeSlug() ? (
               <sup className="text-red-600 text-xs">※変更後1ヶ月間は変更できません（あと{getDaysUntilChange()}日）</sup>
@@ -687,17 +670,39 @@ export default function ProfileSetForm({ user, categories, isFirstTime }: Profil
         {participatePoints && (
           <div className="space-y-4">
             <div className="mb-4">
-              <label className="block mb-2 font-bold text-gray-700">結婚の有無</label>
+              <label className="block mb-2 font-bold text-gray-700">
+                職種
+                <span className="ml-2 text-gray-500 text-xs font-normal">※プロフィールに表示されません</span>
+              </label>
               <select
-                value={marriage}
-                onChange={(e) => setMarriage(e.target.value)}
+                value={job}
+                onChange={(e) => setJob(e.target.value)}
                 className="p-2.5 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-orange-400 w-full"
               >
-                <option value="not_specified">選択して下さい</option>
-                <option value="single">未婚</option>
+                <option value="">選択してください</option>
+                {JOBS.map((j) => (
+                  <option key={j} value={j}>{j}</option>
+                ))}
+              </select>
+            </div>
+
+            <div className="mb-4">
+              <label className="block mb-2 font-bold text-gray-700">
+                恋愛ステータス
+                <span className="ml-2 text-gray-500 text-xs font-normal">※ニックネーム横にバッジ表示されます</span>
+              </label>
+              <select
+                value={marriage || ''}
+                onChange={(e) => setMarriage(e.target.value || null)}
+                className="p-2.5 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-orange-400 w-full"
+              >
+                <option value="">未設定（バッジ非表示）</option>
+                <option value="private">非公開（バッジ非表示）</option>
+                <option value="single">独身・恋人なし</option>
+                <option value="dating">恋愛中・交際中</option>
                 <option value="married">既婚</option>
-                <option value="divorced">離婚</option>
-                <option value="widowed">死別</option>
+                <option value="divorced">離婚・別居</option>
+                <option value="other">その他</option>
               </select>
             </div>
             

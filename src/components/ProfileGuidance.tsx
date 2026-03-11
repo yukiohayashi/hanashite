@@ -8,13 +8,13 @@ interface ProfileGuidanceProps {
 }
 
 export default function ProfileGuidance({ userName, userBio }: ProfileGuidanceProps) {
-  // 初期状態で判定
-  const shouldShowGuidance = userName === '匿名' && (!userBio || userBio.trim() === '');
-  const [showGuidance, setShowGuidance] = useState(shouldShowGuidance);
+  const [showGuidance, setShowGuidance] = useState(false);
 
   useEffect(() => {
-    // ニックネームが「匿名」かつ自己紹介がNULLまたは空の場合にメニューをハイライト
-    if (shouldShowGuidance) {
+    // ニックネームが「匿名」かつ自己紹介がNULLまたは空の場合にガイダンスを表示
+    if (userName === '匿名' && (!userBio || userBio.trim() === '')) {
+      setShowGuidance(true);
+      
       // プロフィール編集メニューをハイライト
       const timer = setTimeout(() => {
         const profileLink = document.querySelector('a[href="/profileset"]');
@@ -28,7 +28,7 @@ export default function ProfileGuidance({ userName, userBio }: ProfileGuidancePr
 
       return () => clearTimeout(timer);
     }
-  }, [shouldShowGuidance]);
+  }, [userName, userBio]);
 
   if (!showGuidance) return null;
 
