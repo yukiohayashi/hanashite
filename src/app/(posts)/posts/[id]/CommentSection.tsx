@@ -212,58 +212,18 @@ export default function CommentSection({ postId, initialComments, totalCount, po
       )}
       
       {/* ベストアンサーがある場合の表示 */}
-      {bestAnswerId ? (
-        canComment ? (
-          <div className="mb-6 p-4 bg-[#fff8ef] border-l-4 border-[#f4511e] rounded-lg">
-            <div className="flex items-center gap-2 text-[#f4511e] mb-3">
-              <i className="fas fa-trophy"></i>
-              <span className="font-medium">
-                この相談は{comments.find(c => c.id === bestAnswerId)?.users?.name || 'ゲスト'}さんがベストアンサーに選ばれました
-              </span>
-            </div>
-            <p className="text-[#f4511e] text-sm">
-              {isPostOwner && isBestAnswerUser 
-                ? '相談者とベストアンサー回答者として、引き続きコメントできます'
-                : isPostOwner 
-                ? '相談者として、引き続きコメントできます'
-                : 'ベストアンサー回答者として、引き続きコメントできます'}
-            </p>
-            <button
-              onClick={() => {
-                const element = document.getElementById(`reply-${bestAnswerId}`);
-                if (element) {
-                  element.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                }
-              }}
-              className="mt-3 px-4 py-2 bg-[#f4511e] hover:bg-[#e64a19] text-white rounded-md text-sm font-medium transition-colors"
-            >
-              ベストアンサーをみる
-            </button>
+      {bestAnswerId && !canComment && (
+        <div className="mb-6 p-4 bg-[#fff8ef] rounded-lg text-center">
+          <div className="flex items-center justify-center gap-2 text-[#f4511e]">
+            <i className="fas fa-trophy"></i>
+            <span className="font-medium">
+              【回答受付終了】{comments.find(c => c.id === bestAnswerId)?.users?.name || 'ゲスト'}さんがベストアンサーに選ばれました！
+            </span>
           </div>
-        ) : (
-          <div className="mb-6 p-4 bg-[#fff8ef] border-l-4 border-[#f4511e] rounded-lg text-center">
-            <div className="flex flex-col items-center gap-2">
-              <div className="flex items-center gap-2 text-[#f4511e]">
-                <i className="fas fa-trophy"></i>
-                <span className="font-medium">
-                  この相談は{comments.find(c => c.id === bestAnswerId)?.users?.name || 'ゲスト'}さんがベストアンサーに選ばれたため、回答受付を終了しました
-                </span>
-              </div>
-              <button
-                onClick={() => {
-                  const element = document.getElementById(`reply-${bestAnswerId}`);
-                  if (element) {
-                    element.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                  }
-                }}
-                className="mt-2 px-4 py-2 bg-[#f4511e] hover:bg-[#e64a19] text-white rounded-md text-sm font-medium transition-colors"
-              >
-                ベストアンサーをみる
-              </button>
-            </div>
-          </div>
-        )
-      ) : (
+        </div>
+      )}
+      
+      {!bestAnswerId && (
         <form onSubmit={handleSubmit} className="mb-6">
           {replyingTo && (
             <div className="flex justify-between items-center mb-2 p-2 bg-gray-100 rounded">
@@ -302,12 +262,33 @@ export default function CommentSection({ postId, initialComments, totalCount, po
         {comments.length > 0 ? (
           (() => {
             // 親コメントと返信コメントを分離（parent_idが0またはnullの場合は親コメント）
-            const parentComments = comments.filter(c => !c.parent_id || c.parent_id === 0);
+            let parentComments = comments.filter(c => !c.parent_id || c.parent_id === 0);
             
             // 特定のコメントIDに対するすべての返信を取得する再帰関数
             const getReplies = (parentId: number): Comment[] => {
               return comments.filter(c => c.parent_id === parentId);
             };
+            
+            // ベストアンサーがある場合、それを最初に表示
+            if (bestAnswerId) {
+              const bestAnswer = comments.find(c => c.id === bestAnswerId);
+              if (bestAnswer && bestAnswer.parent_id && bestAnswer.parent_id !== 0) {
+                // ベストアンサーが返信の場合、親コメントを見つけて最初に移動
+                const parentComment = comments.find(c => c.id === bestAnswer.parent_id);
+                if (parentComment) {
+                  parentComments = [
+                    parentComment,
+                    ...parentComments.filter(c => c.id !== parentComment.id)
+                  ];
+                }
+              } else if (bestAnswer) {
+                // ベストアンサーが親コメントの場合、最初に移動
+                parentComments = [
+                  bestAnswer,
+                  ...parentComments.filter(c => c.id !== bestAnswerId)
+                ];
+              }
+            }
             
             // 親コメントごとに返信をグループ化
             return parentComments.map((comment) => {
@@ -331,14 +312,14 @@ export default function CommentSection({ postId, initialComments, totalCount, po
               const isBestAnswer = bestAnswerId === comment.id;
               
               return (
-                <div key={comment.id} id={`reply-${comment.id}`}>
+                <div key={comment.id} id={`reply-${comment.id}`} className={isBestAnswer ? 'border-2 border-[#f4511e] rounded-lg p-3 bg-[#fff8f6] my-4' : ''}>
                   {isBestAnswer && (
-                    <div className="flex items-center gap-2 mb-2 mt-2 px-3 py-2 bg-[#fff8ef] border border-[#f4511e] rounded-lg">
+                    <div className="flex items-center justify-center gap-2 mb-3 pb-3 border-b border-[#f4511e]">
                       <span className="text-[#f4511e] text-lg">🏆</span>
-                      <span className="font-bold text-[#f4511e] text-sm">ベストアンサー</span>
+                      <span className="font-bold text-[#f4511e] text-base">ベストアンサー</span>
                     </div>
                   )}
-                  <div className={`flex flex-wrap py-2.5 border-t border-gray-100 pt-2.5 ${isBestAnswer ? 'bg-[#fff8f6] border-l-3 border-[#ff6b6b] -mx-2 px-2 rounded-lg' : ''}`}>
+                  <div className={`flex flex-wrap py-2.5 ${!isBestAnswer ? 'border-t border-gray-100 pt-2.5' : ''}`}>
                   <div className="shrink-0 mr-1">
                     {comment.user_id ? (
                       <Link href={`/users/${comment.user_id}`}>
@@ -440,11 +421,11 @@ export default function CommentSection({ postId, initialComments, totalCount, po
                     const isReplyBestAnswer = bestAnswerId === reply.id;
                     
                     return (
-                      <div key={reply.id} id={`reply-${reply.id}`} className="ml-12 mt-2">
+                      <div key={reply.id} id={`reply-${reply.id}`} className={`ml-12 mt-2 ${isReplyBestAnswer ? 'border-2 border-[#f4511e] rounded-lg p-3 bg-[#fff8f6]' : ''}`}>
                         {isReplyBestAnswer && (
-                          <div className="flex items-center gap-2 mb-2 px-3 py-2 bg-[#fff8ef] border border-[#f4511e] rounded-lg">
+                          <div className="flex items-center justify-center gap-2 mb-3 pb-3 border-b border-[#f4511e]">
                             <span className="text-[#f4511e] text-lg">🏆</span>
-                            <span className="font-bold text-[#f4511e] text-sm">ベストアンサー</span>
+                            <span className="font-bold text-[#f4511e] text-base">ベストアンサー</span>
                           </div>
                         )}
                         <div className="flex flex-wrap py-2.5">
@@ -548,14 +529,14 @@ export default function CommentSection({ postId, initialComments, totalCount, po
                           const isNestedBestAnswer = bestAnswerId === nestedReply.id;
                           
                           return (
-                            <div key={nestedReply.id} id={`reply-${nestedReply.id}`} className="ml-12 mt-2">
+                            <div key={nestedReply.id} id={`reply-${nestedReply.id}`} className={`ml-12 mt-2 ${isNestedBestAnswer ? 'border-2 border-[#f4511e] rounded-lg p-3 bg-[#fff8f6]' : ''}`}>
                               {isNestedBestAnswer && (
-                                <div className="flex items-center gap-2 mb-2 px-3 py-2 bg-yellow-50 border border-yellow-300 rounded-lg">
-                                  <span className="text-yellow-600 text-lg">🏆</span>
-                                  <span className="font-bold text-yellow-700 text-sm">ベストアンサー</span>
+                                <div className="flex items-center justify-center gap-2 mb-3 pb-3 border-b border-[#f4511e]">
+                                  <span className="text-[#f4511e] text-lg">🏆</span>
+                                  <span className="font-bold text-[#f4511e] text-base">ベストアンサー</span>
                                 </div>
                               )}
-                              <div className={`flex flex-wrap py-2.5 ${isNestedBestAnswer ? 'bg-yellow-50 -mx-2 px-2 rounded-lg' : ''}`}>
+                              <div className="flex flex-wrap py-2.5">
                                 <div className="shrink-0 mr-1">
                                   {nestedReply.user_id ? (
                                     <Link href={`/users/${nestedReply.user_id}`}>
