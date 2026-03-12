@@ -1,14 +1,25 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { useSession } from 'next-auth/react';
+import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
 
 export default function RegistPage() {
+  const { data: session, status } = useSession();
+  const router = useRouter();
+
   useEffect(() => {
     document.title = '新規会員登録｜ハナシテ';
   }, []);
+
+  useEffect(() => {
+    if (status === 'authenticated') {
+      router.push('/');
+    }
+  }, [status, router]);
   const [email, setEmail] = useState('');
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState('');
