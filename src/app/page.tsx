@@ -671,16 +671,15 @@ export default async function Home({ searchParams }: HomeProps) {
             {/* カテゴリ */}
             {session && <InterestCategoriesSection userId={userId} />}
 
-            {/* Google広告 */}
-            <GoogleAdTop />
-
+         
             {/* 解決済み */}
             <ResolvedSection 
               bestAnswers={bestAnswersWithUsers} 
               waitingPosts={waitingPostsFiltered}
             />
 
-          
+            {/* Google広告・TOPページ中央コンテンツ部 */}
+            <GoogleAdTop />
 
             {/* 相談受付中見出し */}
             <h3 className="m-1.5 mb-2 px-0 font-bold text-base text-[#ff6b6b]">
