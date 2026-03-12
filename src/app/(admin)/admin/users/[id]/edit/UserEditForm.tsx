@@ -44,7 +44,7 @@ export default function UserEditForm({ user }: UserEditFormProps) {
     kana_mei: user.kana_mei || '',
     birth_year: user.birth_year || '',
     sex: user.sex || '',
-    marriage: user.marriage || '',
+    marriage: user.marriage || null,
     child_count: user.child_count || 0,
     job: user.job || '',
     prefecture: user.prefecture || '',
@@ -332,22 +332,20 @@ export default function UserEditForm({ user }: UserEditFormProps) {
 
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
-              結婚状況
+              恋愛ステータス
             </label>
             <select
-              value={formData.marriage}
-              onChange={(e) => setFormData({ ...formData, marriage: e.target.value })}
+              value={formData.marriage || ''}
+              onChange={(e) => setFormData({ ...formData, marriage: e.target.value || null })}
               className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
             >
-              <option value="">選択してください</option>
-              <option value="single">未婚</option>
+              <option value="">未設定（バッジ非表示）</option>
+              <option value="private">非公開（バッジ非表示）</option>
+              <option value="single">独身・恋人なし</option>
+              <option value="dating">恋愛中・交際中</option>
               <option value="married">既婚</option>
-              <option value="divorced">離婚</option>
-              <option value="widowed">死別</option>
-              <option value="未婚">未婚（旧）</option>
-              <option value="既婚">既婚（旧）</option>
-              <option value="離婚">離婚（旧）</option>
-              <option value="死別">死別（旧）</option>
+              <option value="divorced">離婚・別居</option>
+              <option value="other">その他</option>
             </select>
           </div>
 

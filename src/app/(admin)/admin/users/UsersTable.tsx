@@ -15,6 +15,7 @@ interface User {
   avatar_seed?: string | null;
   use_custom_image?: boolean | null;
   post_count?: number;
+  marriage?: string | null;
 }
 
 interface UsersTableProps {
@@ -81,6 +82,33 @@ export default function UsersTable({ users: initialUsers }: UsersTableProps) {
     } catch (error) {
       console.error('Error changing user status:', error);
       alert('権限変更に失敗しました');
+    } finally {
+      setLoading(null);
+    }
+  };
+
+  const handleChangeMarriage = async (userId: number, newMarriage: string | null) => {
+    setLoading(userId);
+    try {
+      const response = await fetch(`/api/admin/users/${userId}`, {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ marriage: newMarriage }),
+      });
+
+      if (response.ok) {
+        setUsers(users.map(u => 
+          u.id === userId ? { ...u, marriage: newMarriage } : u
+        ));
+        alert('恋愛ステータスを変更しました');
+      } else {
+        alert('恋愛ステータス変更に失敗しました');
+      }
+    } catch (error) {
+      console.error('Error changing marriage status:', error);
+      alert('恋愛ステータス変更に失敗しました');
     } finally {
       setLoading(null);
     }
@@ -233,6 +261,9 @@ export default function UsersTable({ users: initialUsers }: UsersTableProps) {
                 </div>
               </th>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                恋愛ステータス
+              </th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                 相談件数
               </th>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100" onClick={() => handleSort('created_at')}>
@@ -329,6 +360,22 @@ export default function UsersTable({ users: initialUsers }: UsersTableProps) {
                     <option value="3">会員</option>
                     <option value="4">AI会員</option>
                     <option value="9">停止</option>
+                  </select>
+                </td>
+                <td className="px-6 py-4 whitespace-nowrap">
+                  <select
+                    value={user.marriage || ''}
+                    onChange={(e) => handleChangeMarriage(user.id, e.target.value || null)}
+                    disabled={loading === user.id}
+                    className="px-2 py-1 text-xs border border-gray-300 rounded disabled:opacity-50"
+                  >
+                    <option value="">未設定</option>
+                    <option value="private">非公開</option>
+                    <option value="single">独身</option>
+                    <option value="dating">交際中</option>
+                    <option value="married">既婚</option>
+                    <option value="divorced">離婚</option>
+                    <option value="other">その他</option>
                   </select>
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">

@@ -20,7 +20,7 @@ export async function PATCH(
 
   const userId = parseInt(id);
   const body = await request.json();
-  const { is_banned, status } = body;
+  const { is_banned, status, marriage } = body;
 
   const updateData: any = {};
 
@@ -30,6 +30,10 @@ export async function PATCH(
 
   if (typeof status === 'number' && (status >= 0 && status <= 4 || status === 6 || status === 9)) {
     updateData.status = status;
+  }
+
+  if (marriage !== undefined) {
+    updateData.marriage = marriage;
   }
 
   if (Object.keys(updateData).length === 0) {

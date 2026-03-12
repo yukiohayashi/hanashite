@@ -11,7 +11,7 @@ async function getUsers(statusFilter?: number, hasImage?: boolean, page: number 
   // ユーザーデータを取得
   let query = supabase
     .from('users')
-    .select('id, name, email, image, created_at, is_banned, status, profile_slug, avatar_seed, use_custom_image', { count: 'exact' });
+    .select('id, name, email, image, created_at, is_banned, status, profile_slug, avatar_seed, use_custom_image, marriage', { count: 'exact' });
 
   // ステータスフィルター適用
   if (statusFilter !== undefined) {
