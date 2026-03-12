@@ -214,11 +214,11 @@ export default function CommentSection({ postId, initialComments, totalCount, po
       
       {/* ベストアンサーがある場合の表示 */}
       {bestAnswerId && !canComment && (
-        <div className="mb-6 p-4 bg-[#fff8ef] rounded-lg text-center">
-          <div className="flex items-center justify-center gap-2 text-[#f4511e]">
-            <i className="fas fa-trophy"></i>
+        <div className="mb-6 p-4 font-bold rounded-lg text-center">
+          <div className="flex items-center justify-center font-bol gap-2 text-[#f4511e]">
+       
             <span className="font-medium">
-              【回答受付終了】{comments.find(c => c.id === bestAnswerId)?.users?.name || 'ゲスト'}さんがベストアンサーに選ばれました！
+              【受付終了】{comments.find(c => c.id === bestAnswerId)?.users?.name || 'ゲスト'}さんがベストアンサーに選ばれました！
             </span>
           </div>
         </div>
@@ -395,12 +395,14 @@ export default function CommentSection({ postId, initialComments, totalCount, po
                         </button>
                       )}
                       
-                      <Link
-                        href={`/report?url=${encodeURIComponent(`https://dokujo.com/posts/${postId}#comment-${comment.id}`)}`}
-                        className="text-gray-600 hover:text-red-600 text-xs transition-colors ml-auto"
-                      >
-                        通報する
-                      </Link>
+                      {!isBestAnswer && (
+                        <Link
+                          href={`/report?url=${encodeURIComponent(`https://dokujo.com/posts/${postId}#comment-${comment.id}`)}`}
+                          className="text-gray-600 hover:text-red-600 text-xs transition-colors ml-auto"
+                        >
+                          通報する
+                        </Link>
+                      )}
                     </div>
                   </div>
                 </div>
@@ -508,12 +510,14 @@ export default function CommentSection({ postId, initialComments, totalCount, po
                                 </button>
                               )}
                               
-                              <Link
-                                href={`/report?url=${encodeURIComponent(`https://dokujo.com/posts/${postId}#comment-${reply.id}`)}`}
-                                className="text-gray-600 hover:text-red-600 text-xs transition-colors ml-auto"
-                              >
-                                通報する
-                              </Link>
+                              {!isReplyBestAnswer && (
+                                <Link
+                                  href={`/report?url=${encodeURIComponent(`https://dokujo.com/posts/${postId}#comment-${reply.id}`)}`}
+                                  className="text-gray-600 hover:text-red-600 text-xs transition-colors ml-auto"
+                                >
+                                  通報する
+                                </Link>
+                              )}
                             </div>
                           </div>
                         </div>
@@ -611,12 +615,14 @@ export default function CommentSection({ postId, initialComments, totalCount, po
                                       </button>
                                     )}
                                     
-                                    <Link
-                                      href={`/report?url=${encodeURIComponent(`https://dokujo.com/posts/${postId}#comment-${nestedReply.id}`)}`}
-                                      className="text-gray-600 hover:text-red-600 text-xs transition-colors ml-auto"
-                                    >
-                                      通報する
-                                    </Link>
+                                    {!isNestedBestAnswer && (
+                                      <Link
+                                        href={`/report?url=${encodeURIComponent(`https://dokujo.com/posts/${postId}#comment-${nestedReply.id}`)}`}
+                                        className="text-gray-600 hover:text-red-600 text-xs transition-colors ml-auto"
+                                      >
+                                        通報する
+                                      </Link>
+                                    )}
                                   </div>
                                 </div>
                               </div>
