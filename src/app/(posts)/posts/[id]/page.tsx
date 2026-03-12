@@ -190,6 +190,15 @@ export default async function PostPage({ params, searchParams }: { params: Promi
     };
   });
 
+  // ベストアンサーのポイント設定値を取得
+  const { data: bestAnswerPointSetting } = await supabase
+    .from('point_settings')
+    .select('point_value')
+    .eq('point_type', 'best_answer')
+    .single();
+  
+  const bestAnswerPoints = bestAnswerPointSetting?.point_value || 10;
+
   if (!post || post.status === 'trash') {
     return (
       <div className="bg-white min-h-screen">
@@ -497,7 +506,7 @@ export default async function PostPage({ params, searchParams }: { params: Promi
               </div>
 
               {/* コメントセクション */}
-              <CommentSection postId={post.id} initialComments={comments || []} totalCount={totalCommentCount || 0} postUserId={post.user_id as any} bestAnswerId={post.best_answer_id ? Number(post.best_answer_id) : undefined} deadlineAt={post.deadline_at} />
+              <CommentSection postId={post.id} initialComments={comments || []} totalCount={totalCommentCount || 0} postUserId={post.user_id as any} bestAnswerId={post.best_answer_id ? Number(post.best_answer_id) : undefined} deadlineAt={post.deadline_at} bestAnswerPoints={bestAnswerPoints} />
             </article>
           </section>
         </div>

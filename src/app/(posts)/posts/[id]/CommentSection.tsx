@@ -29,6 +29,7 @@ interface CommentSectionProps {
   postUserId?: number;
   bestAnswerId?: number | null;
   deadlineAt?: string | null;
+  bestAnswerPoints?: number;
 }
 
 function getTimeAgo(dateString: string): string {
@@ -69,7 +70,7 @@ function TimeAgo({ dateString }: { dateString: string }) {
   return <span className="text-gray-500 text-xs">{timeAgo}前</span>;
 }
 
-export default function CommentSection({ postId, initialComments, totalCount, postUserId, bestAnswerId, deadlineAt }: CommentSectionProps) {
+export default function CommentSection({ postId, initialComments, totalCount, postUserId, bestAnswerId, deadlineAt, bestAnswerPoints = 10 }: CommentSectionProps) {
   const { data: session } = useSession();
   const [comments, setComments] = useState<Comment[]>(initialComments);
   const [newComment, setNewComment] = useState('');
@@ -317,6 +318,10 @@ export default function CommentSection({ postId, initialComments, totalCount, po
                     <div className="flex items-center justify-center gap-2 mb-3 pb-3 border-b border-[#f4511e]">
                       <span className="text-[#f4511e] text-lg">🏆</span>
                       <span className="font-bold text-[#f4511e] text-base">ベストアンサー</span>
+                      <span className="inline-flex items-center gap-1 px-2 py-1 bg-yellow-100 text-yellow-800 rounded-full text-sm font-medium">
+                        <span>{bestAnswerPoints}pt獲得</span>
+                        <span className="text-base">🪙</span>
+                      </span>
                     </div>
                   )}
                   <div className={`flex flex-wrap py-2.5 ${!isBestAnswer ? 'border-t border-gray-100 pt-2.5' : ''}`}>
@@ -426,6 +431,10 @@ export default function CommentSection({ postId, initialComments, totalCount, po
                           <div className="flex items-center justify-center gap-2 mb-3 pb-3 border-b border-[#f4511e]">
                             <span className="text-[#f4511e] text-lg">🏆</span>
                             <span className="font-bold text-[#f4511e] text-base">ベストアンサー</span>
+                            <span className="inline-flex items-center gap-1 px-2 py-1 bg-yellow-100 text-yellow-800 rounded-full text-sm font-medium">
+                              <span>{bestAnswerPoints}pt獲得</span>
+                              <span className="text-base">🪙</span>
+                            </span>
                           </div>
                         )}
                         <div className="flex flex-wrap py-2.5">
@@ -534,6 +543,10 @@ export default function CommentSection({ postId, initialComments, totalCount, po
                                 <div className="flex items-center justify-center gap-2 mb-3 pb-3 border-b border-[#f4511e]">
                                   <span className="text-[#f4511e] text-lg">🏆</span>
                                   <span className="font-bold text-[#f4511e] text-base">ベストアンサー</span>
+                                  <span className="inline-flex items-center gap-1 px-2 py-1 bg-yellow-100 text-yellow-800 rounded-full text-sm font-medium">
+                                    <span>{bestAnswerPoints}pt獲得</span>
+                                
+                                  </span>
                                 </div>
                               )}
                               <div className="flex flex-wrap py-2.5">
