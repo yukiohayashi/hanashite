@@ -343,6 +343,13 @@ export default function AutoCreatorSettings() {
               </span>
             </div>
 
+            {settings.is_enabled === 'true' && nextRunTime && (
+              <div className="border-l border-gray-300 pl-4">
+                <strong className="text-sm">次回実行予定:</strong>
+                <span className="ml-2 text-sm text-blue-600 font-medium">{nextRunTime}頃</span>
+              </div>
+            )}
+
             {lastExecutedAt && (
               <div className="border-l border-gray-300 pl-4">
                 <strong className="text-sm">最終実行:</strong>
@@ -355,13 +362,6 @@ export default function AutoCreatorSettings() {
                   })}
                   {elapsedTime && ` (${elapsedTime})`}
                 </span>
-              </div>
-            )}
-
-            {settings.is_enabled === 'true' && nextRunTime && (
-              <div className="border-l border-gray-300 pl-4">
-                <strong className="text-sm">次回実行予定:</strong>
-                <span className="ml-2 text-sm text-blue-600 font-medium">{nextRunTime}頃</span>
               </div>
             )}
           </div>
