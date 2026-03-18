@@ -71,16 +71,15 @@ async function isProcessed(articleUrl: string): Promise<boolean> {
 }
 
 async function selectQuestioner(aiUserProbability: number) {
-  const useAI = Math.random() * 100 < aiUserProbability;
-
+  // AI会員（status=4）のみを使用
   const { data: users } = await supabase
     .from('users')
     .select('id')
-    .eq('status', useAI ? 6 : 2)
+    .eq('status', 4)
     .limit(100);
 
   if (!users || users.length === 0) {
-    throw new Error('質問者が見つかりません');
+    throw new Error('AI会員が見つかりません');
   }
 
   const randomUser = users[Math.floor(Math.random() * users.length)];

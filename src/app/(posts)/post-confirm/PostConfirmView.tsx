@@ -20,6 +20,7 @@ interface AnkeData {
   imagePreview?: string;
   closeDate: string;
   closeTime: string;
+  sourceId?: number;
 }
 
 export default function PostConfirmView() {
@@ -165,6 +166,19 @@ export default function PostConfirmView() {
       const data = await response.json();
 
       if (data.success) {
+        // ソースIDがある場合、is_processedを更新
+        if (ankeData.sourceId) {
+          try {
+            const { supabase } = await import('@/lib/supabase');
+            await supabase
+              .from('auto_consultation_sources')
+              .update({ is_processed: true, processed_at: new Date().toISOString() })
+              .eq('id', ankeData.sourceId);
+          } catch (error) {
+            console.error('Failed to update source status:', error);
+          }
+        }
+
         sessionStorage.removeItem('anke_create_data');
         sessionStorage.removeItem('anke_image_file');
         if (needsApproval) {

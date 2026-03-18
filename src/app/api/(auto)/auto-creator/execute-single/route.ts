@@ -31,24 +31,15 @@ async function logExecution(
 }
 
 async function selectQuestioner() {
-  const { data: settings } = await supabase
-    .from('auto_creator_settings')
-    .select('setting_value')
-    .eq('setting_key', 'ai_user_probability')
-    .single();
-
-  const aiProbability = parseInt(settings?.setting_value || '70');
-  const useAI = Math.random() * 100 < aiProbability;
-
-  // AI会員（status=6）または編集者（status=2）を取得
+  // AI会員（status=4）のみを使用
   const { data: users } = await supabase
     .from('users')
     .select('id')
-    .eq('status', useAI ? 6 : 2)
+    .eq('status', 4)
     .limit(100);
 
   if (!users || users.length === 0) {
-    throw new Error('質問者が見つかりません');
+    throw new Error('AI会員が見つかりません');
   }
 
   const randomUser = users[Math.floor(Math.random() * users.length)];

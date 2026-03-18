@@ -175,3 +175,72 @@ export async function generateAnke(article: {
     keywords,
   };
 }
+
+// Yahoo知恵袋の質問をハナシテ用の質問文に修正
+export async function refineYahooQuestion(originalTitle: string, originalContent: string): Promise<{ title: string; content: string }> {
+  // api_settingsテーブルからアクティブなOpenAI APIキーを取得
+  const { data: apiSettings } = await supabase
+    .from('api_settings')
+    .select('api_key, model')
+    .eq('is_active', true)
+    .limit(1)
+    .single();
+
+  if (!apiSettings || !apiSettings.api_key) {
+    throw new Error('OpenAI APIキーが設定されていません');
+  }
+
+  const openai = new OpenAI({
+    apiKey: apiSettings.api_key,
+  });
+
+  const model = apiSettings.model || 'gpt-4o-mini';
+
+  const response = await openai.chat.completions.create({
+    model,
+    messages: [
+      {
+        role: 'system',
+        content: `あなたは恋愛相談サイト「ハナシテ」の質問文を作成するアシスタントです。
+Yahoo!知恵袋からスクレイピングした質問を、ブログ記事のような自然で読みやすい相談文に修正してください。
+
+【修正ルール】
+1. タイトル: 20-40文字程度の簡潔で具体的なタイトルにする
+2. 本文: 150-300文字程度で、ブログ記事のような自然な文章にする
+3. 一人称視点で、日記や体験談のような親しみやすい口調で書く
+4. 「最近〜」「実は〜」などの自然な書き出しを使う
+5. 感情や心情を丁寧に描写する
+6. 「〜なんです」「〜でしょうか」など柔らかい語尾を使う
+7. 具体的なエピソードを残しつつ、読みやすく整理する
+8. 堅苦しい表現は避け、SNSやブログで使うような自然な言葉遣いにする
+
+【良い例】
+「最近、年上の店員さんに恋をしてしまいました。彼は私の好意に気づいているようですが、恋愛感情ではなく推しのファンだと思っているようです。私は上京することになり、その人にはあと数回しか会えません。上京前に彼に気持ちを伝えるべきか悩んでいます。どうすればいいでしょうか？」
+
+【出力形式】
+タイトル: [修正後のタイトル]
+本文: [修正後の本文]`,
+      },
+      {
+        role: 'user',
+        content: `元のタイトル: ${originalTitle}\n\n元の本文: ${originalContent}`,
+      },
+    ],
+    temperature: 0.7,
+    max_tokens: 500,
+  });
+
+  const responseText = response.choices[0]?.message?.content?.trim() || '';
+  
+  // タイトルと本文を抽出
+  const titleMatch = responseText.match(/タイトル[：:]\s*(.+?)(?=\n|$)/);
+  const contentMatch = responseText.match(/本文[：:]\s*([\s\S]+)/);
+
+  const refinedTitle = titleMatch ? titleMatch[1].trim() : originalTitle;
+  const refinedContent = contentMatch ? contentMatch[1].trim() : originalContent;
+
+  return {
+    title: refinedTitle,
+    content: refinedContent,
+  };
+}

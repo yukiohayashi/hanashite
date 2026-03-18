@@ -125,10 +125,10 @@ export default function AdminPanelLayout({
                 ダッシュボード
               </Link>
               <Link
-                href="/admin/auto-creator/rss"
+                href="/admin/auto-creator/sources"
                 className={`block px-3 py-1 text-sm text-gray-400 ${hoverBgColor} hover:text-white transition-colors`}
               >
-                RSS記事一覧
+                ソース一覧
               </Link>
               <Link
                 href="/admin/auto-creator/logs"
@@ -382,14 +382,6 @@ export default function AdminPanelLayout({
               </Link>
             </div>
           </div>
-
-          <Link
-            href="/admin/api-settings"
-            className={`flex items-center gap-2 px-3 py-1 text-gray-300 ${hoverBgColor} hover:text-white transition-colors`}
-          >
-            <Settings className="w-5 h-5" />
-            <span className="text-sm">API設定</span>
-          </Link>
         </nav>
       </aside>
 

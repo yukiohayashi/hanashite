@@ -38,6 +38,7 @@ export default function PostCreateForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const workid = searchParams.get('workid');
+  const sourceId = searchParams.get('source_id');
 
   // 締切日時の最小値と最大値を計算（3週間以内）
   const { minDate, maxDate } = useMemo(() => {
@@ -106,6 +107,39 @@ export default function PostCreateForm() {
     };
     fetchCategories();
   }, []);
+
+  // ソースIDからデータを取得
+  useEffect(() => {
+    const fetchSourceData = async () => {
+      if (!sourceId) return;
+      
+      try {
+        const { supabase } = await import('@/lib/supabase');
+        
+        const { data: source, error } = await supabase
+          .from('auto_consultation_sources')
+          .select('*')
+          .eq('id', sourceId)
+          .single();
+        
+        if (error || !source) {
+          console.error('Failed to fetch source:', error);
+          return;
+        }
+        
+        // ソースのタイトルと内容を自動入力
+        setFormData(prev => ({
+          ...prev,
+          title: source.source_title || '',
+          content: source.source_content || '',
+        }));
+      } catch (error) {
+        console.error('Failed to fetch source data:', error);
+      }
+    };
+    
+    fetchSourceData();
+  }, [sourceId]);
 
   // セッションストレージからデータを復元
   useEffect(() => {
@@ -257,7 +291,8 @@ export default function PostCreateForm() {
       ...formData,
       choices: [], // 相談フォームでは選択肢なし
       imagePreview: imagePreview, // 画像プレビューを保存
-      workid: workid ? parseInt(workid) : undefined // workidを追加
+      workid: workid ? parseInt(workid) : undefined, // workidを追加
+      sourceId: sourceId ? parseInt(sourceId) : undefined // sourceIdを追加
     };
 
     sessionStorage.setItem('anke_create_data', JSON.stringify(ankeData));

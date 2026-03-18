@@ -18,7 +18,12 @@ interface Settings {
   max_categories: string;
   max_keywords: string;
   max_posts_per_execution: string;
+  max_scraping_items: string;
   last_executed_at?: string;
+}
+
+interface CategoryWeight {
+  [key: string]: number;
 }
 
 export default function AutoCreatorSettings() {
@@ -38,6 +43,7 @@ export default function AutoCreatorSettings() {
     max_categories: '1',
     max_keywords: '3',
     max_posts_per_execution: '5',
+    max_scraping_items: '20',
   });
   const [urls, setUrls] = useState<string[]>(['', '', '', '', '', '', '', '']);
   const [saving, setSaving] = useState(false);
@@ -47,52 +53,75 @@ export default function AutoCreatorSettings() {
   const [executing, setExecuting] = useState(false);
   const [lastExecutedAt, setLastExecutedAt] = useState<string>('');
   const [elapsedTime, setElapsedTime] = useState<string>('');
+  const [categoryWeights, setCategoryWeights] = useState<CategoryWeight>({});
+  const [categories, setCategories] = useState<Array<{ id: number; name: string }>>([]);
 
   useEffect(() => {
+    fetchCategories();
     fetchSettings();
     fetchNextRunTime();
   }, []);
 
+  const fetchCategories = async () => {
+    const { data, error } = await supabase
+      .from('categories')
+      .select('id, name')
+      .order('id');
+
+    if (error) {
+      console.error('Error fetching categories:', error);
+      return;
+    }
+
+    if (data) {
+      setCategories(data);
+    }
+  };
+
   const fetchSettings = async () => {
     const { data, error } = await supabase
       .from('auto_creator_settings')
-      .select('setting_key, setting_value');
+      .select('*')
+      .limit(1)
+      .single();
 
     if (error) {
       console.error('Error fetching settings:', error);
       return;
     }
 
-    const settingsMap: Record<string, string> = {};
-    data?.forEach((setting) => {
-      settingsMap[setting.setting_key] = setting.setting_value;
-    });
+    if (!data) return;
 
-    if (settingsMap.scraping_urls) {
-      const urlsArray = JSON.parse(settingsMap.scraping_urls);
-      setUrls([...urlsArray, ...Array(8 - urlsArray.length).fill('')]);
-    }
+    // Yahoo!知恵袋URLを含むURLリストを作成
+    const urlsArray = data.yahoo_chiebukuro_url 
+      ? [data.yahoo_chiebukuro_url] 
+      : [];
+    setUrls([...urlsArray, ...Array(8 - urlsArray.length).fill('')]);
+
+    // カテゴリウェイトを取得（存在しない場合は空オブジェクト）
+    setCategoryWeights(data.category_weights || {});
 
     setSettings({
-      scraping_urls: settingsMap.scraping_urls || '[]',
-      execution_interval: settingsMap.execution_interval || '60',
-      execution_variance: settingsMap.execution_variance || '15',
-      no_create_start_hour: settingsMap.no_create_start_hour || '0',
-      no_create_end_hour: settingsMap.no_create_end_hour || '6',
-      ai_user_probability: settingsMap.ai_user_probability || '50',
-      scraping_wait_time: settingsMap.scraping_wait_time || '30',
-      is_enabled: settingsMap.is_enabled || 'true',
-      title_prompt: settingsMap.title_prompt || '',
-      choices_prompt: settingsMap.choices_prompt || '',
-      max_categories: settingsMap.max_categories || '1',
-      max_keywords: settingsMap.max_keywords || '3',
-      max_posts_per_execution: settingsMap.max_posts_per_execution || '5',
-      last_executed_at: settingsMap.last_executed_at,
+      scraping_urls: JSON.stringify(urlsArray),
+      execution_interval: data.interval_minutes?.toString() || '60',
+      execution_variance: '15',
+      no_create_start_hour: '0',
+      no_create_end_hour: '6',
+      ai_user_probability: '50',
+      scraping_wait_time: '30',
+      is_enabled: data.is_active ? 'true' : 'false',
+      title_prompt: data.title_prompt || '',
+      choices_prompt: data.content_prompt || '',
+      max_categories: '1',
+      max_keywords: '3',
+      max_posts_per_execution: '5',
+      max_scraping_items: data.max_scraping_items?.toString() || '20',
+      last_executed_at: data.updated_at,
     });
 
-    if (settingsMap.last_executed_at) {
-      setLastExecutedAt(settingsMap.last_executed_at);
-      updateElapsedTime(settingsMap.last_executed_at);
+    if (data.updated_at) {
+      setLastExecutedAt(data.updated_at);
+      updateElapsedTime(data.updated_at);
     }
   };
 
@@ -196,20 +225,27 @@ export default function AutoCreatorSettings() {
 
     try {
       const filteredUrls = urls.filter((url) => url.trim() !== '');
-      const updatedSettings = {
-        ...settings,
-        scraping_urls: JSON.stringify(filteredUrls),
-      };
+      const yahooUrl = filteredUrls[0] || '';
 
-      for (const [key, value] of Object.entries(updatedSettings)) {
-        await supabase
-          .from('auto_creator_settings')
-          .update({ setting_value: value, updated_at: new Date().toISOString() })
-          .eq('setting_key', key);
+      const { error } = await supabase
+        .from('auto_creator_settings')
+        .update({
+          yahoo_chiebukuro_url: yahooUrl,
+          interval_minutes: parseInt(settings.execution_interval),
+          title_prompt: settings.title_prompt,
+          content_prompt: settings.choices_prompt,
+          category_weights: categoryWeights,
+          updated_at: new Date().toISOString()
+        })
+        .eq('id', 1);
+
+      if (error) {
+        console.error('Error saving settings:', error);
+        setMessage('保存に失敗しました');
+      } else {
+        setMessage('設定を保存しました');
+        setTimeout(() => setMessage(''), 3000);
       }
-
-      setMessage('設定を保存しました');
-      setTimeout(() => setMessage(''), 3000);
     } catch (error) {
       console.error('Error saving settings:', error);
       setMessage('保存に失敗しました');
@@ -491,6 +527,24 @@ export default function AutoCreatorSettings() {
             </div>
 
             <div>
+              <label htmlFor="max_scraping_items" className="block text-sm font-medium text-gray-700 mb-2">
+                最大スクレイピング件数
+              </label>
+              <input
+                type="number"
+                id="max_scraping_items"
+                value={settings.max_scraping_items}
+                onChange={(e) => setSettings({ ...settings, max_scraping_items: e.target.value })}
+                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                min="10"
+                max="100"
+              />
+              <p className="mt-1 text-xs text-gray-500">
+                Yahoo!知恵袋から取得する最大件数（10〜100件）
+              </p>
+            </div>
+
+            <div>
               <label htmlFor="max_categories" className="block text-sm font-medium text-gray-700 mb-2">
                 最大カテゴリ数
               </label>
@@ -523,6 +577,42 @@ export default function AutoCreatorSettings() {
             </div>
           </div>
 
+          {/* カテゴリウェイト設定 */}
+          <div className="border-t border-gray-200 pt-6 mt-6">
+            <h3 className="text-lg font-medium text-gray-900 mb-4">カテゴリウェイト設定</h3>
+            <p className="text-sm text-gray-600 mb-4">
+              各カテゴリの投稿頻度を設定します。数値が大きいほど、そのカテゴリの投稿が多くなります。
+            </p>
+            
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+              {categories.map((category) => (
+                <div key={category.id}>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    {category.name}
+                  </label>
+                  <input
+                    type="number"
+                    value={categoryWeights[category.name] || 0}
+                    onChange={(e) => setCategoryWeights({
+                      ...categoryWeights,
+                      [category.name]: parseInt(e.target.value) || 0
+                    })}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    min="0"
+                    max="10"
+                  />
+                </div>
+              ))}
+            </div>
+            
+            <div className="mt-4 bg-blue-50 border border-blue-200 rounded-lg p-4">
+              <p className="text-sm text-blue-800">
+                💡 合計ウェイト: <strong>{Object.values(categoryWeights).reduce((sum, w) => sum + w, 0)}</strong> 
+                （50件で1サイクル完結を推奨）
+              </p>
+            </div>
+          </div>
+
           {/* ChatGPTプロンプト設定 */}
           <div className="border-t border-gray-200 pt-6 mt-6">
             <h3 className="text-lg font-medium text-gray-900 mb-4">ChatGPTプロンプト設定</h3>
@@ -545,23 +635,6 @@ export default function AutoCreatorSettings() {
               </p>
             </div>
 
-            {/* 選択肢生成プロンプト */}
-            <div>
-              <label htmlFor="choices_prompt" className="block text-sm font-medium text-gray-700 mb-2">
-                選択肢生成プロンプト
-              </label>
-              <textarea
-                id="choices_prompt"
-                value={settings.choices_prompt}
-                onChange={(e) => setSettings({ ...settings, choices_prompt: e.target.value })}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 font-mono text-sm"
-                rows={10}
-                placeholder="質問に対する選択肢を2〜4個作成してください。"
-              />
-              <p className="mt-1 text-xs text-gray-500">
-                ChatGPTが投票選択肢を生成する際のプロンプト（トピック別ガイドラインなどを指定）
-              </p>
-            </div>
           </div>
         </div>
 

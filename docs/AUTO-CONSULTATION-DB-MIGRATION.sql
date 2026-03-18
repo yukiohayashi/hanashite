@@ -46,6 +46,7 @@ CREATE TABLE IF NOT EXISTS auto_consultation_sources (
   source_content TEXT, -- 取得した本文（該当する場合）
   category_id INTEGER, -- 対応するカテゴリID
   is_processed BOOLEAN DEFAULT FALSE, -- 投稿済みかどうか
+  post_id BIGINT, -- 作成された投稿のID
   created_at TIMESTAMP DEFAULT NOW(),
   processed_at TIMESTAMP,
   CONSTRAINT unique_source_url UNIQUE(source_url)
@@ -136,28 +137,7 @@ INSERT INTO auto_creator_settings (
 SELECT 
   true,
   60,
-  '{
-    "片思い": 5,
-    "浮気": 5,
-    "別れ話・失恋": 4,
-    "コミュニケーション": 4,
-    "復縁": 4,
-    "職場恋愛": 3,
-    "告白・プロポーズ": 3,
-    "マンネリ・倦怠期": 3,
-    "同棲": 3,
-    "婚活": 2,
-    "デート": 2,
-    "出会い": 2,
-    "価値観": 2,
-    "遠距離恋愛": 2,
-    "離婚": 2,
-    "夫婦": 1,
-    "レス": 1,
-    "夜の悩み": 1,
-    "その他": 1,
-    "不倫": 1
-  }'::JSONB,
+  '{}'::JSONB,
   'https://chiebukuro.yahoo.co.jp/category/2078297875/question/list',
   'カテゴリ: {{category_name}}
 テーマ: {{source_title}}
@@ -190,31 +170,10 @@ SELECT
   NOW()
 WHERE NOT EXISTS (SELECT 1 FROM auto_creator_settings LIMIT 1);
 
--- 既存レコードがある場合は更新
+-- 既存レコードがある場合は更新（category_weightsが空の場合のみ）
 UPDATE auto_creator_settings
 SET 
-  category_weights = '{
-    "片思い": 5,
-    "浮気": 5,
-    "別れ話・失恋": 4,
-    "コミュニケーション": 4,
-    "復縁": 4,
-    "職場恋愛": 3,
-    "告白・プロポーズ": 3,
-    "マンネリ・倦怠期": 3,
-    "同棲": 3,
-    "婚活": 2,
-    "デート": 2,
-    "出会い": 2,
-    "価値観": 2,
-    "遠距離恋愛": 2,
-    "離婚": 2,
-    "夫婦": 1,
-    "レス": 1,
-    "夜の悩み": 1,
-    "その他": 1,
-    "不倫": 1
-  }'::JSONB,
+  category_weights = COALESCE(category_weights, '{}'::JSONB),
   yahoo_chiebukuro_url = 'https://chiebukuro.yahoo.co.jp/category/2078297875/question/list',
   title_prompt = 'カテゴリ: {{category_name}}
 テーマ: {{source_title}}
