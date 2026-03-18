@@ -407,7 +407,7 @@ export default function AutoCreatorSources() {
                       )}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                      {new Date(source.created_at).toLocaleString('ja-JP')}
+                      {new Date(source.created_at).toLocaleString('ja-JP', { timeZone: 'Asia/Tokyo' })}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm">
                       <div className="flex gap-2">

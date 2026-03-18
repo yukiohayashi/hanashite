@@ -200,17 +200,22 @@ export async function POST(request: Request) {
     }
 
     // AIでタイトルと本文を修正
-    console.log('AI修正前 - タイトル:', source.source_title);
-    console.log('AI修正前 - 本文:', source.source_content?.substring(0, 100));
+    console.log('========================================');
+    console.log('【リライト前】');
+    console.log('タイトル:', source.source_title);
+    console.log('本文:', source.source_content || source.source_title);
+    console.log('========================================');
     
     const refined = await refineYahooQuestion(
       source.source_title,
       source.source_content || source.source_title
     );
     
-    console.log('AI修正後 - タイトル:', refined.title);
-    console.log('AI修正後 - 本文:', refined.content.substring(0, 200));
-    console.log('AI修正後 - 本文全文:', refined.content);
+    console.log('========================================');
+    console.log('【リライト後】');
+    console.log('タイトル:', refined.title);
+    console.log('本文:', refined.content);
+    console.log('========================================');
 
     // 質問者を選択（修正後の内容に適合したAI会員）
     const questionerId = await selectQuestioner(refined.title, refined.content);
