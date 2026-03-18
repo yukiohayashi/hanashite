@@ -119,9 +119,27 @@ export default function AutoCreatorSettings() {
       last_executed_at: data.updated_at,
     });
 
-    if (data.updated_at) {
-      setLastExecutedAt(data.updated_at);
-      updateElapsedTime(data.updated_at);
+    if (data.last_executed_at) {
+      setLastExecutedAt(data.last_executed_at);
+      updateElapsedTime(data.last_executed_at);
+      
+      // 次回実行時刻を計算
+      if (data.is_active) {
+        const lastExecuted = new Date(data.last_executed_at);
+        const interval = data.interval_minutes || 40;
+        const variance = data.execution_variance || 15;
+        const minInterval = interval - variance;
+        const nextTime = new Date(lastExecuted.getTime() + minInterval * 60 * 1000);
+        
+        setNextRunTime(nextTime.toLocaleString('ja-JP', { 
+          month: '2-digit',
+          day: '2-digit',
+          hour: '2-digit', 
+          minute: '2-digit'
+        }));
+      }
+    } else if (data.is_active) {
+      setNextRunTime('未実行');
     }
   };
 
@@ -144,37 +162,7 @@ export default function AutoCreatorSettings() {
   };
 
   const fetchNextRunTime = async () => {
-    const { data: settingsData } = await supabase
-      .from('auto_creator_settings')
-      .select('*');
-
-    if (!settingsData) return;
-
-    const settingsMap: Record<string, string> = {};
-    settingsData.forEach((item) => {
-      settingsMap[item.setting_key] = item.setting_value;
-    });
-
-    if (settingsMap.is_active === 'true' || settingsMap.is_enabled === 'true') {
-      if (settingsMap.last_executed_at) {
-        const lastExecuted = new Date(settingsMap.last_executed_at);
-        const interval = parseInt(settingsMap.execution_interval || '20');
-        const variance = parseInt(settingsMap.execution_variance || '10');
-        const minInterval = interval - variance;
-        const nextTime = new Date(lastExecuted.getTime() + minInterval * 60 * 1000);
-        
-        setNextRunTime(nextTime.toLocaleString('ja-JP', { 
-          month: '2-digit',
-          day: '2-digit',
-          hour: '2-digit', 
-          minute: '2-digit'
-        }));
-      } else {
-        setNextRunTime('未実行');
-      }
-    } else {
-      setNextRunTime('');
-    }
+    // この関数は使用しないため削除
   };
 
   useEffect(() => {
