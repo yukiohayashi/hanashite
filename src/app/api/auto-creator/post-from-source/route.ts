@@ -59,18 +59,32 @@ function detectCategory(title: string, content: string): number {
 }
 
 async function selectQuestioner(refinedTitle: string, refinedContent: string) {
-  // AI会員（status=4）を取得
+  // AI会員使用確率を取得
+  const { data: settings } = await supabase
+    .from('auto_creator_settings')
+    .select('ai_user_probability')
+    .eq('id', 1)
+    .single();
+
+  const aiUserProbability = settings?.ai_user_probability || 100;
+  const useAiUser = Math.random() * 100 < aiUserProbability;
+
+  console.log(`AI会員使用確率: ${aiUserProbability}%, AI会員を使用: ${useAiUser}`);
+
+  // AI会員を使用する場合はstatus=4、通常会員を使用する場合はstatus=3
+  const targetStatus = useAiUser ? 4 : 3;
+
   const { data: users, error } = await supabase
     .from('users')
     .select('id, name, birth_year, sex, marriage, status')
-    .eq('status', 4)
+    .eq('status', targetStatus)
     .limit(100);
 
-  console.log('AI会員検索結果:', { count: users?.length || 0, error });
+  console.log(`${useAiUser ? 'AI会員' : '通常会員'}検索結果:`, { count: users?.length || 0, error });
 
   if (!users || users.length === 0) {
-    // status=4のユーザーがいない場合、全ユーザーから検索
-    console.log('status=4のユーザーが見つからないため、全ユーザーから検索します');
+    // 指定したstatusのユーザーがいない場合、全ユーザーから検索
+    console.log(`status=${targetStatus}のユーザーが見つからないため、全ユーザーから検索します`);
     const { data: allUsers } = await supabase
       .from('users')
       .select('id, name, birth_year, sex, marriage, status')
@@ -195,7 +209,8 @@ export async function POST(request: Request) {
     );
     
     console.log('AI修正後 - タイトル:', refined.title);
-    console.log('AI修正後 - 本文:', refined.content.substring(0, 100));
+    console.log('AI修正後 - 本文:', refined.content.substring(0, 200));
+    console.log('AI修正後 - 本文全文:', refined.content);
 
     // 質問者を選択（修正後の内容に適合したAI会員）
     const questionerId = await selectQuestioner(refined.title, refined.content);

@@ -106,8 +106,6 @@ export async function GET(request: Request) {
       ];
       
       const shouldInclude = loveRelatedCategories.some(cat => categoryLabel === cat);
-      
-      console.log(`[${i}] タイトル: ${title.substring(0, 40)}... カテゴリ: "${categoryLabel}" 含める: ${shouldInclude} 文字数: ${title.length}`);
 
       // 50文字未満のタイトルは除外
       if (title && questionUrl && title.length >= 50 && shouldInclude) {
@@ -151,14 +149,9 @@ export async function GET(request: Request) {
               url: questionUrl, 
               pubDate: new Date().toISOString() 
             });
-            console.log(`  → 追加（女性または性別不明）`);
-          } else {
-            const reason = isMaleByProfile ? 'プロフィール' : '本文内容';
-            console.log(`  → スキップ（男性からの相談: ${reason}）`);
           }
         } catch {
           // エラーの場合は念のため追加
-          console.log(`  → 性別確認エラー、念のため追加`);
           questions.push({ 
             title, 
             url: questionUrl, 
@@ -168,8 +161,6 @@ export async function GET(request: Request) {
       }
     }
 
-    console.log(`Yahoo!知恵袋から${questions.length}件の質問を取得しました`);
-    console.log(`取得URL: ${url}`);
 
     // カテゴリフィルタリング（カテゴリ名が指定されている場合）
     let filteredQuestions = questions;
