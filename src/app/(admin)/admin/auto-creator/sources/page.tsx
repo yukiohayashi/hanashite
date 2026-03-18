@@ -218,6 +218,11 @@ export default function AutoCreatorSources() {
         <div>
           <h1 className="text-3xl font-bold text-gray-900">ソース一覧</h1>
           <p className="mt-2 text-gray-600">Yahoo!知恵袋、Googleトレンド、GPT自動生成から取得したソースを確認</p>
+          <div className="mt-3 bg-green-50 border border-green-200 rounded-lg p-3 inline-block">
+            <p className="text-sm text-green-800">
+              <strong>🕒 Yahoo!知恵袋自動取得:</strong> 毎日 9:00, 15:00, 21:00
+            </p>
+          </div>
         </div>
         <div className="flex gap-2">
           {selectedIds.length > 0 && (

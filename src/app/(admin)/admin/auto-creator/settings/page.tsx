@@ -378,6 +378,23 @@ export default function AutoCreatorSettings() {
             </p>
           </div>
 
+          {/* 自動実行スケジュール */}
+          <div className="bg-green-50 border border-green-200 rounded-lg p-4">
+            <h3 className="text-sm font-semibold text-green-900 mb-2">🕒 自動実行スケジュール</h3>
+            <div className="space-y-2 text-sm text-green-800">
+              <div>
+                <strong>Yahoo!知恵袋取得:</strong> 毎日 9:00, 15:00, 21:00
+              </div>
+              <div>
+                <strong>AI自動投稿:</strong> {settings.execution_interval}分ごと（±{settings.execution_variance}分のゆらぎ）
+                <span className="text-xs text-green-600 ml-2">※実行間隔と実行ゆらぎの設定値に基づいて自動実行されます</span>
+              </div>
+              <div className="text-xs text-green-600 mt-2">
+                ※作成しない時間帯: {settings.no_create_start_hour}時〜{settings.no_create_end_hour}時
+              </div>
+            </div>
+          </div>
+
           {/* スクレイピングURL */}
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
