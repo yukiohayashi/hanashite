@@ -243,28 +243,14 @@ export async function POST() {
         if (remainingComments > 0 && commentPrompt) {
           console.log('新規コメント投稿を実行');
           try {
-            const useAiMember = Math.random() * 100 <= aiMemberProbability;
-            const status = useAiMember ? 6 : 2;
-
-            let { data: users } = await supabase
+            // AI会員（status: 4）のみを使用
+            const { data: users } = await supabase
               .from('users')
               .select('id')
-              .eq('status', status)
+              .eq('status', 4)
               .limit(50);
 
-            console.log(`取得したユーザー数: ${users?.length || 0} (status: ${status})`);
-
-            // AI会員が存在しない場合は一般ユーザーにフォールバック
-            if ((!users || users.length === 0) && status === 6) {
-              console.log('AI会員が存在しないため、一般ユーザーにフォールバック');
-              const { data: fallbackUsers } = await supabase
-                .from('users')
-                .select('id')
-                .eq('status', 2)
-                .limit(50);
-              users = fallbackUsers;
-              console.log(`フォールバック後のユーザー数: ${users?.length || 0}`);
-            }
+            console.log(`取得したユーザー数: ${users?.length || 0} (status: 4)`);
 
             if (users && users.length > 0) {
               const randomUser = users[Math.floor(Math.random() * users.length)];
@@ -427,29 +413,14 @@ export async function POST() {
         try {
           if (selectedAction === 'new_comment') {
             console.log('新規コメント投稿処理開始（既存コメントあり）');
-            // 新規コメント投稿
-            const useAiMember = Math.random() * 100 <= aiMemberProbability;
-            const status = useAiMember ? 6 : 2;
-
-            let { data: users } = await supabase
+            // AI会員（status: 4）のみを使用
+            const { data: users } = await supabase
               .from('users')
               .select('id')
-              .eq('status', status)
+              .eq('status', 4)
               .limit(50);
 
-            console.log(`取得したユーザー数: ${users?.length || 0} (status: ${status})`);
-
-            // AI会員が存在しない場合は一般ユーザーにフォールバック
-            if ((!users || users.length === 0) && status === 6) {
-              console.log('AI会員が存在しないため、一般ユーザーにフォールバック');
-              const { data: fallbackUsers } = await supabase
-                .from('users')
-                .select('id')
-                .eq('status', 2)
-                .limit(50);
-              users = fallbackUsers;
-              console.log(`フォールバック後のユーザー数: ${users?.length || 0}`);
-            }
+            console.log(`取得したユーザー数: ${users?.length || 0} (status: 4)`);
 
             if (users && users.length > 0) {
               const randomUser = users[Math.floor(Math.random() * users.length)];
