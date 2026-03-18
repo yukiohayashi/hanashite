@@ -44,13 +44,17 @@ export async function POST() {
     console.log('返信プロンプト:', replyPrompt ? `設定済み (${replyPrompt.length}文字)` : '未設定');
 
     // API設定を取得
-    const { data: apiSettings } = await supabase
-      .from('auto_creator_settings')
-      .select('setting_value')
-      .eq('setting_key', 'openai_api_key')
+    const { data: apiSettings, error: apiError } = await supabase
+      .from('api_settings')
+      .select('api_secret')
+      .eq('api_name', 'OpenAI')
       .single();
     
-    const openaiApiKey = apiSettings?.setting_value || process.env.OPENAI_API_KEY;
+    console.log('API設定取得結果:', { apiSettings, apiError });
+    
+    const openaiApiKey = apiSettings?.api_secret || process.env.OPENAI_API_KEY;
+    
+    console.log('OpenAI APIキー:', openaiApiKey ? `設定済み (${openaiApiKey.substring(0, 10)}...)` : '未設定');
     
     if (!openaiApiKey) {
       console.error('OpenAI APIキーが設定されていません');
@@ -212,6 +216,8 @@ export async function POST() {
       let commentLikesAddedForThisPost = 0;
       const commentErrors: string[] = [];
       
+      console.log(`\n=== 記事ID ${post.id} のコメント投稿処理開始 ===`);
+      
       // 記事の既存コメントを取得
       const { data: existingComments, count: currentCommentCount } = await supabase
         .from('comments')
@@ -219,28 +225,50 @@ export async function POST() {
         .eq('post_id', post.id)
         .order('created_at', { ascending: false });
       
+      console.log(`既存コメント数: ${currentCommentCount}`);
+      
       // 記事ごとの最大コメント数を超えないようにチェック
       const maxCommentsForThisPost = maxCommentsPerPost + Math.floor(Math.random() * (maxCommentsVariance * 2 + 1)) - maxCommentsVariance;
       const remainingComments = Math.max(0, maxCommentsForThisPost - (currentCommentCount || 0));
+      
+      console.log(`最大コメント数: ${maxCommentsForThisPost}, 残り: ${remainingComments}`);
+      console.log(`commentPrompt存在: ${!!commentPrompt}`);
       
       // コメントが存在しない場合: 新規コメント投稿 → コメントいいね
       // コメントが存在する場合: 新規コメント投稿 OR コメント返信 OR 投稿者返信 のいずれか1つ
       
       if (currentCommentCount === 0) {
+        console.log('コメントがない場合の処理開始');
         // コメントがない場合: 新規コメント投稿のみ
         if (remainingComments > 0 && commentPrompt) {
+          console.log('新規コメント投稿を実行');
           try {
             const useAiMember = Math.random() * 100 <= aiMemberProbability;
             const status = useAiMember ? 6 : 2;
 
-            const { data: users } = await supabase
+            let { data: users } = await supabase
               .from('users')
               .select('id')
               .eq('status', status)
               .limit(50);
 
+            console.log(`取得したユーザー数: ${users?.length || 0} (status: ${status})`);
+
+            // AI会員が存在しない場合は一般ユーザーにフォールバック
+            if ((!users || users.length === 0) && status === 6) {
+              console.log('AI会員が存在しないため、一般ユーザーにフォールバック');
+              const { data: fallbackUsers } = await supabase
+                .from('users')
+                .select('id')
+                .eq('status', 2)
+                .limit(50);
+              users = fallbackUsers;
+              console.log(`フォールバック後のユーザー数: ${users?.length || 0}`);
+            }
+
             if (users && users.length > 0) {
               const randomUser = users[Math.floor(Math.random() * users.length)];
+              console.log(`選択したユーザーID: ${randomUser.id}`);
 
               // 投票選択肢を取得
               const { data: voteChoices } = await supabase
@@ -250,6 +278,7 @@ export async function POST() {
                 .order('id', { ascending: true });
               
               const choicesText = voteChoices?.map(vc => `「${vc.choice}」`).join('、') || '';
+              console.log(`投票選択肢: ${choicesText}`);
 
               // ChatGPTでコメント生成（投稿本文と選択肢を含める）
               const prompt = commentPrompt
@@ -257,12 +286,14 @@ export async function POST() {
                 .replace('{$content}', post.content || '')
                 .replace('{$choices}', choicesText);
               
+              console.log(`プロンプト生成完了 (${prompt.length}文字)`);
+              
               if (!openaiApiKey) {
                 const errorMsg = 'OpenAI APIキーが設定されていません';
                 console.error(errorMsg);
                 commentErrors.push(errorMsg);
-                break;
-              }
+              } else {
+              console.log('OpenAI APIを呼び出し中...');
 
               const response = await fetch('https://api.openai.com/v1/chat/completions', {
                 method: 'POST',
@@ -278,6 +309,8 @@ export async function POST() {
               });
 
               const data = await response.json();
+              
+              console.log(`OpenAI APIレスポンス受信 (status: ${response.status})`);
               
               // エラーチェック
               if (!response.ok || data.error) {
@@ -295,6 +328,7 @@ export async function POST() {
               }
               
               const commentText = data.choices[0]?.message?.content?.trim() || '';
+              console.log(`生成されたコメント: ${commentText}`);
 
               if (!commentText) {
                 const errorMsg = 'コメントテキストが空です';
@@ -304,6 +338,7 @@ export async function POST() {
               }
 
               if (commentText) {
+                console.log('コメントをデータベースに挿入中...');
                 const { data: comment, error: insertError } = await supabase
                   .from('comments')
                   .insert({
@@ -323,6 +358,7 @@ export async function POST() {
                 }
 
                 if (comment) {
+                  console.log(`✅ コメント挿入成功 (ID: ${comment.id})`);
                   totalComments++;
                   commentsAddedForThisPost++;
 
@@ -349,49 +385,74 @@ export async function POST() {
                   }
                 }
               }
+              }
             }
           } catch (error) {
             console.error(`コメント投稿エラー (記事ID: ${post.id}):`, error);
           }
         }
       } else if (existingComments && existingComments.length > 0) {
+        console.log('既存コメントがある場合の処理開始');
         // コメントが既に存在する場合: 新規コメント OR コメント返信 OR 投稿者返信 のいずれか1つ
         const actions = [];
         
         // 新規コメント投稿の選択肢
         if (remainingComments > 0 && commentPrompt) {
           actions.push('new_comment');
+          console.log('アクション追加: new_comment');
         }
         
         // コメント返信の選択肢（親コメントのみ対象）
         const parentComments = existingComments.filter(c => !c.parent_id);
+        console.log(`親コメント数: ${parentComments.length}, replyPrompt存在: ${!!replyPrompt}`);
         if (parentComments.length > 0 && replyPrompt) {
           actions.push('user_reply');
           actions.push('author_reply');
+          console.log('アクション追加: user_reply, author_reply');
         }
         
+        console.log(`利用可能なアクション: ${actions.join(', ')}`);
+        
         if (actions.length === 0) {
+          console.log('⚠️ 実行可能なアクションがないためスキップ');
           // 実行可能なアクションがない場合はスキップ
           continue;
         }
         
         // ランダムに1つのアクションを選択
         const selectedAction = actions[Math.floor(Math.random() * actions.length)];
+        console.log(`選択されたアクション: ${selectedAction}`);
         
         try {
           if (selectedAction === 'new_comment') {
+            console.log('新規コメント投稿処理開始（既存コメントあり）');
             // 新規コメント投稿
             const useAiMember = Math.random() * 100 <= aiMemberProbability;
             const status = useAiMember ? 6 : 2;
 
-            const { data: users } = await supabase
+            let { data: users } = await supabase
               .from('users')
               .select('id')
               .eq('status', status)
               .limit(50);
 
+            console.log(`取得したユーザー数: ${users?.length || 0} (status: ${status})`);
+
+            // AI会員が存在しない場合は一般ユーザーにフォールバック
+            if ((!users || users.length === 0) && status === 6) {
+              console.log('AI会員が存在しないため、一般ユーザーにフォールバック');
+              const { data: fallbackUsers } = await supabase
+                .from('users')
+                .select('id')
+                .eq('status', 2)
+                .limit(50);
+              users = fallbackUsers;
+              console.log(`フォールバック後のユーザー数: ${users?.length || 0}`);
+            }
+
             if (users && users.length > 0) {
               const randomUser = users[Math.floor(Math.random() * users.length)];
+              console.log(`選択したユーザーID: ${randomUser.id}`);
               
               // 投票選択肢を取得
               const { data: voteChoices } = await supabase
@@ -401,11 +462,14 @@ export async function POST() {
                 .order('id', { ascending: true });
               
               const choicesText = voteChoices?.map(vc => `「${vc.choice}」`).join('、') || '';
+              console.log(`投票選択肢: ${choicesText}`);
               
               const prompt = commentPrompt
                 .replace('{$question}', post.title)
                 .replace('{$content}', post.content || '')
                 .replace('{$choices}', choicesText);
+              
+              console.log(`プロンプト生成完了 (${prompt.length}文字)`);
               
               if (!openaiApiKey) {
                 const errorMsg = 'OpenAI APIキーが設定されていません';
@@ -414,6 +478,7 @@ export async function POST() {
                 continue;
               }
 
+              console.log('OpenAI APIを呼び出し中...');
               const response = await fetch('https://api.openai.com/v1/chat/completions', {
                 method: 'POST',
                 headers: {
@@ -428,6 +493,7 @@ export async function POST() {
               });
 
               const data = await response.json();
+              console.log(`OpenAI APIレスポンス受信 (status: ${response.status})`);
               
               if (!response.ok || data.error) {
                 const errorMsg = `OpenAI APIエラー (status: ${response.status}): ${JSON.stringify(data.error || data)}`;
@@ -444,6 +510,7 @@ export async function POST() {
               }
               
               const commentText = data.choices[0]?.message?.content?.trim() || '';
+              console.log(`生成されたコメント: ${commentText}`);
 
               if (!commentText) {
                 const errorMsg = 'コメントテキストが空です';
@@ -452,6 +519,7 @@ export async function POST() {
                 continue;
               }
 
+              console.log('コメントをデータベースに挿入中...');
               const { data: comment, error: insertError } = await supabase
                 .from('comments')
                 .insert({
@@ -471,6 +539,7 @@ export async function POST() {
               }
 
               if (comment) {
+                console.log(`✅ コメント挿入成功 (ID: ${comment.id})`);
                 totalComments++;
                 commentsAddedForThisPost++;
               }
