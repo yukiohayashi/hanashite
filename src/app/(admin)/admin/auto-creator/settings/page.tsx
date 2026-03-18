@@ -13,7 +13,6 @@ interface Settings {
   ai_user_probability: string;
   scraping_wait_time: string;
   is_enabled: string;
-  title_prompt: string;
   choices_prompt: string;
   max_categories: string;
   max_keywords: string;
@@ -38,7 +37,6 @@ export default function AutoCreatorSettings() {
     ai_user_probability: '50',
     scraping_wait_time: '30',
     is_enabled: 'true',
-    title_prompt: '',
     choices_prompt: '',
     max_categories: '1',
     max_keywords: '3',
@@ -110,7 +108,6 @@ export default function AutoCreatorSettings() {
       ai_user_probability: '50',
       scraping_wait_time: '30',
       is_enabled: data.is_active ? 'true' : 'false',
-      title_prompt: data.title_prompt || '',
       choices_prompt: data.content_prompt || '',
       max_categories: '1',
       max_keywords: '3',
@@ -239,7 +236,6 @@ export default function AutoCreatorSettings() {
         .update({
           yahoo_chiebukuro_url: yahooUrl,
           interval_minutes: parseInt(settings.execution_interval),
-          title_prompt: settings.title_prompt,
           content_prompt: settings.choices_prompt,
           category_weights: categoryWeights,
           updated_at: new Date().toISOString()
@@ -637,29 +633,6 @@ export default function AutoCreatorSettings() {
             </div>
           </div>
 
-          {/* ChatGPTプロンプト設定 */}
-          <div className="border-t border-gray-200 pt-6 mt-6">
-            <h3 className="text-lg font-medium text-gray-900 mb-4">ChatGPTプロンプト設定</h3>
-            
-            {/* タイトル生成プロンプト */}
-            <div className="mb-6">
-              <label htmlFor="title_prompt" className="block text-sm font-medium text-gray-700 mb-2">
-                タイトル生成プロンプト
-              </label>
-              <textarea
-                id="title_prompt"
-                value={settings.title_prompt}
-                onChange={(e) => setSettings({ ...settings, title_prompt: e.target.value })}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 font-mono text-sm"
-                rows={10}
-                placeholder="記事の内容に基づいた簡潔な相談質問を1つ作成してください。"
-              />
-              <p className="mt-1 text-xs text-gray-500">
-                ChatGPTが相談タイトルを生成する際のプロンプト（禁止ワード、推奨形式などを指定）
-              </p>
-            </div>
-
-          </div>
         </div>
 
         <div className="px-6 py-4 bg-white border-t border-gray-200 flex justify-end">
