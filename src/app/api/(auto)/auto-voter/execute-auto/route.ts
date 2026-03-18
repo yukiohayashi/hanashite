@@ -46,13 +46,13 @@ export async function POST() {
     // API設定を取得
     const { data: apiSettings, error: apiError } = await supabase
       .from('api_settings')
-      .select('api_secret')
+      .select('api_key')
       .eq('api_name', 'OpenAI')
       .single();
     
     console.log('API設定取得結果:', { apiSettings, apiError });
     
-    const openaiApiKey = apiSettings?.api_secret || process.env.OPENAI_API_KEY;
+    const openaiApiKey = apiSettings?.api_key || process.env.OPENAI_API_KEY;
     
     console.log('OpenAI APIキー:', openaiApiKey ? `設定済み (${openaiApiKey.substring(0, 10)}...)` : '未設定');
     
