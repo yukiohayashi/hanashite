@@ -119,12 +119,12 @@ export default function AutoCreatorSettings() {
       last_executed_at: data.updated_at,
     });
 
-    if (data.last_executed_at) {
-      setLastExecutedAt(data.last_executed_at);
-      updateElapsedTime(data.last_executed_at);
-      
-      // 次回実行時刻を計算
-      if (data.is_active) {
+    // 次回実行時刻を計算
+    if (data.is_active) {
+      if (data.last_executed_at) {
+        setLastExecutedAt(data.last_executed_at);
+        updateElapsedTime(data.last_executed_at);
+        
         const lastExecuted = new Date(data.last_executed_at);
         const interval = data.interval_minutes || 40;
         const variance = data.execution_variance || 15;
@@ -137,9 +137,28 @@ export default function AutoCreatorSettings() {
           hour: '2-digit', 
           minute: '2-digit'
         }));
+      } else {
+        // 最終実行がない場合は、次のCRON実行時（10分単位）を表示
+        const now = new Date();
+        const minutes = now.getMinutes();
+        const nextMinutes = Math.ceil(minutes / 10) * 10;
+        const nextTime = new Date(now);
+        
+        if (nextMinutes >= 60) {
+          nextTime.setHours(nextTime.getHours() + 1);
+          nextTime.setMinutes(0);
+        } else {
+          nextTime.setMinutes(nextMinutes);
+        }
+        nextTime.setSeconds(0);
+        
+        setNextRunTime(nextTime.toLocaleString('ja-JP', { 
+          month: '2-digit',
+          day: '2-digit',
+          hour: '2-digit', 
+          minute: '2-digit'
+        }));
       }
-    } else if (data.is_active) {
-      setNextRunTime('未実行');
     }
   };
 

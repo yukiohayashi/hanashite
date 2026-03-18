@@ -95,15 +95,11 @@ async function getPosts(statusFilter?: string, limit: number = 100, sortBy: stri
             userId: comment.user_id || '',
             userName: user?.name || 'ゲスト'
           });
-          console.log(`Set best answer for post ${post.id}:`, user?.name || 'ゲスト');
         }
       });
     }
   }
   
-  console.log('Final best answer map size:', bestAnswerMap.size);
-  console.log('Best answer map entries:', Array.from(bestAnswerMap.entries()));
-
   // キーワードを一括取得
   const { data: postKeywords } = await supabase
     .from('post_keywords')
