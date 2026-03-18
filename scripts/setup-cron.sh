@@ -28,8 +28,8 @@ cat > /tmp/new_crontab << 'EOF'
 # Yahoo知恵袋から質問を取得（毎日 9:00, 15:00, 21:00）
 0 9,15,21 * * * curl -X POST https://dokujo.com/api/auto-creator/fetch-yahoo-chiebukuro >> /home/ubuntu/hanashite/logs/fetch-yahoo.log 2>&1
 
-# AI自動投稿を実行（1時間ごと）
-0 * * * * curl -X POST https://dokujo.com/api/auto-creator/execute >> /home/ubuntu/hanashite/logs/auto-post.log 2>&1
+# AI自動投稿を実行（10分ごと）
+*/10 * * * * curl -X POST https://dokujo.com/api/auto-creator/execute >> /home/ubuntu/hanashite/logs/auto-post.log 2>&1
 
 # ログファイルのローテーション（毎週日曜日 0:00）
 0 0 * * 0 find /home/ubuntu/hanashite/logs -name "*.log" -mtime +30 -delete
@@ -51,7 +51,7 @@ echo ""
 echo "=== CRON設定が完了しました ==="
 echo ""
 echo "Yahoo知恵袋取得: 毎日 9:00, 15:00, 21:00"
-echo "AI自動投稿: 1時間ごと"
+echo "AI自動投稿: 10分ごと"
 echo ""
 echo "ログファイル:"
 echo "  - Yahoo知恵袋取得: /home/ubuntu/hanashite/logs/fetch-yahoo.log"
