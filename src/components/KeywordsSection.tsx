@@ -3,7 +3,7 @@ import { getPopularKeywords, getLatestKeywords } from '@/lib/keywords';
 
 export default async function KeywordsSection() {
   // 人気検索ワードを取得（keyword_search_historyから集計）
-  const popularKeywords = await getPopularKeywords(6);
+  const popularKeywords = await getPopularKeywords(5);
   
   // 最新キーワードを取得（keywordsテーブルから）
   const latestKeywords = await getLatestKeywords(3);

@@ -296,7 +296,7 @@ export default async function PostPage({ params, searchParams }: { params: Promi
                   </div>
                   
                   {/* ユーザー名と日付 */}
-                  <div className="flex flex-col">
+                  <div className="flex flex-col flex-1">
                     <div className="mb-0 text-gray-700 text-sm flex items-center gap-2">
                       {post?.user_id ? (
                         <Link href={`/users/${post.user_id}`} className="hover:text-blue-600 transition-colors">
@@ -321,21 +321,27 @@ export default async function PostPage({ params, searchParams }: { params: Promi
                           {userPrefecture && ` ${userPrefecture}`}
                         </span>
                       )}
+                      {/* PCビューのみ表示 */}
+                      <div className="hidden md:flex items-center gap-1.5 ml-auto">
+                        <LikeButton postId={post.id} />
+                        <FavoriteButton postId={post.id} />
+                      </div>
                     </div>
-                    <div className="text-gray-400 text-xs">
-                      {new Date(post.created_at).toLocaleDateString('ja-JP', {
-                        year: '2-digit',
-                        month: '2-digit',
-                        day: '2-digit',
-                        weekday: 'short'
-                      })}
+                    <div className="flex items-center justify-between">
+                      <div className="text-gray-400 text-xs">
+                        {new Date(post.created_at).toLocaleDateString('ja-JP', {
+                          year: '2-digit',
+                          month: '2-digit',
+                          day: '2-digit',
+                          weekday: 'short'
+                        })}
+                      </div>
+                      {/* スマホビューのみ表示 */}
+                      <div className="flex md:hidden items-center gap-1.5">
+                        <LikeButton postId={post.id} />
+                        <FavoriteButton postId={post.id} />
+                      </div>
                     </div>
-                  </div>
-                  
-                  {/* いいねとお気に入りボタン */}
-                  <div className="flex items-center gap-1.5 ml-auto">
-                    <LikeButton postId={post.id} />
-                    <FavoriteButton postId={post.id} />
                   </div>
                 </div>
 

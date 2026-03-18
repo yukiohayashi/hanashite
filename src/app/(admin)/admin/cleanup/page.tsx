@@ -38,6 +38,7 @@ export default function CleanupPage() {
   const [showOrphanedKeywords, setShowOrphanedKeywords] = useState(false);
   const [orphanedKeywordsList, setOrphanedKeywordsList] = useState<OrphanedKeyword[]>([]);
   const [loadingOrphanedKeywords, setLoadingOrphanedKeywords] = useState(false);
+  const [linkingKeywordId, setLinkingKeywordId] = useState<number | null>(null);
 
   const fetchOrphanedData = async () => {
     setLoading(true);
@@ -172,6 +173,38 @@ export default function CleanupPage() {
     }
 
     setLoadingOrphanedKeywords(false);
+  };
+
+  const handleLinkSingleKeyword = async (keywordId: number, keyword: string) => {
+    if (!confirm(`「${keyword}」を含む投稿を検索してタグ付けします。よろしいですか？`)) {
+      return;
+    }
+
+    setLinkingKeywordId(keywordId);
+
+    try {
+      const response = await fetch('/api/admin/link-keywords', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ keywordId }),
+      });
+
+      const data = await response.json();
+
+      if (response.ok) {
+        alert(`✅ ${data.message}`);
+        // 孤立キーワードリストを再取得
+        await handleShowOrphanedKeywords();
+        // 孤立データ数も更新
+        await fetchOrphanedData();
+      } else {
+        alert(`❌ エラー: ${data.error}`);
+      }
+    } catch (error) {
+      alert(`❌ エラーが発生しました`);
+    }
+
+    setLinkingKeywordId(null);
   };
 
   const totalOrphaned = Object.values(orphanedData).reduce((sum, count) => sum + count, 0);
