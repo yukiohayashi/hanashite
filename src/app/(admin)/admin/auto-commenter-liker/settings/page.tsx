@@ -448,19 +448,19 @@ export default function AutoVoterSettings() {
             </div>
           </div>
 
-          {/* 投稿・投票設定 */}
+          {/* 投稿設定 */}
           <div className="border-t border-gray-200 pt-6 mt-6">
             <div className="flex justify-between items-center mb-4">
-              <h3 className="text-lg font-medium text-gray-900">投稿・投票設定</h3>
+              <h3 className="text-lg font-medium text-gray-900">投稿設定</h3>
               <a 
                 href="/admin/categories" 
                 className="text-sm text-blue-600 hover:text-blue-800 underline"
               >
-                カテゴリごとの対象期間・フィルタ・最小投票数はこちら
+                カテゴリごとの対象期間・フィルタはこちら
               </a>
             </div>
             
-            <div className="grid grid-cols-1 md:grid-cols-4 gap-0 justify-items-start">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-0 justify-items-start">
               <div>
                 <label htmlFor="posts_per_run" className="block text-sm font-medium text-gray-700 mb-1">
                   1回の実行で処理する記事数
@@ -475,34 +475,6 @@ export default function AutoVoterSettings() {
                   max="10"
                 />
                 <p className="mt-1 text-xs text-gray-500">1～10件（推奨: 1件）</p>
-              </div>
-
-              <div>
-                <label htmlFor="votes_per_run" className="block text-sm font-medium text-gray-700 mb-1">
-                  1記事あたりの投票数
-                </label>
-                <div className="flex items-center gap-2">
-                  <input
-                    type="number"
-                    id="votes_per_run"
-                    value={settings.votes_per_run}
-                    onChange={(e) => setSettings({ ...settings, votes_per_run: e.target.value })}
-                    className="max-w-[100px] px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    min="1"
-                    max="20"
-                  />
-                  <span className="text-gray-600 font-medium">±</span>
-                  <input
-                    type="number"
-                    id="votes_variance"
-                    value={settings.votes_variance}
-                    onChange={(e) => setSettings({ ...settings, votes_variance: e.target.value })}
-                    className="max-w-[100px] px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    min="0"
-                    max="10"
-                  />
-                </div>
-                <p className="mt-1 text-xs text-gray-500">推奨: 3～5票、ゆらぎ: 1～3票</p>
               </div>
 
               <div>

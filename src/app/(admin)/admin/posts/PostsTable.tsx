@@ -363,6 +363,9 @@ export default function PostsTable({ posts: initialPosts, initialCounts }: Posts
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100" onClick={() => handleSort('created_at')}>
                 投稿日付 {sortBy === 'created_at' && (sortOrder === 'asc' ? '↑' : '↓')}
               </th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                操作
+              </th>
             </tr>
           </thead>
           <tbody className="bg-white divide-y divide-gray-200">
@@ -533,6 +536,35 @@ export default function PostsTable({ posts: initialPosts, initialCounts }: Posts
                   {new Date(post.created_at).toLocaleDateString('ja-JP')}
                   <div className="text-xs">
                     {new Date(post.created_at).toLocaleTimeString('ja-JP', { hour: '2-digit', minute: '2-digit' })}
+                  </div>
+                </td>
+                <td className="px-6 py-4 whitespace-nowrap text-sm" onClick={(e) => e.stopPropagation()}>
+                  <div className="flex gap-2">
+                    {post.status !== 'trash' && (
+                      <button
+                        onClick={async () => {
+                          setSelectedIds([post.id]);
+                          await handleBulkDelete(false);
+                        }}
+                        disabled={loading === post.id}
+                        className="px-3 py-1.5 bg-orange-600 text-white text-xs font-medium rounded hover:bg-orange-700 disabled:bg-gray-400 disabled:cursor-not-allowed transition-colors"
+                      >
+                        ゴミ箱
+                      </button>
+                    )}
+                    <button
+                      onClick={async () => {
+                        if (!confirm('この投稿を完全に削除しますか？この操作は取り消せません。')) {
+                          return;
+                        }
+                        setSelectedIds([post.id]);
+                        await handleBulkDelete(true);
+                      }}
+                      disabled={loading === post.id}
+                      className="px-3 py-1.5 bg-red-600 text-white text-xs font-medium rounded hover:bg-red-700 disabled:bg-gray-400 disabled:cursor-not-allowed transition-colors"
+                    >
+                      完全削除
+                    </button>
                   </div>
                 </td>
               </tr>
