@@ -271,7 +271,7 @@ export default async function PostPage({ params, searchParams }: { params: Promi
             <article className="px-0 md:px-2.5">
               {/* 投稿情報エリア（single.phpと同じデザイン） */}
               <div className="relative shadow-md mb-4 p-2.5 border-t-4 border-t-orange-500 border-x border-b border-gray-200 rounded bg-white">
-                <div className="flex items-start">
+                <div className="flex items-center">
                   {/* アバター画像 */}
                   <div className="flex-shrink-0 mr-1.5">
                     {post?.user_id ? (
