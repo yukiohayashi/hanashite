@@ -40,6 +40,9 @@ export async function POST() {
     const commentPrompt = settings.comment_prompt || '';
     const replyPrompt = settings.reply_prompt || '';
 
+    console.log('コメントプロンプト:', commentPrompt ? `設定済み (${commentPrompt.length}文字)` : '未設定');
+    console.log('返信プロンプト:', replyPrompt ? `設定済み (${replyPrompt.length}文字)` : '未設定');
+
     // API設定を取得
     const { data: apiSettings } = await supabase
       .from('auto_creator_settings')
