@@ -345,7 +345,7 @@ export async function POST() {
                     post_id: post.id,
                     user_id: randomUser.id,
                     content: commentText,
-                    status: 'published',
+                    status: 'approved',
                     created_at: new Date().toISOString(),
                   })
                   .select()
@@ -527,7 +527,7 @@ export async function POST() {
                   post_id: post.id,
                   user_id: randomUser.id,
                   content: commentText,
-                  status: 'published',
+                  status: 'approved',
                   created_at: new Date().toISOString(),
                 })
                 .select()
