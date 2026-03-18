@@ -88,13 +88,23 @@ async function selectQuestioner(refinedTitle: string, refinedContent: string) {
     return randomUser.id;
   }
 
-  // 既婚者を除外（marriageがnullまたは空の場合は含める）
-  const unmarriedUsers = users.filter(user => 
-    !user.marriage || user.marriage !== '既婚'
-  );
+  // 既婚者を完全に除外（marriageが'married'の場合は除外）
+  const unmarriedUsers = users.filter(user => {
+    const isMarried = user.marriage === 'married' || user.marriage === '既婚';
+    if (isMarried) {
+      console.log(`既婚者を除外: ${user.name} (marriage: ${user.marriage})`);
+    }
+    return !isMarried;
+  });
 
-  // 既婚者以外がいない場合は全てのAI会員を対象にする
-  const targetUsers = unmarriedUsers.length > 0 ? unmarriedUsers : users;
+  console.log(`既婚者除外後のユーザー数: ${unmarriedUsers.length}`);
+
+  // 既婚者以外がいない場合はエラー
+  if (unmarriedUsers.length === 0) {
+    throw new Error('未婚のAI会員が見つかりません');
+  }
+
+  const targetUsers = unmarriedUsers;
 
   // 記事内容から年齢層を推定
   const text = (refinedTitle + ' ' + refinedContent).toLowerCase();
