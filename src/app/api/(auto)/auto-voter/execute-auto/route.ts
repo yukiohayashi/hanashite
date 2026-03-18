@@ -31,8 +31,6 @@ export async function POST() {
     }
 
     const postsPerRun = parseInt(settings.posts_per_run || '1');
-    const votesPerRun = parseInt(settings.votes_per_run || '3');
-    const votesVariance = parseInt(settings.votes_variance || '2');
     const aiMemberProbability = parseInt(settings.ai_member_probability || '70');
     const postLikeProbability = parseInt(settings.post_like_probability || '50');
     const likeProbability = parseInt(settings.like_probability || '40');
@@ -57,8 +55,6 @@ export async function POST() {
 
     console.log('実行パラメータ:', {
       postsPerRun,
-      votesPerRun,
-      votesVariance,
       aiMemberProbability,
       postLikeProbability,
       likeProbability,
@@ -162,7 +158,6 @@ export async function POST() {
 
     // 処理する記事を選択（優先度順）
     const postsToProcess = postsWithPriority.slice(0, postsPerRun);
-    let totalVotes = 0;
     let totalComments = 0;
     let totalPostLikes = 0;
     let totalCommentLikes = 0;
@@ -170,7 +165,6 @@ export async function POST() {
       post_id: number;
       title: string;
       category_id: number;
-      votes_added: number;
       comments_added: number;
       post_likes_added: number;
       comment_likes_added: number;
@@ -179,58 +173,7 @@ export async function POST() {
     }> = [];
 
     for (const post of postsToProcess) {
-      // 投票数を計算（ゆらぎを考慮）
-      const actualVotes = votesPerRun + Math.floor(Math.random() * (votesVariance * 2 + 1)) - votesVariance;
-      let votesAddedForThisPost = 0;
-
-      // 投票実行
-      for (let i = 0; i < actualVotes; i++) {
-        try {
-          // ランダムなユーザーを取得
-          const useAiMember = Math.random() * 100 <= aiMemberProbability;
-          const status = useAiMember ? 6 : 2;
-
-          const { data: users } = await supabase
-            .from('users')
-            .select('id')
-            .eq('status', status)
-            .limit(50);
-
-          if (users && users.length > 0) {
-            const randomUser = users[Math.floor(Math.random() * users.length)];
-
-            // 投票選択肢を取得
-            const { data: choices } = await supabase
-              .from('vote_choices')
-              .select('id')
-              .eq('post_id', post.id);
-
-            if (choices && choices.length > 0) {
-              const randomChoice = choices[Math.floor(Math.random() * choices.length)];
-
-              // 投票履歴に追加
-              await supabase.from('vote_history').insert({
-                post_id: post.id,
-                user_id: randomUser.id,
-                choice_id: randomChoice.id,
-                created_at: new Date().toISOString(),
-              });
-
-              // 投票数を更新
-              await supabase.rpc('increment_vote_count', {
-                choice_id: randomChoice.id,
-              });
-
-              totalVotes++;
-              votesAddedForThisPost++;
-            }
-          }
-        } catch (error) {
-          console.error(`投票エラー (記事ID: ${post.id}):`, error);
-        }
-      }
-      
-      // 投票いいね処理
+      // 投稿いいね処理
       let postLikesAddedForThisPost = 0;
       if (Math.random() * 100 <= postLikeProbability) {
         try {
@@ -648,7 +591,6 @@ export async function POST() {
         post_id: post.id,
         title: post.title,
         category_id: post.category_id,
-        votes_added: votesAddedForThisPost,
         comments_added: commentsAddedForThisPost,
         post_likes_added: postLikesAddedForThisPost,
         comment_likes_added: commentLikesAddedForThisPost,
@@ -659,18 +601,15 @@ export async function POST() {
 
     const result = {
       success: true,
-      message: `${postsToProcess.length}件の記事に${totalVotes}票を投票、${totalComments}件のコメント、${totalPostLikes}件の投票いいね、${totalCommentLikes}件のコメントいいねを追加しました`,
+      message: `${postsToProcess.length}件の記事に${totalComments}件のコメント、${totalPostLikes}件の投稿いいね、${totalCommentLikes}件のコメントいいねを追加しました`,
       details: {
         processed_posts: postsToProcess.length,
-        total_votes: totalVotes,
         total_comments: totalComments,
         total_post_likes: totalPostLikes,
         total_comment_likes: totalCommentLikes,
         posts_details: processedPostsDetails,
         settings_used: {
           posts_per_run: postsPerRun,
-          votes_per_run: votesPerRun,
-          votes_variance: votesVariance,
           ai_member_probability: aiMemberProbability,
           post_like_probability: postLikeProbability,
           like_probability: likeProbability,

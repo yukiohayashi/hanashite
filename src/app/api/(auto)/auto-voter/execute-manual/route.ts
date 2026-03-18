@@ -55,8 +55,6 @@ export async function POST() {
         details: executeData.details || {},
         settings: {
           posts_per_run: settings.posts_per_run,
-          votes_per_run: settings.votes_per_run,
-          votes_variance: settings.votes_variance,
           ai_member_probability: settings.ai_member_probability,
           comment_settings: {
             reply_probability: settings.reply_probability,
