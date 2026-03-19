@@ -28,6 +28,7 @@ export async function POST() {
       { setting_key: 'profile_weight', setting_value: 'medium' },
       { setting_key: 'content_weight', setting_value: 'medium' },
       { setting_key: 'mention_other_choices_probability', setting_value: '30' },
+      { setting_key: 'last_executed_at', setting_value: '' },
     ];
 
     // 既存の設定を確認

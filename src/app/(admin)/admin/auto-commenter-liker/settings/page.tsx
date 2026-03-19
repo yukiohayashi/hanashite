@@ -30,7 +30,7 @@ interface Settings {
   mention_other_choices_probability: string;
   comment_prompt: string;
   reply_prompt: string;
-  last_execution?: string;
+  last_executed_at?: string;
 }
 
 export default function AutoVoterSettings() {
@@ -97,12 +97,12 @@ export default function AutoVoterSettings() {
 - 口語的で自然な日本語（20〜100文字）
 - 短い共感、同意＋補足、異なる視点、質問などバリエーション豊かに
 - 「確かに」「おっしゃる」などAI臭い表現は避ける`,
-      last_execution: settingsMap.last_execution,
+      last_executed_at: settingsMap.last_executed_at,
     });
 
-    if (settingsMap.last_execution) {
-      setLastExecution(settingsMap.last_execution);
-      updateElapsedTime(settingsMap.last_execution);
+    if (settingsMap.last_executed_at) {
+      setLastExecution(settingsMap.last_executed_at);
+      updateElapsedTime(settingsMap.last_executed_at);
     }
   };
 
@@ -156,11 +156,11 @@ export default function AutoVoterSettings() {
     console.log('次回実行予定計算 - settingsMap:', settingsMap);
     console.log('次回実行予定計算 - 全キー:', Object.keys(settingsMap));
     console.log('次回実行予定計算 - enabled値:', settingsMap.enabled, 'タイプ:', typeof settingsMap.enabled);
-    console.log('次回実行予定計算 - last_execution値:', settingsMap.last_execution);
+    console.log('次回実行予定計算 - last_executed_at値:', settingsMap.last_executed_at);
 
     if (settingsMap.enabled === 'true') {
-      if (settingsMap.last_execution) {
-        const lastExec = new Date(settingsMap.last_execution);
+      if (settingsMap.last_executed_at) {
+        const lastExec = new Date(settingsMap.last_executed_at);
         const interval = parseInt(settingsMap.interval || '120');
         const variance = parseInt(settingsMap.interval_variance || '30');
         const minInterval = interval - variance;

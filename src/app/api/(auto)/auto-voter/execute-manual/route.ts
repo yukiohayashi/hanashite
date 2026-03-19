@@ -48,12 +48,12 @@ export async function POST() {
     const executeData = await executeResponse.json();
     console.log('実行結果:', executeData);
 
-    // last_executionを更新
+    // last_executed_atを更新
     const executedAt = new Date().toISOString();
     await supabase
       .from('auto_voter_settings')
       .upsert({ 
-        setting_key: 'last_execution', 
+        setting_key: 'last_executed_at', 
         setting_value: executedAt,
         updated_at: executedAt
       }, {

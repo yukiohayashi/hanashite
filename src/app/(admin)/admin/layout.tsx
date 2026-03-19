@@ -181,48 +181,7 @@ export default function AdminPanelLayout({
             </div>
           </div>
 
-          <div>
-            <Link
-              href="/admin/keywords"
-              className={`flex items-center gap-2 px-3 py-1 text-gray-300 ${hoverBgColor} hover:text-white transition-colors`}
-            >
-              <Search className="w-5 h-5" />
-              <span className="text-sm">キーワード検索</span>
-            </Link>
-            <div className="ml-11 space-y-1">
-              <Link
-                href="/admin/keywords/stats"
-                className={`block px-3 py-1 text-sm text-gray-400 ${hoverBgColor} hover:text-white transition-colors`}
-              >
-                キーワード統計
-              </Link>
-                 <Link
-                href="/admin/keywords"
-                className={`block px-3 py-1 text-sm text-gray-400 ${hoverBgColor} hover:text-white transition-colors`}
-              >
-                キーワード一覧
-              </Link>
-              <Link
-                href="/admin/categories"
-                className={`block px-3 py-1 text-sm text-gray-400 ${hoverBgColor} hover:text-white transition-colors`}
-              >
-                カテゴリ管理
-              </Link>
-              <Link
-                href="/admin/ng-words"
-                className={`block px-3 py-1 text-sm text-gray-400 ${hoverBgColor} hover:text-white transition-colors`}
-              >
-                NGワード管理
-              </Link>
-              <Link
-                href="/admin/keywords/history"
-                className={`block px-3 py-1 text-sm text-gray-400 ${hoverBgColor} hover:text-white transition-colors`}
-              >
-                検索履歴
-              </Link>
-           
-            </div>
-          </div>
+        
 
           <Link
             href="/admin/comments"
@@ -267,7 +226,48 @@ export default function AdminPanelLayout({
               </Link>
             </div>
           </div>
-
+  <div>
+            <Link
+              href="/admin/keywords"
+              className={`flex items-center gap-2 px-3 py-1 text-gray-300 ${hoverBgColor} hover:text-white transition-colors`}
+            >
+              <Search className="w-5 h-5" />
+              <span className="text-sm">キーワード検索</span>
+            </Link>
+            <div className="ml-11 space-y-1">
+              <Link
+                href="/admin/keywords/stats"
+                className={`block px-3 py-1 text-sm text-gray-400 ${hoverBgColor} hover:text-white transition-colors`}
+              >
+                キーワード統計
+              </Link>
+                 <Link
+                href="/admin/keywords"
+                className={`block px-3 py-1 text-sm text-gray-400 ${hoverBgColor} hover:text-white transition-colors`}
+              >
+                キーワード一覧
+              </Link>
+              <Link
+                href="/admin/categories"
+                className={`block px-3 py-1 text-sm text-gray-400 ${hoverBgColor} hover:text-white transition-colors`}
+              >
+                カテゴリ管理
+              </Link>
+              <Link
+                href="/admin/ng-words"
+                className={`block px-3 py-1 text-sm text-gray-400 ${hoverBgColor} hover:text-white transition-colors`}
+              >
+                NGワード管理
+              </Link>
+              <Link
+                href="/admin/keywords/history"
+                className={`block px-3 py-1 text-sm text-gray-400 ${hoverBgColor} hover:text-white transition-colors`}
+              >
+                検索履歴
+              </Link>
+           
+            </div>
+          </div>
 <div>
             <Link
               href="/admin/likes"

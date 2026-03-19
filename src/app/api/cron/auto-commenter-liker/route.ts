@@ -41,7 +41,7 @@ export async function GET(request: Request) {
     const intervalVariance = parseInt(settings.interval_variance || '30');
     const noRunStart = settings.no_run_start || '00:00';
     const noRunEnd = settings.no_run_end || '06:00';
-    const lastExecution = settings.last_execution;
+    const lastExecution = settings.last_executed_at;
 
     // 実行間隔チェック（ゆらぎを考慮）
     if (lastExecution) {
@@ -88,12 +88,12 @@ export async function GET(request: Request) {
 
     const executeResult = await executeResponse.json();
 
-    // last_executionを更新
+    // last_executed_atを更新
     const executedAt = new Date();
     await supabase
       .from('auto_voter_settings')
       .update({ setting_value: executedAt.toISOString() })
-      .eq('setting_key', 'last_execution');
+      .eq('setting_key', 'last_executed_at');
 
     // ログを記録
     await supabase.from('auto_voter_logs').insert({
