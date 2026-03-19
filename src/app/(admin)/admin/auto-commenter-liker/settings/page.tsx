@@ -143,31 +143,46 @@ export default function AutoVoterSettings() {
       .from('auto_voter_settings')
       .select('*');
 
-    if (!settingsData) return;
+    if (!settingsData) {
+      console.log('次回実行予定: データなし');
+      return;
+    }
 
     const settingsMap: Record<string, string> = {};
     settingsData.forEach((item) => {
       settingsMap[item.setting_key] = item.setting_value;
     });
 
+    console.log('次回実行予定計算:', {
+      enabled: settingsMap.enabled,
+      last_execution: settingsMap.last_execution,
+      interval: settingsMap.interval,
+      interval_variance: settingsMap.interval_variance
+    });
+
     if (settingsMap.enabled === 'true') {
       if (settingsMap.last_execution) {
         const lastExec = new Date(settingsMap.last_execution);
-        const interval = parseInt(settingsMap.interval || '20');
-        const variance = parseInt(settingsMap.interval_variance || '10');
+        const interval = parseInt(settingsMap.interval || '120');
+        const variance = parseInt(settingsMap.interval_variance || '30');
         const minInterval = interval - variance;
         const nextTime = new Date(lastExec.getTime() + minInterval * 60 * 1000);
         
-        setNextRunTime(nextTime.toLocaleString('ja-JP', { 
+        const nextTimeStr = nextTime.toLocaleString('ja-JP', { 
           month: '2-digit',
           day: '2-digit',
           hour: '2-digit', 
           minute: '2-digit'
-        }));
+        });
+        
+        console.log('次回実行予定:', nextTimeStr);
+        setNextRunTime(nextTimeStr);
       } else {
+        console.log('次回実行予定: 未実行');
         setNextRunTime('未実行');
       }
     } else {
+      console.log('次回実行予定: 無効');
       setNextRunTime('');
     }
   };
