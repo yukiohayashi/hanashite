@@ -13,87 +13,59 @@ export async function POST(request: Request) {
     }
 
     // 設定を取得
-    const { data: settings } = await supabase
+    const { data: settingsData } = await supabase
       .from('auto_creator_settings')
-      .select('setting_key, setting_value');
+      .select('*')
+      .single();
 
-    const settingsMap = new Map(
-      settings?.map((s) => [s.setting_key, s.setting_value]) || []
-    );
-
-    const isActive = settingsMap.get('is_active') === 'true';
-    const noCreateStartHour = parseInt(settingsMap.get('no_create_start_hour') || '0');
-    const noCreateEndHour = parseInt(settingsMap.get('no_create_end_hour') || '6');
-    const intervalMinutes = parseInt(settingsMap.get('execution_interval') || '20');
-    const varianceMinutes = parseInt(settingsMap.get('execution_variance') || '0');
-    const lastExecutedAt = settingsMap.get('last_executed_at');
-
-    // 現在時刻をチェック（日本時間）
-    const now = new Date();
-    const jstOffset = 9 * 60; // JST is UTC+9
-    const jstTime = new Date(now.getTime() + jstOffset * 60 * 1000);
-    const currentHour = jstTime.getUTCHours();
-
-    // 作成しない時間帯かチェック
-    const isNoCreateTime = currentHour >= noCreateStartHour && currentHour < noCreateEndHour;
-
-    if (isNoCreateTime) {
-      return NextResponse.json({
-        success: true,
-        message: `作成しない時間帯です（${noCreateStartHour}時〜${noCreateEndHour}時）`,
-        skipped: true,
-      });
+    if (!settingsData) {
+      return NextResponse.json(
+        { error: '設定が見つかりません' },
+        { status: 404 }
+      );
     }
 
-    // is_activeがfalseの場合はスキップ
-    if (!isActive) {
-      return NextResponse.json({
-        success: true,
-        message: 'AI自動投稿が無効化されています',
-        skipped: true,
-      });
-    }
+    const currentlyActive = settingsData.is_active;
+    const intervalMinutes = settingsData.interval_minutes || 60;
 
-    // 実行間隔チェック（ゆらぎを考慮）
-    if (lastExecutedAt) {
-      const lastExecuted = new Date(lastExecutedAt);
-      const elapsedMinutes = (now.getTime() - lastExecuted.getTime()) / (1000 * 60);
-      
-      // ゆらぎを考慮した最小間隔
-      const minInterval = intervalMinutes - varianceMinutes;
+    // 停止から開始する場合、ランダムな初回実行時間を設定
+    if (enabled && !currentlyActive) {
+      const varianceMinutes = 6; // interval_minutesの10%
       const maxInterval = intervalMinutes + varianceMinutes;
+      
+      // 0〜最大間隔の範囲でランダムな分数を生成
+      const randomMinutes = Math.floor(Math.random() * maxInterval);
+      const pastExecutionTime = new Date(Date.now() - randomMinutes * 60 * 1000);
+      
+      // updated_atを過去の時刻に設定（AI自動投稿はupdated_atを使用）
+      await supabase
+        .from('auto_creator_settings')
+        .update({ 
+          is_active: enabled,
+          updated_at: pastExecutionTime.toISOString()
+        })
+        .eq('id', settingsData.id);
 
-      if (elapsedMinutes < minInterval) {
-        return NextResponse.json({
-          success: true,
-          message: `実行間隔が短すぎます（前回実行から${Math.floor(elapsedMinutes)}分、最小間隔${minInterval}分）`,
-          skipped: true,
-        });
-      }
+      return NextResponse.json({
+        success: true,
+        message: enabled ? 'AI自動投稿を開始しました' : 'AI自動投稿を停止しました',
+        enabled: enabled,
+      });
     }
 
-    // 実際の投稿作成処理を呼び出す
-    const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000';
-    const executeResponse = await fetch(`${baseUrl}/api/auto-creator/execute-auto`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-    });
-
-    const executeResult = await executeResponse.json();
-
-    // 実行時刻を記録（投稿が作成されたかどうかに関わらず）
+    // 通常のトグル（開始→停止）
     await supabase
       .from('auto_creator_settings')
-      .update({ setting_value: now.toISOString() })
-      .eq('setting_key', 'last_executed_at');
+      .update({ 
+        is_active: enabled,
+        updated_at: new Date().toISOString()
+      })
+      .eq('id', settingsData.id);
 
     return NextResponse.json({
       success: true,
-      message: executeResult.message || '自動作成を開始しました',
-      enabled: true,
-      result: executeResult,
+      message: enabled ? 'AI自動投稿を開始しました' : 'AI自動投稿を停止しました',
+      enabled: enabled,
     });
   } catch (error) {
     console.error('Toggle auto-creator error:', error);

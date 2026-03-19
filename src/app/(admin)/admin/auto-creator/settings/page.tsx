@@ -116,15 +116,15 @@ export default function AutoCreatorSettings() {
       last_executed_at: data.updated_at,
     });
 
-    // 次回実行時刻を計算
+    // 次回実行時刻を計算（updated_atを使用）
     if (data.is_active) {
-      if (data.last_executed_at) {
-        setLastExecutedAt(data.last_executed_at);
-        updateElapsedTime(data.last_executed_at);
+      if (data.updated_at) {
+        setLastExecutedAt(data.updated_at);
+        updateElapsedTime(data.updated_at);
         
-        const lastExecuted = new Date(data.last_executed_at);
-        const interval = data.interval_minutes || 40;
-        const variance = data.execution_variance || 15;
+        const lastExecuted = new Date(data.updated_at);
+        const interval = data.interval_minutes || 60;
+        const variance = Math.floor(interval * 0.1); // 10%のゆらぎ
         const minInterval = interval - variance;
         const nextTime = new Date(lastExecuted.getTime() + minInterval * 60 * 1000);
         

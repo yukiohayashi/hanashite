@@ -194,6 +194,26 @@ export default function AutoVoterSettings() {
     try {
       const newEnabled = settings.enabled !== 'true';
 
+      // 停止から開始する場合、ランダムな初回実行時間を設定
+      if (newEnabled) {
+        const interval = parseInt(settings.interval || '120');
+        const variance = parseInt(settings.interval_variance || '30');
+        const maxInterval = interval + variance;
+        
+        // 0〜最大間隔の範囲でランダムな分数を生成
+        const randomMinutes = Math.floor(Math.random() * maxInterval);
+        const nextExecutionTime = new Date(Date.now() - randomMinutes * 60 * 1000);
+        
+        // last_executed_atを過去の時刻に設定
+        await supabase
+          .from('auto_voter_settings')
+          .update({ 
+            setting_value: nextExecutionTime.toISOString(),
+            updated_at: new Date().toISOString()
+          })
+          .eq('setting_key', 'last_executed_at');
+      }
+
       const { error } = await supabase
         .from('auto_voter_settings')
         .update({ setting_value: newEnabled ? 'true' : 'false', updated_at: new Date().toISOString() })
