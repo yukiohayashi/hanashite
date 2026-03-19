@@ -21,9 +21,9 @@ TIMESTAMP=$(date '+%Y-%m-%d %H:%M:%S')
 
 echo "[$TIMESTAMP] 自動アクション CRON実行開始" >> "$LOG_FILE"
 
-RESPONSE=$(curl -s -X POST "${API_URL}/api/cron/auto-voter" \
+RESPONSE=$(curl -s -X GET "${API_URL}/api/cron/auto-commenter-liker" \
   -H "Content-Type: application/json" \
-  -H "x-api-secret: ${API_SECRET}" \
+  -H "Authorization: Bearer ${CRON_SECRET}" \
   -w "\nHTTP_STATUS:%{http_code}")
 
 HTTP_STATUS=$(echo "$RESPONSE" | grep "HTTP_STATUS" | cut -d: -f2)

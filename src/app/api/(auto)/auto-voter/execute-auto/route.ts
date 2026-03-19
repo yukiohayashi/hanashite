@@ -71,31 +71,31 @@ export async function POST() {
     });
 
     // カテゴリごとの設定
-    const categorySettings: Record<number, { target_days: number; min_votes: number }> = {
-      1: { target_days: 10, min_votes: 0 },    // アニメ・漫画
-      2: { target_days: 10, min_votes: 0 },    // エンタメ
-      3: { target_days: 180, min_votes: 0 },   // お受験
-      4: { target_days: 180, min_votes: 0 },   // クレカ・電子マネー
-      5: { target_days: 180, min_votes: 0 },   // ゲーム
-      6: { target_days: 3, min_votes: 0 },     // ジャニーズ
-      7: { target_days: 3, min_votes: 0 },     // ファッション
-      8: { target_days: 1000, min_votes: 400 }, // ペット
-      10: { target_days: 3, min_votes: 10 },   // 住まい・不動産
-      11: { target_days: 3, min_votes: 0 },    // 保険
-      12: { target_days: 180, min_votes: 0 },  // 医療費
-      13: { target_days: 10, min_votes: 0 },   // 婚活・結婚
-      14: { target_days: 180, min_votes: 0 },  // 就職・転職
-      15: { target_days: 180, min_votes: 10 }, // 恋愛
-      16: { target_days: 180, min_votes: 10 }, // 投資・貯蓄
-      17: { target_days: 180, min_votes: 10 }, // 整形・脱毛
-      18: { target_days: 180, min_votes: 10 }, // 料理・グルメ
-      19: { target_days: 180, min_votes: 10 }, // 旅行・ホテル
-      20: { target_days: 180, min_votes: 10 }, // 税金・年金
-      21: { target_days: 180, min_votes: 10 }, // 競馬・ギャンブル
-      22: { target_days: 180, min_votes: 0 },  // 美容・コスメ
-      23: { target_days: 180, min_votes: 0 },  // 育児
-      24: { target_days: 180, min_votes: 0 },  // 雑談
-      25: { target_days: 10, min_votes: 0 },   // ニュース・話題
+    const categorySettings: Record<number, { target_days: number }> = {
+      1: { target_days: 180 },   // アニメ・漫画
+      2: { target_days: 180 },   // エンタメ
+      3: { target_days: 180 },   // お受験
+      4: { target_days: 180 },   // クレカ・電子マネー
+      5: { target_days: 180 },   // ゲーム
+      6: { target_days: 180 },   // ジャニーズ
+      7: { target_days: 180 },   // ファッション
+      8: { target_days: 180 },   // ペット
+      10: { target_days: 180 },  // 住まい・不動産
+      11: { target_days: 180 },  // 保険
+      12: { target_days: 180 },  // 医療費
+      13: { target_days: 180 },  // 婚活・結婚
+      14: { target_days: 180 },  // 就職・転職
+      15: { target_days: 180 },  // 恋愛
+      16: { target_days: 180 },  // 投資・貯蓄
+      17: { target_days: 180 },  // 整形・脱毛
+      18: { target_days: 180 },  // 料理・グルメ
+      19: { target_days: 180 },  // 旅行・ホテル
+      20: { target_days: 180 },  // 税金・年金
+      21: { target_days: 180 },  // 競馬・ギャンブル
+      22: { target_days: 180 },  // 美容・コスメ
+      23: { target_days: 180 },  // 育児
+      24: { target_days: 180 },  // 雑談
+      25: { target_days: 180 },  // ニュース・話題
     };
 
     const prioritizeRecentPosts = settings.prioritize_recent_posts === '1';
@@ -111,7 +111,7 @@ export async function POST() {
     // 対象記事を取得（返信生成のため、タイトル、本文、投票選択肢を含める）
     const { data: posts } = await supabase
       .from('posts')
-      .select('id, title, content, category_id, created_at, user_id')
+      .select('id, title, content, category_id, created_at, user_id, best_answer_id')
       .eq('status', 'published')
       .neq('user_id', 1) // 管理者投稿を除外
       .order('created_at', { ascending: false })
@@ -133,7 +133,7 @@ export async function POST() {
 
     // カテゴリ設定に基づいてフィルタリング
     const filteredPosts = posts.filter(post => {
-      const categorySetting = categorySettings[post.category_id] || { target_days: 180, min_votes: 0 };
+      const categorySetting = categorySettings[post.category_id] || { target_days: 180 };
       const postDate = new Date(post.created_at);
       const daysDiff = Math.floor((Date.now() - postDate.getTime()) / (1000 * 60 * 60 * 24));
       
@@ -217,6 +217,22 @@ export async function POST() {
       const commentErrors: string[] = [];
       
       console.log(`\n=== 記事ID ${post.id} のコメント投稿処理開始 ===`);
+      
+      // ベストアンサーが設定されている記事はスキップ
+      if (post.best_answer_id) {
+        console.log(`記事ID ${post.id} はベストアンサー設定済みのためスキップ`);
+        processedPostsDetails.push({
+          post_id: post.id,
+          title: post.title,
+          category_id: post.category_id,
+          comments_added: 0,
+          post_likes_added: postLikesAddedForThisPost,
+          comment_likes_added: 0,
+          priority: post.priority,
+          comment_errors: ['ベストアンサー設定済みのためスキップ'],
+        });
+        continue;
+      }
       
       // 記事の既存コメントを取得
       const { data: existingComments, count: currentCommentCount } = await supabase

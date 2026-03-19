@@ -19,7 +19,6 @@ interface Category {
   // AI自動コメント用の設定（ハードコード）
   target_days?: number;
   filter_logic?: 'and' | 'or';
-  min_votes?: number;
 }
 
 export default function CategoriesPage() {
@@ -29,6 +28,7 @@ export default function CategoriesPage() {
   const [showModal, setShowModal] = useState(false);
   const [editingCategory, setEditingCategory] = useState<Category | null>(null);
   const [editingDisplayOrder, setEditingDisplayOrder] = useState<number | null>(null);
+  const [editingTargetDays, setEditingTargetDays] = useState<number | null>(null);
   const [sortBy, setSortBy] = useState<keyof Category>('display_order');
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('asc');
   const [formData, setFormData] = useState({
@@ -53,28 +53,28 @@ export default function CategoriesPage() {
 
     if (data) {
       // AI自動コメント用の設定をハードコードで追加（カテゴリIDごと）
-      const categorySettings: Record<number, { target_days: number; filter_logic: 'and' | 'or'; min_votes: number }> = {
-        1: { target_days: 10, filter_logic: 'and', min_votes: 0 },    // アニメ・漫画
-        2: { target_days: 10, filter_logic: 'and', min_votes: 0 },    // エンタメ
-        3: { target_days: 180, filter_logic: 'and', min_votes: 0 },   // ゲーム
-        4: { target_days: 180, filter_logic: 'and', min_votes: 0 },   // グルメ・レシピ
-        5: { target_days: 180, filter_logic: 'and', min_votes: 0 },   // スポーツ
-        6: { target_days: 3, filter_logic: 'and', min_votes: 0 },     // ファッション
-        7: { target_days: 3, filter_logic: 'and', min_votes: 0 },     // 動物・ペット
-        8: { target_days: 1000, filter_logic: 'and', min_votes: 400 }, // 恋愛・結婚
-        9: { target_days: 3, filter_logic: 'and', min_votes: 10 },    // 政治・経済
-        10: { target_days: 3, filter_logic: 'and', min_votes: 10 },   // 旅行・おでかけ
-        11: { target_days: 3, filter_logic: 'and', min_votes: 0 },    // 暮らし・生活
-        12: { target_days: 180, filter_logic: 'and', min_votes: 0 },  // 美容・コスメ
-        13: { target_days: 10, filter_logic: 'and', min_votes: 0 },   // ニュース・話題
-        14: { target_days: 180, filter_logic: 'and', min_votes: 0 },  // 雑談
-        15: { target_days: 180, filter_logic: 'and', min_votes: 10 }, // 政治・野党
-        16: { target_days: 180, filter_logic: 'and', min_votes: 10 }, // タレント・俳優女優
-        17: { target_days: 180, filter_logic: 'and', min_votes: 10 }, // 趣味・芸能
-        18: { target_days: 180, filter_logic: 'and', min_votes: 10 }, // 雑談
-        19: { target_days: 180, filter_logic: 'and', min_votes: 10 }, // 住まい・不動産
-        20: { target_days: 180, filter_logic: 'and', min_votes: 10 }, // 読書・映画
-        21: { target_days: 180, filter_logic: 'and', min_votes: 10 }, // 民族・宗教
+      const categorySettings: Record<number, { target_days: number; filter_logic: 'and' | 'or' }> = {
+        1: { target_days: 180, filter_logic: 'and' },   // アニメ・漫画
+        2: { target_days: 180, filter_logic: 'and' },   // エンタメ
+        3: { target_days: 180, filter_logic: 'and' },   // ゲーム
+        4: { target_days: 180, filter_logic: 'and' },   // グルメ・レシピ
+        5: { target_days: 180, filter_logic: 'and' },   // スポーツ
+        6: { target_days: 180, filter_logic: 'and' },   // ファッション
+        7: { target_days: 180, filter_logic: 'and' },   // 動物・ペット
+        8: { target_days: 180, filter_logic: 'and' },   // 恋愛・結婚
+        9: { target_days: 180, filter_logic: 'and' },   // 政治・経済
+        10: { target_days: 180, filter_logic: 'and' },  // 旅行・おでかけ
+        11: { target_days: 180, filter_logic: 'and' },  // 暮らし・生活
+        12: { target_days: 180, filter_logic: 'and' },  // 美容・コスメ
+        13: { target_days: 180, filter_logic: 'and' },  // ニュース・話題
+        14: { target_days: 180, filter_logic: 'and' },  // 雑談
+        15: { target_days: 180, filter_logic: 'and' },  // 政治・野党
+        16: { target_days: 180, filter_logic: 'and' },  // タレント・俳優女優
+        17: { target_days: 180, filter_logic: 'and' },  // 趣味・芸能
+        18: { target_days: 180, filter_logic: 'and' },  // 雑談
+        19: { target_days: 180, filter_logic: 'and' },  // 住まい・不動産
+        20: { target_days: 180, filter_logic: 'and' },  // 読書・映画
+        21: { target_days: 180, filter_logic: 'and' },  // 民族・宗教
       };
       
       // 各カテゴリのトピック数を取得
@@ -87,14 +87,13 @@ export default function CategoriesPage() {
             .in('status', ['publish', 'published']);
           
           // AI自動コメント用の設定を追加
-          const settings = categorySettings[category.id] || { target_days: 3, filter_logic: 'or', min_votes: 100 };
+          const settings = categorySettings[category.id] || { target_days: 3, filter_logic: 'or' };
           
           return { 
             ...category, 
             post_count: count || 0,
             target_days: settings.target_days,
-            filter_logic: settings.filter_logic,
-            min_votes: settings.min_votes
+            filter_logic: settings.filter_logic
           };
         })
       );
@@ -199,7 +198,7 @@ export default function CategoriesPage() {
       .eq('id', categoryId);
 
     if (error) {
-      alert('表示順の更新に失敗しました: ' + error.message);
+      console.error('Error updating display order:', error);
       return;
     }
 
@@ -207,6 +206,15 @@ export default function CategoriesPage() {
       c.id === categoryId ? { ...c, display_order: newOrder } : c
     ));
     setEditingDisplayOrder(null);
+  };
+
+  const handleTargetDaysUpdate = (categoryId: number, newDays: number) => {
+    // ローカル状態を更新（ハードコード設定のため、DBには保存しない）
+    setCategories(categories.map(c => 
+      c.id === categoryId ? { ...c, target_days: newDays } : c
+    ));
+    setEditingTargetDays(null);
+    alert('対象期間を更新しました。※この変更は一時的です。永続的に保存するにはコード修正が必要です。');
   };
 
   const handleSort = (column: keyof Category) => {
@@ -329,9 +337,6 @@ export default function CategoriesPage() {
                   <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase cursor-pointer hover:bg-gray-100" onClick={() => handleSort('filter_logic')}>
                     フィルタ {sortBy === 'filter_logic' && (sortOrder === 'asc' ? '↑' : '↓')}
                   </th>
-                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase cursor-pointer hover:bg-gray-100" onClick={() => handleSort('min_votes')}>
-                    最小投票数 {sortBy === 'min_votes' && (sortOrder === 'asc' ? '↑' : '↓')}
-                  </th>
                   <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase cursor-pointer hover:bg-gray-100" onClick={() => handleSort('is_active')}>
                     状態 {sortBy === 'is_active' && (sortOrder === 'asc' ? '↑' : '↓')}
                   </th>
@@ -388,8 +393,30 @@ export default function CategoriesPage() {
                     <td className="px-4 py-3 text-sm text-gray-900 font-semibold">
                       {category.post_count || 0}件
                     </td>
-                    <td className="px-4 py-3 text-sm text-gray-600">
-                      過去{category.target_days || 3}日間
+                    <td className="px-4 py-3 text-sm text-gray-600" onClick={(e) => e.stopPropagation()}>
+                      {editingTargetDays === category.id ? (
+                        <input
+                          type="number"
+                          defaultValue={category.target_days || 3}
+                          onBlur={(e) => handleTargetDaysUpdate(category.id, parseInt(e.target.value) || 3)}
+                          onKeyDown={(e) => {
+                            if (e.key === 'Enter') {
+                              handleTargetDaysUpdate(category.id, parseInt((e.target as HTMLInputElement).value) || 3);
+                            } else if (e.key === 'Escape') {
+                              setEditingTargetDays(null);
+                            }
+                          }}
+                          autoFocus
+                          className="w-20 px-2 py-1 border border-blue-500 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        />
+                      ) : (
+                        <div
+                          onClick={() => setEditingTargetDays(category.id)}
+                          className="cursor-pointer hover:bg-blue-50 px-2 py-1 rounded transition-colors"
+                        >
+                          過去{category.target_days || 3}日間
+                        </div>
+                      )}
                     </td>
                     <td className="px-4 py-3 text-sm text-gray-600">
                       <span className={`px-2 py-1 text-xs rounded ${
@@ -399,9 +426,6 @@ export default function CategoriesPage() {
                       }`}>
                         {category.filter_logic === 'or' ? 'OR' : 'AND'}
                       </span>
-                    </td>
-                    <td className="px-4 py-3 text-sm text-gray-600">
-                      {category.min_votes || 0}票以上
                     </td>
                     <td className="px-4 py-3">
                       <span className={`px-2 py-1 text-xs rounded ${

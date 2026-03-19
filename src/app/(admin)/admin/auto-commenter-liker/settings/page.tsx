@@ -300,6 +300,11 @@ export default function AutoVoterSettings() {
         <p className="mt-2 text-sm text-gray-600">
           相談への自動コメント・返信・いいね機能の設定を管理します
         </p>
+        <div className="mt-3 p-3 bg-blue-50 border border-blue-200 rounded-lg">
+          <p className="text-sm text-blue-800">
+            <strong>📌 重要なルール:</strong> ベストアンサーが設定されている記事には、相談者以外からの自動コメントは投稿されません。
+          </p>
+        </div>
       </div>
 
       {message && (
