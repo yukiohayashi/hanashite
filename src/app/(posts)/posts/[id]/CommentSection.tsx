@@ -380,10 +380,11 @@ export default function CommentSection({ postId, initialComments, totalCount, po
                       <button 
                         onClick={() => handleLike(comment.id)}
                         disabled={likingComments.has(comment.id)}
-                        className={`inline-flex items-center gap-1 bg-transparent p-0 border-0 text-xl hover:scale-110 transition-all cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed ${comment.is_liked ? 'text-red-500' : 'text-gray-400 hover:text-red-500'}`}
+                        className="inline-flex items-center gap-1 bg-transparent p-0 border-0 text-xl hover:scale-110 transition-all cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+                        style={{ color: '#ef4444' }}
                       >
-                        <span className="text-xl">♥</span>
-                        <span className="font-medium text-gray-600 text-sm">{comment.like_count || ''}</span>
+                        <span className="text-xl">{comment.is_liked ? '♥' : '♡'}</span>
+                        <span className="text-sm" style={{ color: '#ef4444' }}>{comment.like_count || ''}</span>
                       </button>
                       
                       {session && (
@@ -495,10 +496,11 @@ export default function CommentSection({ postId, initialComments, totalCount, po
                               <button 
                                 onClick={() => handleLike(reply.id)}
                                 disabled={likingComments.has(reply.id)}
-                                className={`inline-flex items-center gap-1 bg-transparent p-0 border-0 text-xl hover:scale-110 transition-all cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed ${reply.is_liked ? 'text-red-500' : 'text-gray-400 hover:text-red-500'}`}
+                                className="inline-flex items-center gap-1 bg-transparent p-0 border-0 text-xl hover:scale-110 transition-all cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+                                style={{ color: '#ef4444' }}
                               >
-                                <span className="text-xl">♥</span>
-                                <span className="font-medium text-gray-600 text-sm">{reply.like_count || ''}</span>
+                                <span className="text-xl">{reply.is_liked ? '♥' : '♡'}</span>
+                                <span className="text-sm" style={{ color: '#ef4444' }}>{reply.like_count || ''}</span>
                               </button>
                               
                               {session && !bestAnswerId && (
@@ -600,10 +602,11 @@ export default function CommentSection({ postId, initialComments, totalCount, po
                                     <button 
                                       onClick={() => handleLike(nestedReply.id)}
                                       disabled={likingComments.has(nestedReply.id)}
-                                      className={`inline-flex items-center gap-1 bg-transparent p-0 border-0 text-xl hover:scale-110 transition-all cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed ${nestedReply.is_liked ? 'text-red-500' : 'text-gray-400 hover:text-red-500'}`}
+                                      className="inline-flex items-center gap-1 bg-transparent p-0 border-0 text-xl hover:scale-110 transition-all cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+                                      style={{ color: '#ef4444' }}
                                     >
-                                      <span className="text-xl">♥</span>
-                                      <span className="font-medium text-gray-600 text-sm">{nestedReply.like_count || ''}</span>
+                                      <span className="text-xl">{nestedReply.is_liked ? '♥' : '♡'}</span>
+                                      <span className="text-sm" style={{ color: '#ef4444' }}>{nestedReply.like_count || ''}</span>
                                     </button>
                                     
                                     {session && !bestAnswerId && (

@@ -111,13 +111,10 @@ export default function LikeButton({ postId }: LikeButtonProps) {
     <button
       onClick={handleLike}
       disabled={isLoading}
-      className={`flex items-center gap-1 px-2 py-1 rounded transition-colors ${
-        isLiked 
-          ? 'text-pink-600' 
-          : 'text-gray-600 hover:text-pink-500'
-      }`}
+      className="flex items-center gap-1 px-1 py-1 rounded transition-opacity hover:opacity-80"
+      style={{ color: '#ef4444' }}
     >
-      <span className="text-xl">{isLiked ? '❤️' : '🤍'}</span>
+      <span className="text-xl">{isLiked ? '♥' : '♡'}</span>
       <span className="text-sm">{likeCount}</span>
     </button>
   );

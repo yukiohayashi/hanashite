@@ -621,7 +621,7 @@ export default function AutoVoterSettings() {
                     min="10"
                     max="200"
                   />
-                  <span className="text-gray-600 font-medium text-sm">±</span>
+                  <span className="text-gray-600 text-sm">±</span>
                   <input
                     type="number"
                     id="max_comments_variance"

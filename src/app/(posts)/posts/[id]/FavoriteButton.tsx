@@ -76,13 +76,10 @@ export default function FavoriteButton({ postId }: FavoriteButtonProps) {
     <button
       onClick={handleFavorite}
       disabled={isLoading}
-      className={`flex items-center gap-1 px-2 py-1 rounded transition-colors ${
-        isFavorited 
-          ? 'text-yellow-600' 
-          : 'text-gray-600 hover:text-yellow-500'
-      } ${isLoading ? 'opacity-50 cursor-not-allowed' : ''}`}
+      className={`flex items-center gap-1 px-1 py-1 rounded transition-colors ${isLoading ? 'opacity-50 cursor-not-allowed' : ''}`}
+      style={{ color: '#eab308' }}
     >
-      <span className="text-xl">{isFavorited ? '⭐' : '☆'}</span>
+      <span className="text-xl">{isFavorited ? '★' : '☆'}</span>
       {count > 0 && <span className="text-xs">({count})</span>}
     </button>
   );

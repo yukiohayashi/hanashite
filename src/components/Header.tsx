@@ -137,7 +137,7 @@ export default function Header({ siteSettings: initialSettings }: HeaderProps = 
               />
             </Link>
             <div className="hidden md:block text-[0.45rem] text-white text-center">powered by {siteSettings.powered_by_text}</div>
-            <div className="w-full text-[0.5rem] text-center text-white min-h-[1em]">
+            <div className="w-full text-[0.5rem] text-center font-bold text-white min-h-[1em]">
               {siteSettings.site_catchphrase || '\u00A0'}
             </div>
           </div>
@@ -209,7 +209,7 @@ export default function Header({ siteSettings: initialSettings }: HeaderProps = 
                 <div className="font-semibold text-white">
                   相談合計数: {siteSettings.total_posts_count}件超
                 </div>
-                <div className="mt-0.5 text-[0.65rem] leading-tight">
+                <div className="mt-0.5 text-[0.65rem] leading-tight font-bold">
                   {siteSettings.site_catchphrase}
                 </div>
               </div>

@@ -270,34 +270,35 @@ export default async function PostPage({ params, searchParams }: { params: Promi
           <section>
             <article className="px-0 md:px-2.5">
               {/* 投稿情報エリア（single.phpと同じデザイン） */}
-              <div className="relative shadow-md mb-4 p-2.5 border-t-4 border-t-orange-500 border-x border-b border-gray-200 rounded bg-white">
-                <div className="flex items-center">
-                  {/* アバター画像 */}
-                  <div className="flex-shrink-0 mr-1.5">
-                    {post?.user_id ? (
-                      <Link href={`/users/${post.user_id}`}>
+              <div className="relative shadow-md mb-4 p-2 border-t-4 border-t-orange-500 border-x border-b border-gray-200 rounded bg-white">
+                <div className="flex items-center justify-between">
+                  {/* 左側：アバター、ユーザー名、その他の情報 */}
+                  <div className="flex items-center gap-2">
+                    {/* アバター画像 */}
+                    <div className="flex-shrink-0">
+                      {post?.user_id ? (
+                        <Link href={`/users/${post.user_id}`}>
+                          <div className="w-5 h-5 rounded-full overflow-hidden">
+                            <img 
+                              src={getAvatarUrl(String(post.user_id), userAvatar, userUseCustomImage, null, userAvatarSeed, 20)}
+                              alt={userName}
+                              className="rounded-full w-full h-full object-cover scale-125 hover:opacity-80 transition-opacity cursor-pointer"
+                            />
+                          </div>
+                        </Link>
+                      ) : (
                         <div className="w-5 h-5 rounded-full overflow-hidden">
                           <img 
-                            src={getAvatarUrl(String(post.user_id), userAvatar, userUseCustomImage, null, userAvatarSeed, 20)}
-                            alt={userName}
-                            className="rounded-full w-full h-full object-cover scale-125 hover:opacity-80 transition-opacity cursor-pointer"
+                            src={getAvatarUrl('guest', null, false, null, null, 20)}
+                            alt="ゲスト"
+                            className="rounded-full w-full h-full object-cover scale-125"
                           />
                         </div>
-                      </Link>
-                    ) : (
-                      <div className="w-5 h-5 rounded-full overflow-hidden">
-                        <img 
-                          src={getAvatarUrl('guest', null, false, null, null, 20)}
-                          alt="ゲスト"
-                          className="rounded-full w-full h-full object-cover scale-125"
-                        />
-                      </div>
-                    )}
-                  </div>
-                  
-                  {/* ユーザー名と日付 */}
-                  <div className="flex flex-col flex-1">
-                    <div className="mb-0 text-gray-700 text-sm flex items-center gap-2">
+                      )}
+                    </div>
+                    
+                    {/* ユーザー名 */}
+                    <div className="text-gray-700 text-sm">
                       {post?.user_id ? (
                         <Link href={`/users/${post.user_id}`} className="hover:text-blue-600 transition-colors">
                           {userName}さん
@@ -305,43 +306,37 @@ export default async function PostPage({ params, searchParams }: { params: Promi
                       ) : (
                         <span>{userName}さん</span>
                       )}
-                      {userMarriage && userMarriage !== 'private' && (
-                        <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-orange-100 text-orange-800">
-                          {userMarriage === 'single' && '独身'}
-                          {userMarriage === 'dating' && '交際中'}
-                          {userMarriage === 'married' && '既婚'}
-                          {userMarriage === 'divorced' && '離婚経験'}
-                          {userMarriage === 'other' && 'その他'}
-                        </span>
-                      )}
-                      {(userSex || userBirthYear || userPrefecture) && (
-                        <span className="text-gray-500 text-xs">
-                          {getSexSymbol(userSex)}
-                          {getAgeGroup(userBirthYear) && ` ${getAgeGroup(userBirthYear)}`}
-                          {userPrefecture && ` ${userPrefecture}`}
-                        </span>
-                      )}
-                      {/* PCビューのみ表示 */}
-                      <div className="hidden md:flex items-center gap-1.5 ml-auto">
-                        <LikeButton postId={post.id} />
-                        <FavoriteButton postId={post.id} />
-                      </div>
                     </div>
-                    <div className="flex items-center justify-between">
-                      <div className="text-gray-400 text-xs">
-                        {new Date(post.created_at).toLocaleDateString('ja-JP', {
-                          year: '2-digit',
-                          month: '2-digit',
-                          day: '2-digit',
-                          weekday: 'short'
-                        })}
-                      </div>
-                      {/* スマホビューのみ表示 */}
-                      <div className="flex md:hidden items-center gap-1.5">
-                        <LikeButton postId={post.id} />
-                        <FavoriteButton postId={post.id} />
-                      </div>
-                    </div>
+                    
+                    {/* 交際ステータス */}
+                    {userMarriage && userMarriage !== 'private' && (
+                      <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-orange-100 text-orange-800">
+                        {userMarriage === 'single' && '独身'}
+                        {userMarriage === 'dating' && '交際中'}
+                        {userMarriage === 'married' && '既婚'}
+                        {userMarriage === 'divorced' && '離婚経験'}
+                        {userMarriage === 'other' && 'その他'}
+                      </span>
+                    )}
+                    
+                    {/* 年齢・都道府県 */}
+                    {(userSex || userBirthYear || userPrefecture) && (
+                      <span className="text-gray-500 text-xs">
+                        {getSexSymbol(userSex)}
+                        {getAgeGroup(userBirthYear) && ` ${getAgeGroup(userBirthYear)}`}
+                        {userPrefecture && ` ${userPrefecture}`}
+                      </span>
+                    )}
+                  </div>
+                  
+                  {/* 右側：日付 */}
+                  <div className="text-gray-400 text-xs">
+                    {new Date(post.created_at).toLocaleDateString('ja-JP', {
+                      year: '2-digit',
+                      month: '2-digit',
+                      day: '2-digit',
+                      weekday: 'short'
+                    })}
                   </div>
                 </div>
 
@@ -427,8 +422,10 @@ export default async function PostPage({ params, searchParams }: { params: Promi
                   }
                 })()}
 
-                {/* 記事ID（右下に表示） */}
-                <div className="mb-4 text-right">
+                {/* ハート・星・記事ID */}
+                <div className="mb-4 flex items-center justify-end gap-2">
+                  <LikeButton postId={post.id} />
+                  <FavoriteButton postId={post.id} />
                   <span className="text-gray-400 text-sm">ID: {post.id}</span>
                 </div>
 
