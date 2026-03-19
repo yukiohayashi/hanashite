@@ -29,15 +29,12 @@ export async function POST() {
       });
     }
 
-    // 実行間隔チェック（設定値 + ゆらぎ）
-    const baseIntervalMinutes = parseInt(settings.execution_interval || '60', 10);
-    const varianceMinutes = parseInt(settings.execution_variance || '15', 10);
+    // 実行間隔チェック（interval_minutes + 10%のゆらぎ）
+    const intervalMinutes = settings.interval_minutes || 60;
+    const varianceMinutes = Math.floor(intervalMinutes * 0.1); // 10%のゆらぎ
+    const minInterval = intervalMinutes - varianceMinutes;
     
-    // ゆらぎをランダムに適用（-variance ~ +variance）
-    const randomVariance = Math.floor(Math.random() * (varianceMinutes * 2 + 1)) - varianceMinutes;
-    const actualIntervalMinutes = baseIntervalMinutes + randomVariance;
-    
-    const lastExecutedAt = settings.last_executed_at;
+    const lastExecutedAt = settings.updated_at;
 
     if (lastExecutedAt) {
       const lastExecutedTime = new Date(lastExecutedAt).getTime();
@@ -46,17 +43,17 @@ export async function POST() {
 
       console.log(`前回実行: ${lastExecutedAt}`);
       console.log(`経過時間: ${elapsedMinutes.toFixed(1)}分`);
-      console.log(`実行間隔設定: ${baseIntervalMinutes}分 ± ${varianceMinutes}分`);
-      console.log(`今回の必要間隔: ${actualIntervalMinutes}分（ゆらぎ: ${randomVariance > 0 ? '+' : ''}${randomVariance}分）`);
+      console.log(`実行間隔設定: ${intervalMinutes}分 ± ${varianceMinutes}分`);
+      console.log(`最小間隔: ${minInterval}分`);
 
-      if (elapsedMinutes < actualIntervalMinutes) {
-        console.log(`実行間隔未満のためスキップ（あと${(actualIntervalMinutes - elapsedMinutes).toFixed(1)}分）`);
+      if (elapsedMinutes < minInterval) {
+        console.log(`実行間隔未満のためスキップ（あと${(minInterval - elapsedMinutes).toFixed(1)}分）`);
         return NextResponse.json({
           success: false,
-          message: `実行間隔未満のためスキップ（あと${(actualIntervalMinutes - elapsedMinutes).toFixed(1)}分）`,
+          message: `実行間隔未満のためスキップ（あと${(minInterval - elapsedMinutes).toFixed(1)}分）`,
           elapsed: elapsedMinutes,
-          required: actualIntervalMinutes,
-          baseInterval: baseIntervalMinutes,
+          required: minInterval,
+          interval: intervalMinutes,
           variance: varianceMinutes,
         });
       }
@@ -123,11 +120,11 @@ export async function POST() {
       }, { status: 500 });
     }
 
-    // 最終実行時刻を更新
+    // 最終実行時刻を更新（updated_atを使用）
     await supabase
       .from('auto_creator_settings')
       .update({
-        last_executed_at: new Date().toISOString(),
+        updated_at: new Date().toISOString(),
       })
       .eq('id', settings.id);
 

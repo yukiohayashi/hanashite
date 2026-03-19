@@ -294,25 +294,24 @@ export default function PostsTable({ posts: initialPosts, initialCounts }: Posts
                   {bulkDeleting ? '移動中...' : 'ゴミ箱に移動'}
                 </button>
               )}
-              {/* ゴミ箱の場合は復元ボタンと完全削除ボタン */}
+              {/* ゴミ箱の場合は復元ボタン */}
               {posts.some(p => selectedIds.includes(p.id) && p.status === 'trash') && (
-                <>
-                  <button
-                    onClick={handleBulkRestore}
-                    disabled={bulkDeleting}
-                    className="px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700 disabled:bg-gray-400 text-sm font-medium"
-                  >
-                    {bulkDeleting ? '復元中...' : '復元して公開'}
-                  </button>
-                  <button
-                    onClick={() => handleBulkDelete(true)}
-                    disabled={bulkDeleting}
-                    className="px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700 disabled:bg-gray-400 text-sm font-medium"
-                  >
-                    {bulkDeleting ? '削除中...' : '完全に削除'}
-                  </button>
-                </>
+                <button
+                  onClick={handleBulkRestore}
+                  disabled={bulkDeleting}
+                  className="px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700 disabled:bg-gray-400 text-sm font-medium"
+                >
+                  {bulkDeleting ? '復元中...' : '復元して公開'}
+                </button>
               )}
+              {/* 完全削除ボタン（常に表示） */}
+              <button
+                onClick={() => handleBulkDelete(true)}
+                disabled={bulkDeleting}
+                className="px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700 disabled:bg-gray-400 text-sm font-medium"
+              >
+                {bulkDeleting ? '削除中...' : '完全に削除'}
+              </button>
             </div>
           </div>
         </div>
