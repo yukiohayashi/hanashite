@@ -48,6 +48,18 @@ export async function POST() {
     const executeData = await executeResponse.json();
     console.log('実行結果:', executeData);
 
+    // last_executionを更新
+    const executedAt = new Date().toISOString();
+    await supabase
+      .from('auto_voter_settings')
+      .upsert({ 
+        setting_key: 'last_execution', 
+        setting_value: executedAt,
+        updated_at: executedAt
+      }, {
+        onConflict: 'setting_key'
+      });
+
     if (executeData.success) {
       return NextResponse.json({
         success: true,
