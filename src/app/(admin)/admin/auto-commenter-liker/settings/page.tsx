@@ -153,12 +153,8 @@ export default function AutoVoterSettings() {
       settingsMap[item.setting_key] = item.setting_value;
     });
 
-    console.log('次回実行予定計算:', {
-      enabled: settingsMap.enabled,
-      last_execution: settingsMap.last_execution,
-      interval: settingsMap.interval,
-      interval_variance: settingsMap.interval_variance
-    });
+    console.log('次回実行予定計算 - settingsMap:', settingsMap);
+    console.log('次回実行予定計算 - enabled値:', settingsMap.enabled, 'タイプ:', typeof settingsMap.enabled);
 
     if (settingsMap.enabled === 'true') {
       if (settingsMap.last_execution) {
