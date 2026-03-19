@@ -12,7 +12,7 @@ export default function AddKeywordButton({ postId, isAdmin }: AddKeywordButtonPr
   const [showModal, setShowModal] = useState(false);
   const [keyword, setKeyword] = useState('');
   const [description, setDescription] = useState('');
-  const [type, setType] = useState('tag');
+  const [keywordType, setKeywordType] = useState('tag');
   const [loading, setLoading] = useState(false);
 
   if (!isAdmin) return null;
@@ -39,7 +39,7 @@ export default function AddKeywordButton({ postId, isAdmin }: AddKeywordButtonPr
           .insert({
             keyword,
             description,
-            type,
+            keyword_type: keywordType,
           })
           .select('id')
           .single();
@@ -62,7 +62,7 @@ export default function AddKeywordButton({ postId, isAdmin }: AddKeywordButtonPr
       setShowModal(false);
       setKeyword('');
       setDescription('');
-      setType('tag');
+      setKeywordType('tag');
       window.location.reload();
     } catch (error) {
       console.error('Error adding keyword:', error);
@@ -120,8 +120,8 @@ export default function AddKeywordButton({ postId, isAdmin }: AddKeywordButtonPr
                   タイプ
                 </label>
                 <select
-                  value={type}
-                  onChange={(e) => setType(e.target.value)}
+                  value={keywordType}
+                  onChange={(e) => setKeywordType(e.target.value)}
                   className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                 >
                   <option value="tag">タグ</option>
@@ -142,7 +142,7 @@ export default function AddKeywordButton({ postId, isAdmin }: AddKeywordButtonPr
                     setShowModal(false);
                     setKeyword('');
                     setDescription('');
-                    setType('tag');
+                    setKeywordType('tag');
                   }}
                   className="flex-1 px-4 py-2 bg-gray-200 text-gray-700 rounded-md hover:bg-gray-300"
                 >
