@@ -54,13 +54,11 @@ export async function POST() {
     
     const { data: updateData, error: updateError } = await supabase
       .from('auto_voter_settings')
-      .upsert({ 
-        setting_key: 'last_executed_at', 
+      .update({ 
         setting_value: executedAt,
         updated_at: executedAt
-      }, {
-        onConflict: 'setting_key'
-      });
+      })
+      .eq('setting_key', 'last_executed_at');
     
     if (updateError) {
       console.error('last_executed_at更新エラー:', updateError);
