@@ -10,6 +10,7 @@ import HomeRightSidebar from '@/components/HomeRightSidebar';
 import ClickableImage from '@/components/ClickableImage';
 import LikeButton from './LikeButton';
 import FavoriteButton from './FavoriteButton';
+import AddKeywordButton from './AddKeywordButton';
 // import GoogleAdPost from '@/components/GoogleAdPost'; // 一時的に非表示
 import type { Metadata } from 'next';
 
@@ -347,18 +348,24 @@ export default async function PostPage({ params, searchParams }: { params: Promi
                   <h1 className="font-bold text-gray-900 text-1.5xl">
                     {post.title}
                   </h1>
-                  {(session?.user?.status === 1 || session?.user?.status === 2 || session?.user?.id === post.user_id) && (
-                    <Link
-                      href={
-                        session?.user?.status === 1 || session?.user?.status === 2
-                          ? `/admin/posts/${post.id}/edit`
-                          : `/post-manage/${post.id}`
-                      }
-                      className="ml-4 px-3 py-1 text-sm bg-blue-600 text-white rounded hover:bg-blue-700"
-                    >
-                      編集
-                    </Link>
-                  )}
+                  <div className="flex items-center">
+                    {(session?.user?.status === 1 || session?.user?.status === 2 || session?.user?.id === post.user_id) && (
+                      <Link
+                        href={
+                          session?.user?.status === 1 || session?.user?.status === 2
+                            ? `/admin/posts/${post.id}/edit`
+                            : `/post-manage/${post.id}`
+                        }
+                        className="px-3 py-1 text-sm bg-blue-600 text-white rounded hover:bg-blue-700"
+                      >
+                        編集
+                      </Link>
+                    )}
+                    <AddKeywordButton 
+                      postId={post.id} 
+                      isAdmin={session?.user?.status === 1 || session?.user?.status === 2}
+                    />
+                  </div>
                 </div>
 
                 {/* 本文（管理者投稿は緑エリアなし、一般投稿は条件分岐） */}

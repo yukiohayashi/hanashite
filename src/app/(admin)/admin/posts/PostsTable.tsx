@@ -14,7 +14,7 @@ interface Post {
   thumbnail_url?: string | null;
   og_image?: string | null;
   category_id?: number | null;
-  total_votes?: number;
+  comment_count?: number;
   best_answer_id?: number | null;
   best_answer_selected_at?: string | null;
   deadline_at?: string | null;
@@ -347,8 +347,8 @@ export default function PostsTable({ posts: initialPosts, initialCounts }: Posts
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                 ハナシテカテゴリ
               </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100" onClick={() => handleSort('vote_count')}>
-                合計投票数 {sortBy === 'vote_count' && (sortOrder === 'asc' ? '↑' : '↓')}
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                コメント件数
               </th>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100" onClick={() => handleSort('deadline_at')}>
                 締め切り {sortBy === 'deadline_at' && (sortOrder === 'asc' ? '↑' : '↓')}
@@ -473,7 +473,7 @@ export default function PostsTable({ posts: initialPosts, initialCounts }: Posts
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                   <span className="font-semibold">
-                    {post.total_votes || 0}票
+                    {post.comment_count || 0}件
                   </span>
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500" onClick={(e) => e.stopPropagation()}>

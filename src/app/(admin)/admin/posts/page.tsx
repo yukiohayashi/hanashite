@@ -6,7 +6,7 @@ async function getPosts(statusFilter?: string, limit: number = 100, sortBy: stri
   
   let query = supabase
     .from('posts')
-    .select('id, title, content, status, created_at, user_id, thumbnail_url, og_image, category_id, total_votes, best_answer_id, best_answer_selected_at, deadline_at, categories(id, name)');
+    .select('id, title, content, status, created_at, user_id, thumbnail_url, og_image, category_id, best_answer_id, best_answer_selected_at, deadline_at, categories(id, name)');
 
   if (statusFilter) {
     query = query.eq('status', statusFilter);
@@ -16,14 +16,8 @@ async function getPosts(statusFilter?: string, limit: number = 100, sortBy: stri
     query = query.or(`title.ilike.%${searchQuery}%,content.ilike.%${searchQuery}%`);
   }
 
-  // 投票数でソートする場合は、total_votesカラムを使用
-  if (sortBy === 'vote_count') {
-    console.log('ソート: total_votes', sortOrder === 'asc' ? '昇順' : '降順');
-    query = query.order('total_votes', { ascending: sortOrder === 'asc' });
-  } else {
-    console.log('ソート:', sortBy, sortOrder === 'asc' ? '昇順' : '降順');
-    query = query.order(sortBy, { ascending: sortOrder === 'asc' });
-  }
+  console.log('ソート:', sortBy, sortOrder === 'asc' ? '昇順' : '降順');
+  query = query.order(sortBy, { ascending: sortOrder === 'asc' });
 
   const { data: posts, error } = await query.limit(limit);
 
@@ -38,8 +32,8 @@ async function getPosts(statusFilter?: string, limit: number = 100, sortBy: stri
   // ソート結果を確認
   if (posts.length > 0) {
     console.log('取得件数:', posts.length);
-    console.log('最初の投稿:', { id: posts[0].id, created_at: posts[0].created_at, total_votes: posts[0].total_votes });
-    console.log('最後の投稿:', { id: posts[posts.length - 1].id, created_at: posts[posts.length - 1].created_at, total_votes: posts[posts.length - 1].total_votes });
+    console.log('最初の投稿:', { id: posts[0].id, created_at: posts[0].created_at });
+    console.log('最後の投稿:', { id: posts[posts.length - 1].id, created_at: posts[posts.length - 1].created_at });
   }
 
   const postIds = posts.map(p => p.id);
@@ -52,6 +46,17 @@ async function getPosts(statusFilter?: string, limit: number = 100, sortBy: stri
     .in('id', userIds);
 
   const userMap = new Map(users?.map(u => [u.id, u]) || []);
+
+  // コメント件数を一括取得
+  const { data: commentCounts } = await supabase
+    .from('comments')
+    .select('post_id')
+    .in('post_id', postIds);
+
+  const commentCountMap = new Map<number, number>();
+  commentCounts?.forEach(c => {
+    commentCountMap.set(c.post_id, (commentCountMap.get(c.post_id) || 0) + 1);
+  });
 
   // ベストアンサーを一括取得（commentsテーブルから）
   const postsWithBestAnswer = posts.filter(p => p.best_answer_id);
@@ -122,6 +127,7 @@ async function getPosts(statusFilter?: string, limit: number = 100, sortBy: stri
     users: userMap.get(post.user_id) || null,
     keywords: keywordsMap.get(post.id) || [],
     bestAnswer: bestAnswerMap.get(post.id) || null,
+    comment_count: commentCountMap.get(post.id) || 0,
   }));
 
   return postsWithDetails;
