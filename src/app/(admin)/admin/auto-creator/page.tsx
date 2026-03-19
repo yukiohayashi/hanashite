@@ -68,7 +68,7 @@ export default async function AutoCreatorDashboard() {
   const settings = await getSettings();
 
   const isEnabled = settings.is_enabled === 'true';
-  const lastExecution = settings.last_execution;
+  const lastExecution = settings.last_executed_at;
 
   return (
     <div className="space-y-6">
