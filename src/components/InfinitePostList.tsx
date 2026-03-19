@@ -158,7 +158,7 @@ export default function InfinitePostList({ initialPosts, sortBy: initialSortBy }
                 />
               </div>
               <span className="truncate">{post.user_name || 'ゲスト'}さん</span>
-              <span className="ml-2 flex-shrink-0">{new Date(post.created_at).toLocaleDateString('ja-JP', { month: 'numeric', day: 'numeric', timeZone: 'Asia/Tokyo' })} {new Date(post.created_at).toLocaleTimeString('ja-JP', { hour: '2-digit', minute: '2-digit', timeZone: 'Asia/Tokyo' })}</span>
+              <span className="ml-2 flex-shrink-0">{new Date(post.created_at).toLocaleDateString('ja-JP', { month: 'numeric', day: 'numeric' })} {new Date(post.created_at).toLocaleTimeString('ja-JP', { hour: '2-digit', minute: '2-digit' })}</span>
             </div>
             {post.category_name && post.category_id && (
               <Link

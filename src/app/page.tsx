@@ -605,7 +605,7 @@ export default async function Home({ searchParams }: HomeProps) {
                               />
                             </div>
                             <span className="truncate">{(post as any).user_name || 'ゲスト'}さん</span>
-                            <span className="ml-2 shrink-0">{new Date(post.created_at).toLocaleDateString('ja-JP', { month: 'numeric', day: 'numeric', timeZone: 'Asia/Tokyo' })} {new Date(post.created_at).toLocaleTimeString('ja-JP', { hour: '2-digit', minute: '2-digit', timeZone: 'Asia/Tokyo' })}</span>
+                            <span className="ml-2 shrink-0">{new Date(post.created_at).toLocaleDateString('ja-JP', { month: 'numeric', day: 'numeric' })} {new Date(post.created_at).toLocaleTimeString('ja-JP', { hour: '2-digit', minute: '2-digit' })}</span>
                           </div>
                         </Link>
                       </div>
@@ -644,7 +644,7 @@ export default async function Home({ searchParams }: HomeProps) {
                             />
                           </div>
                           <span className="truncate">{(post as any).user_name || 'ゲスト'}さん</span>
-                          <span className="ml-1 shrink-0">{new Date(post.created_at).toLocaleDateString('ja-JP', { month: 'numeric', day: 'numeric', timeZone: 'Asia/Tokyo' })} {new Date(post.created_at).toLocaleTimeString('ja-JP', { hour: '2-digit', minute: '2-digit', timeZone: 'Asia/Tokyo' })}</span>
+                          <span className="ml-1 shrink-0">{new Date(post.created_at).toLocaleDateString('ja-JP', { month: 'numeric', day: 'numeric' })} {new Date(post.created_at).toLocaleTimeString('ja-JP', { hour: '2-digit', minute: '2-digit' })}</span>
                         </div>
                       </Link>
                     </div>

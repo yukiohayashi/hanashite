@@ -15,7 +15,7 @@ const categoryKeywords: { [key: number]: string[] } = {
   10: ['職場恋愛', '社内恋愛', '職場', '会社'],
   11: ['同棲', '一緒に住む', '同棲生活'],
   12: ['告白', 'プロポーズ', '想いを伝える'],
-  13: ['離婚', '別れ', '離婚したい'],
+  13: ['離婚', '離婚したい', '離婚届', '慰謝料'],
   14: ['その他', 'その他の相談'],
   16: ['遠距離恋愛', '遠距離', '遠恋'],
   17: ['マンネリ', '倦怠期', 'マンネリ化'],
@@ -40,6 +40,15 @@ function detectCategory(title: string, content: string): number {
       if (text.includes(keyword.toLowerCase())) {
         scores[id]++;
       }
+    }
+  }
+  
+  // 離婚カテゴリは結婚関連キーワードがある場合のみ有効
+  if (scores[13] > 0) {
+    const marriageKeywords = ['夫婦', '旦那', '妻', '結婚', '既婚'];
+    const hasMarriageContext = marriageKeywords.some(kw => text.includes(kw));
+    if (!hasMarriageContext) {
+      scores[13] = 0; // 結婚関連の文脈がない場合は離婚カテゴリを無効化
     }
   }
   

@@ -60,7 +60,15 @@ export default function PostEditForm({ post, categories, allKeywords, postKeywor
     title: post.title || '',
     content: post.content || '',
     status: post.status || 'draft',
-    created_at: post.created_at ? new Date(post.created_at).toISOString().slice(0, 16) : '',
+    created_at: post.created_at ? (() => {
+      const date = new Date(post.created_at);
+      const year = date.getFullYear();
+      const month = String(date.getMonth() + 1).padStart(2, '0');
+      const day = String(date.getDate()).padStart(2, '0');
+      const hours = String(date.getHours()).padStart(2, '0');
+      const minutes = String(date.getMinutes()).padStart(2, '0');
+      return `${year}-${month}-${day}T${hours}:${minutes}`;
+    })() : '',
     deadline_at: post.deadline_at ? new Date(post.deadline_at).toISOString().slice(0, 10) : '',
     category_id: post.category_id || null,
   });
