@@ -26,27 +26,34 @@ export default function Header({ siteSettings: initialSettings }: HeaderProps = 
   
   const [leftSidebarOpen, setLeftSidebarOpen] = useState(false);
   const [rightSidebarOpen, setRightSidebarOpen] = useState(false);
-  const [avatarUrl, setAvatarUrl] = useState<string>(() => {
-    if (typeof window !== 'undefined') {
-      return sessionStorage.getItem('header-avatar-url') || '';
-    }
-    return '';
-  });
+  const [avatarUrl, setAvatarUrl] = useState<string>('');
   const [unreadCount, setUnreadCount] = useState(0);
-  const [siteSettings, setSiteSettings] = useState<SiteSettings>(() => {
-    if (initialSettings) return initialSettings;
-    if (typeof window !== 'undefined') {
-      const cached = sessionStorage.getItem('site-settings');
-      if (cached) {
-        try { return JSON.parse(cached); } catch { /* ignore */ }
-      }
-    }
-    return {
+  const [siteSettings, setSiteSettings] = useState<SiteSettings>(
+    initialSettings || {
       powered_by_text: '',
       total_posts_count: '',
       site_catchphrase: '',
-    };
-  });
+    }
+  );
+
+  useEffect(() => {
+    // sessionStorageから初期値を復元（マウント後のみ）
+    if (typeof window !== 'undefined') {
+      const cachedAvatar = sessionStorage.getItem('header-avatar-url');
+      if (cachedAvatar) {
+        setAvatarUrl(cachedAvatar);
+      }
+      
+      if (!initialSettings) {
+        const cachedSettings = sessionStorage.getItem('site-settings');
+        if (cachedSettings) {
+          try {
+            setSiteSettings(JSON.parse(cachedSettings));
+          } catch { /* ignore */ }
+        }
+      }
+    }
+  }, [initialSettings]);
 
   useEffect(() => {
     // 初期値がない場合のみAPIから取得
