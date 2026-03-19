@@ -257,6 +257,10 @@ export default function AutoVoterSettings() {
         if (settingsInfo.ai_member_probability) message += `- AI会員確率: ${settingsInfo.ai_member_probability}%\n`;
         
         setMessage(message);
+        
+        // 設定と次回実行予定時刻を更新
+        await fetchSettings();
+        await fetchNextRunTime();
       } else {
         setMessage(`❌ ${data.message || data.error}\n\nエラー詳細: ${JSON.stringify(data, null, 2)}`);
       }
