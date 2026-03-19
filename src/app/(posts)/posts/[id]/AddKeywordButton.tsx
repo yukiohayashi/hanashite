@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { supabase } from '@/lib/supabase';
 
 interface AddKeywordButtonProps {
@@ -14,8 +14,13 @@ export default function AddKeywordButton({ postId, isAdmin }: AddKeywordButtonPr
   const [description, setDescription] = useState('');
   const [keywordType, setKeywordType] = useState('tag');
   const [loading, setLoading] = useState(false);
+  const [mounted, setMounted] = useState(false);
 
-  if (!isAdmin) return null;
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  if (!mounted || !isAdmin) return null;
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
