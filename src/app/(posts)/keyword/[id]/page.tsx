@@ -206,7 +206,7 @@ export default async function KeywordPage({
                           alt="相談者"
                           className="w-4 h-4 rounded-full border border-gray-200 inline-block mr-1"
                         />
-                        <span>{userName}さんからの相談</span>
+                        <span>{userName}さん</span>
                         <span className="ml-2">{new Date(post.created_at).toLocaleDateString('ja-JP')}</span>
                       </div>
                       {categoryName && (

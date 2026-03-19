@@ -191,7 +191,7 @@ export default async function CategoryPage({
                         alt="相談者"
                         className="w-4 h-4 rounded-full border border-gray-200 shrink-0"
                       />
-                      <span className="truncate">{post.user_name || 'ゲスト'}さんからの相談</span>
+                      <span className="truncate">{post.user_name || 'ゲスト'}さん</span>
                       <span className="shrink-0">{new Date(post.created_at).toLocaleDateString('ja-JP')}</span>
                     </div>
                     {post.best_answer_id && (

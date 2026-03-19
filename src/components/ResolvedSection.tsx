@@ -125,8 +125,8 @@ export default function ResolvedSection({ bestAnswers, waitingPosts }: ResolvedS
                       {contentPreview}
                     </p>
                   )}
-                  <div className="mt-2 flex items-center gap-2 text-gray-500 text-xs">
-                    <span className="truncate">{post.user_name || 'ゲスト'}さんからの相談</span>
+                  <div className="mt-2 flex items-center gap-1 text-gray-500 text-xs">
+                    <span className="truncate">{post.user_name || 'ゲスト'}さん</span>
                     {post.deadline_at && (
                       <span className="ml-2 flex-shrink-0 text-red-600">締切: {new Date(post.deadline_at).toLocaleDateString('ja-JP')}</span>
                     )}

@@ -532,7 +532,7 @@ export default async function Home({ searchParams }: HomeProps) {
         </aside>
 
         {/* メインコンテンツ */}
-        <div className="flex-1 max-w-[760px] px-2 md:px-4">
+        <div className="flex-1 max-w-[760px] px-1 md:px-4">
           <section>
             {/* 検索ボックスとキーワード */}
             <div className="p-2.5">
@@ -586,7 +586,7 @@ export default async function Home({ searchParams }: HomeProps) {
                       ? fullContent.substring(0, Math.min(halfLength, 100)) + (fullContent.length > Math.min(halfLength, 100) ? '...' : '')
                       : '';
                     return (
-                      <div className="relative bg-white p-3 border border-[#ffe0d6] rounded-md hover:shadow-md transition-shadow">
+                      <div className="relative bg-white p-2 border border-[#ffe0d6] rounded-md hover:shadow-md transition-shadow">
                         <Link href={`/posts/${post.id}`} className="block">
                           <h3 className="mb-2 font-extrabold text-gray-900 text-lg line-clamp-2">
                             {post.title}
@@ -596,7 +596,7 @@ export default async function Home({ searchParams }: HomeProps) {
                               {contentPreview}
                             </p>
                           )}
-                          <div className="mt-2 flex items-center gap-2 text-gray-500 text-xs">
+                          <div className="mt-2 flex items-center gap-1 text-gray-500 text-xs">
                             <div className="w-4 h-4 rounded-full overflow-hidden border border-gray-200 inline-block mr-1 shrink-0">
                               <img 
                                 src={(post as any).avatar_url || '/images/local-avatars/default-avatar.webp'} 
@@ -604,18 +604,10 @@ export default async function Home({ searchParams }: HomeProps) {
                                 className="w-full h-full object-cover scale-125"
                               />
                             </div>
-                            <span className="truncate">{(post as any).user_name || 'ゲスト'}さんからの相談</span>
-                            <span className="ml-2 shrink-0 hidden md:inline">{new Date(post.created_at).toLocaleDateString('ja-JP')}</span>
+                            <span className="truncate">{(post as any).user_name || 'ゲスト'}さん</span>
+                            <span className="ml-2 shrink-0">{new Date(post.created_at).toLocaleDateString('ja-JP', { month: 'numeric', day: 'numeric', timeZone: 'Asia/Tokyo' })} {new Date(post.created_at).toLocaleTimeString('ja-JP', { hour: '2-digit', minute: '2-digit', timeZone: 'Asia/Tokyo' })}</span>
                           </div>
                         </Link>
-                        {(post as any).categories?.name && (post as any).category_id && (
-                          <Link
-                            href={`/category/${(post as any).category_id}`}
-                            className="absolute bottom-3 right-3 inline-block px-2 py-0.5 text-xs font-medium text-[#bf360c] bg-white border border-[#ffccbc] rounded whitespace-nowrap hover:bg-pink-50 transition-colors z-10"
-                          >
-                            {(post as any).categories.name}
-                          </Link>
-                        )}
                       </div>
                     );
                   })()}
@@ -652,16 +644,9 @@ export default async function Home({ searchParams }: HomeProps) {
                             />
                           </div>
                           <span className="truncate">{(post as any).user_name || 'ゲスト'}さん</span>
+                          <span className="ml-1 shrink-0">{new Date(post.created_at).toLocaleDateString('ja-JP', { month: 'numeric', day: 'numeric', timeZone: 'Asia/Tokyo' })} {new Date(post.created_at).toLocaleTimeString('ja-JP', { hour: '2-digit', minute: '2-digit', timeZone: 'Asia/Tokyo' })}</span>
                         </div>
                       </Link>
-                      {(post as any).categories?.name && (post as any).category_id && (
-                        <Link
-                          href={`/category/${(post as any).category_id}`}
-                          className="absolute bottom-2 right-2 inline-block px-1.5 py-0.5 text-[10px] font-medium text-[#bf360c] bg-white border border-[#ffccbc] rounded whitespace-nowrap hover:bg-pink-50 transition-colors z-10"
-                        >
-                          {(post as any).categories.name}
-                        </Link>
-                      )}
                     </div>
                   );
                 })}
@@ -863,7 +848,7 @@ async function InterestCategoriesSection({ userId }: { userId: string | number |
 
   return (
     <div className="mb-4">
-      <h3 className="m-1.5 mb-2 px-0 font-bold text-base text-[#ff6b35]">
+      <h3 className="m-1.5 mb-2 px-0 font-bold text-base text-[#ff6b6b]">
         カテゴリ
         <Link href="/profileset/" className="ml-2 text-sm">
           追加 <i className="fas fa-plus-square"></i>
@@ -871,12 +856,12 @@ async function InterestCategoriesSection({ userId }: { userId: string | number |
       </h3>
       <div className="space-y-2 px-2">
         {allPosts.map((post: any, index: number) => (
-          <div key={`${post.id}-${index}`} className="relative bg-white hover:shadow-md p-3 border border-gray-300 rounded-md transition-all hover:-translate-y-1">
+          <div key={`${post.id}-${index}`} className="relative bg-white hover:shadow-md p-2 border border-gray-300 rounded-md transition-all hover:-translate-y-1">
             <Link href={`/posts/${post.id}`} className="block pr-16">
               <h3 className="font-bold text-gray-900 text-base md:text-lg leading-relaxed">
                 {post.title}
               </h3>
-              <div className="mt-2 flex items-center gap-2 text-gray-500 text-xs">
+              <div className="mt-2 flex items-center gap-1 text-gray-500 text-xs">
                 <div className="w-4 h-4 rounded-full overflow-hidden border border-gray-200 inline-block mr-1 shrink-0">
                   <img
                     src={post.avatar_url || '/images/local-avatars/default-avatar.webp'}
@@ -884,7 +869,7 @@ async function InterestCategoriesSection({ userId }: { userId: string | number |
                     className="w-full h-full object-cover scale-125"
                   />
                 </div>
-                <span className="truncate">{post.user_name || 'ゲスト'}さんからの相談</span>
+                <span className="truncate">{post.user_name || 'ゲスト'}さん</span>
               </div>
             </Link>
             {post.categories?.name && post.category_id && (

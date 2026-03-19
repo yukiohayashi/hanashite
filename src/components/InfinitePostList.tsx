@@ -134,7 +134,7 @@ export default function InfinitePostList({ initialPosts, sortBy: initialSortBy }
           ? cleanContent.substring(0, 50) + (cleanContent.length > 50 ? '...' : '')
           : '';
         return (
-          <div key={post.id} className="relative block bg-white hover:shadow-md p-3 border border-[#ffe0d6] rounded-md transition-all hover:-translate-y-1">
+          <div key={post.id} className="relative block bg-white hover:shadow-md p-2 border border-[#ffe0d6] rounded-md transition-all hover:-translate-y-1">
           <Link 
             href={`/posts/${post.id}`} 
             className="block"
@@ -157,10 +157,8 @@ export default function InfinitePostList({ initialPosts, sortBy: initialSortBy }
                   className="w-full h-full object-cover scale-125"
                 />
               </div>
-              <span className="truncate">{post.user_name || 'ゲスト'}さんからの相談</span>
-              {post.deadline_at && (
-                <span className="ml-2 flex-shrink-0 hidden md:inline">締切: {new Date(post.deadline_at).toLocaleDateString('ja-JP')}</span>
-              )}
+              <span className="truncate">{post.user_name || 'ゲスト'}さん</span>
+              <span className="ml-2 flex-shrink-0">{new Date(post.created_at).toLocaleDateString('ja-JP', { month: 'numeric', day: 'numeric', timeZone: 'Asia/Tokyo' })} {new Date(post.created_at).toLocaleTimeString('ja-JP', { hour: '2-digit', minute: '2-digit', timeZone: 'Asia/Tokyo' })}</span>
             </div>
             {post.category_name && post.category_id && (
               <Link
