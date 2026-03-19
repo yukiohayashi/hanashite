@@ -50,7 +50,9 @@ export async function POST() {
 
     // last_executed_atを更新
     const executedAt = new Date().toISOString();
-    await supabase
+    console.log('last_executed_atを更新:', executedAt);
+    
+    const { data: updateData, error: updateError } = await supabase
       .from('auto_voter_settings')
       .upsert({ 
         setting_key: 'last_executed_at', 
@@ -59,6 +61,12 @@ export async function POST() {
       }, {
         onConflict: 'setting_key'
       });
+    
+    if (updateError) {
+      console.error('last_executed_at更新エラー:', updateError);
+    } else {
+      console.log('last_executed_at更新成功:', updateData);
+    }
 
     if (executeData.success) {
       return NextResponse.json({
