@@ -154,7 +154,9 @@ export default function AutoVoterSettings() {
     });
 
     console.log('次回実行予定計算 - settingsMap:', settingsMap);
+    console.log('次回実行予定計算 - 全キー:', Object.keys(settingsMap));
     console.log('次回実行予定計算 - enabled値:', settingsMap.enabled, 'タイプ:', typeof settingsMap.enabled);
+    console.log('次回実行予定計算 - last_execution値:', settingsMap.last_execution);
 
     if (settingsMap.enabled === 'true') {
       if (settingsMap.last_execution) {
