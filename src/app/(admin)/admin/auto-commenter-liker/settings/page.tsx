@@ -386,10 +386,12 @@ export default function AutoVoterSettings() {
               </div>
             )}
 
-            {settings.enabled === 'true' && nextRunTime && (
+            {settings.enabled === 'true' && (
               <div className="border-l border-gray-300 pl-4">
                 <strong className="text-sm">次回実行予定:</strong>
-                <span className="ml-2 text-sm text-blue-600 font-medium">{nextRunTime}頃</span>
+                <span className="ml-2 text-sm text-blue-600 font-medium">
+                  {nextRunTime ? `${nextRunTime}頃` : '計算中...'}
+                </span>
               </div>
             )}
           </div>
