@@ -211,15 +211,29 @@ export default function AutoVoterSettings() {
           .eq('setting_key', 'last_executed_at');
         
         // next_execution_timeを設定
-        await supabase
+        const { data: existingNextExec } = await supabase
           .from('auto_voter_settings')
-          .upsert({ 
-            setting_key: 'next_execution_time',
-            setting_value: nextExecutionTime.toISOString(),
-            updated_at: now.toISOString()
-          }, {
-            onConflict: 'setting_key'
-          });
+          .select('setting_key')
+          .eq('setting_key', 'next_execution_time')
+          .single();
+        
+        if (existingNextExec) {
+          await supabase
+            .from('auto_voter_settings')
+            .update({ 
+              setting_value: nextExecutionTime.toISOString(),
+              updated_at: now.toISOString()
+            })
+            .eq('setting_key', 'next_execution_time');
+        } else {
+          await supabase
+            .from('auto_voter_settings')
+            .insert({ 
+              setting_key: 'next_execution_time',
+              setting_value: nextExecutionTime.toISOString(),
+              updated_at: now.toISOString()
+            });
+        }
       }
 
       const { error } = await supabase
@@ -628,8 +642,6 @@ export default function AutoVoterSettings() {
           {/* コメント設定 */}
           <div className="border-t border-gray-200 pt-4 mt-4">
             <h3 className="text-lg font-medium text-gray-900 mb-3">コメント設定</h3>
-            
-            
             <div className="grid grid-cols-1 md:grid-cols-8 gap-0 justify-items-start">
               <div>
                 <label htmlFor="comments_per_run" className="block text-sm font-medium text-gray-700 mb-1">
@@ -903,18 +915,6 @@ export default function AutoVoterSettings() {
         </div>
       </div>
 
-      {/* 注意事項 */}
-      <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
-        <h3 className="text-sm font-medium text-yellow-800 mb-2">⚠️ 注意事項</h3>
-        <ul className="text-sm text-yellow-700 space-y-1">
-          <li>• OpenAI APIキーは <a href="/admin/api-settings" className="underline hover:text-yellow-900">API設定</a> で管理してください</li>
-          <li>• 実行間隔は最短1分、最長24時間です</li>
-          <li>• 確率設定は0～100%で設定してください</li>
-          <li>• 自動実行はカゴヤVPSのcrontabで動作します</li>
-          <li>• 開始/停止ボタンでCRON実行を制御できます</li>
-          <li>• ローカル環境では「今すぐ実行」ボタンで動作確認できます</li>
-        </ul>
-      </div>
     </div>
   );
 }
