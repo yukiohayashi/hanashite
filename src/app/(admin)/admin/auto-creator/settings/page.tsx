@@ -91,11 +91,16 @@ export default function AutoCreatorSettings() {
       settingsMap[item.setting_key] = item.setting_value;
     });
 
+    console.log('Settings map:', settingsMap);
+    console.log('scraping_urls value:', settingsMap.scraping_urls);
+
     // スクレイピングURLリストを取得
     let urlsArray: string[] = [];
     try {
       urlsArray = settingsMap.scraping_urls ? JSON.parse(settingsMap.scraping_urls) : [];
-    } catch {
+      console.log('Parsed URLs:', urlsArray);
+    } catch (e) {
+      console.error('Failed to parse scraping_urls:', e);
       urlsArray = [];
     }
     setUrls([...urlsArray, ...Array(8 - urlsArray.length).fill('')]);
