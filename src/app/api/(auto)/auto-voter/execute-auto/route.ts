@@ -257,13 +257,16 @@ export async function POST() {
     // 優先度でソート（高い順）
     postsWithPriority.sort((a, b) => b.priority - a.priority);
 
-    console.log('優先度トップ5:', postsWithPriority.slice(0, 5).map(p => ({
+    console.log('優先度トップ10:', postsWithPriority.slice(0, 10).map(p => ({
       id: p.id,
       title: p.title.substring(0, 30),
       priority: p.priority,
       commentCount: p.commentCount,
-      hoursDiff: Math.floor((Date.now() - new Date(p.created_at).getTime()) / (1000 * 60 * 60))
+      hoursDiff: Math.floor((Date.now() - new Date(p.created_at).getTime()) / (1000 * 60 * 60)),
+      created_at: p.created_at
     })));
+    
+    console.log('コメント0件の投稿数:', postsWithPriority.filter(p => p.commentCount === 0).length);
 
     // 処理する記事を選択（優先度順）
     // commentsPerRunの数だけコメントを投稿するため、複数の投稿を対象にする
