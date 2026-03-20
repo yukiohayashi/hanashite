@@ -183,13 +183,7 @@ export default function AdminPanelLayout({
 
         
 
-          <Link
-            href="/admin/comments"
-            className={`flex items-center gap-2 px-3 py-1 text-gray-300 ${hoverBgColor} hover:text-white transition-colors`}
-          >
-            <MessageSquare className="w-5 h-5" />
-            <span className="text-sm">コメント一覧</span>
-          </Link>
+        
           {/* 自動コメント・いいね */}
           <div>
             <Link
@@ -207,6 +201,12 @@ export default function AdminPanelLayout({
                 ダッシュボード
               </Link>
               <Link
+            href="/admin/comments"
+           className={`block px-3 py-1 text-sm text-gray-400 ${hoverBgColor} hover:text-white transition-colors`}
+          >
+       
+           コメント一覧
+          </Link>  <Link
                 href="/admin/auto-commenter-liker/manual"
                 className={`block px-3 py-1 text-sm text-gray-400 ${hoverBgColor} hover:text-white transition-colors`}
               >

@@ -116,18 +116,22 @@ export default function AutoCreatorSettings() {
       last_executed_at: data.updated_at,
     });
 
-    // 次回実行時刻を計算（updated_atを使用）
+    // 次回実行時刻を取得
     if (data.is_active) {
       if (data.updated_at) {
         setLastExecutedAt(data.updated_at);
         updateElapsedTime(data.updated_at);
-        
-        const lastExecuted = new Date(data.updated_at);
-        const interval = data.interval_minutes || 60;
-        const variance = Math.floor(interval * 0.1); // 10%のゆらぎ
-        const minInterval = interval - variance;
-        const nextTime = new Date(lastExecuted.getTime() + minInterval * 60 * 1000);
-        
+      }
+      
+      // next_execution_timeを取得
+      const { data: nextExecData } = await supabase
+        .from('auto_creator_settings')
+        .select('setting_value')
+        .eq('setting_key', 'next_execution_time')
+        .single();
+      
+      if (nextExecData?.setting_value) {
+        const nextTime = new Date(nextExecData.setting_value);
         setNextRunTime(nextTime.toLocaleString('ja-JP', { 
           month: '2-digit',
           day: '2-digit',
@@ -135,26 +139,7 @@ export default function AutoCreatorSettings() {
           minute: '2-digit'
         }));
       } else {
-        // 最終実行がない場合は、次のCRON実行時（10分単位）を表示
-        const now = new Date();
-        const minutes = now.getMinutes();
-        const nextMinutes = Math.ceil(minutes / 10) * 10;
-        const nextTime = new Date(now);
-        
-        if (nextMinutes >= 60) {
-          nextTime.setHours(nextTime.getHours() + 1);
-          nextTime.setMinutes(0);
-        } else {
-          nextTime.setMinutes(nextMinutes);
-        }
-        nextTime.setSeconds(0);
-        
-        setNextRunTime(nextTime.toLocaleString('ja-JP', { 
-          month: '2-digit',
-          day: '2-digit',
-          hour: '2-digit', 
-          minute: '2-digit'
-        }));
+        setNextRunTime('未設定');
       }
     }
   };
@@ -346,12 +331,7 @@ export default function AutoCreatorSettings() {
               </span>
             </div>
 
-            {settings.is_enabled === 'true' && nextRunTime && (
-              <div className="border-l border-gray-300 pl-4">
-                <strong className="text-sm">次回実行予定:</strong>
-                <span className="ml-2 text-sm text-blue-600 font-medium">{nextRunTime}頃</span>
-              </div>
-            )}
+            
 
             {lastExecutedAt && (
               <div className="border-l border-gray-300 pl-4">
@@ -365,6 +345,12 @@ export default function AutoCreatorSettings() {
                   })}
                   {elapsedTime && ` (${elapsedTime})`}
                 </span>
+              </div>
+            )}
+            {settings.is_enabled === 'true' && nextRunTime && (
+              <div className="border-l border-gray-300 pl-4">
+                <strong className="text-sm">次回実行予定:</strong>
+                <span className="ml-2 text-sm text-blue-600 font-medium">{nextRunTime}頃</span>
               </div>
             )}
           </div>
