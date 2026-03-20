@@ -280,8 +280,8 @@ export async function POST() {
     console.log('コメント0件の投稿数:', postsWithPriority.filter(p => p.commentCount === 0).length);
 
     // 処理する記事を選択（優先度順）
-    // commentsPerRunの数だけコメントを投稿するため、複数の投稿を対象にする
-    const postsToProcess = postsWithPriority.slice(0, Math.max(postsPerRun, commentsPerRun * 2));
+    // commentsPerRunの数だけコメントを投稿するため、その数の投稿を対象にする
+    const postsToProcess = postsWithPriority.slice(0, Math.max(postsPerRun, commentsPerRun));
     let totalComments = 0;
     let totalPostLikes = 0;
     let totalCommentLikes = 0;
