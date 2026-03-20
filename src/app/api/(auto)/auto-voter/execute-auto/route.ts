@@ -19,6 +19,8 @@ export async function POST() {
     const interval = parseInt(settings.interval || '12');
     const intervalVariance = parseInt(settings.interval_variance || '5');
     
+    console.log(`実行間隔設定: ${interval}±${intervalVariance}分`);
+    
     // 次回実行予定時刻を取得
     const { data: nextExecData } = await supabase
       .from('auto_commenter_liker_settings')
@@ -27,9 +29,13 @@ export async function POST() {
       .maybeSingle();
     
     const now = new Date();
+    console.log(`現在時刻: ${now.toISOString()}`);
+    console.log(`next_execution_time取得結果:`, nextExecData);
     
     if (nextExecData?.setting_value) {
       const nextExecutionTime = new Date(nextExecData.setting_value);
+      console.log(`次回実行予定時刻: ${nextExecutionTime.toISOString()}`);
+      console.log(`now < nextExecutionTime: ${now < nextExecutionTime}`);
       
       // 次回実行予定時刻になっていない場合はスキップ
       if (now < nextExecutionTime) {
@@ -42,6 +48,8 @@ export async function POST() {
           nextExecutionTime: nextExecutionTime.toISOString(),
         });
       }
+    } else {
+      console.log('next_execution_timeが設定されていません。初回実行として処理します。');
     }
     
     // 次回実行予定時刻を先に設定（重複実行を防ぐため）
