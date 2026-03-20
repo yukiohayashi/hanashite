@@ -232,7 +232,7 @@ export default function AIUserGeneratorPage() {
         <h3 className="font-bold text-blue-900 mb-2">AI会員について</h3>
         <ul className="text-sm text-blue-800 space-y-1">
           <li>• OpenAI APIを使用してリアルなユーザープロフィールを生成します</li>
-          <li>• 生成されたユーザーはstatus=6（AI会員）として登録されます</li>
+          <li>• 生成されたユーザーはstatus=4（AI会員）として登録されます</li>
           <li>• パスワードは「00000000」で統一されます</li>
           <li>• メールアドレスは「yhayashi+[ユーザーID]@sucmedia.co.jp」形式で自動生成されます</li>
         </ul>

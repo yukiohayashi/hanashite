@@ -5,7 +5,7 @@ import OpenAI from 'openai';
 // ランダムなAI会員または編集者を取得
 async function getRandomUser(aiMemberProbability: number = 70): Promise<number> {
   const useAiMember = Math.random() * 100 <= aiMemberProbability;
-  const status = useAiMember ? 6 : 2; // 6: AI会員, 2: 編集者
+  const status = useAiMember ? 4 : 2; // 4: AI会員, 2: 編集者
 
   const { data } = await supabase
     .from('users')

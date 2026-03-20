@@ -306,7 +306,7 @@ export async function POST() {
       if (Math.random() * 100 <= postLikeProbability) {
         try {
           const useAiMember = Math.random() * 100 <= aiMemberProbability;
-          const status = useAiMember ? 6 : 2;
+          const status = useAiMember ? 4 : 2;
 
           const { data: users } = await supabase
             .from('users')
@@ -662,7 +662,7 @@ export async function POST() {
             // コメント返信（一般ユーザー）
             const targetComment = parentComments[Math.floor(Math.random() * parentComments.length)];
             const useAiMember = Math.random() * 100 <= aiMemberProbability;
-            const status = useAiMember ? 6 : 2;
+            const status = useAiMember ? 4 : 2;
 
             const { data: replyUsers } = await supabase
               .from('users')

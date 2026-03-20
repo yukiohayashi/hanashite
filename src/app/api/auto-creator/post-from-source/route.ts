@@ -68,20 +68,8 @@ function detectCategory(title: string, content: string): number {
 }
 
 async function selectQuestioner(refinedTitle: string, refinedContent: string, categoryId: number) {
-  // AI会員使用確率を取得
-  const { data: settings } = await supabase
-    .from('auto_creator_settings')
-    .select('setting_key, setting_value')
-    .eq('setting_key', 'ai_user_probability')
-    .maybeSingle();
-
-  const aiUserProbability = settings?.setting_value ? parseInt(settings.setting_value) : 100;
-  const useAiUser = Math.random() * 100 < aiUserProbability;
-
-  console.log(`AI会員使用確率: ${aiUserProbability}%, AI会員を使用: ${useAiUser}`);
-
-  // AI会員を使用する場合はstatus=4、通常会員を使用する場合はstatus=3
-  const targetStatus = useAiUser ? 4 : 3;
+  // 常にAI会員（status=4）のみを使用（編集者status=2は除外）
+  const targetStatus = 4;
 
   const { data: users, error } = await supabase
     .from('users')
@@ -89,7 +77,7 @@ async function selectQuestioner(refinedTitle: string, refinedContent: string, ca
     .eq('status', targetStatus)
     .limit(100);
 
-  console.log(`${useAiUser ? 'AI会員' : '通常会員'}検索結果:`, { count: users?.length || 0, error });
+  console.log(`AI会員検索結果:`, { count: users?.length || 0, error });
 
   if (!users || users.length === 0) {
     // 指定したstatusのユーザーがいない場合、全ユーザーから検索

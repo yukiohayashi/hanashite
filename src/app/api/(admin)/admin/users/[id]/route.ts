@@ -28,7 +28,7 @@ export async function PATCH(
     updateData.is_banned = is_banned;
   }
 
-  if (typeof status === 'number' && (status >= 0 && status <= 4 || status === 6 || status === 9)) {
+  if (typeof status === 'number' && (status >= 1 && status <= 4 || status === 9)) {
     updateData.status = status;
   }
 
