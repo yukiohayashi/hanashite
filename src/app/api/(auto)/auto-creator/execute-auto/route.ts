@@ -22,13 +22,12 @@ async function getSettings() {
     .from('auto_creator_settings')
     .select('setting_key, setting_value')
     .in('setting_key', [
-      'is_active', 
-      'is_enabled',
+      'enabled',
       'scraping_urls', 
       'ai_user_probability', 
       'max_posts_per_execution',
-      'execution_interval',
-      'execution_variance',
+      'interval',
+      'interval_variance',
       'no_create_start_hour',
       'no_create_end_hour'
     ]);
@@ -48,12 +47,12 @@ async function getSettings() {
   console.log('Settings map:', settingsMap);
 
   return {
-    isActive: settingsMap.is_active === 'true' || settingsMap.is_enabled === 'true',
+    isActive: settingsMap.enabled === 'true',
     scrapingUrls: JSON.parse(settingsMap.scraping_urls || '[]'),
     aiUserProbability: parseInt(settingsMap.ai_user_probability || '70'),
     maxPostsPerExecution: parseInt(settingsMap.max_posts_per_execution || '5'),
-    executionInterval: parseInt(settingsMap.execution_interval || '60'),
-    executionVariance: parseInt(settingsMap.execution_variance || '15'),
+    executionInterval: parseInt(settingsMap.interval || '60'),
+    executionVariance: parseInt(settingsMap.interval_variance || '15'),
     noCreateStartHour: parseInt(settingsMap.no_create_start_hour || '0'),
     noCreateEndHour: parseInt(settingsMap.no_create_end_hour || '6'),
   };

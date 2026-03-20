@@ -79,53 +79,58 @@ export default function AutoCreatorSettings() {
   const fetchSettings = async () => {
     const { data, error } = await supabase
       .from('auto_creator_settings')
-      .select('*')
-      .limit(1)
-      .single();
+      .select('*');
 
     if (error) {
       console.error('Error fetching settings:', error);
       return;
     }
 
-    if (!data) return;
+    const settingsMap: Record<string, string> = {};
+    data?.forEach((item) => {
+      settingsMap[item.setting_key] = item.setting_value;
+    });
 
     // Yahoo!知恵袋URLを含むURLリストを作成
-    const urlsArray = data.yahoo_chiebukuro_url 
-      ? [data.yahoo_chiebukuro_url] 
+    const urlsArray = settingsMap.yahoo_chiebukuro_url 
+      ? [settingsMap.yahoo_chiebukuro_url] 
       : [];
     setUrls([...urlsArray, ...Array(8 - urlsArray.length).fill('')]);
 
     // カテゴリウェイトを取得（存在しない場合は空オブジェクト）
-    setCategoryWeights(data.category_weights || {});
+    try {
+      setCategoryWeights(settingsMap.category_weights ? JSON.parse(settingsMap.category_weights) : {});
+    } catch {
+      setCategoryWeights({});
+    }
 
     setSettings({
       scraping_urls: JSON.stringify(urlsArray),
-      execution_interval: data.interval_minutes?.toString() || '60',
-      execution_variance: '15',
-      no_create_start_hour: '0',
-      no_create_end_hour: '6',
+      execution_interval: settingsMap.interval || '60',
+      execution_variance: settingsMap.interval_variance || '15',
+      no_create_start_hour: settingsMap.no_create_start_hour || '0',
+      no_create_end_hour: settingsMap.no_create_end_hour || '6',
       ai_user_probability: '50',
       scraping_wait_time: '30',
-      is_enabled: data.is_active ? 'true' : 'false',
-      choices_prompt: data.content_prompt || '',
+      is_enabled: settingsMap.enabled || 'false',
+      choices_prompt: settingsMap.content_prompt || '',
       max_categories: '1',
       max_keywords: '3',
       max_posts_per_execution: '5',
-      max_scraping_items: data.max_scraping_items?.toString() || '20',
-      last_executed_at: data.updated_at,
+      max_scraping_items: settingsMap.max_scraping_items || '20',
+      last_executed_at: settingsMap.last_executed_at || '',
     });
 
     // 次回実行時刻を取得
-    if (data.is_active) {
-      if (data.updated_at) {
-        setLastExecutedAt(data.updated_at);
-        updateElapsedTime(data.updated_at);
+    if (settingsMap.enabled === 'true') {
+      if (settingsMap.last_executed_at) {
+        setLastExecutedAt(settingsMap.last_executed_at);
+        updateElapsedTime(settingsMap.last_executed_at);
       }
       
-      // next_execution_timeを取得（dataから直接取得）
-      if (data.next_execution_time) {
-        const nextTime = new Date(data.next_execution_time);
+      // next_execution_timeを取得
+      if (settingsMap.next_execution_time) {
+        const nextTime = new Date(settingsMap.next_execution_time);
         setNextRunTime(nextTime.toLocaleString('ja-JP', { 
           month: '2-digit',
           day: '2-digit',
@@ -209,25 +214,34 @@ export default function AutoCreatorSettings() {
     try {
       const filteredUrls = urls.filter((url) => url.trim() !== '');
       const yahooUrl = filteredUrls[0] || '';
+      const now = new Date().toISOString();
 
-      const { error } = await supabase
-        .from('auto_creator_settings')
-        .update({
-          yahoo_chiebukuro_url: yahooUrl,
-          interval_minutes: parseInt(settings.execution_interval),
-          content_prompt: settings.choices_prompt,
-          category_weights: categoryWeights,
-          updated_at: new Date().toISOString()
-        })
-        .eq('id', 1);
+      // キー・バリュー形式で保存
+      const updates = [
+        { setting_key: 'yahoo_chiebukuro_url', setting_value: yahooUrl },
+        { setting_key: 'interval', setting_value: settings.execution_interval },
+        { setting_key: 'interval_variance', setting_value: settings.execution_variance },
+        { setting_key: 'content_prompt', setting_value: settings.choices_prompt },
+        { setting_key: 'category_weights', setting_value: JSON.stringify(categoryWeights) },
+        { setting_key: 'max_scraping_items', setting_value: settings.max_scraping_items },
+        { setting_key: 'no_create_start_hour', setting_value: settings.no_create_start_hour },
+        { setting_key: 'no_create_end_hour', setting_value: settings.no_create_end_hour },
+      ];
 
-      if (error) {
-        console.error('Error saving settings:', error);
-        setMessage('保存に失敗しました');
-      } else {
-        setMessage('設定を保存しました');
-        setTimeout(() => setMessage(''), 3000);
+      for (const update of updates) {
+        const { error } = await supabase
+          .from('auto_creator_settings')
+          .update({ setting_value: update.setting_value, updated_at: now })
+          .eq('setting_key', update.setting_key);
+        
+        if (error) {
+          console.error(`Error updating ${update.setting_key}:`, error);
+          throw error;
+        }
       }
+
+      setMessage('設定を保存しました');
+      setTimeout(() => setMessage(''), 3000);
     } catch (error) {
       console.error('Error saving settings:', error);
       setMessage('保存に失敗しました');
