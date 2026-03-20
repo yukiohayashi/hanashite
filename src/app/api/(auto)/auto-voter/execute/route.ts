@@ -397,7 +397,7 @@ export async function POST(request: NextRequest) {
       message,
       userId,
       result,
-      comment: action_type === 'comment' ? result.commentText : undefined,
+      comment: action_type === 'comment' && 'commentText' in result ? result.commentText : undefined,
     });
   } catch (error: any) {
     console.error('Execute error:', error);
