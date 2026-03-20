@@ -43,21 +43,44 @@ export async function GET(request: Request) {
     const noRunEnd = settings.no_run_end || '06:00';
     const lastExecution = settings.last_executed_at;
 
-    // 実行間隔チェック（ゆらぎを考慮）
+    // 実行間隔チェック（ゆらぎを適用）
     if (lastExecution) {
       const lastExecutedAt = new Date(lastExecution);
       const now = new Date();
-      const elapsedMinutes = (now.getTime() - lastExecutedAt.getTime()) / (1000 * 60);
       
-      // ゆらぎを考慮した最小間隔
-      const minInterval = interval - intervalVariance;
-
-      if (elapsedMinutes < minInterval) {
-        console.log(`実行間隔が短すぎます: ${Math.floor(elapsedMinutes)}分 < ${minInterval}分`);
+      // 次回実行予定時刻を取得または生成
+      let nextExecutionTime: Date;
+      
+      if (settings.next_execution_time) {
+        nextExecutionTime = new Date(settings.next_execution_time);
+      } else {
+        // 次回実行予定時刻が設定されていない場合は、ゆらぎを適用して生成
+        const minInterval = interval - intervalVariance;
+        const maxInterval = interval + intervalVariance;
+        const randomInterval = minInterval + Math.random() * (maxInterval - minInterval);
+        nextExecutionTime = new Date(lastExecutedAt.getTime() + randomInterval * 60 * 1000);
+        
+        // 次回実行予定時刻を保存
+        await supabase
+          .from('auto_voter_settings')
+          .upsert({ 
+            setting_key: 'next_execution_time',
+            setting_value: nextExecutionTime.toISOString(),
+            updated_at: new Date().toISOString()
+          }, {
+            onConflict: 'setting_key'
+          });
+      }
+      
+      // 次回実行予定時刻になっていない場合はスキップ
+      if (now < nextExecutionTime) {
+        const remainingMinutes = Math.ceil((nextExecutionTime.getTime() - now.getTime()) / (1000 * 60));
+        console.log(`次回実行予定時刻まで待機: あと${remainingMinutes}分`);
         return NextResponse.json({
           success: true,
-          message: `実行間隔が短すぎます（前回実行から${Math.floor(elapsedMinutes)}分、最小間隔${minInterval}分）`,
+          message: `次回実行予定時刻まで待機（あと${remainingMinutes}分）`,
           skipped: true,
+          nextExecutionTime: nextExecutionTime.toISOString(),
         });
       }
     }
@@ -94,6 +117,24 @@ export async function GET(request: Request) {
       .from('auto_voter_settings')
       .update({ setting_value: executedAt.toISOString() })
       .eq('setting_key', 'last_executed_at');
+
+    // 次回実行予定時刻を生成・保存（ゆらぎを適用）
+    const minInterval = interval - intervalVariance;
+    const maxInterval = interval + intervalVariance;
+    const randomInterval = minInterval + Math.random() * (maxInterval - minInterval);
+    const nextExecutionTime = new Date(executedAt.getTime() + randomInterval * 60 * 1000);
+    
+    await supabase
+      .from('auto_voter_settings')
+      .upsert({ 
+        setting_key: 'next_execution_time',
+        setting_value: nextExecutionTime.toISOString(),
+        updated_at: executedAt.toISOString()
+      }, {
+        onConflict: 'setting_key'
+      });
+    
+    console.log(`次回実行予定時刻を設定: ${nextExecutionTime.toISOString()} (${Math.floor(randomInterval)}分後)`);
 
     // ログを記録
     await supabase.from('auto_voter_logs').insert({

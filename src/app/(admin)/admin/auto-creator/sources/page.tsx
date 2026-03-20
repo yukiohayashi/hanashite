@@ -220,7 +220,7 @@ export default function AutoCreatorSources() {
           <p className="mt-2 text-gray-600">Yahoo!知恵袋、Googleトレンド、GPT自動生成から取得したソースを確認</p>
           <div className="mt-3 bg-green-50 border border-green-200 rounded-lg p-3 inline-block">
             <p className="text-sm text-green-800">
-              <strong>🕒 Yahoo!知恵袋自動取得:</strong> 毎日 9:00, 15:00, 21:00
+              <strong>🕒 Yahoo!知恵袋自動取得:</strong> 毎日 9:00, 15:00, 21:00　JST
             </p>
           </div>
         </div>

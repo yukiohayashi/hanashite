@@ -108,14 +108,23 @@ export async function POST() {
       priorityWeight,
     });
 
-    // 対象記事を取得（返信生成のため、タイトル、本文、投票選択肢を含める）
+    // 対象記事を取得（コメント数を含める）
     const { data: posts } = await supabase
       .from('posts')
-      .select('id, title, content, category_id, created_at, user_id, best_answer_id')
+      .select(`
+        id, 
+        title, 
+        content, 
+        category_id, 
+        created_at, 
+        user_id, 
+        best_answer_id,
+        comments:comments(count)
+      `)
       .eq('status', 'published')
       .neq('user_id', 1) // 管理者投稿を除外
       .order('created_at', { ascending: false })
-      .limit(100);
+      .limit(200); // 取得件数を増やして選択肢を広げる
 
     console.log(`取得した記事数: ${posts?.length || 0}件`);
 
@@ -131,8 +140,13 @@ export async function POST() {
       });
     }
 
-    // カテゴリ設定に基づいてフィルタリング
+    // カテゴリ設定に基づいてフィルタリング & ベストアンサー有りは除外
     const filteredPosts = posts.filter(post => {
+      // ベストアンサーが設定されている投稿は除外
+      if (post.best_answer_id) {
+        return false;
+      }
+      
       const categorySetting = categorySettings[post.category_id] || { target_days: 180 };
       const postDate = new Date(post.created_at);
       const daysDiff = Math.floor((Date.now() - postDate.getTime()) / (1000 * 60 * 60 * 24));
@@ -140,28 +154,52 @@ export async function POST() {
       return daysDiff <= categorySetting.target_days;
     });
 
-    // 優先度を計算
+    // 優先度を計算（新ルール）
     const postsWithPriority = filteredPosts.map(post => {
       const postDate = new Date(post.created_at);
       const hoursDiff = (Date.now() - postDate.getTime()) / (1000 * 60 * 60);
+      const commentCount = Array.isArray(post.comments) ? post.comments.length : ((post.comments as any)?.[0]?.count || 0);
       
-      let priority = 1;
+      let priority = 0;
       
+      // 1. コメント0件の投稿に最高優先度を付与
+      if (commentCount === 0) {
+        priority += 1000;
+      }
+      
+      // 2. 日付の最新度による優先度
       if (prioritizeRecentPosts) {
         if (hoursDiff <= 24) {
-          priority = priorityWeight * 2;
+          priority += priorityWeight * 10; // 24時間以内: +50
         } else if (hoursDiff <= 48) {
-          priority = priorityWeight * 1.5;
+          priority += priorityWeight * 6;  // 48時間以内: +30
         } else if (hoursDiff <= priorityDays * 24) {
-          priority = priorityWeight;
+          priority += priorityWeight * 3;  // 3日以内: +15
+        } else {
+          priority += priorityWeight;      // それ以降: +5
         }
       }
       
-      return { ...post, priority };
+      // 3. コメント数が少ないほど優先度を上げる（コメント0件以外）
+      if (commentCount > 0) {
+        const maxComments = parseInt(settings.max_comments_per_post || '50');
+        const commentPenalty = (commentCount / maxComments) * 100;
+        priority -= commentPenalty; // コメントが多いほど優先度が下がる
+      }
+      
+      return { ...post, priority, commentCount };
     });
 
     // 優先度でソート（高い順）
     postsWithPriority.sort((a, b) => b.priority - a.priority);
+
+    console.log('優先度トップ5:', postsWithPriority.slice(0, 5).map(p => ({
+      id: p.id,
+      title: p.title.substring(0, 30),
+      priority: p.priority,
+      commentCount: p.commentCount,
+      hoursDiff: Math.floor((Date.now() - new Date(p.created_at).getTime()) / (1000 * 60 * 60))
+    })));
 
     // 処理する記事を選択（優先度順）
     const postsToProcess = postsWithPriority.slice(0, postsPerRun);
@@ -217,22 +255,6 @@ export async function POST() {
       const commentErrors: string[] = [];
       
       console.log(`\n=== 記事ID ${post.id} のコメント投稿処理開始 ===`);
-      
-      // ベストアンサーが設定されている記事はスキップ
-      if (post.best_answer_id) {
-        console.log(`記事ID ${post.id} はベストアンサー設定済みのためスキップ`);
-        processedPostsDetails.push({
-          post_id: post.id,
-          title: post.title,
-          category_id: post.category_id,
-          comments_added: 0,
-          post_likes_added: postLikesAddedForThisPost,
-          comment_likes_added: 0,
-          priority: post.priority,
-          comment_errors: ['ベストアンサー設定済みのためスキップ'],
-        });
-        continue;
-      }
       
       // 記事の既存コメントを取得
       const { data: existingComments, count: currentCommentCount } = await supabase

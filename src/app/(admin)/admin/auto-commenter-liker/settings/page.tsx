@@ -337,10 +337,27 @@ export default function AutoVoterSettings() {
         <p className="mt-2 text-sm text-gray-600">
           相談への自動コメント・返信・いいね機能の設定を管理します
         </p>
-        <div className="mt-3 p-3 bg-blue-50 border border-blue-200 rounded-lg">
-          <p className="text-sm text-blue-800">
-            <strong>📌 重要なルール:</strong> ベストアンサーが設定されている記事には、相談者以外からの自動コメントは投稿されません。
-          </p>
+        
+        {/* 優先順位ルール */}
+        <div className="mt-3 p-4 bg-green-50 border border-green-200 rounded-lg">
+          <p className="text-sm font-semibold text-green-900 mb-2">🎯 投稿選択の優先順位ルール</p>
+          <ol className="text-sm text-green-800 space-y-1 ml-4 list-decimal">
+            <li><strong>ベストアンサー有無:</strong> ベストアンサー設定済みの投稿は除外</li>
+            <li><strong>コメント0件:</strong> コメントがない投稿を最優先（優先度+1000）</li>
+            <li><strong>日付の最新度:</strong> 24時間以内(+50) → 48時間以内(+30) → 3日以内(+15) → それ以降(+5)</li>
+            <li><strong>コメント数:</strong> コメントが多いほど優先度が下がる</li>
+            <li><strong>カテゴリ別対象期間:</strong> 各カテゴリ180日以内の投稿が対象</li>
+          </ol>
+        </div>
+
+        {/* コメント投稿ルール */}
+        <div className="mt-3 p-4 bg-blue-50 border border-blue-200 rounded-lg">
+          <p className="text-sm font-semibold text-blue-900 mb-2">💬 自然なコメント投稿ルール</p>
+          <ul className="text-sm text-blue-800 space-y-1 ml-4 list-disc">
+            <li><strong>コメントがない場合:</strong> 新規コメント投稿 → コメントいいね</li>
+            <li><strong>コメントがある場合:</strong> 新規コメント投稿 OR コメント返信 OR 投稿者返信 のいずれか1つをランダム実行</li>
+          </ul>
+          <p className="text-xs text-blue-700 mt-2">※ 1回の実行で1つのアクションのみ実行し、自然な時間間隔でコメントが投稿されます</p>
         </div>
       </div>
 

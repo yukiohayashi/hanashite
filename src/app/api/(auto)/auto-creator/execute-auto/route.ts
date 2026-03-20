@@ -138,7 +138,7 @@ export async function POST() {
       });
     }
 
-    // 実行間隔チェック
+    // 実行間隔チェック（ゆらぎを適用）
     const { data: lastLog } = await supabase
       .from('auto_creator_logs')
       .select('executed_at')
@@ -151,17 +151,46 @@ export async function POST() {
     if (lastLog) {
       const lastExecutionTime = new Date(lastLog.executed_at);
       const now = new Date();
-      const minutesSinceLastExecution = (now.getTime() - lastExecutionTime.getTime()) / 1000 / 60;
       
-      // 最小実行間隔を計算（間隔 - ゆらぎ）
-      const minInterval = settings.executionInterval - settings.executionVariance;
+      // 次回実行予定時刻を取得または生成
+      const { data: nextExecData } = await supabase
+        .from('auto_creator_settings')
+        .select('setting_value')
+        .eq('setting_key', 'next_execution_time')
+        .single();
       
-      if (minutesSinceLastExecution < minInterval) {
-        console.log(`実行間隔が短すぎます: ${minutesSinceLastExecution}分 < ${minInterval}分`);
+      let nextExecutionTime: Date;
+      
+      if (nextExecData?.setting_value) {
+        nextExecutionTime = new Date(nextExecData.setting_value);
+      } else {
+        // 次回実行予定時刻が設定されていない場合は、ゆらぎを適用して生成
+        const minInterval = settings.executionInterval - settings.executionVariance;
+        const maxInterval = settings.executionInterval + settings.executionVariance;
+        const randomInterval = minInterval + Math.random() * (maxInterval - minInterval);
+        nextExecutionTime = new Date(lastExecutionTime.getTime() + randomInterval * 60 * 1000);
+        
+        // 次回実行予定時刻を保存
+        await supabase
+          .from('auto_creator_settings')
+          .upsert({ 
+            setting_key: 'next_execution_time',
+            setting_value: nextExecutionTime.toISOString(),
+            updated_at: new Date().toISOString()
+          }, {
+            onConflict: 'setting_key'
+          });
+      }
+      
+      // 次回実行予定時刻になっていない場合はスキップ
+      if (now < nextExecutionTime) {
+        const remainingMinutes = Math.ceil((nextExecutionTime.getTime() - now.getTime()) / (1000 * 60));
+        console.log(`次回実行予定時刻まで待機: あと${remainingMinutes}分`);
         return NextResponse.json({
           success: false,
-          message: `実行間隔が短すぎます（${Math.round(minutesSinceLastExecution)}分 < ${minInterval}分）`,
+          message: `次回実行予定時刻まで待機（あと${remainingMinutes}分）`,
           skipped: true,
+          nextExecutionTime: nextExecutionTime.toISOString(),
         });
       }
     }
@@ -421,11 +450,31 @@ export async function POST() {
       }
     }
 
+    // 次回実行予定時刻を生成・保存（ゆらぎを適用）
+    const executedAt = new Date();
+    const minInterval = settings.executionInterval - settings.executionVariance;
+    const maxInterval = settings.executionInterval + settings.executionVariance;
+    const randomInterval = minInterval + Math.random() * (maxInterval - minInterval);
+    const nextExecutionTime = new Date(executedAt.getTime() + randomInterval * 60 * 1000);
+    
+    await supabase
+      .from('auto_creator_settings')
+      .upsert({ 
+        setting_key: 'next_execution_time',
+        setting_value: nextExecutionTime.toISOString(),
+        updated_at: executedAt.toISOString()
+      }, {
+        onConflict: 'setting_key'
+      });
+    
+    console.log(`次回実行予定時刻を設定: ${nextExecutionTime.toISOString()} (${Math.floor(randomInterval)}分後)`);
+
     return NextResponse.json({
       success: true,
       message: `${createdCount}件の相談を作成しました`,
       created_count: createdCount,
       results,
+      nextExecutionTime: nextExecutionTime.toISOString(),
     });
 
   } catch (error) {
