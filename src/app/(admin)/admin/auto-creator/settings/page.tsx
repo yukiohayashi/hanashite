@@ -43,7 +43,7 @@ export default function AutoCreatorSettings() {
     max_posts_per_execution: '1',
     max_scraping_items: '20',
   });
-  const [urls, setUrls] = useState<string[]>(['', '', '', '', '', '', '', '']);
+  const [urls, setUrls] = useState<string[]>([]);
   const [saving, setSaving] = useState(false);
   const [message, setMessage] = useState('');
   const [toggling, setToggling] = useState(false);
@@ -103,7 +103,7 @@ export default function AutoCreatorSettings() {
       console.error('Failed to parse scraping_urls:', e);
       urlsArray = [];
     }
-    setUrls([...urlsArray, ...Array(8 - urlsArray.length).fill('')]);
+    setUrls(urlsArray.length > 0 ? urlsArray : []);
 
     // カテゴリウェイトを取得（存在しない場合は空オブジェクト）
     try {
@@ -297,6 +297,17 @@ export default function AutoCreatorSettings() {
     setUrls(newUrls);
   };
 
+  const handleAddUrl = () => {
+    if (urls.length < 8) {
+      setUrls([...urls, '']);
+    }
+  };
+
+  const handleRemoveUrl = (index: number) => {
+    const newUrls = urls.filter((_, i) => i !== index);
+    setUrls(newUrls);
+  };
+
   return (
     <div className="space-y-6">
       <div>
@@ -379,57 +390,52 @@ export default function AutoCreatorSettings() {
         </div>
       </div>
 
-      <div className="bg-white rounded-lg shadow">
-        <div className="p-6 space-y-6">
-
-          {/* API設定リンク */}
-          <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-            <p className="text-sm text-blue-800">
-              OpenAI APIキーは <a href="/admin/api-settings" className="font-medium underline hover:text-blue-600">API設定</a> で管理されています
-            </p>
-          </div>
-
-          {/* 自動実行スケジュール */}
-          <div className="bg-green-50 border border-green-200 rounded-lg p-4">
-            <h3 className="text-sm font-semibold text-green-900 mb-2">🕒 自動実行スケジュール</h3>
-            <div className="space-y-2 text-sm text-green-800">
-              <div>
-                <strong>Yahoo!知恵袋取得:</strong> 毎日 9:00, 15:00, 21:00
-              </div>
-              <div>
-                <strong>AI自動投稿:</strong> {settings.execution_interval}分ごと（±{settings.execution_variance}分のゆらぎ）
-                <span className="text-xs text-green-600 ml-2">※実行間隔と実行ゆらぎの設定値に基づいて自動実行されます</span>
-              </div>
-              <div className="text-xs text-green-600 mt-2">
-                ※作成しない時間帯: {settings.no_create_start_hour}時〜{settings.no_create_end_hour}時
-              </div>
-            </div>
-          </div>
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        {/* 左列: 入力フィールド */}
+        <div className="bg-white rounded-lg shadow">
+          <div className="p-6 space-y-6">
 
           {/* スクレイピングURL */}
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              スクレイピング対象URL（最大8個）
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              スクレイピング対象URL
             </label>
-            <div className="grid grid-cols-1 md:grid-cols-4 gap-3">
+            <div className="space-y-2">
               {urls.map((url, index) => (
-                <input
-                  key={index}
-                  type="url"
-                  value={url}
-                  onChange={(e) => handleUrlChange(index, e.target.value)}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
-                  placeholder={`URL ${index + 1}`}
-                />
+                <div key={index} className="flex gap-2">
+                  <input
+                    type="url"
+                    value={url}
+                    onChange={(e) => handleUrlChange(index, e.target.value)}
+                    className="flex-1 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
+                    placeholder="https://..."
+                  />
+                  <button
+                    type="button"
+                    onClick={() => handleRemoveUrl(index)}
+                    className="px-3 py-2 bg-red-500 text-white rounded-md hover:bg-red-600 text-sm"
+                  >
+                    削除
+                  </button>
+                </div>
               ))}
+              {urls.length < 8 && (
+                <button
+                  type="button"
+                  onClick={handleAddUrl}
+                  className="w-full px-3 py-2 border-2 border-dashed border-gray-300 rounded-md text-gray-600 hover:border-blue-500 hover:text-blue-500 text-sm"
+                >
+                  + URLを追加
+                </button>
+              )}
             </div>
-            <p className="mt-1 text-xs text-gray-500">
-              RSS/Atom、Yahoo!ニュースなど
+            <p className="mt-2 text-xs text-gray-500">
+              RSS/Atom、Yahoo!ニュースなど（最大8個）
             </p>
           </div>
 
           {/* 実行間隔設定 */}
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+          <div className="grid grid-cols-2 gap-4">
             <div>
               <label htmlFor="execution_interval" className="block text-sm font-medium text-gray-700 mb-1">
                 実行間隔（分）
@@ -497,7 +503,7 @@ export default function AutoCreatorSettings() {
           </div>
 
           {/* その他の設定 */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div className="grid grid-cols-2 gap-4">
             <div>
               <label htmlFor="ai_user_probability" className="block text-sm font-medium text-gray-700 mb-2">
                 AI会員使用確率（%）
@@ -535,7 +541,7 @@ export default function AutoCreatorSettings() {
             </div>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div className="grid grid-cols-2 gap-4">
             <div>
               <label htmlFor="scraping_wait_time" className="block text-sm font-medium text-gray-700 mb-2">
                 スクレイピング待機時間（秒）
@@ -612,7 +618,7 @@ export default function AutoCreatorSettings() {
               各カテゴリの投稿頻度を設定します。数値が大きいほど、そのカテゴリの投稿が多くなります。
             </p>
             
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+            <div className="grid grid-cols-2 gap-4">
               {categories.map((category) => (
                 <div key={category.id}>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
@@ -641,29 +647,103 @@ export default function AutoCreatorSettings() {
             </div>
           </div>
 
+          </div>
+
+          <div className="px-6 py-4 bg-white border-t border-gray-200 flex justify-end">
+            <button
+              onClick={handleSave}
+              disabled={saving}
+              className="px-6 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:bg-gray-400 font-medium"
+            >
+              {saving ? '保存中...' : '設定を保存'}
+            </button>
+          </div>
         </div>
 
-        <div className="px-6 py-4 bg-white border-t border-gray-200 flex justify-end">
-          <button
-            onClick={handleSave}
-            disabled={saving}
-            className="px-6 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:bg-gray-400 font-medium"
-          >
-            {saving ? '保存中...' : '設定を保存'}
-          </button>
-        </div>
-      </div>
+        {/* 右列: 注意書きカード */}
+        <div className="space-y-6">
+          {/* API設定リンク */}
+          <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+            <p className="text-sm text-blue-800">
+              OpenAI APIキーは <a href="/admin/api-settings" className="font-medium underline hover:text-blue-600">API設定</a> で管理されています
+            </p>
+          </div>
 
-      {/* 注意事項 */}
-      <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
-        <h3 className="text-sm font-medium text-yellow-800 mb-2">⚠️ 注意事項</h3>
-        <ul className="text-sm text-yellow-700 space-y-1">
-          <li>• OpenAI APIキーは <a href="/admin/api-settings" className="underline hover:text-yellow-900">API設定</a> で管理してください</li>
-          <li>• 実行間隔は最短1分、最長24時間です</li>
-          <li>• スクレイピングは各サイトの利用規約を遵守してください</li>
-          <li>• 自動実行はカゴヤVPSのcrontabで動作します</li>
-          <li>• 開始/停止ボタンでCRON実行を制御できます</li>
-        </ul>
+          {/* 自動実行スケジュール */}
+          <div className="bg-green-50 border border-green-200 rounded-lg p-4">
+            <h3 className="text-sm font-semibold text-green-900 mb-2">🕒 自動実行スケジュール</h3>
+            <div className="space-y-2 text-sm text-green-800">
+              <div>
+                <strong>Yahoo!知恵袋取得:</strong> 毎日 9:00, 15:00, 21:00
+              </div>
+              <div>
+                <strong>AI自動投稿:</strong> {settings.execution_interval}分ごと（±{settings.execution_variance}分のゆらぎ）
+                <span className="text-xs text-green-600 ml-2">※実行間隔と実行ゆらぎの設定値に基づいて自動実行されます</span>
+              </div>
+              <div className="text-xs text-green-600 mt-2">
+                ※作成しない時間帯: {settings.no_create_start_hour}時〜{settings.no_create_end_hour}時
+              </div>
+            </div>
+          </div>
+
+          {/* AI投稿プロンプト */}
+          <div className="bg-purple-50 border border-purple-200 rounded-lg p-4">
+            <h3 className="text-sm font-semibold text-purple-900 mb-2">🤖 AI投稿プロンプト</h3>
+            <div className="text-xs text-purple-800 space-y-2 max-h-96 overflow-y-auto">
+              <p className="font-medium">Yahoo!知恵袋からスクレイピングした質問を、完全にオリジナルのブログ記事風の相談文に大幅に書き換えます。</p>
+              
+              <div className="space-y-1">
+                <p className="font-semibold">【修正ルール】</p>
+                <ul className="list-disc list-inside space-y-1 pl-2">
+                  <li>タイトル: 20-40文字、体言止めは使わない</li>
+                  <li>本文: 150-300文字で完全に書き直す</li>
+                  <li>リライト率50%以上必須</li>
+                  <li>必ず丁寧語・敬語（です・ます調）</li>
+                </ul>
+              </div>
+
+              <div className="space-y-1">
+                <p className="font-semibold">【冒頭のバリエーション】</p>
+                <ul className="list-disc list-inside space-y-1 pl-2">
+                  <li>「聞いてください」「相談させてください」</li>
+                  <li>「実は〜」「正直〜」「本当に〜」</li>
+                  <li>「〜なんですが」「〜で困っています」</li>
+                  <li>「皆さんならどうしますか」</li>
+                  <li>直接本題から入る（「彼氏が〜」など）</li>
+                </ul>
+                <p className="text-purple-700">※「最近」は全体の30%程度に抑える</p>
+              </div>
+
+              <div className="space-y-1">
+                <p className="font-semibold">【記号・絵文字】</p>
+                <ul className="list-disc list-inside space-y-1 pl-2">
+                  <li>記号: 「、、、」「汗」「…」「！」</li>
+                  <li>絵文字: 0個が一番多く、使う場合は1〜2個程度（💦😊💕😢🥺など）</li>
+                </ul>
+              </div>
+
+              <div className="space-y-1">
+                <p className="font-semibold">【その他】</p>
+                <ul className="list-disc list-inside space-y-1 pl-2">
+                  <li>2〜3文ごとに改行</li>
+                  <li>背景情報や心情を積極的に追加</li>
+                  <li>具体的なたとえや事例を追加</li>
+                </ul>
+              </div>
+            </div>
+          </div>
+
+          {/* 注意事項 */}
+          <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
+            <h3 className="text-sm font-medium text-yellow-800 mb-2">⚠️ 注意事項</h3>
+            <ul className="text-sm text-yellow-700 space-y-1">
+              <li>• 実行間隔は最短1分、最長24時間です</li>
+              <li>• スクレイピングは各サイトの利用規約を遵守してください</li>
+              <li>• 自動実行はVPSのcrontabで動作します</li>
+              <li>• 開始/停止ボタンでCRON実行を制御できます</li>
+            </ul>
+          </div>
+        </div>
       </div>
     </div>
   );

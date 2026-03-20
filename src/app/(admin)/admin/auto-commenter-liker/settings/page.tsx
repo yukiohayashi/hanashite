@@ -359,31 +359,6 @@ export default function AutoVoterSettings() {
         <p className="mt-2 text-sm text-gray-600">
           相談への自動コメント・返信・いいね機能の設定を管理します
         </p>
-        
-        {/* 優先順位ルールとコメント投稿ルール - 2列表示 */}
-        <div className="mt-3 grid grid-cols-1 md:grid-cols-2 gap-3">
-          {/* 優先順位ルール */}
-          <div className="p-4 bg-green-50 border border-green-200 rounded-lg">
-            <p className="text-sm font-semibold text-green-900 mb-2">🎯 投稿選択の優先順位ルール</p>
-            <ol className="text-sm text-green-800 space-y-1 ml-4 list-decimal">
-              <li><strong>ベストアンサー有無:</strong> ベストアンサー設定済みの投稿は除外</li>
-              <li><strong>コメント0件:</strong> コメントがない投稿を最優先（優先度+1000）</li>
-              <li><strong>日付の最新度:</strong> 24時間以内(+50) → 48時間以内(+30) → 3日以内(+15) → それ以降(+5)</li>
-              <li><strong>コメント数:</strong> コメントが多いほど優先度が下がる</li>
-              <li><strong>カテゴリ別対象期間:</strong> 各カテゴリ180日以内の投稿が対象</li>
-            </ol>
-          </div>
-
-          {/* コメント投稿ルール */}
-          <div className="p-4 bg-blue-50 border border-blue-200 rounded-lg">
-            <p className="text-sm font-semibold text-blue-900 mb-2">💬 自然なコメント投稿ルール</p>
-            <ul className="text-sm text-blue-800 space-y-1 ml-4 list-disc">
-              <li><strong>コメントがない場合:</strong> 新規コメント投稿 → コメントいいね</li>
-              <li><strong>コメントがある場合:</strong> 新規コメント投稿 OR コメント返信 OR 投稿者返信 のいずれか1つをランダム実行</li>
-            </ul>
-            <p className="text-xs text-blue-700 mt-2">※ 1回の実行で1つのアクションのみ実行し、自然な時間間隔でコメントが投稿されます</p>
-          </div>
-        </div>
       </div>
 
       {message && (
@@ -470,15 +445,10 @@ export default function AutoVoterSettings() {
         </div>
       </div>
 
-      <div className="bg-white rounded-lg shadow">
-        <div className="p-6 space-y-4">
-
-          {/* API設定リンク */}
-          <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-            <p className="text-sm text-blue-800">
-              OpenAI APIキーは <a href="/admin/api-settings" className="font-medium underline hover:text-blue-600">API設定</a> で管理されています
-            </p>
-          </div>
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        {/* 左列: 入力フィールド */}
+        <div className="bg-white rounded-lg shadow">
+          <div className="p-6 space-y-4">
 
           {/* 実行間隔設定 */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-0 justify-items-start">
@@ -832,86 +802,94 @@ export default function AutoVoterSettings() {
             </div>
           </div>
 
-          {/* ChatGPTプロンプト設定 */}
-          <div className="border-t border-gray-200 pt-4 mt-4">
-            <h3 className="text-lg font-medium text-gray-900 mb-3">ChatGPTプロンプト設定</h3>
-            
-            {/* コメント生成プロンプト */}
-            <div className="mb-4">
-              <label htmlFor="comment_prompt" className="block text-sm font-medium text-gray-700 mb-2">
-                コメント生成プロンプト
-              </label>
-              <textarea
-                id="comment_prompt"
-                value={settings.comment_prompt}
-                onChange={(e) => setSettings({ ...settings, comment_prompt: e.target.value })}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 font-mono text-sm"
-                rows={10}
-                placeholder="相談に対するコメントを生成してください。"
-              />
-              <p className="mt-1 text-xs text-gray-500">
-                ChatGPTがコメントを生成する際のプロンプト（ユーザープロフィールを考慮）
-              </p>
-            </div>
+          </div>
 
-            {/* 返信生成プロンプト */}
-            <div>
-              <label htmlFor="reply_prompt" className="block text-sm font-medium text-gray-700 mb-2">
-                返信生成プロンプト
-              </label>
-              <textarea
-                id="reply_prompt"
-                value={settings.reply_prompt}
-                onChange={(e) => setSettings({ ...settings, reply_prompt: e.target.value })}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 font-mono text-sm"
-                rows={15}
-                placeholder={`【重要】以下の変数は削除しないでください: {$comment}, {$question}, {$content}, {$choices}
-
-あなたはネット掲示板の常連ユーザーです。建前より本音、綺麗事より現実を語ります。
-
-以下の投稿に対するコメント「{$comment}」への返信を生成してください。
-
-【投稿情報】
-タイトル: {$question}
-本文: {$content}
-投票選択肢: {$choices}
-
-【返信ルール】
-- 元のコメント「{$comment}」の内容を踏まえて返信する
-- 具体的な固有名詞を含めることを推奨
-- 口語的で自然な日本語（20〜100文字）
-- 短い共感、同意＋補足、異なる視点、質問などバリエーション豊かに
-- 「確かに」「おっしゃる」などAI臭い表現は避ける
-- 自然な会話調で、押し付けがましくない
-
-【絶対禁止】
-- 投稿タイトル「{$question}」をそのまま返信の冒頭に含めないこと
-- コメントを鉤括弧（「」）で囲むこと
-- 返信内容のみを出力し、前置きや説明は不要
-
-【返信例】
-元コメント: 「水曜日のダウンタウンは普通に面白い」
-→ わかる、企画の質が安定してるよね
-→ 最近のクロちゃんネタは正直飽きたけどね
-→ どの企画が一番好き？
-
-上記を参考に、自然な返信を1つ生成してください。`}
-              />
-              <p className="mt-1 text-xs text-gray-500">
-                ChatGPTが返信を生成する際のプロンプト
-              </p>
-            </div>
+          <div className="px-6 py-4 bg-white border-t border-gray-200 flex justify-end">
+            <button
+              onClick={handleSave}
+              disabled={saving}
+              className="px-6 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:bg-gray-400 font-medium"
+            >
+              {saving ? '保存中...' : '設定を保存'}
+            </button>
           </div>
         </div>
 
-        <div className="px-6 py-4 bg-white border-t border-gray-200 flex justify-end">
-          <button
-            onClick={handleSave}
-            disabled={saving}
-            className="px-6 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:bg-gray-400 font-medium"
-          >
-            {saving ? '保存中...' : '設定を保存'}
-          </button>
+        {/* 右列: 注意書きカード */}
+        <div className="space-y-6">
+          {/* API設定リンク */}
+          <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+            <p className="text-sm text-blue-800">
+              OpenAI APIキーは <a href="/admin/api-settings" className="font-medium underline hover:text-blue-600">API設定</a> で管理されています
+            </p>
+          </div>
+
+          {/* 優先順位ルール */}
+          <div className="bg-green-50 border border-green-200 rounded-lg p-4">
+            <p className="text-sm font-semibold text-green-900 mb-2">🎯 投稿選択の優先順位ルール</p>
+            <ol className="text-sm text-green-800 space-y-1 ml-4 list-decimal">
+              <li><strong>ベストアンサー有無:</strong> ベストアンサー設定済みの投稿は除外</li>
+              <li><strong>コメント0件:</strong> コメントがない投稿を最優先（優先度+1000）</li>
+              <li><strong>日付の最新度:</strong> 24時間以内(+50) → 48時間以内(+30) → 3日以内(+15) → それ以降(+5)</li>
+              <li><strong>コメント数:</strong> コメントが多いほど優先度が下がる</li>
+              <li><strong>カテゴリ別対象期間:</strong> 各カテゴリ180日以内の投稿が対象</li>
+            </ol>
+          </div>
+
+          {/* コメント投稿ルール */}
+          <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+            <p className="text-sm font-semibold text-blue-900 mb-2">💬 自然なコメント投稿ルール</p>
+            <ul className="text-sm text-blue-800 space-y-1 ml-4 list-disc">
+              <li><strong>コメントがない場合:</strong> 新規コメント投稿 → コメントいいね</li>
+              <li><strong>コメントがある場合:</strong> 新規コメント投稿 OR コメント返信 OR 投稿者返信 のいずれか1つをランダム実行</li>
+            </ul>
+            <p className="text-xs text-blue-700 mt-2">※ 1回の実行で1つのアクションのみ実行し、自然な時間間隔でコメントが投稿されます</p>
+          </div>
+
+          {/* AIコメントプロンプト */}
+          <div className="bg-purple-50 border border-purple-200 rounded-lg p-4">
+            <h3 className="text-sm font-semibold text-purple-900 mb-2">🤖 AIコメント生成ルール</h3>
+            <div className="text-xs text-purple-800 space-y-2 max-h-96 overflow-y-auto">
+              <div className="space-y-1">
+                <p className="font-semibold">【コメント生成】</p>
+                <ul className="list-disc list-inside space-y-1 pl-2">
+                  <li>ユーザープロフィールを考慮</li>
+                  <li>投稿内容と選択肢を踏まえた自然な意見</li>
+                  <li>口語的で自然な日本語（20〜100文字）</li>
+                </ul>
+              </div>
+
+              <div className="space-y-1">
+                <p className="font-semibold">【返信生成ルール】</p>
+                <ul className="list-disc list-inside space-y-1 pl-2">
+                  <li>元のコメント内容を踏まえて返信</li>
+                  <li>短い共感、同意＋補足、異なる視点、質問などバリエーション豊か</li>
+                  <li>「確かに」「おっしゃる」などAI臭い表現は避ける</li>
+                  <li>自然な会話調で、押し付けがましくない</li>
+                </ul>
+              </div>
+
+              <div className="space-y-1">
+                <p className="font-semibold">【絶対禁止】</p>
+                <ul className="list-disc list-inside space-y-1 pl-2">
+                  <li>投稿タイトルをそのまま返信の冒頭に含める</li>
+                  <li>コメントを鉤括弧（「」）で囲む</li>
+                </ul>
+              </div>
+            </div>
+          </div>
+
+          {/* 注意事項 */}
+          <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
+            <h3 className="text-sm font-medium text-yellow-800 mb-2">⚠️ 注意事項</h3>
+            <ul className="text-sm text-yellow-700 space-y-1">
+              <li>• 実行間隔は最短1分、最長24時間です</li>
+              <li>• AI会員確率は0%で編集者のみ、100%でAI会員のみ使用</li>
+              <li>• コメント数は1件推奨（自然な投稿間隔を保つため）</li>
+              <li>• 自動実行はVPSのcrontabで動作します</li>
+              <li>• 開始/停止ボタンでCRON実行を制御できます</li>
+            </ul>
+          </div>
         </div>
       </div>
 

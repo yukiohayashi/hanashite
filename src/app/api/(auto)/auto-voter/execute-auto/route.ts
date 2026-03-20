@@ -434,8 +434,8 @@ export async function POST() {
                 continue;
               }
               
-              const commentText = data.choices[0]?.message?.content?.trim() || '';
-              console.log(`生成されたコメント: ${commentText}`);
+              let commentText = data.choices[0]?.message?.content?.trim() || '';
+              console.log(`生成されたコメント（処理前）: ${commentText}`);
 
               if (!commentText) {
                 const errorMsg = 'コメントテキストが空です';
@@ -443,6 +443,26 @@ export async function POST() {
                 commentErrors.push(errorMsg);
                 continue;
               }
+
+              // 【絶対禁止】ルールの適用
+              // 1. 投稿タイトルが含まれている場合は除去
+              if (post.title) {
+                const titlePattern = new RegExp(`^${post.title.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}[、。：:：\\s]*`, 'i');
+                commentText = commentText.replace(titlePattern, '').trim();
+              }
+
+              // 2. 鉤括弧（「」）で囲まれている場合は除去
+              commentText = commentText.replace(/^「(.+)」$/, '$1').trim();
+
+              // 処理後のチェック
+              if (!commentText || commentText.length < 5) {
+                const errorMsg = 'コメント生成に失敗しました（タイトルのみまたは無効な内容）';
+                console.error(errorMsg);
+                commentErrors.push(errorMsg);
+                continue;
+              }
+
+              console.log(`生成されたコメント（処理後）: ${commentText}`);
 
               if (commentText) {
                 console.log('コメントをデータベースに挿入中...');
