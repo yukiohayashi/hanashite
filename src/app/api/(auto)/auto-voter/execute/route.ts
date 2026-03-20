@@ -26,11 +26,12 @@ async function executeVote(postId: number, userId: number) {
   // 投票選択肢を取得
   const { data: choices } = await supabase
     .from('vote_choices')
-    .select('id')
+    .select('id, choice')
     .eq('post_id', postId);
 
   if (!choices || choices.length === 0) {
-    throw new Error('投票選択肢が見つかりません');
+    // 選択肢がない場合はスキップ（エラーにしない）
+    return { choiceId: null };
   }
 
   // ランダムな選択肢を選択
@@ -315,7 +316,7 @@ export async function POST(request: NextRequest) {
 
     // 設定を取得
     const { data: settingsData } = await supabase
-      .from('auto_creator_settings')
+      .from('auto_commenter_liker_settings')
       .select('*');
 
     const settings: Record<string, string> = {};
@@ -323,13 +324,20 @@ export async function POST(request: NextRequest) {
       settings[item.setting_key] = item.setting_value;
     });
 
-    const openaiApiKey = settings.openai_api_key || '';
-    const aiMemberProbability = parseInt(settings.ai_member_probability || '70');
+    // OpenAI APIキーをapi_settingsテーブルから取得
+    const { data: apiSettings } = await supabase
+      .from('api_settings')
+      .select('api_key')
+      .eq('is_active', true)
+      .limit(1)
+      .single();
+
+    const openaiApiKey = apiSettings?.api_key || '';
     const commentPrompt = settings.comment_prompt || '';
     const replyPrompt = settings.reply_prompt || '';
 
-    // ランダムなユーザーを取得
-    const userId = await getRandomUser(aiMemberProbability);
+    // ランダムなAI会員を取得（手動実行時は常にAI会員を使用）
+    const userId = await getRandomUser(100);
 
     let result;
     let message = '';
@@ -389,6 +397,7 @@ export async function POST(request: NextRequest) {
       message,
       userId,
       result,
+      comment: action_type === 'comment' ? result.commentText : undefined,
     });
   } catch (error: any) {
     console.error('Execute error:', error);

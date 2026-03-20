@@ -1,6 +1,7 @@
 import { supabase } from '@/lib/supabase';
 import CommentsTable from './CommentsTable';
 import SearchForm from './SearchForm';
+import CommentTestSection from './CommentTestSection';
 
 async function getComments(limit: number = 100, searchQuery: string = '') {
   let query = supabase
@@ -82,6 +83,9 @@ export default async function CommentsManagementPage({
       <div>
         <h1 className="text-3xl font-bold text-gray-900">コメント管理</h1>
       </div>
+
+      {/* コメント生成テスト */}
+      <CommentTestSection />
 
       {/* 検索フォーム */}
       <SearchForm />
