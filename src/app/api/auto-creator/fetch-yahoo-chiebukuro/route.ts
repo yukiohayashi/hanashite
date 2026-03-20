@@ -10,18 +10,26 @@ export async function GET(request: Request) {
     // Yahoo!知恵袋のURLを取得
     const { data: settings } = await supabase
       .from('auto_creator_settings')
-      .select('yahoo_chiebukuro_url')
-      .limit(1)
-      .single();
+      .select('setting_key, setting_value')
+      .eq('setting_key', 'scraping_urls')
+      .maybeSingle();
 
-    if (!settings?.yahoo_chiebukuro_url) {
+    if (!settings?.setting_value) {
       return NextResponse.json({
         success: false,
         error: 'Yahoo!知恵袋のURLが設定されていません',
       }, { status: 400 });
     }
 
-    const url = settings.yahoo_chiebukuro_url;
+    const urls = JSON.parse(settings.setting_value);
+    if (!urls || urls.length === 0) {
+      return NextResponse.json({
+        success: false,
+        error: 'Yahoo!知恵袋のURLが設定されていません',
+      }, { status: 400 });
+    }
+
+    const url = urls[0];
     
     // URLからカテゴリIDを抽出
     const categoryIdMatch = url.match(/category\/(\d+)/);
@@ -68,11 +76,11 @@ export async function GET(request: Request) {
     // 設定から最大スクレイピング件数を取得
     const { data: settingsData } = await supabase
       .from('auto_creator_settings')
-      .select('max_scraping_items')
-      .limit(1)
-      .single();
+      .select('setting_key, setting_value')
+      .eq('setting_key', 'max_scraping_items')
+      .maybeSingle();
     
-    const maxItems = settingsData?.max_scraping_items || 20;
+    const maxItems = settingsData?.setting_value ? parseInt(settingsData.setting_value) : 20;
     
     const listItemsArray = listItems.toArray();
     console.log(`取得対象記事数: ${listItemsArray.length}件、最大取得件数: ${maxItems}件`);
