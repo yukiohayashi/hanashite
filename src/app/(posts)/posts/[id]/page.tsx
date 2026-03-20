@@ -51,10 +51,6 @@ export default async function PostPage({ params, searchParams }: { params: Promi
   const showUpdatedMessage = search.updated === 'true';
   const session = await auth();
   
-  // デバッグ: セッション情報を確認
-  console.log('Post Page - Session:', JSON.stringify(session, null, 2));
-  console.log('Post Page - User Status:', session?.user?.status);
-  
   const { data: post } = await supabase
     .from('posts')
     .select('id, title, content, created_at, user_id, og_image, thumbnail_url, source_url, og_title, og_description, status, category_id, deadline_at, best_answer_id, users(name, image, sex, birth_year, prefecture, avatar_seed, use_custom_image, marriage), categories(id, name)')
@@ -119,9 +115,6 @@ export default async function PostPage({ params, searchParams }: { params: Promi
     .select('close_at, multi, random')
     .eq('post_id', id)
     .single();
-  
-  console.log('投稿詳細 - Post ID:', id);
-  console.log('投稿詳細 - vote_options:', voteOptions);
 
   // 投票済みかどうかをチェック
   let hasVoted = false;
@@ -244,10 +237,6 @@ export default async function PostPage({ params, searchParams }: { params: Promi
   }
 
   const imageUrl = post.og_image || post.thumbnail_url || '/images/noimage.webp';
-  
-  console.log('投稿詳細 - Post ID:', id);
-  console.log('投稿詳細 - og_image:', post.og_image);
-  console.log('投稿詳細 - imageUrl:', imageUrl);
 
   return (
     <div className="bg-white min-h-screen">

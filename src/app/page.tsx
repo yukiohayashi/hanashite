@@ -73,8 +73,6 @@ export default async function Home({ searchParams }: HomeProps) {
   const params = await searchParams;
   const searchQuery = params.s || '';
   const sortBy = params.sort || 'top_post';
-  
-  console.log('📊 Page params:', { searchQuery, sortBy, allParams: params });
 
   // announcementCategoryの取得を開始（並列実行）
   const announcementCategoryPromise = supabase
@@ -215,7 +213,6 @@ export default async function Home({ searchParams }: HomeProps) {
     query = query.is('best_answer_id', null).is('best_answer_selected_at', null);
 
     if (searchQuery) {
-      console.log('🔍 Search Query (top_post):', searchQuery);
       query = query.ilike('title', `%${searchQuery}%`);
     }
 
@@ -232,16 +229,8 @@ export default async function Home({ searchParams }: HomeProps) {
       return deadline.getTime() > now.getTime();
     }) || [];
     
-    console.log('🔍 Current time:', now.toISOString());
-    console.log('🔍 Filtered posts count:', filteredPosts.length);
-    if (filteredPosts.length > 0) {
-      console.log('🔍 First post deadline:', filteredPosts[0].deadline_at);
-    }
-    
     let postsFromComments: any[] = [];
     if (searchQuery) {
-      console.log('🔍 Search Results (top_post):', allPosts?.length || 0, 'posts found');
-      
       // コメントからも検索
       const { data: comments } = await supabase
         .from('comments')
@@ -251,7 +240,6 @@ export default async function Home({ searchParams }: HomeProps) {
       
       if (comments && comments.length > 0) {
         const postIdsFromComments = [...new Set(comments.map(c => c.post_id))];
-        console.log('🔍 Posts with matching comments:', postIdsFromComments.length);
         
         const { data: commentPosts } = await supabase
           .from('posts')
@@ -293,21 +281,12 @@ export default async function Home({ searchParams }: HomeProps) {
       .is('best_answer_selected_at', null);
 
     if (searchQuery) {
-      console.log('🔍 Search Query:', searchQuery);
       query = query.or(`title.ilike.%${searchQuery}%,content.ilike.%${searchQuery}%`);
     }
 
     const { data: allPosts, error: searchError } = await query
       .order('created_at', { ascending: false })
       .limit(10);
-    
-    if (searchQuery) {
-      console.log('🔍 Search Results:', allPosts?.length || 0, 'posts found');
-      console.log('🔍 Search Error:', searchError);
-      if (allPosts && allPosts.length > 0) {
-        console.log('🔍 First result:', { id: allPosts[0].id, title: allPosts[0].title });
-      }
-    }
     
     postsData = allPosts || [];
   }
