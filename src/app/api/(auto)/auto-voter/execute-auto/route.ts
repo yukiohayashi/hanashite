@@ -222,7 +222,18 @@ export async function POST() {
     const postsWithPriority = filteredPosts.map(post => {
       const postDate = new Date(post.created_at);
       const hoursDiff = (Date.now() - postDate.getTime()) / (1000 * 60 * 60);
-      const commentCount = Array.isArray(post.comments) ? post.comments.length : ((post.comments as any)?.[0]?.count || 0);
+      
+      // コメント数の取得（Supabaseのcount集計結果を正しく処理）
+      let commentCount = 0;
+      if (Array.isArray(post.comments)) {
+        commentCount = post.comments.length;
+      } else if (post.comments && typeof post.comments === 'object') {
+        // count集計の場合、[{ count: N }] の形式で返ってくる
+        const commentsArray = post.comments as any;
+        if (Array.isArray(commentsArray) && commentsArray.length > 0 && 'count' in commentsArray[0]) {
+          commentCount = commentsArray[0].count || 0;
+        }
+      }
       
       let priority = 0;
       
