@@ -58,25 +58,22 @@ export async function POST() {
     const randomInterval = minInterval + Math.random() * (maxInterval - minInterval);
     const nextExecutionTime = new Date(now.getTime() + randomInterval * 60 * 1000);
     
+    // updateを使って確実に更新
     await supabase
       .from('auto_commenter_liker_settings')
-      .upsert({
-        setting_key: 'next_execution_time',
+      .update({
         setting_value: nextExecutionTime.toISOString(),
         updated_at: new Date().toISOString()
-      }, {
-        onConflict: 'setting_key'
-      });
+      })
+      .eq('setting_key', 'next_execution_time');
     
     await supabase
       .from('auto_commenter_liker_settings')
-      .upsert({
-        setting_key: 'last_executed_at',
+      .update({
         setting_value: now.toISOString(),
         updated_at: new Date().toISOString()
-      }, {
-        onConflict: 'setting_key'
-      });
+      })
+      .eq('setting_key', 'last_executed_at');
     
     console.log(`次回実行予定時刻を設定: ${nextExecutionTime.toISOString()} (${Math.round(randomInterval)}分後)`);
 
