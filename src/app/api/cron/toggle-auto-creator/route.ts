@@ -15,18 +15,23 @@ export async function POST(request: Request) {
     // 設定を取得
     const { data: settingsData } = await supabase
       .from('auto_creator_settings')
-      .select('*')
-      .single();
+      .select('setting_key, setting_value')
+      .in('setting_key', ['enabled', 'interval', 'last_executed_at']);
 
-    if (!settingsData) {
+    if (!settingsData || settingsData.length === 0) {
       return NextResponse.json(
         { error: '設定が見つかりません' },
         { status: 404 }
       );
     }
 
-    const currentlyActive = settingsData.is_active;
-    const intervalMinutes = settingsData.interval_minutes || 60;
+    const settingsMap: Record<string, string> = {};
+    settingsData.forEach((item) => {
+      settingsMap[item.setting_key] = item.setting_value;
+    });
+
+    const currentlyActive = settingsMap.enabled === 'true';
+    const intervalMinutes = parseInt(settingsMap.interval || '60');
 
     // 停止から開始する場合、ランダムな初回実行時間を設定
     if (enabled && !currentlyActive) {
@@ -37,14 +42,23 @@ export async function POST(request: Request) {
       const randomMinutes = Math.floor(Math.random() * maxInterval);
       const pastExecutionTime = new Date(Date.now() - randomMinutes * 60 * 1000);
       
-      // updated_atを過去の時刻に設定（AI自動投稿はupdated_atを使用）
-      await supabase
-        .from('auto_creator_settings')
-        .update({ 
-          is_active: enabled,
-          updated_at: pastExecutionTime.toISOString()
-        })
-        .eq('id', settingsData.id);
+      // enabled と last_executed_at を更新
+      const updates = [
+        { setting_key: 'enabled', setting_value: enabled.toString() },
+        { setting_key: 'last_executed_at', setting_value: pastExecutionTime.toISOString() },
+      ];
+
+      for (const update of updates) {
+        await supabase
+          .from('auto_creator_settings')
+          .upsert({ 
+            setting_key: update.setting_key,
+            setting_value: update.setting_value, 
+            updated_at: new Date().toISOString()
+          }, {
+            onConflict: 'setting_key'
+          });
+      }
 
       return NextResponse.json({
         success: true,
@@ -56,11 +70,13 @@ export async function POST(request: Request) {
     // 通常のトグル（開始→停止）
     await supabase
       .from('auto_creator_settings')
-      .update({ 
-        is_active: enabled,
+      .upsert({ 
+        setting_key: 'enabled',
+        setting_value: enabled.toString(),
         updated_at: new Date().toISOString()
-      })
-      .eq('id', settingsData.id);
+      }, {
+        onConflict: 'setting_key'
+      });
 
     return NextResponse.json({
       success: true,

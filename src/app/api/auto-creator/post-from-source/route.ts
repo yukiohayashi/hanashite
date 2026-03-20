@@ -71,11 +71,11 @@ async function selectQuestioner(refinedTitle: string, refinedContent: string) {
   // AI会員使用確率を取得
   const { data: settings } = await supabase
     .from('auto_creator_settings')
-    .select('ai_user_probability')
-    .eq('id', 1)
-    .single();
+    .select('setting_key, setting_value')
+    .eq('setting_key', 'ai_user_probability')
+    .maybeSingle();
 
-  const aiUserProbability = settings?.ai_user_probability || 100;
+  const aiUserProbability = settings?.setting_value ? parseInt(settings.setting_value) : 100;
   const useAiUser = Math.random() * 100 < aiUserProbability;
 
   console.log(`AI会員使用確率: ${aiUserProbability}%, AI会員を使用: ${useAiUser}`);

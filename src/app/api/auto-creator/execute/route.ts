@@ -6,13 +6,12 @@ export async function POST() {
     console.log('=== AI自動投稿実行開始 ===');
 
     // 設定を取得
-    const { data: settings, error: settingsError } = await supabase
+    const { data: settingsData, error: settingsError } = await supabase
       .from('auto_creator_settings')
-      .select('*')
-      .limit(1)
-      .single();
+      .select('setting_key, setting_value')
+      .in('setting_key', ['enabled', 'interval', 'interval_variance', 'last_executed_at', 'no_create_start_hour', 'no_create_end_hour']);
 
-    if (settingsError || !settings) {
+    if (settingsError || !settingsData || settingsData.length === 0) {
       console.error('設定取得エラー:', settingsError);
       return NextResponse.json({
         success: false,
@@ -20,8 +19,13 @@ export async function POST() {
       }, { status: 500 });
     }
 
+    const settingsMap: Record<string, string> = {};
+    settingsData.forEach((item) => {
+      settingsMap[item.setting_key] = item.setting_value;
+    });
+
     // 有効化チェック
-    if (!settings.is_active) {
+    if (settingsMap.enabled !== 'true') {
       console.log('自動投稿は無効化されています');
       return NextResponse.json({
         success: false,
@@ -29,12 +33,12 @@ export async function POST() {
       });
     }
 
-    // 実行間隔チェック（interval_minutes + 10%のゆらぎ）
-    const intervalMinutes = settings.interval_minutes || 60;
-    const varianceMinutes = Math.floor(intervalMinutes * 0.1); // 10%のゆらぎ
+    // 実行間隔チェック
+    const intervalMinutes = parseInt(settingsMap.interval || '60');
+    const varianceMinutes = parseInt(settingsMap.interval_variance || '15');
     const minInterval = intervalMinutes - varianceMinutes;
     
-    const lastExecutedAt = settings.updated_at;
+    const lastExecutedAt = settingsMap.last_executed_at;
 
     if (lastExecutedAt) {
       const lastExecutedTime = new Date(lastExecutedAt).getTime();
@@ -61,8 +65,8 @@ export async function POST() {
 
     // 作成しない時間帯チェック
     const currentHour = new Date().getHours();
-    const noCreateStartHour = settings.no_create_start_hour || 0;
-    const noCreateEndHour = settings.no_create_end_hour || 6;
+    const noCreateStartHour = parseInt(settingsMap.no_create_start_hour || '0');
+    const noCreateEndHour = parseInt(settingsMap.no_create_end_hour || '6');
 
     if (currentHour >= noCreateStartHour && currentHour < noCreateEndHour) {
       console.log(`作成しない時間帯のためスキップ（${noCreateStartHour}時〜${noCreateEndHour}時）`);
@@ -120,13 +124,16 @@ export async function POST() {
       }, { status: 500 });
     }
 
-    // 最終実行時刻を更新（updated_atを使用）
+    // 最終実行時刻を更新
     await supabase
       .from('auto_creator_settings')
-      .update({
+      .upsert({
+        setting_key: 'last_executed_at',
+        setting_value: new Date().toISOString(),
         updated_at: new Date().toISOString(),
-      })
-      .eq('id', settings.id);
+      }, {
+        onConflict: 'setting_key'
+      });
 
     console.log('=== AI自動投稿実行完了 ===');
     console.log(`投稿ID: ${result.postId}`);
