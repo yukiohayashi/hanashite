@@ -123,15 +123,9 @@ export default function AutoCreatorSettings() {
         updateElapsedTime(data.updated_at);
       }
       
-      // next_execution_timeを取得
-      const { data: nextExecData } = await supabase
-        .from('auto_creator_settings')
-        .select('setting_value')
-        .eq('setting_key', 'next_execution_time')
-        .maybeSingle();
-      
-      if (nextExecData?.setting_value) {
-        const nextTime = new Date(nextExecData.setting_value);
+      // next_execution_timeを取得（dataから直接取得）
+      if (data.next_execution_time) {
+        const nextTime = new Date(data.next_execution_time);
         setNextRunTime(nextTime.toLocaleString('ja-JP', { 
           month: '2-digit',
           day: '2-digit',
