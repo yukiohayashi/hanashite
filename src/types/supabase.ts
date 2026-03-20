@@ -214,7 +214,7 @@ export type Database = {
         }
         Relationships: []
       }
-      auto_voter_settings: {
+      auto_commenter_liker_settings: {
         Row: {
           created_at: string | null
           id: number

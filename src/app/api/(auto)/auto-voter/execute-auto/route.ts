@@ -7,7 +7,7 @@ export async function POST() {
     
     // 設定を取得
     const { data: settingsData } = await supabase
-      .from('auto_voter_settings')
+      .from('auto_commenter_liker_settings')
       .select('*');
 
     const settings: Record<string, string> = {};

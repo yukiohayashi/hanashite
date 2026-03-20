@@ -18,7 +18,7 @@ export async function GET(request: Request) {
 
     // 設定を取得
     const { data: settingsData } = await supabase
-      .from('auto_voter_settings')
+      .from('auto_commenter_liker_settings')
       .select('setting_key, setting_value');
 
     const settings: Record<string, string> = {};
@@ -62,7 +62,7 @@ export async function GET(request: Request) {
         
         // 次回実行予定時刻を保存
         await supabase
-          .from('auto_voter_settings')
+          .from('auto_commenter_liker_settings')
           .upsert({ 
             setting_key: 'next_execution_time',
             setting_value: nextExecutionTime.toISOString(),
@@ -114,7 +114,7 @@ export async function GET(request: Request) {
     // last_executed_atを更新
     const executedAt = new Date();
     await supabase
-      .from('auto_voter_settings')
+      .from('auto_commenter_liker_settings')
       .update({ setting_value: executedAt.toISOString() })
       .eq('setting_key', 'last_executed_at');
 
@@ -125,7 +125,7 @@ export async function GET(request: Request) {
     const nextExecutionTime = new Date(executedAt.getTime() + randomInterval * 60 * 1000);
     
     await supabase
-      .from('auto_voter_settings')
+      .from('auto_commenter_liker_settings')
       .upsert({ 
         setting_key: 'next_execution_time',
         setting_value: nextExecutionTime.toISOString(),

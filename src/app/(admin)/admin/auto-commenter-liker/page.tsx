@@ -59,7 +59,7 @@ export default function AutoVoterDashboard() {
 
   const fetchSettings = async () => {
     const { data } = await supabase
-      .from('auto_voter_settings')
+      .from('auto_commenter_liker_settings')
       .select('*')
       .eq('setting_key', 'enabled')
       .single();

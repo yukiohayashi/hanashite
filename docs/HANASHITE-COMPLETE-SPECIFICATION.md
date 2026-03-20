@@ -207,7 +207,7 @@ erDiagram
 | | `auto_creator_processed` | 自動投稿処理済み記事。 |
 | | `auto_creator_logs` | 自動投稿ログ。 |
 | | `auto_tagger_logs` | 自動タグ付けログ。 |
-| | `auto_voter_settings` | AI自動コメント・いいね設定。 |
+| | `auto_commenter_liker_settings` | AI自動コメント・いいね設定。 |
 | | `auto_voter_logs` | 自動コメント・いいねログ。 |
 | **メール** | `mail_settings` | メール設定。 |
 | | `mail_templates` | メールテンプレート。 |

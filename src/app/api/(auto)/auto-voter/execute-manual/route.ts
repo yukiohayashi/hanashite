@@ -7,7 +7,7 @@ export async function POST() {
     
     // 設定を取得
     const { data: settingsData } = await supabase
-      .from('auto_voter_settings')
+      .from('auto_commenter_liker_settings')
       .select('*');
 
     const settings: Record<string, string> = {};
@@ -53,7 +53,7 @@ export async function POST() {
     console.log('last_executed_atを更新:', executedAt);
     
     const { data: updateData, error: updateError } = await supabase
-      .from('auto_voter_settings')
+      .from('auto_commenter_liker_settings')
       .update({ 
         setting_value: executedAt,
         updated_at: executedAt

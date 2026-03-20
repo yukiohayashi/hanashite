@@ -45,7 +45,7 @@ export default function AutoVoterSettings() {
 
   const fetchSettings = async () => {
     const { data, error } = await supabase
-      .from('auto_voter_settings')
+      .from('auto_commenter_liker_settings')
       .select('*');
 
     if (error) {
@@ -140,7 +140,7 @@ export default function AutoVoterSettings() {
 
   const fetchNextRunTime = async () => {
     const { data: settingsData } = await supabase
-      .from('auto_voter_settings')
+      .from('auto_commenter_liker_settings')
       .select('*');
 
     if (!settingsData) {
@@ -203,7 +203,7 @@ export default function AutoVoterSettings() {
         
         // last_executed_atを現在時刻に設定
         await supabase
-          .from('auto_voter_settings')
+          .from('auto_commenter_liker_settings')
           .update({ 
             setting_value: now.toISOString(),
             updated_at: now.toISOString()
@@ -212,14 +212,14 @@ export default function AutoVoterSettings() {
         
         // next_execution_timeを設定
         const { data: existingNextExec } = await supabase
-          .from('auto_voter_settings')
+          .from('auto_commenter_liker_settings')
           .select('setting_key')
           .eq('setting_key', 'next_execution_time')
           .maybeSingle();
         
         if (existingNextExec) {
           await supabase
-            .from('auto_voter_settings')
+            .from('auto_commenter_liker_settings')
             .update({ 
               setting_value: nextExecutionTime.toISOString(),
               updated_at: now.toISOString()
@@ -227,7 +227,7 @@ export default function AutoVoterSettings() {
             .eq('setting_key', 'next_execution_time');
         } else {
           await supabase
-            .from('auto_voter_settings')
+            .from('auto_commenter_liker_settings')
             .insert({ 
               setting_key: 'next_execution_time',
               setting_value: nextExecutionTime.toISOString(),
@@ -237,7 +237,7 @@ export default function AutoVoterSettings() {
       }
 
       const { error } = await supabase
-        .from('auto_voter_settings')
+        .from('auto_commenter_liker_settings')
         .update({ setting_value: newEnabled ? 'true' : 'false', updated_at: new Date().toISOString() })
         .eq('setting_key', 'enabled');
 
@@ -324,7 +324,7 @@ export default function AutoVoterSettings() {
     try {
       for (const [key, value] of Object.entries(settings)) {
         const { error } = await supabase
-          .from('auto_voter_settings')
+          .from('auto_commenter_liker_settings')
           .update({ setting_value: value, updated_at: new Date().toISOString() })
           .eq('setting_key', key);
         

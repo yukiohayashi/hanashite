@@ -33,7 +33,7 @@ export async function POST() {
 
     // 既存の設定を確認
     const { data: existingSettings } = await supabase
-      .from('auto_voter_settings')
+      .from('auto_commenter_liker_settings')
       .select('setting_key');
 
     const existingKeys = new Set(existingSettings?.map(s => s.setting_key) || []);
@@ -43,7 +43,7 @@ export async function POST() {
 
     if (newSettings.length > 0) {
       const { error } = await supabase
-        .from('auto_voter_settings')
+        .from('auto_commenter_liker_settings')
         .insert(newSettings);
 
       if (error) {
