@@ -12,7 +12,7 @@ interface Settings {
   no_create_end_hour: string;
   ai_user_probability: string;
   scraping_wait_time: string;
-  is_enabled: string;
+  enabled: string;
   choices_prompt: string;
   max_categories: string;
   max_keywords: string;
@@ -29,18 +29,18 @@ export default function AutoCreatorSettings() {
   usePageTitle('AI自動投稿設定');
   
   const [settings, setSettings] = useState<Settings>({
-    scraping_urls: '[]',
+    scraping_urls: '',
     execution_interval: '60',
     execution_variance: '15',
     no_create_start_hour: '0',
     no_create_end_hour: '6',
-    ai_user_probability: '50',
-    scraping_wait_time: '30',
-    is_enabled: 'true',
+    ai_user_probability: '100',
+    scraping_wait_time: '3',
+    enabled: 'false',
     choices_prompt: '',
-    max_categories: '1',
-    max_keywords: '3',
-    max_posts_per_execution: '5',
+    max_categories: '3',
+    max_keywords: '5',
+    max_posts_per_execution: '1',
     max_scraping_items: '20',
   });
   const [urls, setUrls] = useState<string[]>(['', '', '', '', '', '', '', '']);
@@ -120,7 +120,7 @@ export default function AutoCreatorSettings() {
       no_create_end_hour: settingsMap.no_create_end_hour || '6',
       ai_user_probability: settingsMap.ai_user_probability || '50',
       scraping_wait_time: settingsMap.scraping_wait_time || '30',
-      is_enabled: settingsMap.enabled || 'false',
+      enabled: settingsMap.enabled || 'false',
       choices_prompt: settingsMap.content_prompt || '',
       max_categories: settingsMap.max_categories || '1',
       max_keywords: settingsMap.max_keywords || '3',
@@ -136,10 +136,12 @@ export default function AutoCreatorSettings() {
         updateElapsedTime(settingsMap.last_executed_at);
       }
       
-      // next_execution_timeを取得
-      if (settingsMap.next_execution_time) {
-        const nextTime = new Date(settingsMap.next_execution_time);
-        setNextRunTime(nextTime.toLocaleString('ja-JP', { 
+      // next_execution_timeを計算
+      if (settingsMap.last_executed_at && settingsMap.interval) {
+        const lastExec = new Date(settingsMap.last_executed_at);
+        const intervalMinutes = parseInt(settingsMap.interval || '60');
+        const nextExec = new Date(lastExec.getTime() + intervalMinutes * 60 * 1000);
+        setNextRunTime(nextExec.toLocaleString('ja-JP', { 
           month: '2-digit',
           day: '2-digit',
           hour: '2-digit', 
@@ -187,7 +189,7 @@ export default function AutoCreatorSettings() {
     setMessage('');
 
     try {
-      const newEnabled = settings.is_enabled !== 'true';
+      const newEnabled = settings.enabled !== 'true';
 
       const response = await fetch('/api/cron/toggle-auto-creator', {
         method: 'POST',
@@ -200,7 +202,7 @@ export default function AutoCreatorSettings() {
       const result = await response.json();
 
       if (result.success) {
-        setSettings({ ...settings, is_enabled: newEnabled ? 'true' : 'false' });
+        setSettings({ ...settings, enabled: newEnabled ? 'true' : 'false' });
         setMessage(result.message);
         await fetchNextRunTime();
         setTimeout(() => setMessage(''), 3000);
@@ -320,14 +322,14 @@ export default function AutoCreatorSettings() {
           <div className="flex items-center gap-4">
             <div className="flex items-center gap-2">
               <span className={`text-2xl ${
-                settings.is_enabled === 'true' ? 'text-green-500' : 'text-gray-400'
+                settings.enabled === 'true' ? 'text-green-500' : 'text-gray-400'
               }`}>●</span>
               <strong className="text-lg">RSS自動作成</strong>
             </div>
             
             <div className="border-l border-gray-300 pl-4 flex items-center gap-3">
               <strong className="text-sm">自動作成:</strong>
-              {settings.is_enabled === 'true' ? (
+              {settings.enabled === 'true' ? (
                 <span className="text-green-600 font-medium">✓ 有効</span>
               ) : (
                 <span className="text-red-600 font-medium">✗ 無効</span>
@@ -336,12 +338,12 @@ export default function AutoCreatorSettings() {
                 onClick={handleToggle}
                 disabled={toggling}
                 className={`px-4 py-1 rounded text-sm font-medium text-white ${
-                  settings.is_enabled === 'true'
+                  settings.enabled === 'true'
                     ? 'bg-red-500 hover:bg-red-600'
                     : 'bg-green-500 hover:bg-green-600'
                 } disabled:bg-gray-400`}
               >
-                {toggling ? '処理中...' : (settings.is_enabled === 'true' ? '⏸ 停止' : '▶ 開始')}
+                {toggling ? '処理中...' : (settings.enabled === 'true' ? '⏸ 停止' : '▶ 開始')}
               </button>
             </div>
 
@@ -369,7 +371,7 @@ export default function AutoCreatorSettings() {
                 </span>
               </div>
             )}
-            {settings.is_enabled === 'true' && nextRunTime && (
+            {settings.enabled === 'true' && nextRunTime && (
               <div className="border-l border-gray-300 pl-4">
                 <strong className="text-sm">次回実行予定:</strong>
                 <span className="ml-2 text-sm text-blue-600 font-medium">{nextRunTime}頃</span>

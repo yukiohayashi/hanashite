@@ -67,7 +67,7 @@ export default async function AutoCreatorDashboard() {
   const recentProcessed = await getRecentProcessed();
   const settings = await getSettings();
 
-  const isEnabled = settings.is_enabled === 'true';
+  const isEnabled = settings.enabled === 'true';
   const lastExecution = settings.last_executed_at;
 
   return (
