@@ -15,6 +15,63 @@ export async function POST() {
       settings[item.setting_key] = item.setting_value;
     });
 
+    // 実行間隔チェック
+    const interval = parseInt(settings.interval || '12');
+    const intervalVariance = parseInt(settings.interval_variance || '5');
+    
+    const { data: lastExecutedData } = await supabase
+      .from('auto_commenter_liker_settings')
+      .select('setting_value')
+      .eq('setting_key', 'last_executed_at')
+      .maybeSingle();
+    
+    if (lastExecutedData?.setting_value) {
+      const lastExecutionTime = new Date(lastExecutedData.setting_value);
+      const now = new Date();
+      
+      // 次回実行予定時刻を取得または生成
+      const { data: nextExecData } = await supabase
+        .from('auto_commenter_liker_settings')
+        .select('setting_value')
+        .eq('setting_key', 'next_execution_time')
+        .maybeSingle();
+      
+      let nextExecutionTime: Date;
+      
+      if (nextExecData?.setting_value) {
+        nextExecutionTime = new Date(nextExecData.setting_value);
+      } else {
+        // 次回実行予定時刻が設定されていない場合は、ゆらぎを適用して生成
+        const minInterval = interval - intervalVariance;
+        const maxInterval = interval + intervalVariance;
+        const randomInterval = minInterval + Math.random() * (maxInterval - minInterval);
+        nextExecutionTime = new Date(lastExecutionTime.getTime() + randomInterval * 60 * 1000);
+        
+        // 次回実行予定時刻を保存
+        await supabase
+          .from('auto_commenter_liker_settings')
+          .upsert({
+            setting_key: 'next_execution_time',
+            setting_value: nextExecutionTime.toISOString(),
+            updated_at: new Date().toISOString()
+          }, {
+            onConflict: 'setting_key'
+          });
+      }
+      
+      // 次回実行予定時刻になっていない場合はスキップ
+      if (now < nextExecutionTime) {
+        const remainingMinutes = Math.ceil((nextExecutionTime.getTime() - now.getTime()) / (1000 * 60));
+        console.log(`次回実行予定時刻まで待機: あと${remainingMinutes}分`);
+        return NextResponse.json({
+          success: false,
+          message: `次回実行予定時刻まで待機（あと${remainingMinutes}分）`,
+          skipped: true,
+          nextExecutionTime: nextExecutionTime.toISOString(),
+        });
+      }
+    }
+
     // 実行しない時間帯のチェック
     const noRunStart = settings.no_run_start || '00:00';
     const noRunEnd = settings.no_run_end || '06:00';
@@ -689,6 +746,35 @@ export async function POST() {
         comment_errors: commentErrors.length > 0 ? commentErrors : undefined,
       });
     }
+
+    // 次回実行予定時刻を計算して保存
+    const executionTime = new Date();
+    const minInterval = interval - intervalVariance;
+    const maxInterval = interval + intervalVariance;
+    const randomInterval = minInterval + Math.random() * (maxInterval - minInterval);
+    const nextExecutionTime = new Date(executionTime.getTime() + randomInterval * 60 * 1000);
+
+    await supabase
+      .from('auto_commenter_liker_settings')
+      .upsert({
+        setting_key: 'last_executed_at',
+        setting_value: executionTime.toISOString(),
+        updated_at: new Date().toISOString()
+      }, {
+        onConflict: 'setting_key'
+      });
+
+    await supabase
+      .from('auto_commenter_liker_settings')
+      .upsert({
+        setting_key: 'next_execution_time',
+        setting_value: nextExecutionTime.toISOString(),
+        updated_at: new Date().toISOString()
+      }, {
+        onConflict: 'setting_key'
+      });
+
+    console.log(`次回実行予定時刻を設定: ${nextExecutionTime.toISOString()} (${Math.round(randomInterval)}分後)`);
 
     const result = {
       success: true,
