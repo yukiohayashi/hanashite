@@ -238,8 +238,13 @@ export default function AutoCreatorSettings() {
       for (const update of updates) {
         const { error } = await supabase
           .from('auto_creator_settings')
-          .update({ setting_value: update.setting_value, updated_at: now })
-          .eq('setting_key', update.setting_key);
+          .upsert({ 
+            setting_key: update.setting_key,
+            setting_value: update.setting_value, 
+            updated_at: now 
+          }, {
+            onConflict: 'setting_key'
+          });
         
         if (error) {
           console.error(`Error updating ${update.setting_key}:`, error);
