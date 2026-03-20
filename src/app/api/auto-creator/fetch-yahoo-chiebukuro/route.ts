@@ -142,7 +142,17 @@ export async function GET(request: Request) {
             '俺が',
             '男の',
             '童貞',
-            'セフレ'
+            '男です',
+            '男性です',
+            '30代後半の男',
+            '30代の男',
+            '40代の男',
+            '20代の男',
+            '50代の男',
+            '私は男',
+            '僕',
+            '僕が',
+            '僕の'
           ];
           
           const isMaleByContent = maleKeywords.some(keyword => 
