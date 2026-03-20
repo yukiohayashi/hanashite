@@ -757,6 +757,7 @@ export async function POST() {
     const result = {
       success: true,
       message: `${postsToProcess.length}件の記事に${totalComments}件のコメント、${totalPostLikes}件の投稿いいね、${totalCommentLikes}件のコメントいいねを追加しました`,
+      next_execution_time: nextExecutionTime.toISOString(),
       details: {
         processed_posts: postsToProcess.length,
         total_comments: totalComments,
