@@ -19,45 +19,16 @@ export async function POST() {
     const interval = parseInt(settings.interval || '12');
     const intervalVariance = parseInt(settings.interval_variance || '5');
     
-    const { data: lastExecutedData } = await supabase
+    // 次回実行予定時刻を取得
+    const { data: nextExecData } = await supabase
       .from('auto_commenter_liker_settings')
       .select('setting_value')
-      .eq('setting_key', 'last_executed_at')
+      .eq('setting_key', 'next_execution_time')
       .maybeSingle();
     
-    if (lastExecutedData?.setting_value) {
-      const lastExecutionTime = new Date(lastExecutedData.setting_value);
+    if (nextExecData?.setting_value) {
+      const nextExecutionTime = new Date(nextExecData.setting_value);
       const now = new Date();
-      
-      // 次回実行予定時刻を取得または生成
-      const { data: nextExecData } = await supabase
-        .from('auto_commenter_liker_settings')
-        .select('setting_value')
-        .eq('setting_key', 'next_execution_time')
-        .maybeSingle();
-      
-      let nextExecutionTime: Date;
-      
-      if (nextExecData?.setting_value) {
-        nextExecutionTime = new Date(nextExecData.setting_value);
-      } else {
-        // 次回実行予定時刻が設定されていない場合は、ゆらぎを適用して生成
-        const minInterval = interval - intervalVariance;
-        const maxInterval = interval + intervalVariance;
-        const randomInterval = minInterval + Math.random() * (maxInterval - minInterval);
-        nextExecutionTime = new Date(lastExecutionTime.getTime() + randomInterval * 60 * 1000);
-        
-        // 次回実行予定時刻を保存
-        await supabase
-          .from('auto_commenter_liker_settings')
-          .upsert({
-            setting_key: 'next_execution_time',
-            setting_value: nextExecutionTime.toISOString(),
-            updated_at: new Date().toISOString()
-          }, {
-            onConflict: 'setting_key'
-          });
-      }
       
       // 次回実行予定時刻になっていない場合はスキップ
       if (now < nextExecutionTime) {
