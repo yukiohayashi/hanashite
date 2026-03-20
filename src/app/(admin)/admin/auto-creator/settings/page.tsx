@@ -221,7 +221,6 @@ export default function AutoCreatorSettings() {
 
     try {
       const filteredUrls = urls.filter((url) => url.trim() !== '');
-      const now = new Date().toISOString();
 
       // キー・バリュー形式で保存
       const updates = [
@@ -235,21 +234,19 @@ export default function AutoCreatorSettings() {
         { setting_key: 'no_create_end_hour', setting_value: settings.no_create_end_hour },
       ];
 
-      for (const update of updates) {
-        const { error } = await supabase
-          .from('auto_creator_settings')
-          .upsert({ 
-            setting_key: update.setting_key,
-            setting_value: update.setting_value, 
-            updated_at: now 
-          }, {
-            onConflict: 'setting_key'
-          });
-        
-        if (error) {
-          console.error(`Error updating ${update.setting_key}:`, error);
-          throw error;
-        }
+      // サーバーサイドAPI経由で保存
+      const response = await fetch('/api/admin/auto-creator/save-settings', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ updates }),
+      });
+
+      const result = await response.json();
+
+      if (!result.success) {
+        throw new Error(result.error || '保存に失敗しました');
       }
 
       setMessage('設定を保存しました');
