@@ -67,7 +67,7 @@ function detectCategory(title: string, content: string): number {
   return maxScore > 0 ? selectedCategory : 19;
 }
 
-async function selectQuestioner(refinedTitle: string, refinedContent: string) {
+async function selectQuestioner(refinedTitle: string, refinedContent: string, categoryId: number) {
   // AI会員使用確率を取得
   const { data: settings } = await supabase
     .from('auto_creator_settings')
@@ -111,23 +111,37 @@ async function selectQuestioner(refinedTitle: string, refinedContent: string) {
     return randomUser.id;
   }
 
-  // 既婚者を完全に除外（marriageが'married'の場合は除外）
-  const unmarriedUsers = users.filter(user => {
-    const isMarried = user.marriage === 'married' || user.marriage === '既婚';
-    if (isMarried) {
-      console.log(`既婚者を除外: ${user.name} (marriage: ${user.marriage})`);
+  // カテゴリに応じてmarriageステータスをフィルタリング
+  const marriedCategories = [5, 13]; // 夫婦、離婚
+  const needMarried = marriedCategories.includes(categoryId);
+  
+  let targetUsers = users;
+  
+  if (needMarried) {
+    // 既婚者のみを選択
+    targetUsers = users.filter(user => {
+      const isMarried = user.marriage === 'married' || user.marriage === '既婚';
+      return isMarried;
+    });
+    console.log(`既婚者カテゴリ（ID: ${categoryId}）のため既婚者を選択: ${targetUsers.length}人`);
+    
+    if (targetUsers.length === 0) {
+      console.log('既婚者が見つからないため、全ユーザーから選択します');
+      targetUsers = users;
     }
-    return !isMarried;
-  });
-
-  console.log(`既婚者除外後のユーザー数: ${unmarriedUsers.length}`);
-
-  // 既婚者以外がいない場合はエラー
-  if (unmarriedUsers.length === 0) {
-    throw new Error('未婚のAI会員が見つかりません');
+  } else {
+    // 未婚者のみを選択
+    targetUsers = users.filter(user => {
+      const isMarried = user.marriage === 'married' || user.marriage === '既婚';
+      return !isMarried;
+    });
+    console.log(`未婚者カテゴリ（ID: ${categoryId}）のため未婚者を選択: ${targetUsers.length}人`);
+    
+    if (targetUsers.length === 0) {
+      console.log('未婚者が見つからないため、全ユーザーから選択します');
+      targetUsers = users;
+    }
   }
-
-  const targetUsers = unmarriedUsers;
 
   // 記事内容から年齢層を推定
   const text = (refinedTitle + ' ' + refinedContent).toLowerCase();
@@ -226,14 +240,14 @@ export async function POST(request: Request) {
     console.log('本文:', refined.content);
     console.log('========================================');
 
-    // 質問者を選択（修正後の内容に適合したAI会員）
-    const questionerId = await selectQuestioner(refined.title, refined.content);
-
     // 記事内容からカテゴリを自動判定（修正後の内容で判定）
     const detectedCategoryId = detectCategory(
       refined.title,
       refined.content
     );
+
+    // 質問者を選択（修正後の内容とカテゴリに適合したAI会員）
+    const questionerId = await selectQuestioner(refined.title, refined.content, detectedCategoryId);
     
     console.log(`カテゴリ自動判定: ${detectedCategoryId}`);
 

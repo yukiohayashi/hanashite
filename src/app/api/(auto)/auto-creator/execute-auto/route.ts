@@ -227,6 +227,61 @@ export async function POST() {
     let createdCount = 0;
     const results: Array<{ success: boolean; url: string; message: string }> = [];
 
+    // Yahoo!知恵袋の未処理記事を投稿に変換
+    const { data: unprocessedSources } = await supabase
+      .from('auto_consultation_sources')
+      .select('*')
+      .eq('is_processed', false)
+      .limit(settings.maxPostsPerExecution);
+    
+    if (unprocessedSources && unprocessedSources.length > 0) {
+      console.log(`Yahoo!知恵袋の未処理記事: ${unprocessedSources.length}件`);
+      
+      for (const source of unprocessedSources) {
+        if (createdCount >= settings.maxPostsPerExecution) {
+          break;
+        }
+        
+        try {
+          // post-from-source APIを呼び出して投稿を作成
+          const response = await fetch(`${process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'}/api/auto-creator/post-from-source`, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+              source_id: source.id,
+            }),
+          });
+          
+          const result = await response.json();
+          
+          if (result.success) {
+            createdCount++;
+            results.push({
+              success: true,
+              url: source.source_url,
+              message: '投稿を作成しました',
+            });
+            console.log(`Yahoo!知恵袋記事から投稿を作成: ${source.source_title}`);
+          } else {
+            results.push({
+              success: false,
+              url: source.source_url,
+              message: result.error || '投稿の作成に失敗しました',
+            });
+          }
+        } catch (error) {
+          console.error(`Yahoo!知恵袋記事の処理エラー:`, error);
+          results.push({
+            success: false,
+            url: source.source_url,
+            message: error instanceof Error ? error.message : '不明なエラー',
+          });
+        }
+      }
+    }
+
     for (const url of settings.scrapingUrls) {
       if (createdCount >= settings.maxPostsPerExecution) {
         break;
