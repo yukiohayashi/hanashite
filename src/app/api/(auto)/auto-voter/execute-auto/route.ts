@@ -26,9 +26,10 @@ export async function POST() {
       .eq('setting_key', 'next_execution_time')
       .maybeSingle();
     
+    const now = new Date();
+    
     if (nextExecData?.setting_value) {
       const nextExecutionTime = new Date(nextExecData.setting_value);
-      const now = new Date();
       
       // 次回実行予定時刻になっていない場合はスキップ
       if (now < nextExecutionTime) {
@@ -42,11 +43,38 @@ export async function POST() {
         });
       }
     }
+    
+    // 次回実行予定時刻を先に設定（重複実行を防ぐため）
+    const minInterval = interval - intervalVariance;
+    const maxInterval = interval + intervalVariance;
+    const randomInterval = minInterval + Math.random() * (maxInterval - minInterval);
+    const nextExecutionTime = new Date(now.getTime() + randomInterval * 60 * 1000);
+    
+    await supabase
+      .from('auto_commenter_liker_settings')
+      .upsert({
+        setting_key: 'next_execution_time',
+        setting_value: nextExecutionTime.toISOString(),
+        updated_at: new Date().toISOString()
+      }, {
+        onConflict: 'setting_key'
+      });
+    
+    await supabase
+      .from('auto_commenter_liker_settings')
+      .upsert({
+        setting_key: 'last_executed_at',
+        setting_value: now.toISOString(),
+        updated_at: new Date().toISOString()
+      }, {
+        onConflict: 'setting_key'
+      });
+    
+    console.log(`次回実行予定時刻を設定: ${nextExecutionTime.toISOString()} (${Math.round(randomInterval)}分後)`);
 
     // 実行しない時間帯のチェック
     const noRunStart = settings.no_run_start || '00:00';
     const noRunEnd = settings.no_run_end || '06:00';
-    const now = new Date();
     const currentTime = `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`;
     
     if (noRunStart && noRunEnd && currentTime >= noRunStart && currentTime < noRunEnd) {
@@ -717,35 +745,6 @@ export async function POST() {
         comment_errors: commentErrors.length > 0 ? commentErrors : undefined,
       });
     }
-
-    // 次回実行予定時刻を計算して保存
-    const executionTime = new Date();
-    const minInterval = interval - intervalVariance;
-    const maxInterval = interval + intervalVariance;
-    const randomInterval = minInterval + Math.random() * (maxInterval - minInterval);
-    const nextExecutionTime = new Date(executionTime.getTime() + randomInterval * 60 * 1000);
-
-    await supabase
-      .from('auto_commenter_liker_settings')
-      .upsert({
-        setting_key: 'last_executed_at',
-        setting_value: executionTime.toISOString(),
-        updated_at: new Date().toISOString()
-      }, {
-        onConflict: 'setting_key'
-      });
-
-    await supabase
-      .from('auto_commenter_liker_settings')
-      .upsert({
-        setting_key: 'next_execution_time',
-        setting_value: nextExecutionTime.toISOString(),
-        updated_at: new Date().toISOString()
-      }, {
-        onConflict: 'setting_key'
-      });
-
-    console.log(`次回実行予定時刻を設定: ${nextExecutionTime.toISOString()} (${Math.round(randomInterval)}分後)`);
 
     const result = {
       success: true,
