@@ -118,13 +118,13 @@ export default function AutoCreatorSettings() {
       execution_variance: settingsMap.interval_variance || '15',
       no_create_start_hour: settingsMap.no_create_start_hour || '0',
       no_create_end_hour: settingsMap.no_create_end_hour || '6',
-      ai_user_probability: '50',
-      scraping_wait_time: '30',
+      ai_user_probability: settingsMap.ai_user_probability || '50',
+      scraping_wait_time: settingsMap.scraping_wait_time || '30',
       is_enabled: settingsMap.enabled || 'false',
       choices_prompt: settingsMap.content_prompt || '',
-      max_categories: '1',
-      max_keywords: '3',
-      max_posts_per_execution: '5',
+      max_categories: settingsMap.max_categories || '1',
+      max_keywords: settingsMap.max_keywords || '3',
+      max_posts_per_execution: settingsMap.max_posts_per_execution || '5',
       max_scraping_items: settingsMap.max_scraping_items || '20',
       last_executed_at: settingsMap.last_executed_at || '',
     });
@@ -232,6 +232,11 @@ export default function AutoCreatorSettings() {
         { setting_key: 'max_scraping_items', setting_value: settings.max_scraping_items },
         { setting_key: 'no_create_start_hour', setting_value: settings.no_create_start_hour },
         { setting_key: 'no_create_end_hour', setting_value: settings.no_create_end_hour },
+        { setting_key: 'ai_user_probability', setting_value: settings.ai_user_probability },
+        { setting_key: 'scraping_wait_time', setting_value: settings.scraping_wait_time },
+        { setting_key: 'max_categories', setting_value: settings.max_categories },
+        { setting_key: 'max_keywords', setting_value: settings.max_keywords },
+        { setting_key: 'max_posts_per_execution', setting_value: settings.max_posts_per_execution },
       ];
 
       // サーバーサイドAPI経由で保存
