@@ -128,7 +128,7 @@ export default function AutoCreatorSettings() {
         .from('auto_creator_settings')
         .select('setting_value')
         .eq('setting_key', 'next_execution_time')
-        .single();
+        .maybeSingle();
       
       if (nextExecData?.setting_value) {
         const nextTime = new Date(nextExecData.setting_value);

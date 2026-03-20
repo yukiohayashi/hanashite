@@ -215,7 +215,7 @@ export default function AutoVoterSettings() {
           .from('auto_voter_settings')
           .select('setting_key')
           .eq('setting_key', 'next_execution_time')
-          .single();
+          .maybeSingle();
         
         if (existingNextExec) {
           await supabase
