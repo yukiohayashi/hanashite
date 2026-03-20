@@ -193,20 +193,33 @@ export default function AutoVoterSettings() {
       if (newEnabled) {
         const interval = parseInt(settings.interval || '120');
         const variance = parseInt(settings.interval_variance || '30');
+        const minInterval = interval - variance;
         const maxInterval = interval + variance;
         
-        // 0〜最大間隔の範囲でランダムな分数を生成
-        const randomMinutes = Math.floor(Math.random() * maxInterval);
-        const nextExecutionTime = new Date(Date.now() - randomMinutes * 60 * 1000);
+        // ランダムな間隔を生成
+        const randomInterval = minInterval + Math.random() * (maxInterval - minInterval);
+        const now = new Date();
+        const nextExecutionTime = new Date(now.getTime() + randomInterval * 60 * 1000);
         
-        // last_executed_atを過去の時刻に設定
+        // last_executed_atを現在時刻に設定
         await supabase
           .from('auto_voter_settings')
           .update({ 
-            setting_value: nextExecutionTime.toISOString(),
-            updated_at: new Date().toISOString()
+            setting_value: now.toISOString(),
+            updated_at: now.toISOString()
           })
           .eq('setting_key', 'last_executed_at');
+        
+        // next_execution_timeを設定
+        await supabase
+          .from('auto_voter_settings')
+          .upsert({ 
+            setting_key: 'next_execution_time',
+            setting_value: nextExecutionTime.toISOString(),
+            updated_at: now.toISOString()
+          }, {
+            onConflict: 'setting_key'
+          });
       }
 
       const { error } = await supabase
@@ -615,12 +628,7 @@ export default function AutoVoterSettings() {
           {/* コメント設定 */}
           <div className="border-t border-gray-200 pt-4 mt-4">
             <h3 className="text-lg font-medium text-gray-900 mb-3">コメント設定</h3>
-            <div className="mb-3 p-3 bg-blue-50 border border-blue-200 rounded text-sm text-blue-800">
-              <strong>自然なコメント投稿ルール:</strong><br/>
-              • <strong>コメントがない場合:</strong> 新規コメント投稿 → コメントいいね<br/>
-              • <strong>コメントがある場合:</strong> 新規コメント投稿 OR コメント返信 OR 投稿者返信 のいずれか1つをランダム実行<br/>
-              <span className="text-xs">※ 1回の実行で1つのアクションのみ実行し、自然な時間間隔でコメントが投稿されます</span>
-            </div>
+            
             
             <div className="grid grid-cols-1 md:grid-cols-8 gap-0 justify-items-start">
               <div>
