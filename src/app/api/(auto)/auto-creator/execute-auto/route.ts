@@ -168,16 +168,24 @@ export async function POST() {
     const randomInterval = minInterval + Math.random() * (maxInterval - minInterval);
     const nextExecutionTime = new Date(now.getTime() + randomInterval * 60 * 1000);
     
-    // updateを使って確実に更新
-    await supabase
+    console.log(`次回実行予定時刻を計算: ${nextExecutionTime.toISOString()} (${Math.round(randomInterval)}分後, 範囲: ${minInterval}〜${maxInterval}分)`);
+    
+    // upsertを使って確実に保存（レコードがない場合は作成）
+    const { error: upsertError } = await supabase
       .from('auto_creator_settings')
-      .update({
+      .upsert({
+        setting_key: 'next_execution_time',
         setting_value: nextExecutionTime.toISOString(),
         updated_at: new Date().toISOString()
-      })
-      .eq('setting_key', 'next_execution_time');
+      }, {
+        onConflict: 'setting_key'
+      });
     
-    console.log(`次回実行予定時刻を設定: ${nextExecutionTime.toISOString()} (${Math.round(randomInterval)}分後)`);
+    if (upsertError) {
+      console.error('next_execution_time更新エラー:', upsertError);
+    } else {
+      console.log(`next_execution_time更新成功: ${nextExecutionTime.toISOString()}`);
+    }
 
     // 作成しない時間帯チェック
     const currentHour = new Date().getHours();
