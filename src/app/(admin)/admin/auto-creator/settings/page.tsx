@@ -91,10 +91,13 @@ export default function AutoCreatorSettings() {
       settingsMap[item.setting_key] = item.setting_value;
     });
 
-    // Yahoo!知恵袋URLを含むURLリストを作成
-    const urlsArray = settingsMap.yahoo_chiebukuro_url 
-      ? [settingsMap.yahoo_chiebukuro_url] 
-      : [];
+    // スクレイピングURLリストを取得
+    let urlsArray: string[] = [];
+    try {
+      urlsArray = settingsMap.scraping_urls ? JSON.parse(settingsMap.scraping_urls) : [];
+    } catch {
+      urlsArray = [];
+    }
     setUrls([...urlsArray, ...Array(8 - urlsArray.length).fill('')]);
 
     // カテゴリウェイトを取得（存在しない場合は空オブジェクト）
@@ -213,12 +216,11 @@ export default function AutoCreatorSettings() {
 
     try {
       const filteredUrls = urls.filter((url) => url.trim() !== '');
-      const yahooUrl = filteredUrls[0] || '';
       const now = new Date().toISOString();
 
       // キー・バリュー形式で保存
       const updates = [
-        { setting_key: 'yahoo_chiebukuro_url', setting_value: yahooUrl },
+        { setting_key: 'scraping_urls', setting_value: JSON.stringify(filteredUrls) },
         { setting_key: 'interval', setting_value: settings.execution_interval },
         { setting_key: 'interval_variance', setting_value: settings.execution_variance },
         { setting_key: 'content_prompt', setting_value: settings.choices_prompt },
