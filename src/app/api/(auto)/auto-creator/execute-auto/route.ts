@@ -138,62 +138,16 @@ export async function POST() {
     }
 
     // 実行間隔チェック（ゆらぎを適用）
-    const { data: lastLog } = await supabase
-      .from('auto_creator_logs')
-      .select('executed_at')
-      .eq('execution_type', 'auto')
-      .eq('status', 'success')
-      .order('executed_at', { ascending: false })
-      .limit(1)
-      .single();
-
-    if (lastLog) {
-      const lastExecutionTime = new Date(lastLog.executed_at);
-      const now = new Date();
-      
-      // 次回実行予定時刻を取得または生成
-      const { data: nextExecData } = await supabase
-        .from('auto_creator_settings')
-        .select('setting_value')
-        .eq('setting_key', 'next_execution_time')
-        .maybeSingle();
-      
-      let nextExecutionTime: Date;
-      
-      if (nextExecData?.setting_value) {
-        nextExecutionTime = new Date(nextExecData.setting_value);
-      } else {
-        // 次回実行予定時刻が設定されていない場合は、ゆらぎを適用して生成
-        const minInterval = settings.executionInterval - settings.executionVariance;
-        const maxInterval = settings.executionInterval + settings.executionVariance;
-        const randomInterval = minInterval + Math.random() * (maxInterval - minInterval);
-        nextExecutionTime = new Date(lastExecutionTime.getTime() + randomInterval * 60 * 1000);
-        
-        // 次回実行予定時刻を保存
-        const { data: existingNextExec } = await supabase
-          .from('auto_creator_settings')
-          .select('setting_key')
-          .eq('setting_key', 'next_execution_time')
-          .maybeSingle();
-        
-        if (existingNextExec) {
-          await supabase
-            .from('auto_creator_settings')
-            .update({ 
-              setting_value: nextExecutionTime.toISOString(),
-              updated_at: new Date().toISOString()
-            })
-            .eq('setting_key', 'next_execution_time');
-        } else {
-          await supabase
-            .from('auto_creator_settings')
-            .insert({ 
-              setting_key: 'next_execution_time',
-              setting_value: nextExecutionTime.toISOString(),
-              updated_at: new Date().toISOString()
-            });
-        }
-      }
+    const { data: nextExecData } = await supabase
+      .from('auto_creator_settings')
+      .select('setting_value')
+      .eq('setting_key', 'next_execution_time')
+      .maybeSingle();
+    
+    const now = new Date();
+    
+    if (nextExecData?.setting_value) {
+      const nextExecutionTime = new Date(nextExecData.setting_value);
       
       // 次回実行予定時刻になっていない場合はスキップ
       if (now < nextExecutionTime) {
@@ -207,6 +161,23 @@ export async function POST() {
         });
       }
     }
+    
+    // 次回実行予定時刻を先に設定（重複実行を防ぐため）
+    const minInterval = settings.executionInterval - settings.executionVariance;
+    const maxInterval = settings.executionInterval + settings.executionVariance;
+    const randomInterval = minInterval + Math.random() * (maxInterval - minInterval);
+    const nextExecutionTime = new Date(now.getTime() + randomInterval * 60 * 1000);
+    
+    // updateを使って確実に更新
+    await supabase
+      .from('auto_creator_settings')
+      .update({
+        setting_value: nextExecutionTime.toISOString(),
+        updated_at: new Date().toISOString()
+      })
+      .eq('setting_key', 'next_execution_time');
+    
+    console.log(`次回実行予定時刻を設定: ${nextExecutionTime.toISOString()} (${Math.round(randomInterval)}分後)`);
 
     // 作成しない時間帯チェック
     const currentHour = new Date().getHours();
@@ -463,45 +434,11 @@ export async function POST() {
       }
     }
 
-    // 次回実行予定時刻を生成・保存（ゆらぎを適用）
-    const executedAt = new Date();
-    const minInterval = settings.executionInterval - settings.executionVariance;
-    const maxInterval = settings.executionInterval + settings.executionVariance;
-    const randomInterval = minInterval + Math.random() * (maxInterval - minInterval);
-    const nextExecutionTime = new Date(executedAt.getTime() + randomInterval * 60 * 1000);
-    
-    const { data: existingNextExec2 } = await supabase
-      .from('auto_creator_settings')
-      .select('setting_key')
-      .eq('setting_key', 'next_execution_time')
-      .maybeSingle();
-    
-    if (existingNextExec2) {
-      await supabase
-        .from('auto_creator_settings')
-        .update({ 
-          setting_value: nextExecutionTime.toISOString(),
-          updated_at: executedAt.toISOString()
-        })
-        .eq('setting_key', 'next_execution_time');
-    } else {
-      await supabase
-        .from('auto_creator_settings')
-        .insert({ 
-          setting_key: 'next_execution_time',
-          setting_value: nextExecutionTime.toISOString(),
-          updated_at: executedAt.toISOString()
-        });
-    }
-    
-    console.log(`次回実行予定時刻を設定: ${nextExecutionTime.toISOString()} (${Math.floor(randomInterval)}分後)`);
-
     return NextResponse.json({
       success: true,
       message: `${createdCount}件の相談を作成しました`,
       created_count: createdCount,
       results,
-      nextExecutionTime: nextExecutionTime.toISOString(),
     });
 
   } catch (error) {
