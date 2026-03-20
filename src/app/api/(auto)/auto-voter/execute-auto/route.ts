@@ -109,7 +109,7 @@ export async function POST() {
     });
 
     // 対象記事を取得（コメント数を含める）
-    const { data: posts } = await supabase
+    const { data: posts, error: postsError } = await supabase
       .from('posts')
       .select(`
         id, 
@@ -119,13 +119,16 @@ export async function POST() {
         created_at, 
         user_id, 
         best_answer_id,
-        comments:comments(count)
+        comments:comments!comments_post_id_fkey(count)
       `)
       .eq('status', 'published')
       .neq('user_id', 1) // 管理者投稿を除外
       .order('created_at', { ascending: false })
       .limit(200); // 取得件数を増やして選択肢を広げる
 
+    if (postsError) {
+      console.error('記事取得エラー:', postsError);
+    }
     console.log(`取得した記事数: ${posts?.length || 0}件`);
 
     if (!posts || posts.length === 0) {
@@ -202,7 +205,8 @@ export async function POST() {
     })));
 
     // 処理する記事を選択（優先度順）
-    const postsToProcess = postsWithPriority.slice(0, postsPerRun);
+    // commentsPerRunの数だけコメントを投稿するため、複数の投稿を対象にする
+    const postsToProcess = postsWithPriority.slice(0, Math.max(postsPerRun, commentsPerRun * 2));
     let totalComments = 0;
     let totalPostLikes = 0;
     let totalCommentLikes = 0;
@@ -218,6 +222,10 @@ export async function POST() {
     }> = [];
 
     for (const post of postsToProcess) {
+      // commentsPerRunに達したら終了
+      if (totalComments >= commentsPerRun) {
+        break;
+      }
       // 投稿いいね処理
       let postLikesAddedForThisPost = 0;
       if (Math.random() * 100 <= postLikeProbability) {
@@ -392,7 +400,7 @@ export async function POST() {
                     const { data: likeUsers } = await supabase
                       .from('users')
                       .select('id')
-                      .eq('status', status)
+                      .eq('status', 4)
                       .limit(50);
 
                     if (likeUsers && likeUsers.length > 0) {

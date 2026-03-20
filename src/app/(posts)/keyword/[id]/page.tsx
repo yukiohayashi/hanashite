@@ -105,7 +105,6 @@ export default async function KeywordPage({
   if (postsError) {
     console.error('投稿取得エラー:', postsError);
   }
-  console.log('取得したトピック数:', posts?.length || 0);
 
   // ユーザー情報とカテゴリ情報を別途取得
   let postsWithUsers = posts || [];

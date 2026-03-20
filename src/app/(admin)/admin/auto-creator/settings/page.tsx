@@ -355,8 +355,6 @@ export default function AutoCreatorSettings() {
               </span>
             </div>
 
-            
-
             {lastExecutedAt && (
               <div className="border-l border-gray-300 pl-4">
                 <strong className="text-sm">最終実行:</strong>

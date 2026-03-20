@@ -19,8 +19,6 @@ export interface Keyword {
  * IDからキーワードを取得
  */
 export async function getKeywordById(id: number): Promise<Keyword | null> {
-  console.log('🔍 Searching for keyword with id:', id);
-  
   const { data, error } = await supabase
     .from('keywords')
     .select('*')
@@ -28,16 +26,13 @@ export async function getKeywordById(id: number): Promise<Keyword | null> {
     .single();
 
   if (error) {
-    if (error.code === 'PGRST116') {
-      console.log('Keyword not found for id:', id);
-    } else {
+    if (error.code !== 'PGRST116') {
       console.error('❌ Error fetching keyword:', error);
       console.error('Searched id:', id);
     }
     return null;
   }
 
-  console.log('✅ Found keyword:', data?.keyword);
   return data;
 }
 

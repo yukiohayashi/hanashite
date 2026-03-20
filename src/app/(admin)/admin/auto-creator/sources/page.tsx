@@ -218,10 +218,17 @@ export default function AutoCreatorSources() {
         <div>
           <h1 className="text-3xl font-bold text-gray-900">ソース一覧</h1>
           <p className="mt-2 text-gray-600">Yahoo!知恵袋、Googleトレンド、GPT自動生成から取得したソースを確認</p>
-          <div className="mt-3 bg-green-50 border border-green-200 rounded-lg p-3 inline-block">
-            <p className="text-sm text-green-800">
-              <strong>🕒 Yahoo!知恵袋自動取得:</strong> 毎日 9:00, 15:00, 21:00　JST
-            </p>
+          <div className="mt-3 flex gap-3">
+            <div className="bg-green-50 border border-green-200 rounded-lg p-3">
+              <p className="text-sm text-green-800">
+                <strong>🕒 Yahoo!知恵袋自動取得:</strong> 毎日 9:00, 15:00, 21:00　JST
+              </p>
+            </div>
+            <div className="bg-red-50 border border-red-200 rounded-lg p-3">
+              <p className="text-sm text-red-800">
+                <strong>🚫 NGワード:</strong> 女とご飯, 女と, 彼女が, 女の子が, 女性が, やれない, 可愛くない女, 男として, 俺は, 俺が, 男の, 童貞, 男です, 男性です, 30代後半の男, 30代の男, 40代の男, 20代の男, 50代の男, 私は男, 僕, 僕が, 僕の
+              </p>
+            </div>
           </div>
         </div>
         <div className="flex gap-2">
