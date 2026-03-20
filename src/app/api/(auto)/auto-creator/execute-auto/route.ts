@@ -157,7 +157,7 @@ export async function POST() {
         .from('auto_creator_settings')
         .select('setting_value')
         .eq('setting_key', 'next_execution_time')
-        .single();
+        .maybeSingle();
       
       let nextExecutionTime: Date;
       
@@ -171,15 +171,29 @@ export async function POST() {
         nextExecutionTime = new Date(lastExecutionTime.getTime() + randomInterval * 60 * 1000);
         
         // 次回実行予定時刻を保存
-        await supabase
+        const { data: existingNextExec } = await supabase
           .from('auto_creator_settings')
-          .upsert({ 
-            setting_key: 'next_execution_time',
-            setting_value: nextExecutionTime.toISOString(),
-            updated_at: new Date().toISOString()
-          }, {
-            onConflict: 'setting_key'
-          });
+          .select('setting_key')
+          .eq('setting_key', 'next_execution_time')
+          .maybeSingle();
+        
+        if (existingNextExec) {
+          await supabase
+            .from('auto_creator_settings')
+            .update({ 
+              setting_value: nextExecutionTime.toISOString(),
+              updated_at: new Date().toISOString()
+            })
+            .eq('setting_key', 'next_execution_time');
+        } else {
+          await supabase
+            .from('auto_creator_settings')
+            .insert({ 
+              setting_key: 'next_execution_time',
+              setting_value: nextExecutionTime.toISOString(),
+              updated_at: new Date().toISOString()
+            });
+        }
       }
       
       // 次回実行予定時刻になっていない場合はスキップ
@@ -457,15 +471,29 @@ export async function POST() {
     const randomInterval = minInterval + Math.random() * (maxInterval - minInterval);
     const nextExecutionTime = new Date(executedAt.getTime() + randomInterval * 60 * 1000);
     
-    await supabase
+    const { data: existingNextExec2 } = await supabase
       .from('auto_creator_settings')
-      .upsert({ 
-        setting_key: 'next_execution_time',
-        setting_value: nextExecutionTime.toISOString(),
-        updated_at: executedAt.toISOString()
-      }, {
-        onConflict: 'setting_key'
-      });
+      .select('setting_key')
+      .eq('setting_key', 'next_execution_time')
+      .maybeSingle();
+    
+    if (existingNextExec2) {
+      await supabase
+        .from('auto_creator_settings')
+        .update({ 
+          setting_value: nextExecutionTime.toISOString(),
+          updated_at: executedAt.toISOString()
+        })
+        .eq('setting_key', 'next_execution_time');
+    } else {
+      await supabase
+        .from('auto_creator_settings')
+        .insert({ 
+          setting_key: 'next_execution_time',
+          setting_value: nextExecutionTime.toISOString(),
+          updated_at: executedAt.toISOString()
+        });
+    }
     
     console.log(`次回実行予定時刻を設定: ${nextExecutionTime.toISOString()} (${Math.floor(randomInterval)}分後)`);
 
