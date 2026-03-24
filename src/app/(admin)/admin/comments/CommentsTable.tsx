@@ -314,14 +314,10 @@ export default function CommentsTable({ comments: initialComments }: CommentsTab
                   )}
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                  {new Date(comment.created_at).toLocaleString('ja-JP', {
-                    year: 'numeric',
-                    month: '2-digit',
-                    day: '2-digit',
-                    hour: '2-digit',
-                    minute: '2-digit',
-                    second: '2-digit'
-                  })}
+                  {new Date(comment.created_at).toLocaleDateString('ja-JP')}
+                  <div className="text-xs">
+                    {new Date(comment.created_at).toLocaleTimeString('ja-JP', { hour: '2-digit', minute: '2-digit' })}
+                  </div>
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap text-sm">
                   {comment.is_best_answer && (

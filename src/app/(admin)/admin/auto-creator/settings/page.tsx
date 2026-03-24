@@ -18,6 +18,7 @@ interface Settings {
   max_keywords: string;
   max_posts_per_execution: string;
   max_scraping_items: string;
+  creator_prompt: string;
   last_executed_at?: string;
 }
 
@@ -42,6 +43,7 @@ export default function AutoCreatorSettings() {
     max_keywords: '5',
     max_posts_per_execution: '1',
     max_scraping_items: '20',
+    creator_prompt: '',
   });
   const [urls, setUrls] = useState<string[]>([]);
   const [saving, setSaving] = useState(false);
@@ -126,6 +128,7 @@ export default function AutoCreatorSettings() {
       max_keywords: settingsMap.max_keywords || '3',
       max_posts_per_execution: settingsMap.max_posts_per_execution || '5',
       max_scraping_items: settingsMap.max_scraping_items || '20',
+      creator_prompt: settingsMap.creator_prompt || '',
       last_executed_at: settingsMap.last_executed_at || '',
     });
 
@@ -689,48 +692,12 @@ export default function AutoCreatorSettings() {
           {/* AI投稿プロンプト */}
           <div className="bg-purple-50 border border-purple-200 rounded-lg p-4">
             <h3 className="text-sm font-semibold text-purple-900 mb-2">🤖 AI投稿プロンプト</h3>
-            <div className="text-xs text-purple-800 space-y-2 max-h-96 overflow-y-auto">
-              <p className="font-medium">Yahoo!知恵袋からスクレイピングした質問を、完全にオリジナルのブログ記事風の相談文に大幅に書き換えます。</p>
-              
-              <div className="space-y-1">
-                <p className="font-semibold">【修正ルール】</p>
-                <ul className="list-disc list-inside space-y-1 pl-2">
-                  <li>タイトル: 20-40文字、体言止めは使わない</li>
-                  <li>本文: 150-300文字で完全に書き直す</li>
-                  <li>リライト率50%以上必須</li>
-                  <li>必ず丁寧語・敬語（です・ます調）</li>
-                </ul>
-              </div>
-
-              <div className="space-y-1">
-                <p className="font-semibold">【冒頭のバリエーション】</p>
-                <ul className="list-disc list-inside space-y-1 pl-2">
-                  <li>「聞いてください」「相談させてください」</li>
-                  <li>「実は〜」「正直〜」「本当に〜」</li>
-                  <li>「〜なんですが」「〜で困っています」</li>
-                  <li>「皆さんならどうしますか」</li>
-                  <li>直接本題から入る（「彼氏が〜」など）</li>
-                </ul>
-                <p className="text-purple-700">※「最近」は全体の30%程度に抑える</p>
-              </div>
-
-              <div className="space-y-1">
-                <p className="font-semibold">【記号・絵文字】</p>
-                <ul className="list-disc list-inside space-y-1 pl-2">
-                  <li>記号: 「、、、」「汗」「…」「！」</li>
-                  <li>絵文字: 0個が一番多く、使う場合は1〜2個程度（💦😊💕😢🥺など）</li>
-                </ul>
-              </div>
-
-              <div className="space-y-1">
-                <p className="font-semibold">【その他】</p>
-                <ul className="list-disc list-inside space-y-1 pl-2">
-                  <li>2〜3文ごとに改行</li>
-                  <li>背景情報や心情を積極的に追加</li>
-                  <li>具体的なたとえや事例を追加</li>
-                </ul>
-              </div>
-            </div>
+            <textarea
+              value={settings?.creator_prompt || ''}
+              onChange={(e) => setSettings({ ...settings!, creator_prompt: e.target.value })}
+              className="w-full h-96 p-3 text-xs border border-purple-300 rounded-md focus:ring-2 focus:ring-purple-500 focus:border-transparent font-mono"
+              placeholder="AI投稿プロンプトを入力してください"
+            />
           </div>
 
           {/* 注意事項 */}

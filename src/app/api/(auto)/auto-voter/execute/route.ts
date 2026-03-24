@@ -76,23 +76,20 @@ async function executeComment(postId: number, userId: number, openaiApiKey: stri
   // OpenAI APIでコメント生成
   const openai = new OpenAI({ apiKey: openaiApiKey });
 
-  const prompt = commentPrompt || `相談「${post.title}」に対するコメントを生成してください。
-ユーザー名: ${user?.name || '匿名'}
-プロフィール: ${user?.profile || 'なし'}
-
-要件:
-- 10〜60文字程度
-- 自然な口調
-- プロフィールを考慮した内容`;
+  // プロンプト内のプレースホルダーを置換
+  const systemPrompt = commentPrompt
+    .replace(/{?\$question}?/g, post.title)
+    .replace(/{?\$content}?/g, post.content || '')
+    .replace(/{?\$choices}?/g, '');
 
   const response = await openai.chat.completions.create({
     model: 'gpt-4o-mini',
     messages: [
-      { role: 'system', content: 'あなたは相談サイトのユーザーです。' },
-      { role: 'user', content: prompt },
+      { role: 'system', content: systemPrompt },
+      { role: 'user', content: `ユーザー名: ${user?.name || '匿名'}\nプロフィール: ${user?.profile || 'なし'}` },
     ],
     temperature: 0.8,
-    max_tokens: 100,
+    max_tokens: 200,
   });
 
   const commentText = response.choices[0]?.message?.content?.trim() || '';
@@ -125,96 +122,6 @@ async function executeComment(postId: number, userId: number, openaiApiKey: stri
 
   console.log('コメント挿入成功:', comment);
   return { commentId: comment?.id, commentText };
-}
-
-// 返信生成・投稿
-async function executeReply(postId: number, userId: number, openaiApiKey: string, replyPrompt: string) {
-  // ランダムなコメントを取得（parent_idが0またはNULL）
-  const { data: parentComment } = await supabase
-    .from('comments')
-    .select('id, user_id, content')
-    .eq('post_id', postId)
-    .eq('status', 'approved')
-    .or('parent_id.eq.0,parent_id.is.null')
-    .limit(100);
-
-  if (!parentComment || parentComment.length === 0) {
-    throw new Error('返信対象のコメントが見つかりません');
-  }
-
-  const randomComment = parentComment[Math.floor(Math.random() * parentComment.length)];
-
-  // ユーザー情報を取得
-  const { data: user } = await supabase
-    .from('users')
-    .select('name, profile')
-    .eq('id', userId)
-    .single();
-
-  // OpenAI APIで返信生成
-  const openai = new OpenAI({ apiKey: openaiApiKey });
-
-  const prompt = replyPrompt || `コメント「${randomComment.content}」に対する返信を生成してください。
-ユーザー名: ${user?.name || '匿名'}
-プロフィール: ${user?.profile || 'なし'}
-
-要件:
-- 10〜60文字程度
-- 自然な口調
-- プロフィールを考慮した内容`;
-
-  const response = await openai.chat.completions.create({
-    model: 'gpt-4o-mini',
-    messages: [
-      { role: 'system', content: 'あなたは相談サイトのユーザーです。' },
-      { role: 'user', content: prompt },
-    ],
-    temperature: 0.8,
-    max_tokens: 100,
-  });
-
-  let replyText = response.choices[0]?.message?.content?.trim() || '';
-
-  if (!replyText) {
-    throw new Error('返信生成に失敗しました');
-  }
-
-  // 【絶対禁止】ルールの適用
-  const { data: post } = await supabase
-    .from('posts')
-    .select('title')
-    .eq('id', postId)
-    .single();
-
-  // 1. 投稿タイトルが含まれている場合は除去
-  if (post?.title) {
-    const titlePattern = new RegExp(`^${post.title.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}[、。：:：\\s]*`, 'i');
-    replyText = replyText.replace(titlePattern, '').trim();
-  }
-
-  // 2. 鉤括弧（「」）で囲まれている場合は除去
-  replyText = replyText.replace(/^「(.+)」$/, '$1').trim();
-
-  // 処理後のチェック
-  if (!replyText || replyText.length < 5) {
-    throw new Error('返信生成に失敗しました（タイトルのみまたは無効な内容）');
-  }
-
-  // 返信を投稿
-  const { data: reply } = await supabase
-    .from('comments')
-    .insert({
-      post_id: postId,
-      user_id: userId,
-      parent_id: randomComment.id,
-      content: replyText,
-      status: 'approved',
-      created_at: new Date().toISOString(),
-    })
-    .select()
-    .single();
-
-  return { replyId: reply?.id, replyText, parentCommentId: randomComment.id };
 }
 
 // 投稿いいね
@@ -334,7 +241,6 @@ export async function POST(request: NextRequest) {
 
     const openaiApiKey = apiSettings?.api_key || '';
     const commentPrompt = settings.comment_prompt || '';
-    const replyPrompt = settings.reply_prompt || '';
 
     // ランダムなAI会員を取得（手動実行時は常にAI会員を使用）
     const userId = await getRandomUser(100);
@@ -355,14 +261,6 @@ export async function POST(request: NextRequest) {
         }
         result = await executeComment(post_id, userId, openaiApiKey, commentPrompt);
         message = `コメントを投稿しました: ${result.commentText}`;
-        break;
-
-      case 'reply':
-        if (!openaiApiKey) {
-          throw new Error('OpenAI APIキーが設定されていません');
-        }
-        result = await executeReply(post_id, userId, openaiApiKey, replyPrompt);
-        message = `返信を投稿しました: ${result.replyText}`;
         break;
 
       case 'like_post':

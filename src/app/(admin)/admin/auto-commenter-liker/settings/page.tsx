@@ -29,7 +29,6 @@ interface Settings {
   content_weight: string;
   mention_other_choices_probability: string;
   comment_prompt: string;
-  reply_prompt: string;
   last_executed_at?: string;
 }
 
@@ -83,47 +82,7 @@ export default function AutoVoterSettings() {
       profile_weight: settingsMap.profile_weight || 'medium',
       content_weight: settingsMap.content_weight || 'medium',
       mention_other_choices_probability: settingsMap.mention_other_choices_probability || '30',
-      comment_prompt: settingsMap.comment_prompt || `あなたはネット掲示板の常連ユーザーです。建前より本音、綺麗事より現実を語ります。
-
-以下の相談に対するコメントを生成してください。
-
-【投稿情報】
-タイトル: {$question}
-本文: {$content}
-投票選択肢: {$choices}
-
-【コメントルール】
-- **文字数**: 20〜150文字（たまに20〜40文字の短文も可）
-- **改行**: 2〜3文ごとに改行を入れて読みやすく
-- **絵文字**: たまに使う（0〜2個程度）💦😊💕😢🥺など
-- **記号**: 「、、、」「汗」「…」「！」などを適度に使う
-- **口調**: 口語的で自然な日本語
-- **内容**: 共感、アドバイス、異なる視点、質問などバリエーション豊かに
-- **AI臭い表現を避ける**: 「確かに」「おっしゃる」などは使わない
-- **投稿タイトルをそのまま冒頭に含めない**
-- **コメントを鉤括弧（「」）で囲まない**
-
-【コメント例】
-- 短文: わかる、私も同じ経験ある💦
-- 中文: それは辛いね…でも、相手の気持ちも考えてみたらどうかな？
-- 長文: 私も似たような状況だったけど、結局は自分の気持ちに正直になることが大事だと思う。
-
-周りの意見も大切だけど、最終的には自分で決めないと後悔するよ😊
-
-コメント内容のみを出力してください（前置きや説明は不要）`,
-      reply_prompt: settingsMap.reply_prompt || `以下の投稿に対するコメント「{$comment}」への返信を生成してください。
-
-【投稿情報】
-タイトル: {$question}
-本文: {$content}
-投票選択肢: {$choices}
-
-【返信ルール】
-- 元のコメント「{$comment}」の内容を踏まえて返信する
-- 投稿のタイトル、本文、投票選択肢の内容も考慮する
-- 口語的で自然な日本語（20〜100文字）
-- 短い共感、同意＋補足、異なる視点、質問などバリエーション豊かに
-- 「確かに」「おっしゃる」などAI臭い表現は避ける`,
+      comment_prompt: settingsMap.comment_prompt || '',
       last_executed_at: settingsMap.last_executed_at,
     });
 
@@ -507,26 +466,37 @@ export default function AutoVoterSettings() {
               </div>
             </div>
 
-            <div>
-              <label htmlFor="no_run_time" className="block text-sm font-medium text-gray-700 mb-1">
-                実行しない時間帯
-              </label>
-              <div className="flex items-center gap-2">
-                <input
-                  type="time"
-                  id="no_run_start"
-                  value={settings.no_run_start}
-                  onChange={(e) => setSettings({ ...settings, no_run_start: e.target.value })}
-                  className="max-w-[200px] px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                />
-                <span className="text-gray-600">〜</span>
-                <input
-                  type="time"
-                  id="no_run_end"
-                  value={settings.no_run_end}
-                  onChange={(e) => setSettings({ ...settings, no_run_end: e.target.value })}
-                  className="max-w-[200px] px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                />
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <label htmlFor="no_run_start_hour" className="block text-sm font-medium text-gray-700 mb-1">
+                  実行しない開始時刻
+                </label>
+                <select
+                  id="no_run_start_hour"
+                  value={settings.no_run_start.split(':')[0] || '0'}
+                  onChange={(e) => setSettings({ ...settings, no_run_start: `${e.target.value}:00` })}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                >
+                  {Array.from({ length: 24 }, (_, i) => (
+                    <option key={i} value={i}>{i}時</option>
+                  ))}
+                </select>
+              </div>
+
+              <div>
+                <label htmlFor="no_run_end_hour" className="block text-sm font-medium text-gray-700 mb-1">
+                  実行しない終了時刻
+                </label>
+                <select
+                  id="no_run_end_hour"
+                  value={settings.no_run_end.split(':')[0] || '6'}
+                  onChange={(e) => setSettings({ ...settings, no_run_end: `${e.target.value}:00` })}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                >
+                  {Array.from({ length: 24 }, (_, i) => (
+                    <option key={i} value={i}>{i}時</option>
+                  ))}
+                </select>
               </div>
             </div>
           </div>
@@ -639,7 +609,8 @@ export default function AutoVoterSettings() {
           {/* コメント設定 */}
           <div className="border-t border-gray-200 pt-4 mt-4">
             <h3 className="text-lg font-medium text-gray-900 mb-3">コメント設定</h3>
-            <div className="grid grid-cols-1 md:grid-cols-8 gap-0 justify-items-start">
+            {/* 1行目: 基本設定 */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
               <div>
                 <label htmlFor="comments_per_run" className="block text-sm font-medium text-gray-700 mb-1">
                   1回の実行でのコメント数
@@ -709,7 +680,10 @@ export default function AutoVoterSettings() {
                   />
                 </div>
               </div>
+            </div>
 
+            {/* 2行目: 確率設定 */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
               <div>
                 <label htmlFor="reply_probability" className="block text-sm font-medium text-gray-700 mb-1">
                   コメント返信確率（%）
@@ -740,6 +714,10 @@ export default function AutoVoterSettings() {
                 />
               </div>
 
+            </div>
+
+            {/* 3行目: 投稿者返信と多様性 */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
               <div>
                 <label htmlFor="author_reply_probability" className="block text-sm font-medium text-gray-700 mb-1">
                   投稿者返信（%）
@@ -755,6 +733,24 @@ export default function AutoVoterSettings() {
                 />
               </div>
 
+              <div>
+                <label htmlFor="mention_other_choices_probability" className="block text-sm font-medium text-gray-700 mb-1">
+                  多様性（%）
+                </label>
+                <input
+                  type="number"
+                  id="mention_other_choices_probability"
+                  value={settings.mention_other_choices_probability}
+                  onChange={(e) => setSettings({ ...settings, mention_other_choices_probability: e.target.value })}
+                  className="max-w-[100px] px-2 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
+                  min="0"
+                  max="100"
+                />
+              </div>
+            </div>
+
+            {/* 4行目: 考慮度設定 */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
                 <label htmlFor="profile_weight" className="block text-sm font-medium text-gray-700 mb-1">
                   プロフィール考慮度
@@ -786,21 +782,6 @@ export default function AutoVoterSettings() {
                   <option value="low">低</option>
                 </select>
               </div>
-
-              <div>
-                <label htmlFor="mention_other_choices_probability" className="block text-sm font-medium text-gray-700 mb-1">
-                  多様性（%）
-                </label>
-                <input
-                  type="number"
-                  id="mention_other_choices_probability"
-                  value={settings.mention_other_choices_probability}
-                  onChange={(e) => setSettings({ ...settings, mention_other_choices_probability: e.target.value })}
-                  className="max-w-[100px] px-2 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
-                  min="0"
-                  max="100"
-                />
-              </div>
             </div>
           </div>
 
@@ -808,7 +789,7 @@ export default function AutoVoterSettings() {
           <div className="border-t border-gray-200 pt-4 mt-4">
             <h3 className="text-lg font-medium text-gray-900 mb-3">コメント投稿者設定</h3>
             
-            <div className="grid grid-cols-1 md:grid-cols-4 gap-0 justify-items-start">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
                 <label htmlFor="ai_member_probability" className="block text-sm font-medium text-gray-700 mb-1">
                   AI会員使用確率（%）
@@ -873,37 +854,15 @@ export default function AutoVoterSettings() {
             <p className="text-xs text-blue-700 mt-2">※ 1回の実行で1つのアクションのみ実行し、自然な時間間隔でコメントが投稿されます</p>
           </div>
 
-          {/* AIコメントプロンプト */}
+          {/* AIコメント生成プロンプト */}
           <div className="bg-purple-50 border border-purple-200 rounded-lg p-4">
-            <h3 className="text-sm font-semibold text-purple-900 mb-2">🤖 AIコメント生成ルール</h3>
-            <div className="text-xs text-purple-800 space-y-2 max-h-96 overflow-y-auto">
-              <div className="space-y-1">
-                <p className="font-semibold">【コメント生成】</p>
-                <ul className="list-disc list-inside space-y-1 pl-2">
-                  <li>ユーザープロフィールを考慮</li>
-                  <li>投稿内容と選択肢を踏まえた自然な意見</li>
-                  <li>口語的で自然な日本語（20〜100文字）</li>
-                </ul>
-              </div>
-
-              <div className="space-y-1">
-                <p className="font-semibold">【返信生成ルール】</p>
-                <ul className="list-disc list-inside space-y-1 pl-2">
-                  <li>元のコメント内容を踏まえて返信</li>
-                  <li>短い共感、同意＋補足、異なる視点、質問などバリエーション豊か</li>
-                  <li>「確かに」「おっしゃる」などAI臭い表現は避ける</li>
-                  <li>自然な会話調で、押し付けがましくない</li>
-                </ul>
-              </div>
-
-              <div className="space-y-1">
-                <p className="font-semibold">【絶対禁止】</p>
-                <ul className="list-disc list-inside space-y-1 pl-2">
-                  <li>投稿タイトルをそのまま返信の冒頭に含める</li>
-                  <li>コメントを鉤括弧（「」）で囲む</li>
-                </ul>
-              </div>
-            </div>
+            <h3 className="text-sm font-semibold text-purple-900 mb-2">🤖 AIコメント生成プロンプト</h3>
+            <textarea
+              value={settings?.comment_prompt || ''}
+              onChange={(e) => setSettings({ ...settings!, comment_prompt: e.target.value })}
+              className="w-full h-96 p-3 text-xs border border-purple-300 rounded-md focus:ring-2 focus:ring-purple-500 focus:border-transparent font-mono"
+              placeholder="AIコメント生成プロンプトを入力してください"
+            />
           </div>
 
           {/* 注意事項 */}
