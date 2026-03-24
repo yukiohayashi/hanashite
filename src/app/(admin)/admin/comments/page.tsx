@@ -81,7 +81,7 @@ export default async function CommentsManagementPage({
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-3xl font-bold text-gray-900">コメント管理</h1>
+        <h1 className="text-3xl font-bold text-gray-900">コメント一覧・生成テスト</h1>
       </div>
 
       {/* コメント生成テスト */}

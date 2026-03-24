@@ -118,48 +118,26 @@ export default function AdminPanelLayout({
               <span className="text-sm">AI自動投稿</span>
             </Link>
             <div className="ml-11 space-y-1">
-              <Link
-                href="/admin/auto-creator"
-                className={`block px-3 py-1 text-sm text-gray-400 ${hoverBgColor} hover:text-white transition-colors`}
-              >
-                ダッシュボード
-              </Link>
+          
               <Link
                 href="/admin/auto-creator/sources"
                 className={`block px-3 py-1 text-sm text-gray-400 ${hoverBgColor} hover:text-white transition-colors`}
               >
-                ソース一覧
+                記事取得一覧
               </Link>
-              <Link
-                href="/admin/auto-creator/logs"
-                className={`block px-3 py-1 text-sm text-gray-400 ${hoverBgColor} hover:text-white transition-colors`}
-              >
-                実行履歴
-              </Link>
-              <Link
-                href="/admin/auto-creator/settings"
-                className={`block px-3 py-1 text-sm text-gray-400 ${hoverBgColor} hover:text-white transition-colors`}
-              >
-                設定
-              </Link>
-            </div>
-          </div>
-
-          <div>
-            <Link
-              href="/admin/posts"
-              className={`flex items-center gap-2 px-3 py-1 text-gray-300 ${hoverBgColor} hover:text-white transition-colors`}
-            >
-              <FileText className="w-5 h-5" />
-              <span className="text-sm">投稿管理</span>
-            </Link>
-            <div className="ml-11 space-y-1">
+            
               <Link
                 href="/admin/posts"
                 className={`block px-3 py-1 text-sm text-gray-400 ${hoverBgColor} hover:text-white transition-colors`}
               >
                 投稿一覧
+              </Link>   <Link
+                href="/admin/auto-creator/settings"
+                className={`block px-3 py-1 text-sm text-gray-400 ${hoverBgColor} hover:text-white transition-colors`}
+              >
+                設定
               </Link>
+          
               <Link
                 href="/admin/posts/new"
                 className={`block px-3 py-1 text-sm text-gray-400 ${hoverBgColor} hover:text-white transition-colors`}
@@ -176,7 +154,7 @@ export default function AdminPanelLayout({
                 href="/admin/posts/ai-tagger/settings"
                 className={`block px-3 py-1 text-sm text-gray-400 ${hoverBgColor} hover:text-white transition-colors`}
               >
-                設定
+                AI自動タグ付け設定
               </Link>
             </div>
           </div>
@@ -194,30 +172,14 @@ export default function AdminPanelLayout({
               <span className="text-sm">AI自動コメント・いいね</span>
             </Link>
             <div className="ml-11 space-y-1">
-              <Link
-                href="/admin/auto-commenter-liker"
-                className={`block px-3 py-1 text-sm text-gray-400 ${hoverBgColor} hover:text-white transition-colors`}
-              >
-                ダッシュボード
-              </Link>
+              
               <Link
             href="/admin/comments"
            className={`block px-3 py-1 text-sm text-gray-400 ${hoverBgColor} hover:text-white transition-colors`}
           >
-       
-           コメント一覧
-          </Link>  <Link
-                href="/admin/auto-commenter-liker/manual"
-                className={`block px-3 py-1 text-sm text-gray-400 ${hoverBgColor} hover:text-white transition-colors`}
-              >
-                手動実行
-              </Link>
-              <Link
-                href="/admin/auto-commenter-liker/logs"
-                className={`block px-3 py-1 text-sm text-gray-400 ${hoverBgColor} hover:text-white transition-colors`}
-              >
-                実行履歴
-              </Link>
+       コメント一覧・生成テスト
+           
+          </Link>  
               <Link
                 href="/admin/auto-commenter-liker/settings"
                 className={`block px-3 py-1 text-sm text-gray-400 ${hoverBgColor} hover:text-white transition-colors`}

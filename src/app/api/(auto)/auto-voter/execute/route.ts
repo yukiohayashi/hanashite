@@ -54,7 +54,13 @@ async function executeVote(postId: number, userId: number) {
 }
 
 // コメント生成・投稿
-async function executeComment(postId: number, userId: number, openaiApiKey: string, commentPrompt: string) {
+async function executeComment(
+  postId: number, 
+  userId: number, 
+  openaiApiKey: string, 
+  commentPrompt: string,
+  settings: Record<string, string>
+) {
   // 投稿情報を取得
   const { data: post } = await supabase
     .from('posts')
@@ -73,11 +79,43 @@ async function executeComment(postId: number, userId: number, openaiApiKey: stri
     .eq('id', userId)
     .single();
 
+  // コメント設定を取得
+  const minLength = parseInt(settings.min_comment_length || '10');
+  const maxLength = parseInt(settings.max_comment_length || '60');
+  const diversity = parseInt(settings.diversity || '30') / 100;
+  const profileWeight = settings.profile_weight || 'medium';
+  const contentWeight = settings.content_weight || 'high';
+
   // OpenAI APIでコメント生成
   const openai = new OpenAI({ apiKey: openaiApiKey });
 
+  // プロフィール考慮度に応じたプロンプト調整
+  let profileInstruction = '';
+  if (profileWeight === 'high') {
+    profileInstruction = 'ユーザーのプロフィールを強く考慮し、その人物像に合ったコメントを生成してください。';
+  } else if (profileWeight === 'medium') {
+    profileInstruction = 'ユーザーのプロフィールをある程度考慮してください。';
+  } else {
+    profileInstruction = 'プロフィールはあまり考慮せず、一般的なコメントを生成してください。';
+  }
+
+  // 記事内容考慮度に応じたプロンプト調整
+  let contentInstruction = '';
+  if (contentWeight === 'high') {
+    contentInstruction = '記事の内容を詳しく読み込み、具体的なアドバイスや共感を示してください。';
+  } else if (contentWeight === 'medium') {
+    contentInstruction = '記事の内容をある程度考慮してコメントしてください。';
+  } else {
+    contentInstruction = '記事のタイトルを中心に、簡潔なコメントを生成してください。';
+  }
+
   // プロンプト内のプレースホルダーを置換
-  const systemPrompt = commentPrompt
+  const systemPrompt = `${commentPrompt}
+
+${profileInstruction}
+${contentInstruction}
+
+コメントは${minLength}文字以上${maxLength}文字以内で生成してください。`
     .replace(/{?\$question}?/g, post.title)
     .replace(/{?\$content}?/g, post.content || '')
     .replace(/{?\$choices}?/g, '');
@@ -88,8 +126,8 @@ async function executeComment(postId: number, userId: number, openaiApiKey: stri
       { role: 'system', content: systemPrompt },
       { role: 'user', content: `ユーザー名: ${user?.name || '匿名'}\nプロフィール: ${user?.profile || 'なし'}` },
     ],
-    temperature: 0.8,
-    max_tokens: 200,
+    temperature: 0.5 + diversity,
+    max_tokens: Math.max(200, maxLength * 2),
   });
 
   const commentText = response.choices[0]?.message?.content?.trim() || '';
@@ -259,7 +297,7 @@ export async function POST(request: NextRequest) {
         if (!openaiApiKey) {
           throw new Error('OpenAI APIキーが設定されていません');
         }
-        result = await executeComment(post_id, userId, openaiApiKey, commentPrompt);
+        result = await executeComment(post_id, userId, openaiApiKey, commentPrompt, settings);
         message = `コメントを投稿しました: ${result.commentText}`;
         break;
 

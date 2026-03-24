@@ -30,6 +30,20 @@ export default function AutoCreatorSources() {
   const [deleting, setDeleting] = useState(false);
   const [posting, setPosting] = useState(false);
   const [postingId, setPostingId] = useState<number | null>(null);
+  const [ngWords, setNgWords] = useState<string>('');
+  const [savingNgWords, setSavingNgWords] = useState(false);
+
+  const fetchNgWords = async () => {
+    const { data } = await supabase
+      .from('auto_creator_settings')
+      .select('setting_value')
+      .eq('setting_key', 'ng_words')
+      .maybeSingle();
+    
+    if (data) {
+      setNgWords(data.setting_value);
+    }
+  };
 
   const fetchSources = async () => {
     setLoading(true);
@@ -63,6 +77,7 @@ export default function AutoCreatorSources() {
 
   useEffect(() => {
     fetchSources();
+    fetchNgWords();
   }, [filter, sourceTypeFilter]);
 
   const handleScrapeYahoo = async () => {
@@ -218,16 +233,50 @@ export default function AutoCreatorSources() {
         <div>
           <h1 className="text-3xl font-bold text-gray-900">ソース一覧</h1>
           <p className="mt-2 text-gray-600">Yahoo!知恵袋、Googleトレンド、GPT自動生成から取得したソースを確認</p>
-          <div className="mt-3 flex gap-3">
+          <div className="mt-3 space-y-3">
             <div className="bg-green-50 border border-green-200 rounded-lg p-3">
               <p className="text-sm text-green-800">
                 <strong>🕒 Yahoo!知恵袋自動取得:</strong> 毎日 9:00, 15:00, 21:00　JST
               </p>
             </div>
             <div className="bg-red-50 border border-red-200 rounded-lg p-3">
-              <p className="text-sm text-red-800">
-                <strong>🚫 NGワード:</strong> 女とご飯, 女と, 彼女が, 女の子が, 女性が, やれない, 可愛くない女, 男として, 俺は, 俺が, 男の, 童貞, 男です, 男性です, 30代後半の男, 30代の男, 40代の男, 20代の男, 50代の男, 私は男, 僕, 僕が, 僕の
-              </p>
+              <div className="flex items-center justify-between mb-2">
+                <label className="text-sm font-semibold text-red-900">
+                  🚫 NGワード設定
+                </label>
+                <button
+                  onClick={async () => {
+                    setSavingNgWords(true);
+                    try {
+                      await supabase
+                        .from('auto_creator_settings')
+                        .upsert({
+                          setting_key: 'ng_words',
+                          setting_value: ngWords,
+                        }, {
+                          onConflict: 'setting_key'
+                        });
+                      setMessage('✅ NGワードを保存しました');
+                      setTimeout(() => setMessage(''), 3000);
+                    } catch (error) {
+                      setMessage('❌ 保存に失敗しました');
+                    } finally {
+                      setSavingNgWords(false);
+                    }
+                  }}
+                  disabled={savingNgWords}
+                  className="px-3 py-1 bg-red-600 text-white text-xs rounded hover:bg-red-700 disabled:bg-gray-400"
+                >
+                  {savingNgWords ? '保存中...' : '保存'}
+                </button>
+              </div>
+              <textarea
+                value={ngWords}
+                onChange={(e) => setNgWords(e.target.value)}
+                className="w-full h-20 p-2 text-xs border border-red-300 rounded-md focus:ring-2 focus:ring-red-500 focus:border-transparent"
+                placeholder="カンマ区切りでNGワードを入力（例: 女とご飯,女と,彼女が）"
+              />
+              <p className="text-xs text-red-600 mt-1">※ これらのワードを含む質問は自動的にスキップされます</p>
             </div>
           </div>
         </div>

@@ -19,6 +19,7 @@ interface Settings {
   max_posts_per_execution: string;
   max_scraping_items: string;
   creator_prompt: string;
+  ng_words: string;
   last_executed_at?: string;
 }
 
@@ -44,6 +45,7 @@ export default function AutoCreatorSettings() {
     max_posts_per_execution: '1',
     max_scraping_items: '20',
     creator_prompt: '',
+    ng_words: '',
   });
   const [urls, setUrls] = useState<string[]>([]);
   const [saving, setSaving] = useState(false);
@@ -129,6 +131,7 @@ export default function AutoCreatorSettings() {
       max_posts_per_execution: settingsMap.max_posts_per_execution || '5',
       max_scraping_items: settingsMap.max_scraping_items || '20',
       creator_prompt: settingsMap.creator_prompt || '',
+      ng_words: settingsMap.ng_words || '',
       last_executed_at: settingsMap.last_executed_at || '',
     });
 

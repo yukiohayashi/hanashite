@@ -31,6 +31,19 @@ export async function GET(request: Request) {
 
     const url = urls[0];
     
+    // NGワードを取得
+    const { data: ngWordsData } = await supabase
+      .from('auto_creator_settings')
+      .select('setting_value')
+      .eq('setting_key', 'ng_words')
+      .maybeSingle();
+    
+    const ngWords: string[] = ngWordsData?.setting_value 
+      ? ngWordsData.setting_value.split(',').map((w: string) => w.trim())
+      : [];
+    
+    console.log(`NGワード: ${ngWords.join(', ')}`);
+    
     // URLからカテゴリIDを抽出
     const categoryIdMatch = url.match(/category\/(\d+)/);
     const targetCategoryId = categoryIdMatch ? categoryIdMatch[1] : null;
@@ -127,39 +140,14 @@ export async function GET(request: Request) {
           const questionerInfo = $detail('.Chie-UserInfo__Text').text();
           const isMaleByProfile = questionerInfo.includes('男性') || questionerInfo.includes('♂');
           
-          // 本文から男性の相談を推測
+          // 本文からNGワードをチェック
           const questionContent = $detail('.Chie-QuestionDetailBody').text();
-          const maleKeywords = [
-            '女とご飯',
-            '女と',
-            '彼女が',
-            '女の子が',
-            '女性が',
-            'やれない',
-            '可愛くない女',
-            '男として',
-            '俺は',
-            '俺が',
-            '男の',
-            '童貞',
-            '男です',
-            '男性です',
-            '30代後半の男',
-            '30代の男',
-            '40代の男',
-            '20代の男',
-            '50代の男',
-            '私は男',
-            '僕',
-            '僕が',
-            '僕の'
-          ];
           
-          const isMaleByContent = maleKeywords.some(keyword => 
+          const hasNgWord = ngWords.some(keyword => 
             questionContent.includes(keyword) || title.includes(keyword)
           );
           
-          const isMale = isMaleByProfile || isMaleByContent;
+          const isMale = isMaleByProfile || hasNgWord;
           
           if (!isMale) {
             questions.push({ 

@@ -11,39 +11,43 @@ interface Post {
 }
 
 export default function CommentTestSection() {
-  const [latestPost, setLatestPost] = useState<Post | null>(null);
+  const [posts, setPosts] = useState<Post[]>([]);
+  const [selectedPost, setSelectedPost] = useState<Post | null>(null);
   const [executing, setExecuting] = useState(false);
   const [message, setMessage] = useState('');
   const [generatedComment, setGeneratedComment] = useState('');
   const [isExpanded, setIsExpanded] = useState(false);
+  const [searchQuery, setSearchQuery] = useState('');
 
   useEffect(() => {
-    fetchLatestPost();
+    fetchPosts();
   }, []);
 
-  const fetchLatestPost = async () => {
+  const fetchPosts = async () => {
     const { data } = await supabase
       .from('posts')
       .select('id, title, content, created_at')
       .eq('status', 'published')
       .order('created_at', { ascending: false })
-      .limit(1)
-      .single();
+      .limit(100);
 
     if (data) {
-      setLatestPost(data);
+      setPosts(data);
+      // 最初の投稿を自動選択
+      if (data.length > 0) {
+        setSelectedPost(data[0]);
+      }
     }
   };
 
   const executeComment = async () => {
-    if (!latestPost) {
-      setMessage('投稿が見つかりません');
+    if (!selectedPost) {
+      setMessage('投稿を選択してください');
       return;
     }
 
     setExecuting(true);
     setMessage('');
-    setGeneratedComment('');
 
     try {
       const response = await fetch('/api/auto-voter/execute', {
@@ -52,7 +56,7 @@ export default function CommentTestSection() {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          post_id: latestPost.id,
+          post_id: selectedPost.id,
           action_type: 'comment',
         }),
       });
@@ -74,6 +78,10 @@ export default function CommentTestSection() {
       setExecuting(false);
     }
   };
+
+  const filteredPosts = posts.filter(post =>
+    post.title.toLowerCase().includes(searchQuery.toLowerCase())
+  );
 
   return (
     <div className="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-lg border border-blue-200 p-4 mb-6">
@@ -102,14 +110,47 @@ export default function CommentTestSection() {
             </div>
           )}
 
-          {/* 対象投稿 */}
-          {latestPost && (
+          {/* 投稿検索 */}
+          <div className="bg-white rounded-lg border border-gray-200 p-4">
+            <h3 className="text-sm font-medium text-gray-700 mb-2">投稿を検索</h3>
+            <input
+              type="text"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              placeholder="タイトルで検索..."
+              className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm"
+            />
+          </div>
+
+          {/* 投稿選択 */}
+          <div className="bg-white rounded-lg border border-gray-200 p-4">
+            <h3 className="text-sm font-medium text-gray-700 mb-2">投稿を選択</h3>
+            <div className="max-h-60 overflow-y-auto space-y-2">
+              {filteredPosts.map((post) => (
+                <button
+                  key={post.id}
+                  onClick={() => setSelectedPost(post)}
+                  className={`w-full text-left p-3 rounded-lg border transition-colors ${
+                    selectedPost?.id === post.id
+                      ? 'bg-blue-50 border-blue-300'
+                      : 'bg-gray-50 border-gray-200 hover:bg-gray-100'
+                  }`}
+                >
+                  <h4 className="font-medium text-gray-900 text-sm mb-1">{post.title}</h4>
+                  <p className="text-xs text-gray-500">ID: {post.id}</p>
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {/* 選択中の投稿 */}
+          {selectedPost && (
             <div className="bg-white rounded-lg border border-gray-200 p-4">
-              <h3 className="text-sm font-medium text-gray-700 mb-2">対象投稿（最新）</h3>
+              <h3 className="text-sm font-medium text-gray-700 mb-2">選択中の投稿</h3>
               <div className="bg-gray-50 rounded-lg p-3">
-                <h4 className="font-bold text-gray-900 mb-2 text-sm">{latestPost.title}</h4>
-                <p className="text-xs text-gray-600 whitespace-pre-wrap line-clamp-3">{latestPost.content}</p>
-                <p className="text-xs text-gray-400 mt-2">投稿ID: {latestPost.id}</p>
+                <h4 className="font-bold text-gray-900 mb-2 text-sm">{selectedPost.title}</h4>
+                <p className="text-xs text-gray-600 whitespace-pre-wrap line-clamp-3">{selectedPost.content}</p>
+                <p className="text-xs text-gray-400 mt-2">投稿ID: {selectedPost.id}</p>
               </div>
             </div>
           )}
@@ -117,7 +158,7 @@ export default function CommentTestSection() {
           {/* 実行ボタン */}
           <button
             onClick={executeComment}
-            disabled={executing || !latestPost}
+            disabled={executing || !selectedPost}
             className="w-full px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:bg-gray-400 font-medium"
           >
             {executing ? 'コメント生成中...' : '💬 コメントを生成'}

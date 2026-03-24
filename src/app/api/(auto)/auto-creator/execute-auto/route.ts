@@ -227,12 +227,12 @@ export async function POST() {
     let createdCount = 0;
     const results: Array<{ success: boolean; url: string; message: string }> = [];
 
-    // Yahoo!知恵袋の未処理記事を投稿に変換
+    // Yahoo!知恵袋の未処理記事を投稿に変換（1件のみ）
     const { data: unprocessedSources } = await supabase
       .from('auto_consultation_sources')
       .select('*')
       .eq('is_processed', false)
-      .limit(settings.maxPostsPerExecution);
+      .limit(1);
     
     if (unprocessedSources && unprocessedSources.length > 0) {
       console.log(`Yahoo!知恵袋の未処理記事: ${unprocessedSources.length}件`);
