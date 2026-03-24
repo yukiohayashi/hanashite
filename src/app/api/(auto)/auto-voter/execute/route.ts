@@ -86,6 +86,15 @@ async function executeComment(
   const profileWeight = settings.profile_weight || 'medium';
   const contentWeight = settings.content_weight || 'high';
 
+  // 既存のコメント数を取得
+  const { count: commentCount } = await supabase
+    .from('comments')
+    .select('*', { count: 'exact', head: true })
+    .eq('post_id', postId)
+    .eq('status', 'approved');
+
+  console.log(`投稿ID: ${postId} の既存コメント数: ${commentCount}`);
+
   // OpenAI APIでコメント生成
   const openai = new OpenAI({ apiKey: openaiApiKey });
 
@@ -109,11 +118,21 @@ async function executeComment(
     contentInstruction = '記事のタイトルを中心に、簡潔なコメントを生成してください。';
   }
 
+  // コメント数に応じた指示を追加
+  let commentCountInstruction = '';
+  if (commentCount && commentCount >= 5) {
+    commentCountInstruction = `
+
+【重要】この投稿には既に${commentCount}件のコメントがあります。
+回答やアドバイスではなく、投稿者に寄り添った共感や励ましのコメントを生成してください。
+例: 「お気持ちわかります」「辛いですよね」「応援しています」「頑張ってください」など`;
+  }
+
   // プロンプト内のプレースホルダーを置換
   const systemPrompt = `${commentPrompt}
 
 ${profileInstruction}
-${contentInstruction}
+${contentInstruction}${commentCountInstruction}
 
 コメントは${minLength}文字以上${maxLength}文字以内で生成してください。`
     .replace(/{?\$question}?/g, post.title)
@@ -126,8 +145,10 @@ ${contentInstruction}
       { role: 'system', content: systemPrompt },
       { role: 'user', content: `ユーザー名: ${user?.name || '匿名'}\nプロフィール: ${user?.profile || 'なし'}` },
     ],
-    temperature: 0.5 + diversity,
+    temperature: 0.9 + diversity,
     max_tokens: Math.max(200, maxLength * 2),
+    presence_penalty: 0.6,
+    frequency_penalty: 0.3,
   });
 
   const commentText = response.choices[0]?.message?.content?.trim() || '';
@@ -138,6 +159,20 @@ ${contentInstruction}
 
   // まず投票を実行
   await executeVote(postId, userId);
+
+  // 同じユーザーが同じ投稿に既に親コメントを投稿していないかチェック
+  const { data: existingParentComment } = await supabase
+    .from('comments')
+    .select('id')
+    .eq('post_id', postId)
+    .eq('user_id', userId)
+    .is('parent_id', null)
+    .single();
+
+  if (existingParentComment) {
+    console.log('このユーザーは既に親コメントを投稿済みです');
+    throw new Error('このユーザーは既にこの投稿にコメントしています');
+  }
 
   // コメントを投稿
   console.log('コメント挿入開始:', { postId, userId, commentText });
@@ -159,7 +194,209 @@ ${contentInstruction}
   }
 
   console.log('コメント挿入成功:', comment);
+  
+  // コメントいいね確率をチェック
+  const commentLikeProbability = parseInt(settings.comment_like_probability || '0');
+  if (commentLikeProbability > 0 && Math.random() * 100 <= commentLikeProbability) {
+    // 自分のコメント以外のランダムなコメントにいいね
+    try {
+      const { data: otherComments } = await supabase
+        .from('comments')
+        .select('id')
+        .eq('post_id', postId)
+        .eq('status', 'approved')
+        .neq('user_id', userId)
+        .limit(100);
+
+      if (otherComments && otherComments.length > 0) {
+        const randomComment = otherComments[Math.floor(Math.random() * otherComments.length)];
+        
+        // 既にいいね済みかチェック
+        const { data: existingLike } = await supabase
+          .from('likes')
+          .select('id')
+          .eq('user_id', userId)
+          .eq('like_type', 'comment')
+          .eq('target_id', randomComment.id)
+          .single();
+
+        if (!existingLike) {
+          // いいねを追加
+          await supabase.from('likes').insert({
+            user_id: userId,
+            like_type: 'comment',
+            target_id: randomComment.id,
+            created_at: new Date().toISOString(),
+          });
+
+          // like_countsテーブルを更新
+          const { data: currentCount } = await supabase
+            .from('like_counts')
+            .select('like_count')
+            .eq('target_id', randomComment.id)
+            .eq('like_type', 'comment')
+            .single();
+
+          const newCount = (currentCount?.like_count || 0) + 1;
+
+          await supabase
+            .from('like_counts')
+            .upsert({
+              target_id: randomComment.id,
+              like_type: 'comment',
+              like_count: newCount,
+              updated_at: new Date().toISOString(),
+            });
+          
+          console.log(`コメントにいいねしました（コメントID: ${randomComment.id}）`);
+        }
+      }
+    } catch (error) {
+      console.error('コメントいいねエラー:', error);
+      // エラーでもコメント投稿は成功しているので続行
+    }
+  }
+  
   return { commentId: comment?.id, commentText };
+}
+
+// 投稿者返信
+async function executeAuthorReply(postId: number, openaiApiKey: string, settings: Record<string, string>) {
+  // 投稿者返信確率をチェック
+  const posterReplyProbability = parseInt(settings.author_reply_probability || '0');
+  console.log(`投稿者返信確率: ${posterReplyProbability}%`);
+  
+  const randomValue = Math.random() * 100;
+  console.log(`ランダム値: ${randomValue.toFixed(2)} (${randomValue <= posterReplyProbability ? '実行' : 'スキップ'})`);
+  
+  if (posterReplyProbability === 0 || randomValue > posterReplyProbability) {
+    console.log('投稿者返信はスキップされました');
+    return { success: false, message: '投稿者返信はスキップされました' };
+  }
+
+  try {
+    // 投稿情報と投稿者を取得
+    const { data: post } = await supabase
+      .from('posts')
+      .select('user_id, title')
+      .eq('id', postId)
+      .single();
+
+    if (!post || !post.user_id) {
+      return { success: false, message: '投稿が見つかりません' };
+    }
+
+    console.log(`投稿者ID: ${post.user_id} による返信コメント生成開始`);
+    
+    // 投稿者が既に返信したコメントIDを取得
+    const { data: authorReplies } = await supabase
+      .from('comments')
+      .select('parent_id')
+      .eq('post_id', postId)
+      .eq('user_id', post.user_id)
+      .not('parent_id', 'is', null);
+
+    const repliedCommentIds = authorReplies?.map(r => r.parent_id).filter(Boolean) || [];
+    
+    // 他のユーザーのコメントを取得（投稿者自身のコメントと既に返信済みのコメントを除外）
+    let query = supabase
+      .from('comments')
+      .select('id, content')
+      .eq('post_id', postId)
+      .eq('status', 'approved')
+      .neq('user_id', post.user_id)
+      .limit(100);
+    
+    if (repliedCommentIds.length > 0) {
+      query = query.not('id', 'in', `(${repliedCommentIds.join(',')})`);
+    }
+    
+    const { data: otherComments } = await query;
+
+    if (!otherComments || otherComments.length === 0) {
+      console.log('投稿者返信: 返信対象のコメントがありません');
+      return { success: false, message: '返信対象のコメントがありません' };
+    }
+
+    // ランダムにコメントを選択
+    const targetComment = otherComments[Math.floor(Math.random() * otherComments.length)];
+    
+    // 投稿者情報を取得
+    const { data: posterUser } = await supabase
+      .from('users')
+      .select('name, profile')
+      .eq('id', post.user_id)
+      .single();
+
+    console.log(`投稿者名: ${posterUser?.name || '匿名'}, 返信対象コメントID: ${targetComment.id}`);
+
+    // 返信プロンプト
+    const replyPrompt = `あなたは投稿者として、コメントに対して返信してください。
+
+投稿タイトル: ${post.title}
+コメント: ${targetComment.content}
+
+【返信ルール】
+- **口調**: 常に丁寧語（ですます調）を使用
+- **文字数**: 20〜40文字
+- **内容のバリエーション**:
+  - 共感を示す（「そうですよね」「本当にそう思います」）
+  - 気づきを得た（「確かに、日中の方が冷静に話せそうですね」）
+  - 参考になった（「参考になります」「その視点は考えていませんでした」）
+  - たまに感謝の気持ち（5回に1回程度「ありがとうございます」を含める）
+- **禁止事項**: 
+  - 「コメントありがとうございます」を毎回使わない
+  - 過度な感謝表現を避ける
+
+【返信例】
+- そうですよね。日中の方が冷静に話せそうです。
+- 確かに、日中の方がお互い落ち着いて話せますね。
+- その視点は考えていませんでした。参考になります。
+- 本当にそう思います。夜は感情的になりがちですよね。
+- ありがとうございます。日中に話してみます。
+
+返信内容のみを出力してください（前置きや説明は不要）`;
+
+    const replyOpenai = new OpenAI({ apiKey: openaiApiKey });
+    const replyResponse = await replyOpenai.chat.completions.create({
+      model: 'gpt-4o-mini',
+      messages: [
+        { role: 'system', content: replyPrompt },
+        { role: 'user', content: `投稿者名: ${posterUser?.name || '匿名'}` },
+      ],
+      temperature: 1.2,
+      max_tokens: 100,
+      presence_penalty: 0.8,
+      frequency_penalty: 0.5,
+    });
+
+    const replyText = replyResponse.choices[0]?.message?.content?.trim() || '';
+
+    if (!replyText) {
+      return { success: false, message: '返信テキストの生成に失敗しました' };
+    }
+
+    // 投稿者として返信コメントを投稿
+    const { data: replyComment, error: replyError } = await supabase.from('comments').insert({
+      post_id: postId,
+      user_id: post.user_id,
+      content: replyText,
+      parent_id: targetComment.id,
+      status: 'approved',
+      created_at: new Date().toISOString(),
+    }).select().single();
+
+    if (replyError) {
+      console.error('投稿者返信の挿入エラー:', replyError);
+      return { success: false, message: `投稿者返信の挿入エラー: ${replyError.message}` };
+    }
+
+    console.log(`✅ 投稿者返信を作成しました (投稿者ID: ${post.user_id}, コメントID: ${replyComment?.id}, 返信先: ${targetComment.id}): ${replyText}`);
+    return { success: true, message: `投稿者返信を作成しました: ${replyText}`, replyText };
+  } catch (error) {
+    console.error('投稿者返信エラー:', error);
+    return { success: false, message: `投稿者返信エラー: ${error}` };
+  }
 }
 
 // 投稿いいね
@@ -309,6 +546,14 @@ export async function POST(request: NextRequest) {
       case 'like_comment':
         result = await executeLikeComment(post_id, userId);
         message = `コメントにいいねしました（コメントID: ${result.commentId}）`;
+        break;
+
+      case 'author_reply':
+        if (!openaiApiKey) {
+          throw new Error('OpenAI APIキーが設定されていません');
+        }
+        result = await executeAuthorReply(post_id, openaiApiKey, settings);
+        message = result.message;
         break;
 
       default:

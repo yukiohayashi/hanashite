@@ -14,13 +14,16 @@ export default function CommentTestSection() {
   const [posts, setPosts] = useState<Post[]>([]);
   const [selectedPost, setSelectedPost] = useState<Post | null>(null);
   const [executing, setExecuting] = useState(false);
+  const [executingReply, setExecutingReply] = useState(false);
   const [message, setMessage] = useState('');
-  const [generatedComment, setGeneratedComment] = useState('');
   const [isExpanded, setIsExpanded] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
+  const [commentPrompt, setCommentPrompt] = useState('');
+  const [savingPrompt, setSavingPrompt] = useState(false);
 
   useEffect(() => {
     fetchPosts();
+    fetchCommentPrompt();
   }, []);
 
   const fetchPosts = async () => {
@@ -37,6 +40,18 @@ export default function CommentTestSection() {
       if (data.length > 0) {
         setSelectedPost(data[0]);
       }
+    }
+  };
+
+  const fetchCommentPrompt = async () => {
+    const { data } = await supabase
+      .from('auto_commenter_liker_settings')
+      .select('setting_value')
+      .eq('setting_key', 'comment_prompt')
+      .maybeSingle();
+    
+    if (data) {
+      setCommentPrompt(data.setting_value);
     }
   };
 
@@ -65,9 +80,6 @@ export default function CommentTestSection() {
 
       if (response.ok) {
         setMessage(`✅ ${result.message}`);
-        if (result.comment) {
-          setGeneratedComment(result.comment);
-        }
       } else {
         setMessage(`❌ エラー: ${result.error}`);
       }
@@ -76,6 +88,41 @@ export default function CommentTestSection() {
       console.error('Error:', error);
     } finally {
       setExecuting(false);
+    }
+  };
+
+  const executeAuthorReply = async () => {
+    if (!selectedPost) {
+      setMessage('投稿を選択してください');
+      return;
+    }
+
+    setExecutingReply(true);
+    setMessage('');
+
+    try {
+      const response = await fetch('/api/auto-voter/execute', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          post_id: selectedPost.id,
+          action_type: 'author_reply',
+        }),
+      });
+
+      const result = await response.json();
+
+      if (response.ok) {
+        setMessage(`✅ ${result.message}`);
+      } else {
+        setMessage(`❌ エラー: ${result.error}`);
+      }
+    } catch (error) {
+      setMessage('❌ 実行に失敗しました');
+    } finally {
+      setExecutingReply(false);
     }
   };
 
@@ -99,7 +146,9 @@ export default function CommentTestSection() {
       </button>
 
       {isExpanded && (
-        <div className="mt-4 space-y-4">
+        <div className="mt-4 grid grid-cols-2 gap-4">
+          {/* 左側: AIコメント生成テスト */}
+          <div className="space-y-4">
           {message && (
             <div className={`p-3 rounded-lg ${
               message.includes('✅')
@@ -156,23 +205,96 @@ export default function CommentTestSection() {
           )}
 
           {/* 実行ボタン */}
-          <button
-            onClick={executeComment}
-            disabled={executing || !selectedPost}
-            className="w-full px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:bg-gray-400 font-medium"
-          >
-            {executing ? 'コメント生成中...' : '💬 コメントを生成'}
-          </button>
+          <div className="space-y-2">
+            <button
+              onClick={executeComment}
+              disabled={executing || !selectedPost}
+              className="w-full px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:bg-gray-400 font-medium"
+            >
+              {executing ? 'コメント生成中...' : '💬 コメントを生成'}
+            </button>
+            <button
+              onClick={executeAuthorReply}
+              disabled={executingReply || !selectedPost}
+              className="w-full px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 disabled:bg-gray-400 font-medium"
+            >
+              {executingReply ? '投稿者返信生成中...' : '👤 投稿者返信を生成'}
+            </button>
+          </div>
+          </div>
 
-          {/* 生成されたコメント */}
-          {generatedComment && (
-            <div className="bg-white rounded-lg border border-blue-200 p-4">
-              <h3 className="text-sm font-medium text-gray-700 mb-2">生成されたコメント</h3>
-              <div className="bg-blue-50 rounded-lg p-3">
-                <p className="text-gray-900 whitespace-pre-wrap text-sm">{generatedComment}</p>
+          {/* 右側: AIコメント生成プロンプト */}
+          <div className="space-y-4">
+            <div className="bg-white rounded-lg border border-gray-200 p-4">
+              <div className="flex items-center justify-between mb-2">
+                <h3 className="text-sm font-medium text-gray-700">🤖 AIコメント生成プロンプト</h3>
+                <button
+                  onClick={async () => {
+                    setSavingPrompt(true);
+                    try {
+                      const { error } = await supabase
+                        .from('auto_commenter_liker_settings')
+                        .update({ setting_value: commentPrompt })
+                        .eq('setting_key', 'comment_prompt');
+                      
+                      if (error) {
+                        console.error('プロンプト保存エラー:', error);
+                        setMessage(`❌ 保存に失敗しました: ${error.message}`);
+                      } else {
+                        setMessage('✅ プロンプトを保存しました');
+                        setTimeout(() => setMessage(''), 3000);
+                      }
+                    } catch (error) {
+                      console.error('プロンプト保存エラー:', error);
+                      setMessage('❌ 保存に失敗しました');
+                    } finally {
+                      setSavingPrompt(false);
+                    }
+                  }}
+                  disabled={savingPrompt}
+                  className="px-3 py-1 bg-blue-600 text-white text-xs rounded hover:bg-blue-700 disabled:bg-gray-400"
+                >
+                  {savingPrompt ? '保存中...' : '保存'}
+                </button>
+              </div>
+              <textarea
+                value={commentPrompt}
+                onChange={(e) => setCommentPrompt(e.target.value)}
+                className="w-full h-96 p-3 text-xs border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent font-mono"
+                placeholder="AIコメント生成プロンプトを入力してください"
+              />
+            </div>
+
+            {/* 投稿者返信プロンプト */}
+            <div className="bg-white rounded-lg border border-gray-200 p-4">
+              <h3 className="text-sm font-medium text-gray-700 mb-2">👤 投稿者返信プロンプト（読み取り専用）</h3>
+              <div className="bg-gray-50 rounded-lg p-3">
+                <pre className="text-xs text-gray-700 whitespace-pre-wrap font-mono">{`あなたは投稿者として、コメントに対して返信してください。
+
+投稿タイトル: {投稿タイトル}
+コメント: {選択されたコメント内容}
+
+【返信ルール】
+- **口調**: 常に丁寧語（ですます調）を使用
+- **文字数**: 20〜40文字
+- **内容のバリエーション**:
+  - 共感を示す（「そうですよね」「本当にそう思います」）
+  - 気づきを得た（「確かに、日中の方が冷静に話せそうですね」）
+  - 参考になった（「参考になります」「その視点は考えていませんでした」）
+  - たまに感謝の気持ち（5回に1回程度「ありがとうございます」を含める）
+- **禁止事項**: 
+  - 「コメントありがとうございます」を毎回使わない
+  - 過度な感謝表現を避ける
+
+【返信例】
+- そうですよね。日中の方が冷静に話せそうです。
+- 確かに、日中の方がお互い落ち着いて話せますね。
+- その視点は考えていませんでした。参考になります。
+- 本当にそう思います。夜は感情的になりがちですよね。
+- ありがとうございます。日中に話してみます。`}</pre>
               </div>
             </div>
-          )}
+          </div>
         </div>
       )}
     </div>
