@@ -21,36 +21,10 @@ async function getRandomUser(aiMemberProbability: number = 70): Promise<number> 
   return data[randomIndex].id;
 }
 
-// 投票実行
-async function executeVote(postId: number, userId: number) {
-  // 投票選択肢を取得
-  const { data: choices } = await supabase
-    .from('vote_choices')
-    .select('id, choice')
-    .eq('post_id', postId);
-
-  if (!choices || choices.length === 0) {
-    // 選択肢がない場合はスキップ（エラーにしない）
-    return { choiceId: null };
-  }
-
-  // ランダムな選択肢を選択
-  const randomChoice = choices[Math.floor(Math.random() * choices.length)];
-
-  // 投票履歴に追加
-  await supabase.from('vote_history').insert({
-    post_id: postId,
-    user_id: userId,
-    choice_id: randomChoice.id,
-    created_at: new Date().toISOString(),
-  });
-
-  // 投票数を更新
-  await supabase.rpc('increment_vote_count', {
-    choice_id: randomChoice.id,
-  });
-
-  return { choiceId: randomChoice.id };
+// 投票実行（投票選択肢は未使用のため、何もしない）
+async function executeVote(_postId: number, _userId: number) {
+  // 投票選択肢機能は現在未使用のため、スキップ
+  return { choiceId: null };
 }
 
 // コメント生成・投稿
@@ -75,25 +49,147 @@ async function executeComment(
   // ユーザー情報を取得
   const { data: user } = await supabase
     .from('users')
-    .select('name, profile')
+    .select('name, profile, status')
     .eq('id', userId)
     .single();
 
   // コメント設定を取得
-  const minLength = parseInt(settings.min_comment_length || '10');
-  const maxLength = parseInt(settings.max_comment_length || '60');
+  let minLength = parseInt(settings.min_comment_length || '10');
+  let maxLength = parseInt(settings.max_comment_length || '60');
   const diversity = parseInt(settings.diversity || '30') / 100;
   const profileWeight = settings.profile_weight || 'medium';
   const contentWeight = settings.content_weight || 'high';
 
-  // 既存のコメント数を取得
+  // 5回に1回の確率で長文コメント（説教じみた）を生成
+  // ただし、運営者（status=1）は除外
+  const isLongComment = user?.status !== 1 && Math.random() < 0.2; // 20% = 5回に1回
+  let longCommentInstruction = '';
+  
+  if (isLongComment) {
+    minLength = 200;
+    maxLength = 300;
+    longCommentInstruction = `
+
+【重要】今回は長文で説教じみたコメントを生成してください。
+- 人生経験を語り、やや上から目線で助言する
+- 自分の経験や考えを詳しく述べる
+- 「私も若い頃は〜」「結局は〜」「〜だと思います」などの表現を使う
+- 必ず200〜300文字で生成してください
+- 2〜3文ごとに必ず改行を入れてください
+- 短いコメントは絶対に生成しないでください`;
+    console.log('🎯 長文コメント生成モード: 200〜300文字（必須・改行あり）');
+  }
+
+  // 既存の親コメント数を取得（返信は除外）
   const { count: commentCount } = await supabase
     .from('comments')
     .select('*', { count: 'exact', head: true })
     .eq('post_id', postId)
-    .eq('status', 'approved');
+    .eq('status', 'approved')
+    .is('parent_id', null);
 
-  console.log(`投稿ID: ${postId} の既存コメント数: ${commentCount}`);
+  console.log(`投稿ID: ${postId} の既存親コメント数: ${commentCount}`);
+
+  // 既存の長文コメント（200文字以上）を検出し、ツッコミ返信がない場合は50%の確率で追加
+  try {
+    const { data: longComments } = await supabase
+      .from('comments')
+      .select('id, content, user_id')
+      .eq('post_id', postId)
+      .eq('status', 'approved')
+      .is('parent_id', null);
+
+    if (longComments && longComments.length > 0) {
+      for (const longComment of longComments) {
+        // 200文字以上のコメントを長文と判定
+        if (longComment.content.length >= 200) {
+          // 既にツッコミ返信があるかチェック
+          const { data: existingReplies } = await supabase
+            .from('comments')
+            .select('id')
+            .eq('parent_id', longComment.id)
+            .eq('status', 'approved');
+
+          if (!existingReplies || existingReplies.length === 0) {
+            // 50%の確率でツッコミ返信を投稿
+            if (Math.random() < 0.5) {
+              console.log(`📢 長文コメント発見（${longComment.content.length}文字）、ツッコミ返信を投稿します...`);
+            
+              // ツッコミ返信用のユーザーIDを取得
+              const { data: replyUsers } = await supabase
+                .from('users')
+                .select('id, name')
+                .neq('id', longComment.user_id)
+                .limit(100);
+
+              if (replyUsers && replyUsers.length > 0) {
+                const randomReplyUser = replyUsers[Math.floor(Math.random() * replyUsers.length)];
+                
+                const tsukkomiPrompts = [
+                  'もっと端的に言えませんか？長すぎて読むのが大変です汗',
+                  '長文すぎて読むのが大変です…要点だけ教えてください',
+                  '長い…もう少し簡潔にお願いします💦',
+                  '説教じみてますね…もっと短くまとめてください',
+                  '長文お疲れ様です。でももう少し短くしてほしいです',
+                ];
+                const tsukkomiText = tsukkomiPrompts[Math.floor(Math.random() * tsukkomiPrompts.length)];
+                
+                const { data: tsukkomiComment } = await supabase.from('comments').insert({
+                  post_id: postId,
+                  parent_id: longComment.id,
+                  user_id: randomReplyUser.id,
+                  content: tsukkomiText,
+                  status: 'approved',
+                  created_at: new Date().toISOString(),
+                }).select().single();
+                
+                console.log(`✅ 既存長文へのツッコミ返信投稿完了: ${tsukkomiText}`);
+                
+                // ツッコミ返信にいいねを付ける（2〜5人）
+                if (tsukkomiComment) {
+                  const likeCount = Math.floor(Math.random() * 4) + 2;
+                  const { data: likeUsers } = await supabase
+                    .from('users')
+                    .select('id')
+                    .not('id', 'in', `(${randomReplyUser.id},${longComment.user_id})`)
+                    .limit(100);
+
+                  if (likeUsers && likeUsers.length > 0) {
+                    const shuffled = likeUsers.sort(() => 0.5 - Math.random());
+                    const selectedUsers = shuffled.slice(0, Math.min(likeCount, likeUsers.length));
+                    
+                    for (const likeUser of selectedUsers) {
+                      await supabase.from('likes').insert({
+                        user_id: likeUser.id,
+                        like_type: 'comment',
+                        target_id: tsukkomiComment.id,
+                        created_at: new Date().toISOString(),
+                      });
+                    }
+                    
+                    await supabase.from('like_counts').upsert({
+                      target_id: tsukkomiComment.id,
+                      like_type: 'comment',
+                      like_count: selectedUsers.length,
+                      updated_at: new Date().toISOString(),
+                    });
+                    
+                    console.log(`👍 既存長文へのツッコミ返信に${selectedUsers.length}人がいいねしました`);
+                  }
+                }
+              }
+              
+              // 1つの長文にツッコミを入れたら終了
+              break;
+            }
+          }
+        }
+      }
+    }
+  } catch (error) {
+    console.error('既存長文コメントチェックエラー:', error);
+    // エラーでも続行
+  }
 
   // OpenAI APIでコメント生成
   const openai = new OpenAI({ apiKey: openaiApiKey });
@@ -132,12 +228,11 @@ async function executeComment(
   const systemPrompt = `${commentPrompt}
 
 ${profileInstruction}
-${contentInstruction}${commentCountInstruction}
+${contentInstruction}${commentCountInstruction}${longCommentInstruction}
 
 コメントは${minLength}文字以上${maxLength}文字以内で生成してください。`
     .replace(/{?\$question}?/g, post.title)
-    .replace(/{?\$content}?/g, post.content || '')
-    .replace(/{?\$choices}?/g, '');
+    .replace(/{?\$content}?/g, post.content || '');
 
   const response = await openai.chat.completions.create({
     model: 'gpt-4o-mini',
@@ -157,6 +252,12 @@ ${contentInstruction}${commentCountInstruction}
     throw new Error('コメント生成に失敗しました');
   }
 
+  // 長文コメントのデバッグログ
+  if (isLongComment) {
+    console.log(`📝 長文コメント生成完了: ${commentText.length}文字`);
+    console.log(`内容: ${commentText}`);
+  }
+
   // まず投票を実行
   await executeVote(postId, userId);
 
@@ -169,21 +270,54 @@ ${contentInstruction}${commentCountInstruction}
     .is('parent_id', null)
     .single();
 
+  let finalUserId = userId;
+
   if (existingParentComment) {
-    console.log('このユーザーは既に親コメントを投稿済みです');
-    throw new Error('このユーザーは既にこの投稿にコメントしています');
+    console.log(`⚠️ ユーザーID: ${userId} は既に親コメントを投稿済み。他のユーザーIDを探します...`);
+    
+    // 既に親コメントを投稿したユーザーIDを取得
+    const { data: existingUserIds } = await supabase
+      .from('comments')
+      .select('user_id')
+      .eq('post_id', postId)
+      .is('parent_id', null);
+
+    const usedUserIds = existingUserIds?.map(c => c.user_id) || [];
+    
+    // 利用可能なユーザーIDを取得（既に投稿していないユーザー）
+    const { data: availableUsers } = await supabase
+      .from('users')
+      .select('id')
+      .not('id', 'in', `(${usedUserIds.join(',')})`)
+      .limit(100);
+
+    if (!availableUsers || availableUsers.length === 0) {
+      console.log('❌ 利用可能なユーザーIDがありません');
+      throw new Error('このユーザーは既にこの投稿にコメントしています');
+    }
+
+    // ランダムに1人選択
+    const randomUser = availableUsers[Math.floor(Math.random() * availableUsers.length)];
+    finalUserId = randomUser.id;
+    console.log(`✅ 新しいユーザーID: ${finalUserId} を使用します`);
   }
 
   // コメントを投稿
-  console.log('コメント挿入開始:', { postId, userId, commentText });
+  // 長文コメントの場合は5分前の時刻に設定（ツッコミ返信が現在時刻になるように）
+  const commentDate = new Date();
+  if (isLongComment) {
+    commentDate.setMinutes(commentDate.getMinutes() - 5);
+  }
+  
+  console.log('コメント挿入開始:', { postId, userId: finalUserId, commentText });
   const { data: comment, error: commentError } = await supabase
     .from('comments')
     .insert({
       post_id: postId,
-      user_id: userId,
+      user_id: finalUserId,
       content: commentText,
       status: 'approved',
-      created_at: new Date().toISOString(),
+      created_at: commentDate.toISOString(),
     })
     .select()
     .single();
@@ -195,66 +329,138 @@ ${contentInstruction}${commentCountInstruction}
 
   console.log('コメント挿入成功:', comment);
   
-  // コメントいいね確率をチェック
-  const commentLikeProbability = parseInt(settings.comment_like_probability || '0');
-  if (commentLikeProbability > 0 && Math.random() * 100 <= commentLikeProbability) {
-    // 自分のコメント以外のランダムなコメントにいいね
+  // 長文コメントの場合、すぐにツッコミ返信を投稿
+  if (isLongComment && comment) {
+    console.log('💬 長文コメントにツッコミ返信を投稿します...');
     try {
-      const { data: otherComments } = await supabase
-        .from('comments')
-        .select('id')
-        .eq('post_id', postId)
-        .eq('status', 'approved')
-        .neq('user_id', userId)
+      // ツッコミ返信用のユーザーIDを取得（長文コメント投稿者以外）
+      const { data: replyUsers } = await supabase
+        .from('users')
+        .select('id, name')
+        .neq('id', finalUserId)
         .limit(100);
 
-      if (otherComments && otherComments.length > 0) {
-        const randomComment = otherComments[Math.floor(Math.random() * otherComments.length)];
+      if (replyUsers && replyUsers.length > 0) {
+        const randomReplyUser = replyUsers[Math.floor(Math.random() * replyUsers.length)];
         
-        // 既にいいね済みかチェック
-        const { data: existingLike } = await supabase
-          .from('likes')
-          .select('id')
-          .eq('user_id', userId)
-          .eq('like_type', 'comment')
-          .eq('target_id', randomComment.id)
-          .single();
+        // ツッコミコメントを生成
+        const tsukkomiPrompts = [
+          'もっと端的に言えませんか？長すぎて読むのが大変です汗',
+          '長文すぎて読むのが大変です…要点だけ教えてください',
+          '長い…もう少し簡潔にお願いします💦',
+          '説教じみてますね…もっと短くまとめてください',
+          '長文お疲れ様です。でももう少し短くしてほしいです',
+        ];
+        const tsukkomiText = tsukkomiPrompts[Math.floor(Math.random() * tsukkomiPrompts.length)];
+        
+        // ツッコミ返信を投稿
+        const { data: tsukkomiComment } = await supabase.from('comments').insert({
+          post_id: postId,
+          parent_id: comment.id,
+          user_id: randomReplyUser.id,
+          content: tsukkomiText,
+          status: 'approved',
+          created_at: new Date().toISOString(),
+        }).select().single();
+        
+        console.log(`✅ ツッコミ返信投稿完了: ${tsukkomiText} (ユーザーID: ${randomReplyUser.id})`);
+        
+        // ツッコミ返信にいいねを付ける（2〜5人）
+        if (tsukkomiComment) {
+          const likeCount = Math.floor(Math.random() * 4) + 2; // 2〜5人
+          const { data: likeUsers } = await supabase
+            .from('users')
+            .select('id')
+            .not('id', 'in', `(${randomReplyUser.id},${finalUserId})`)
+            .limit(100);
 
-        if (!existingLike) {
-          // いいねを追加
-          await supabase.from('likes').insert({
-            user_id: userId,
-            like_type: 'comment',
-            target_id: randomComment.id,
-            created_at: new Date().toISOString(),
-          });
-
-          // like_countsテーブルを更新
-          const { data: currentCount } = await supabase
-            .from('like_counts')
-            .select('like_count')
-            .eq('target_id', randomComment.id)
-            .eq('like_type', 'comment')
-            .single();
-
-          const newCount = (currentCount?.like_count || 0) + 1;
-
-          await supabase
-            .from('like_counts')
-            .upsert({
-              target_id: randomComment.id,
+          if (likeUsers && likeUsers.length > 0) {
+            const shuffled = likeUsers.sort(() => 0.5 - Math.random());
+            const selectedUsers = shuffled.slice(0, Math.min(likeCount, likeUsers.length));
+            
+            for (const likeUser of selectedUsers) {
+              await supabase.from('likes').insert({
+                user_id: likeUser.id,
+                like_type: 'comment',
+                target_id: tsukkomiComment.id,
+                created_at: new Date().toISOString(),
+              });
+            }
+            
+            // like_countsテーブルを更新
+            await supabase.from('like_counts').upsert({
+              target_id: tsukkomiComment.id,
               like_type: 'comment',
-              like_count: newCount,
+              like_count: selectedUsers.length,
               updated_at: new Date().toISOString(),
             });
-          
-          console.log(`コメントにいいねしました（コメントID: ${randomComment.id}）`);
+            
+            console.log(`👍 ツッコミ返信に${selectedUsers.length}人がいいねしました`);
+          }
         }
       }
     } catch (error) {
-      console.error('コメントいいねエラー:', error);
+      console.error('ツッコミ返信エラー:', error);
       // エラーでもコメント投稿は成功しているので続行
     }
+  }
+  
+  // 自分のコメント以外のランダムなコメントにいいね（必ず実行）
+  try {
+    const { data: otherComments } = await supabase
+      .from('comments')
+      .select('id')
+      .eq('post_id', postId)
+      .eq('status', 'approved')
+      .neq('user_id', finalUserId)
+      .limit(100);
+
+    if (otherComments && otherComments.length > 0) {
+      const randomComment = otherComments[Math.floor(Math.random() * otherComments.length)];
+      
+      // 既にいいね済みかチェック
+      const { data: existingLike } = await supabase
+        .from('likes')
+        .select('id')
+        .eq('user_id', finalUserId)
+        .eq('like_type', 'comment')
+        .eq('target_id', randomComment.id)
+        .single();
+
+      if (!existingLike) {
+        // いいねを追加
+        await supabase.from('likes').insert({
+          user_id: finalUserId,
+          like_type: 'comment',
+          target_id: randomComment.id,
+          created_at: new Date().toISOString(),
+        });
+
+        // like_countsテーブルを更新
+        const { data: currentCount } = await supabase
+          .from('like_counts')
+          .select('like_count')
+          .eq('target_id', randomComment.id)
+          .eq('like_type', 'comment')
+          .single();
+
+        const newCount = (currentCount?.like_count || 0) + 1;
+
+        await supabase
+          .from('like_counts')
+          .upsert({
+            target_id: randomComment.id,
+            like_type: 'comment',
+            like_count: newCount,
+            updated_at: new Date().toISOString(),
+          });
+        
+        console.log(`💚 コメントにいいねしました（コメントID: ${randomComment.id}）`);
+      }
+    }
+  } catch (error) {
+    console.error('コメントいいねエラー:', error);
+    // エラーでもコメント投稿は成功しているので続行
   }
   
   return { commentId: comment?.id, commentText };
@@ -331,10 +537,14 @@ async function executeAuthorReply(postId: number, openaiApiKey: string, settings
     console.log(`投稿者名: ${posterUser?.name || '匿名'}, 返信対象コメントID: ${targetComment.id}`);
 
     // 返信プロンプト
+    const commentLength = targetComment.content.length;
+    const isLongComment = commentLength > 100;
+    
     const replyPrompt = `あなたは投稿者として、コメントに対して返信してください。
 
 投稿タイトル: ${post.title}
 コメント: ${targetComment.content}
+コメント文字数: ${commentLength}文字
 
 【返信ルール】
 - **口調**: 常に丁寧語（ですます調）を使用
@@ -344,6 +554,7 @@ async function executeAuthorReply(postId: number, openaiApiKey: string, settings
   - 気づきを得た（「確かに、日中の方が冷静に話せそうですね」）
   - 参考になった（「参考になります」「その視点は考えていませんでした」）
   - たまに感謝の気持ち（5回に1回程度「ありがとうございます」を含める）
+  ${isLongComment ? '- **長文コメントへのツッコミ（10回に1回程度）**: 「もっと端的にお願いします」「長文すぎて読むのが大変です汗」などと優しくツッコむ' : ''}
 - **禁止事項**: 
   - 「コメントありがとうございます」を毎回使わない
   - 過度な感謝表現を避ける
@@ -354,6 +565,7 @@ async function executeAuthorReply(postId: number, openaiApiKey: string, settings
 - その視点は考えていませんでした。参考になります。
 - 本当にそう思います。夜は感情的になりがちですよね。
 - ありがとうございます。日中に話してみます。
+${isLongComment ? '- もっと端的にお願いします汗\n- 長文すぎて読むのが大変です…要点だけ教えてください' : ''}
 
 返信内容のみを出力してください（前置きや説明は不要）`;
 
