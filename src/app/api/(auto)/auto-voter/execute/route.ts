@@ -99,7 +99,9 @@ async function executeComment(
   const systemPrompt = `${commentPrompt}
 
 ${profileInstruction}
-${contentInstruction}`
+${contentInstruction}
+
+【重要】コメントは${minLength}文字以上${maxLength}文字以内で生成してください（厳守）。`
     .replace(/{?\$question}?/g, post.title)
     .replace(/{?\$content}?/g, post.content || '');
 
