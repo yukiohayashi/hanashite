@@ -47,17 +47,25 @@ async function getPosts(statusFilter?: string, limit: number = 100, sortBy: stri
 
   const userMap = new Map(users?.map(u => [u.id, u]) || []);
 
-  // コメント件数を一括取得（承認済みのみ）
-  const { data: commentCounts } = await supabase
+  // コメント件数を一括取得（承認済みのみ、親コメント・子コメント両方）
+  const { data: commentCounts, error: commentError } = await supabase
     .from('comments')
     .select('post_id')
     .in('post_id', postIds)
     .eq('status', 'approved');
 
+  console.log('コメント件数取得:', { 
+    postIds: postIds.slice(0, 5), 
+    commentCounts: commentCounts?.length,
+    error: commentError 
+  });
+
   const commentCountMap = new Map<number, number>();
   commentCounts?.forEach(c => {
     commentCountMap.set(c.post_id, (commentCountMap.get(c.post_id) || 0) + 1);
   });
+
+  console.log('コメント件数マップ:', Array.from(commentCountMap.entries()).slice(0, 5));
 
   // ベストアンサーを一括取得（commentsテーブルから）
   const postsWithBestAnswer = posts.filter(p => p.best_answer_id);
