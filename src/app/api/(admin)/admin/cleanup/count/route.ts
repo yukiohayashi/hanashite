@@ -8,12 +8,10 @@ const supabase = createClient(
 
 export async function GET() {
   try {
-    // 開発用: 直近100件の投稿のみを対象（デフォルト1000件制限を回避）
+    // 全投稿を対象
     const { data: allPosts, error: postsError } = await supabase
       .from('posts')
-      .select('id')
-      .order('id', { ascending: false })
-      .limit(100);
+      .select('id');
 
     if (postsError) {
       console.error('Posts fetch error:', postsError);
@@ -22,29 +20,12 @@ export async function GET() {
 
     const postIds = new Set((allPosts || []).map(p => p.id));
     
-    // 削除された投稿も含めて範囲を計算するため、vote_choicesから最大post_idを取得
-    const { data: maxVoteChoice } = await supabase
-      .from('vote_choices')
-      .select('post_id')
-      .order('post_id', { ascending: false })
-      .limit(1)
-      .single();
-    
-    const maxPostIdFromVotes = maxVoteChoice?.post_id || 0;
-    const maxPostIdFromPosts = allPosts && allPosts.length > 0 ? Math.max(...allPosts.map(p => p.id)) : 0;
-    const maxPostId = Math.max(maxPostIdFromVotes, maxPostIdFromPosts);
-    const minPostId = allPosts && allPosts.length > 0 ? Math.min(...allPosts.map(p => p.id)) : 0;
-    
-    console.log('Total posts fetched (最新100件):', postIds.size);
-    console.log('Post ID range:', minPostId, '-', maxPostId);
-    console.log('Max post_id from votes:', maxPostIdFromVotes);
+    console.log('Total posts fetched:', postIds.size);
 
-    // 孤立した投票選択肢（直近100件の投稿範囲内のみ）
+    // 孤立した投票選択肢
     const { data: voteChoices, error: voteChoicesError } = await supabase
       .from('vote_choices')
-      .select('id, post_id')
-      .gte('post_id', minPostId)
-      .lte('post_id', maxPostId);
+      .select('id, post_id');
 
     if (voteChoicesError) {
       console.error('Vote choices fetch error:', voteChoicesError);
@@ -56,12 +37,10 @@ export async function GET() {
     ).length || 0;
     console.log('Orphaned vote_choices:', orphaned_vote_choices);
 
-    // 孤立した投票オプション（直近100件の投稿範囲内のみ）
+    // 孤立した投票オプション
     const { data: voteOptions, error: voteOptionsError } = await supabase
       .from('vote_options')
-      .select('id, post_id')
-      .gte('post_id', minPostId)
-      .lte('post_id', maxPostId);
+      .select('id, post_id');
 
     if (voteOptionsError) {
       console.error('Vote options fetch error:', voteOptionsError);
@@ -73,12 +52,10 @@ export async function GET() {
     ).length || 0;
     console.log('Orphaned vote_options:', orphaned_vote_options);
 
-    // 孤立したコメント（直近100件の投稿範囲内のみ）
+    // 孤立したコメント
     const { data: comments, error: commentsError } = await supabase
       .from('comments')
-      .select('id, post_id')
-      .gte('post_id', minPostId)
-      .lte('post_id', maxPostId);
+      .select('id, post_id');
 
     if (commentsError) {
       console.error('Comments fetch error:', commentsError);
@@ -99,13 +76,11 @@ export async function GET() {
 
     const orphaned_keywords = keywords?.length || 0;
 
-    // 孤立したいいね（直近100件の投稿範囲内のみ）
+    // 孤立したいいね
     const { data: likes, error: likesError } = await supabase
       .from('likes')
       .select('id, like_type, target_id')
-      .eq('like_type', 'post')
-      .gte('target_id', minPostId)
-      .lte('target_id', maxPostId);
+      .eq('like_type', 'post');
 
     if (likesError) {
       console.error('Likes fetch error:', likesError);
@@ -115,12 +90,10 @@ export async function GET() {
       l => !postIds.has(l.target_id)
     ).length || 0;
 
-    // 孤立したお気に入り（直近100件の投稿範囲内のみ）
+    // 孤立したお気に入り
     const { data: favorites, error: favoritesError } = await supabase
       .from('favorites')
-      .select('id, post_id')
-      .gte('post_id', minPostId)
-      .lte('post_id', maxPostId);
+      .select('id, post_id');
 
     if (favoritesError) {
       console.error('Favorites fetch error:', favoritesError);
