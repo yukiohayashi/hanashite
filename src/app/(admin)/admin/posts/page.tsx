@@ -47,11 +47,12 @@ async function getPosts(statusFilter?: string, limit: number = 100, sortBy: stri
 
   const userMap = new Map(users?.map(u => [u.id, u]) || []);
 
-  // コメント件数を一括取得
+  // コメント件数を一括取得（承認済みのみ）
   const { data: commentCounts } = await supabase
     .from('comments')
     .select('post_id')
-    .in('post_id', postIds);
+    .in('post_id', postIds)
+    .eq('status', 'approved');
 
   const commentCountMap = new Map<number, number>();
   commentCounts?.forEach(c => {
