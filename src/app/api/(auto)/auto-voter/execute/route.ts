@@ -54,20 +54,13 @@ async function executeComment(
     .single();
 
   // コメント設定を取得
+  const minLength = parseInt(settings.comment_min_length || '10');
+  const maxLength = parseInt(settings.comment_max_length || '60');
   const diversity = parseInt(settings.diversity || '30') / 100;
   const profileWeight = settings.profile_weight || 'medium';
   const contentWeight = settings.content_weight || 'high';
 
-  // すべて短文コメント（20〜80文字）のみ
-  const minLength = 20;
-  const maxLength = 80;
-  const longCommentInstruction = `
-
-【最重要】短文コメントを生成してください。
-- 長文コメントは絶対に生成しないでください
-- 80文字以内で生成してください（厳守）
-- 簡潔で読みやすいコメントを心がけてください`;
-  console.log('📝 短文コメント生成モード: 20〜80文字');
+  console.log(`📝 コメント生成モード: ${minLength}〜${maxLength}文字（DB設定値）`);
 
   // 既存の親コメント数を取得（返信は除外）
   const { count: commentCount } = await supabase
@@ -102,23 +95,11 @@ async function executeComment(
     contentInstruction = '記事のタイトルを中心に、簡潔なコメントを生成してください。';
   }
 
-  // コメント数に応じた指示を追加
-  let commentCountInstruction = '';
-  if (commentCount && commentCount >= 5) {
-    commentCountInstruction = `
-
-【重要】この投稿には既に${commentCount}件のコメントがあります。
-回答やアドバイスではなく、投稿者に寄り添った共感や励ましのコメントを生成してください。
-例: 「お気持ちわかります」「辛いですよね」「応援しています」「頑張ってください」など`;
-  }
-
   // プロンプト内のプレースホルダーを置換
   const systemPrompt = `${commentPrompt}
 
 ${profileInstruction}
-${contentInstruction}${commentCountInstruction}${longCommentInstruction}
-
-コメントは${minLength}文字以上${maxLength}文字以内で生成してください。`
+${contentInstruction}`
     .replace(/{?\$question}?/g, post.title)
     .replace(/{?\$content}?/g, post.content || '');
 
