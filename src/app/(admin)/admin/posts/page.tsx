@@ -47,17 +47,17 @@ async function getPosts(statusFilter?: string, limit: number = 100, sortBy: stri
 
   const userMap = new Map(users?.map(u => [u.id, u]) || []);
 
-  // コメント件数を一括取得（承認済みのみ、親コメント・子コメント両方）
+  // コメント件数を一括取得（全コメント、親コメント・子コメント両方）
   const { data: commentCounts, error: commentError } = await supabase
     .from('comments')
     .select('post_id')
-    .in('post_id', postIds)
-    .eq('status', 'approved');
+    .in('post_id', postIds);
 
   console.log('コメント件数取得:', { 
     postIds: postIds.slice(0, 5), 
     commentCounts: commentCounts?.length,
-    error: commentError 
+    error: commentError,
+    sampleComments: commentCounts?.slice(0, 10).map(c => ({ post_id: c.post_id, type: typeof c.post_id }))
   });
 
   const commentCountMap = new Map<number, number>();
@@ -65,7 +65,15 @@ async function getPosts(statusFilter?: string, limit: number = 100, sortBy: stri
     commentCountMap.set(c.post_id, (commentCountMap.get(c.post_id) || 0) + 1);
   });
 
-  console.log('コメント件数マップ:', Array.from(commentCountMap.entries()).slice(0, 5));
+  const commentCountEntries = Array.from(commentCountMap.entries()).slice(0, 5);
+  console.log('コメント件数マップ:', commentCountEntries);
+  commentCountEntries.forEach(([postId, count]) => {
+    console.log(`  投稿ID ${postId}: ${count}件`);
+  });
+
+  // 最初の5件の投稿IDを確認
+  console.log('最初の5件の投稿ID:', posts.slice(0, 5).map(p => p.id));
+  console.log('commentCountMapのキー:', Array.from(commentCountMap.keys()).slice(0, 10));
 
   // ベストアンサーを一括取得（commentsテーブルから）
   const postsWithBestAnswer = posts.filter(p => p.best_answer_id);
@@ -138,6 +146,12 @@ async function getPosts(statusFilter?: string, limit: number = 100, sortBy: stri
     bestAnswer: bestAnswerMap.get(post.id) || null,
     comment_count: commentCountMap.get(post.id) || 0,
   }));
+
+  // マッピング後のデータを確認
+  console.log('postsWithDetails (最初の5件):');
+  postsWithDetails.slice(0, 5).forEach(post => {
+    console.log(`  投稿ID ${post.id}: comment_count=${post.comment_count}`);
+  });
 
   return postsWithDetails;
 }

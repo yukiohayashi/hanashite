@@ -350,9 +350,10 @@ export default function PostsTable({ posts: initialPosts, initialCounts }: Posts
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                 コメント件数
               </th>
-                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100" onClick={() => handleSort('created_at')}>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100" onClick={() => handleSort('created_at')}>
                 投稿日付 {sortBy === 'created_at' && (sortOrder === 'asc' ? '↑' : '↓')}
-              </th>  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100" onClick={() => handleSort('deadline_at')}>
+              </th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100" onClick={() => handleSort('deadline_at')}>
                 締め切り {sortBy === 'deadline_at' && (sortOrder === 'asc' ? '↑' : '↓')}
               </th>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100" onClick={() => handleSort('best_answer_id')}>
@@ -361,7 +362,6 @@ export default function PostsTable({ posts: initialPosts, initialCounts }: Posts
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100" onClick={() => handleSort('best_answer_selected_at')}>
                 ベストアンサー日付 {sortBy === 'best_answer_selected_at' && (sortOrder === 'asc' ? '↑' : '↓')}
               </th>
-         
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                 操作
               </th>
@@ -481,7 +481,8 @@ export default function PostsTable({ posts: initialPosts, initialCounts }: Posts
                   <div className="text-xs">
                     {new Date(post.created_at).toLocaleTimeString('ja-JP', { hour: '2-digit', minute: '2-digit' })}
                   </div>
-                </td>   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500" onClick={(e) => e.stopPropagation()}>
+                </td>
+                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500" onClick={(e) => e.stopPropagation()}>
                   {editingDeadline === post.id ? (
                     <input
                       type="date"
