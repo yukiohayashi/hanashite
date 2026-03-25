@@ -54,13 +54,16 @@ async function executeComment(
     .single();
 
   // コメント設定を取得
-  const minLength = parseInt(settings.comment_min_length || '10');
-  const maxLength = parseInt(settings.comment_max_length || '60');
   const diversity = parseInt(settings.diversity || '30') / 100;
   const profileWeight = settings.profile_weight || 'medium';
   const contentWeight = settings.content_weight || 'high';
 
-  console.log(`📝 コメント生成モード: ${minLength}〜${maxLength}文字（DB設定値）`);
+  // ランダムな目標文字数を生成（短文寄り）
+  const targetLength = Math.random() < 0.7 
+    ? Math.floor(Math.random() * 30) + 10  // 70%の確率で10〜40文字
+    : Math.floor(Math.random() * 210) + 40; // 30%の確率で40〜250文字
+
+  console.log(`📝 コメント生成モード: 目標${targetLength}文字`);
 
   // 既存の親コメント数を取得（返信は除外）
   const { count: commentCount } = await supabase
@@ -101,7 +104,7 @@ async function executeComment(
 ${profileInstruction}
 ${contentInstruction}
 
-【重要】コメントは${minLength}文字以上${maxLength}文字以内で生成してください（厳守）。`
+【重要】コメントは${targetLength}文字前後で生成してください。`
     .replace(/{?\$question}?/g, post.title)
     .replace(/{?\$content}?/g, post.content || '');
 
@@ -112,7 +115,7 @@ ${contentInstruction}
       { role: 'user', content: `ユーザー名: ${user?.name || '匿名'}\nプロフィール: ${user?.profile || 'なし'}` },
     ],
     temperature: 0.9 + diversity,
-    max_tokens: Math.max(200, maxLength * 2),
+    max_tokens: Math.max(200, targetLength * 3),
     presence_penalty: 0.6,
     frequency_penalty: 0.3,
   });

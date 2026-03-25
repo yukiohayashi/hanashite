@@ -18,8 +18,6 @@ interface Settings {
   like_probability: string;
   post_like_probability: string;
   author_reply_probability: string;
-  comment_min_length: string;
-  comment_max_length: string;
   max_comments_per_post: string;
   max_comments_variance: string;
   prioritize_recent_posts: string;
@@ -72,8 +70,6 @@ export default function AutoVoterSettings() {
       like_probability: settingsMap.like_probability || '40',
       post_like_probability: settingsMap.post_like_probability || '50',
       author_reply_probability: settingsMap.author_reply_probability || '70',
-      comment_min_length: settingsMap.comment_min_length || '10',
-      comment_max_length: settingsMap.comment_max_length || '60',
       max_comments_per_post: settingsMap.max_comments_per_post || '50',
       max_comments_variance: settingsMap.max_comments_variance || '20',
       prioritize_recent_posts: settingsMap.prioritize_recent_posts || '1',
@@ -631,26 +627,13 @@ export default function AutoVoterSettings() {
                 <label htmlFor="comment_length" className="block text-sm font-medium text-gray-700 mb-1">
                   コメント文字数
                 </label>
-                <div className="flex items-center gap-1">
-                  <input
-                    type="number"
-                    id="comment_min_length"
-                    value={settings.comment_min_length}
-                    onChange={(e) => setSettings({ ...settings, comment_min_length: e.target.value })}
-                    className="max-w-[100px] px-2 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
-                    min="5"
-                    max="100"
-                  />
-                  <span className="text-gray-600 text-sm">〜</span>
-                  <input
-                    type="number"
-                    id="comment_max_length"
-                    value={settings.comment_max_length}
-                    onChange={(e) => setSettings({ ...settings, comment_max_length: e.target.value })}
-                    className="max-w-[100px] px-2 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
-                    min="10"
-                    max="200"
-                  />
+                <div className="bg-gray-50 px-3 py-2 rounded-md border border-gray-200">
+                  <p className="text-sm text-gray-700">
+                    <strong>自動設定:</strong> 70%の確率で10〜40文字（短文）、30%の確率で40〜250文字（長文）
+                  </p>
+                  <p className="mt-1 text-xs text-gray-500">
+                    ※ コメント文字数はコード内でランダムに生成されます。変更する場合は<code className="bg-gray-200 px-1 rounded">execute/route.ts</code>を編集してください。
+                  </p>
                 </div>
               </div>
 
