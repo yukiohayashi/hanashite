@@ -58,39 +58,16 @@ async function executeComment(
   const profileWeight = settings.profile_weight || 'medium';
   const contentWeight = settings.content_weight || 'high';
 
-  // 5回に1回の確率で長文コメント（説教じみた）を生成
-  // ただし、運営者（status=1）は除外
-  const isLongComment = user?.status !== 1 && Math.random() < 0.2; // 20% = 5回に1回
-  
-  let minLength: number;
-  let maxLength: number;
-  let longCommentInstruction = '';
-  
-  if (isLongComment) {
-    minLength = 200;
-    maxLength = 300;
-    longCommentInstruction = `
+  // すべて短文コメント（20〜80文字）のみ
+  const minLength = 20;
+  const maxLength = 80;
+  const longCommentInstruction = `
 
-【重要】今回は長文で説教じみたコメントを生成してください。
-- 人生経験を語り、やや上から目線で助言する
-- 自分の経験や考えを詳しく述べる
-- 「私も若い頃は〜」「結局は〜」「〜だと思います」などの表現を使う
-- 必ず200〜300文字で生成してください
-- 2〜3文ごとに必ず改行を入れてください
-- 短いコメントは絶対に生成しないでください`;
-    console.log('🎯 長文コメント生成モード: 200〜300文字（必須・改行あり）');
-  } else {
-    // 通常コメント（短文）
-    minLength = 20;
-    maxLength = 80;
-    longCommentInstruction = `
-
-【最重要】今回は短文コメントを生成してください。
+【最重要】短文コメントを生成してください。
 - 長文コメントは絶対に生成しないでください
 - 80文字以内で生成してください（厳守）
 - 簡潔で読みやすいコメントを心がけてください`;
-    console.log('📝 通常コメント生成モード: 20〜80文字');
-  }
+  console.log('📝 短文コメント生成モード: 20〜80文字');
 
   // 既存の親コメント数を取得（返信は除外）
   const { count: commentCount } = await supabase
@@ -163,12 +140,6 @@ ${contentInstruction}${commentCountInstruction}${longCommentInstruction}
     throw new Error('コメント生成に失敗しました');
   }
 
-  // 長文コメントのデバッグログ
-  if (isLongComment) {
-    console.log(`📝 長文コメント生成完了: ${commentText.length}文字`);
-    console.log(`内容: ${commentText}`);
-  }
-
   // まず投票を実行
   await executeVote(postId, userId);
 
@@ -214,11 +185,8 @@ ${contentInstruction}${commentCountInstruction}${longCommentInstruction}
   }
 
   // コメントを投稿
-  // 長文コメントの場合は5分前の時刻に設定（ツッコミ返信が現在時刻になるように）
+  // コメント日時を設定
   const commentDate = new Date();
-  if (isLongComment) {
-    commentDate.setMinutes(commentDate.getMinutes() - 5);
-  }
   
   console.log('コメント挿入開始:', { postId, userId: finalUserId, commentText });
   const { data: comment, error: commentError } = await supabase
