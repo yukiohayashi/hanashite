@@ -364,14 +364,29 @@ export async function POST() {
         if (remainingComments > 0 && commentPrompt) {
           console.log('新規コメント投稿を実行');
           try {
-            // AI会員（status: 4）のみを使用
-            const { data: users } = await supabase
+            // この記事に既に親コメントを投稿したユーザーIDを取得
+            const { data: existingParentComments } = await supabase
+              .from('comments')
+              .select('user_id')
+              .eq('post_id', post.id)
+              .is('parent_id', null);
+            
+            const existingUserIds = existingParentComments?.map(c => c.user_id) || [];
+            console.log(`既に親コメントを投稿したユーザーID: ${existingUserIds.join(', ')}`);
+
+            // AI会員（status: 4）で、まだこの記事に親コメントを投稿していないユーザーを取得
+            let query = supabase
               .from('users')
               .select('id')
-              .eq('status', 4)
-              .limit(50);
+              .eq('status', 4);
+            
+            if (existingUserIds.length > 0) {
+              query = query.not('id', 'in', `(${existingUserIds.join(',')})`);
+            }
+            
+            const { data: users } = await query.limit(50);
 
-            console.log(`取得したユーザー数: ${users?.length || 0} (status: 4)`);
+            console.log(`取得したユーザー数: ${users?.length || 0} (status: 4, 未投稿)`);
 
             if (users && users.length > 0) {
               const randomUser = users[Math.floor(Math.random() * users.length)];
@@ -554,14 +569,30 @@ export async function POST() {
         try {
           if (selectedAction === 'new_comment') {
             console.log('新規コメント投稿処理開始（既存コメントあり）');
-            // AI会員（status: 4）のみを使用
-            const { data: users } = await supabase
+            
+            // この記事に既に親コメントを投稿したユーザーIDを取得
+            const { data: existingParentComments2 } = await supabase
+              .from('comments')
+              .select('user_id')
+              .eq('post_id', post.id)
+              .is('parent_id', null);
+            
+            const existingUserIds2 = existingParentComments2?.map(c => c.user_id) || [];
+            console.log(`既に親コメントを投稿したユーザーID: ${existingUserIds2.join(', ')}`);
+
+            // AI会員（status: 4）で、まだこの記事に親コメントを投稿していないユーザーを取得
+            let query2 = supabase
               .from('users')
               .select('id')
-              .eq('status', 4)
-              .limit(50);
+              .eq('status', 4);
+            
+            if (existingUserIds2.length > 0) {
+              query2 = query2.not('id', 'in', `(${existingUserIds2.join(',')})`);
+            }
+            
+            const { data: users } = await query2.limit(50);
 
-            console.log(`取得したユーザー数: ${users?.length || 0} (status: 4)`);
+            console.log(`取得したユーザー数: ${users?.length || 0} (status: 4, 未投稿)`);
 
             if (users && users.length > 0) {
               const randomUser = users[Math.floor(Math.random() * users.length)];
