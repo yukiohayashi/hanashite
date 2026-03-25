@@ -404,11 +404,19 @@ export async function POST() {
               const choicesText = voteChoices?.map(vc => `「${vc.choice}」`).join('、') || '';
               console.log(`投票選択肢: ${choicesText}`);
 
+              // ランダムな目標文字数を生成（短文寄り）
+              const targetLength = Math.random() < 0.7 
+                ? Math.floor(Math.random() * 30) + 10  // 70%の確率で10〜40文字
+                : Math.floor(Math.random() * 210) + 40; // 30%の確率で40〜250文字
+
+              console.log(`目標文字数: ${targetLength}文字`);
+
               // ChatGPTでコメント生成（投稿本文と選択肢を含める）
               const prompt = commentPrompt
                 .replace('{$question}', post.title)
                 .replace('{$content}', post.content || '')
-                .replace('{$choices}', choicesText);
+                .replace('{$choices}', choicesText) + 
+                `\n\n【重要】コメントは${targetLength}文字前後で生成してください。`;
               
               console.log(`プロンプト生成完了 (${prompt.length}文字)`);
               console.log('=== GPTへのプロンプト内容 ===');
@@ -613,10 +621,18 @@ export async function POST() {
               const choicesText = voteChoices?.map(vc => `「${vc.choice}」`).join('、') || '';
               console.log(`投票選択肢: ${choicesText}`);
               
+              // ランダムな目標文字数を生成（短文寄り）
+              const targetLength = Math.random() < 0.7 
+                ? Math.floor(Math.random() * 30) + 10  // 70%の確率で10〜40文字
+                : Math.floor(Math.random() * 210) + 40; // 30%の確率で40〜250文字
+
+              console.log(`目標文字数: ${targetLength}文字`);
+              
               const prompt = commentPrompt
                 .replace('{$question}', post.title)
                 .replace('{$content}', post.content || '')
-                .replace('{$choices}', choicesText);
+                .replace('{$choices}', choicesText) + 
+                `\n\n【重要】コメントは${targetLength}文字前後で生成してください。`;
               
               console.log(`プロンプト生成完了 (${prompt.length}文字)`);
               console.log('=== GPTへのプロンプト内容（既存コメントあり） ===');
