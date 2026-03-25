@@ -18,8 +18,6 @@ interface Settings {
   like_probability: string;
   post_like_probability: string;
   author_reply_probability: string;
-  max_comments_per_post: string;
-  max_comments_variance: string;
   prioritize_recent_posts: string;
   priority_days: string;
   priority_weight: string;
@@ -70,8 +68,6 @@ export default function AutoVoterSettings() {
       like_probability: settingsMap.like_probability || '40',
       post_like_probability: settingsMap.post_like_probability || '50',
       author_reply_probability: settingsMap.author_reply_probability || '70',
-      max_comments_per_post: settingsMap.max_comments_per_post || '50',
-      max_comments_variance: settingsMap.max_comments_variance || '20',
       prioritize_recent_posts: settingsMap.prioritize_recent_posts || '1',
       priority_days: settingsMap.priority_days || '3',
       priority_weight: settingsMap.priority_weight || '5',
@@ -639,28 +635,15 @@ export default function AutoVoterSettings() {
 
               <div>
                 <label htmlFor="max_comments_per_post" className="block text-sm font-medium text-gray-700 mb-1">
-                  記事ごとの最大コメント数
+                  記事ごとの最大コメント合計数
                 </label>
-                <div className="flex items-center gap-1">
-                  <input
-                    type="number"
-                    id="max_comments_per_post"
-                    value={settings.max_comments_per_post}
-                    onChange={(e) => setSettings({ ...settings, max_comments_per_post: e.target.value })}
-                    className="max-w-[100px] px-2 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
-                    min="10"
-                    max="200"
-                  />
-                  <span className="text-gray-600 text-sm">±</span>
-                  <input
-                    type="number"
-                    id="max_comments_variance"
-                    value={settings.max_comments_variance}
-                    onChange={(e) => setSettings({ ...settings, max_comments_variance: e.target.value })}
-                    className="max-w-[100px] px-2 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
-                    min="0"
-                    max="50"
-                  />
+                <div className="bg-gray-50 px-3 py-2 rounded-md border border-gray-200">
+                  <p className="text-sm text-gray-700">
+                    <strong>自動設定:</strong> 50 ± 20件（30〜70件の範囲でランダム）
+                  </p>
+                  <p className="mt-1 text-xs text-gray-500">
+                    ※ 記事ごとの最大コメント合計数はコード内で定数管理されています。変更する場合は<code className="bg-gray-200 px-1 rounded">execute-auto/route.ts</code>を編集してください。
+                  </p>
                 </div>
               </div>
             </div>

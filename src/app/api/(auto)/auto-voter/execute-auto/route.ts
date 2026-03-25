@@ -96,8 +96,11 @@ export async function POST() {
     const postLikeProbability = parseInt(settings.post_like_probability || '50');
     const likeProbability = parseInt(settings.like_probability || '40');
     const commentsPerRun = parseInt(settings.comments_per_run || '1');
-    const maxCommentsPerPost = parseInt(settings.max_comments_per_post || '20');
-    const maxCommentsVariance = parseInt(settings.max_comments_variance || '10');
+    
+    // 記事ごとの最大コメント数（定数管理）
+    const MAX_COMMENTS_PER_POST = 50;
+    const MAX_COMMENTS_VARIANCE = 20;
+    
     const commentPrompt = settings.comment_prompt || '';
     const replyPrompt = settings.reply_prompt || '';
 
@@ -127,8 +130,8 @@ export async function POST() {
       postLikeProbability,
       likeProbability,
       commentsPerRun,
-      maxCommentsPerPost,
-      maxCommentsVariance,
+      MAX_COMMENTS_PER_POST,
+      MAX_COMMENTS_VARIANCE,
     });
 
     // カテゴリごとの設定
@@ -257,8 +260,7 @@ export async function POST() {
       
       // 3. コメント数が少ないほど優先度を上げる（コメント0件以外）
       if (commentCount > 0) {
-        const maxComments = parseInt(settings.max_comments_per_post || '50');
-        const commentPenalty = (commentCount / maxComments) * 100;
+        const commentPenalty = (commentCount / MAX_COMMENTS_PER_POST) * 100;
         priority -= commentPenalty; // コメントが多いほど優先度が下がる
       }
       
@@ -349,7 +351,7 @@ export async function POST() {
       console.log(`既存コメント数: ${currentCommentCount}`);
       
       // 記事ごとの最大コメント数を超えないようにチェック
-      const maxCommentsForThisPost = maxCommentsPerPost + Math.floor(Math.random() * (maxCommentsVariance * 2 + 1)) - maxCommentsVariance;
+      const maxCommentsForThisPost = MAX_COMMENTS_PER_POST + Math.floor(Math.random() * (MAX_COMMENTS_VARIANCE * 2 + 1)) - MAX_COMMENTS_VARIANCE;
       const remainingComments = Math.max(0, maxCommentsForThisPost - (currentCommentCount || 0));
       
       console.log(`最大コメント数: ${maxCommentsForThisPost}, 残り: ${remainingComments}`);
@@ -409,6 +411,9 @@ export async function POST() {
                 .replace('{$choices}', choicesText);
               
               console.log(`プロンプト生成完了 (${prompt.length}文字)`);
+              console.log('=== GPTへのプロンプト内容 ===');
+              console.log(prompt);
+              console.log('=== プロンプト終了 ===');
               
               if (!openaiApiKey) {
                 const errorMsg = 'OpenAI APIキーが設定されていません';
@@ -614,6 +619,9 @@ export async function POST() {
                 .replace('{$choices}', choicesText);
               
               console.log(`プロンプト生成完了 (${prompt.length}文字)`);
+              console.log('=== GPTへのプロンプト内容（既存コメントあり） ===');
+              console.log(prompt);
+              console.log('=== プロンプト終了 ===');
               
               if (!openaiApiKey) {
                 const errorMsg = 'OpenAI APIキーが設定されていません';
@@ -832,8 +840,8 @@ export async function POST() {
           post_like_probability: postLikeProbability,
           like_probability: likeProbability,
           comments_per_run: commentsPerRun,
-          max_comments_per_post: maxCommentsPerPost,
-          max_comments_variance: maxCommentsVariance,
+          max_comments_per_post: MAX_COMMENTS_PER_POST,
+          max_comments_variance: MAX_COMMENTS_VARIANCE,
         },
       },
     };
