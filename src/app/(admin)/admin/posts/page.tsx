@@ -2,8 +2,6 @@ import { supabase } from '@/lib/supabase';
 import PostsTable from './PostsTable';
 
 async function getPosts(statusFilter?: string, limit: number = 100, sortBy: string = 'created_at', sortOrder: string = 'desc', searchQuery?: string) {
-  console.log('getPosts - sortBy:', sortBy, 'sortOrder:', sortOrder);
-  
   let query = supabase
     .from('posts')
     .select('id, title, content, status, created_at, user_id, thumbnail_url, og_image, category_id, best_answer_id, best_answer_selected_at, deadline_at, categories(id, name)');
@@ -16,25 +14,16 @@ async function getPosts(statusFilter?: string, limit: number = 100, sortBy: stri
     query = query.or(`title.ilike.%${searchQuery}%,content.ilike.%${searchQuery}%`);
   }
 
-  console.log('ソート:', sortBy, sortOrder === 'asc' ? '昇順' : '降順');
   query = query.order(sortBy, { ascending: sortOrder === 'asc' });
 
   const { data: posts, error } = await query.limit(limit);
 
   if (error) {
     console.error('Error fetching posts:', error);
-    console.error('Error details:', JSON.stringify(error, null, 2));
     return [];
   }
 
   if (!posts || posts.length === 0) return [];
-
-  // ソート結果を確認
-  if (posts.length > 0) {
-    console.log('取得件数:', posts.length);
-    console.log('最初の投稿:', { id: posts[0].id, created_at: posts[0].created_at });
-    console.log('最後の投稿:', { id: posts[posts.length - 1].id, created_at: posts[posts.length - 1].created_at });
-  }
 
   const postIds = posts.map(p => p.id);
   const userIds = [...new Set(posts.map(p => p.user_id).filter(Boolean))];
@@ -48,52 +37,42 @@ async function getPosts(statusFilter?: string, limit: number = 100, sortBy: stri
   const userMap = new Map(users?.map(u => [u.id, u]) || []);
 
   // コメント件数を一括取得（全コメント、親コメント・子コメント両方）
-  const { data: commentCounts, error: commentError } = await supabase
-    .from('comments')
-    .select('post_id')
-    .in('post_id', postIds);
-
-  console.log('コメント件数取得:', { 
-    postIds: postIds.slice(0, 5), 
-    commentCounts: commentCounts?.length,
-    error: commentError,
-    sampleComments: commentCounts?.slice(0, 10).map(c => ({ post_id: c.post_id, type: typeof c.post_id }))
-  });
-
+  // Supabaseの.in()制限に対応するため、100件ずつバッチ処理
   const commentCountMap = new Map<number, number>();
-  commentCounts?.forEach(c => {
-    commentCountMap.set(c.post_id, (commentCountMap.get(c.post_id) || 0) + 1);
-  });
+  const batchSize = 100;
+  
+  for (let i = 0; i < postIds.length; i += batchSize) {
+    const batchIds = postIds.slice(i, i + batchSize);
+    const { data: commentCounts, error: commentError } = await supabase
+      .from('comments')
+      .select('post_id')
+      .in('post_id', batchIds);
 
-  const commentCountEntries = Array.from(commentCountMap.entries()).slice(0, 5);
-  console.log('コメント件数マップ:', commentCountEntries);
-  commentCountEntries.forEach(([postId, count]) => {
-    console.log(`  投稿ID ${postId}: ${count}件`);
-  });
+    if (commentError) {
+      console.error(`コメント件数取得エラー (バッチ ${i / batchSize + 1}):`, commentError);
+      continue;
+    }
 
-  // 最初の5件の投稿IDを確認
-  console.log('最初の5件の投稿ID:', posts.slice(0, 5).map(p => p.id));
-  console.log('commentCountMapのキー:', Array.from(commentCountMap.keys()).slice(0, 10));
+    commentCounts?.forEach(c => {
+      commentCountMap.set(c.post_id, (commentCountMap.get(c.post_id) || 0) + 1);
+    });
+  }
+
 
   // ベストアンサーを一括取得（commentsテーブルから）
   const postsWithBestAnswer = posts.filter(p => p.best_answer_id);
   const bestAnswerIds = postsWithBestAnswer.map(p => p.best_answer_id).filter(Boolean);
 
-  console.log('Posts with best answer:', postsWithBestAnswer.length);
-  console.log('Best answer IDs:', bestAnswerIds);
-
   const bestAnswerMap = new Map<number, { userId: string; userName: string }>();
   
   if (bestAnswerIds.length > 0) {
-    // commentsを取得
     const { data: bestComments, error: commentsError } = await supabase
       .from('comments')
       .select('id, user_id')
       .in('id', bestAnswerIds);
 
-    console.log('Best comments query result:', { bestComments, commentsError });
     if (commentsError) {
-      console.error('Comments query error details:', JSON.stringify(commentsError, null, 2));
+      console.error('Comments query error:', commentsError);
     }
 
     if (bestComments && bestComments.length > 0) {
@@ -110,7 +89,6 @@ async function getPosts(statusFilter?: string, limit: number = 100, sortBy: stri
 
       postsWithBestAnswer.forEach(post => {
         const comment = bestComments.find(c => c.id === post.best_answer_id);
-        console.log(`Post ${post.id} - Looking for comment ${post.best_answer_id}:`, comment);
         if (comment) {
           const user = commentUserMap.get(comment.user_id);
           bestAnswerMap.set(post.id, {
@@ -146,12 +124,6 @@ async function getPosts(statusFilter?: string, limit: number = 100, sortBy: stri
     bestAnswer: bestAnswerMap.get(post.id) || null,
     comment_count: commentCountMap.get(post.id) || 0,
   }));
-
-  // マッピング後のデータを確認
-  console.log('postsWithDetails (最初の5件):');
-  postsWithDetails.slice(0, 5).forEach(post => {
-    console.log(`  投稿ID ${post.id}: comment_count=${post.comment_count}`);
-  });
 
   return postsWithDetails;
 }

@@ -54,8 +54,6 @@ async function executeComment(
     .single();
 
   // コメント設定を取得
-  let minLength = parseInt(settings.min_comment_length || '10');
-  let maxLength = parseInt(settings.max_comment_length || '60');
   const diversity = parseInt(settings.diversity || '30') / 100;
   const profileWeight = settings.profile_weight || 'medium';
   const contentWeight = settings.content_weight || 'high';
@@ -63,6 +61,9 @@ async function executeComment(
   // 5回に1回の確率で長文コメント（説教じみた）を生成
   // ただし、運営者（status=1）は除外
   const isLongComment = user?.status !== 1 && Math.random() < 0.2; // 20% = 5回に1回
+  
+  let minLength: number;
+  let maxLength: number;
   let longCommentInstruction = '';
   
   if (isLongComment) {
@@ -79,15 +80,16 @@ async function executeComment(
 - 短いコメントは絶対に生成しないでください`;
     console.log('🎯 長文コメント生成モード: 200〜300文字（必須・改行あり）');
   } else {
-    // 通常コメント（短文）を明示的に指示
+    // 通常コメント（短文）
+    minLength = 20;
+    maxLength = 80;
     longCommentInstruction = `
 
-【重要】今回は通常の短文コメントを生成してください。
-- 長文で説教じみたコメントは生成しないでください
-- 必ず20〜150文字以内で生成してください
-- 簡潔で読みやすいコメントを心がけてください
-- 200文字以上の長文は絶対に生成しないでください`;
-    console.log('📝 通常コメント生成モード: 20〜150文字');
+【最重要】今回は短文コメントを生成してください。
+- 長文コメントは絶対に生成しないでください
+- 80文字以内で生成してください（厳守）
+- 簡潔で読みやすいコメントを心がけてください`;
+    console.log('📝 通常コメント生成モード: 20〜80文字');
   }
 
   // 既存の親コメント数を取得（返信は除外）

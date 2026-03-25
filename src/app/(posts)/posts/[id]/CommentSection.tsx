@@ -351,13 +351,23 @@ export default function CommentSection({ postId, initialComments, totalCount, po
                         ) : (
                           <span className="font-medium text-gray-600 text-sm">{userName}</span>
                         )}
-                        {users?.marriage && users.marriage !== 'private' && (
-                          <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-orange-100 text-orange-800">
-                            {users.marriage === 'single' && '独身'}
-                            {users.marriage === 'dating' && '交際中'}
-                            {users.marriage === 'married' && '既婚'}
-                            {users.marriage === 'divorced' && '離婚経験'}
-                            {users.marriage === 'other' && 'その他'}
+                        {users?.marriage ? (
+                          users.marriage === 'private' ? (
+                            <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-600">
+                              非公開
+                            </span>
+                          ) : (
+                            <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-orange-100 text-orange-800">
+                              {users.marriage === 'single' && '独身'}
+                              {users.marriage === 'dating' && '交際中'}
+                              {users.marriage === 'married' && '既婚'}
+                              {users.marriage === 'divorced' && '離婚経験'}
+                              {users.marriage === 'other' && 'その他'}
+                            </span>
+                          )
+                        ) : (
+                          <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-600">
+                            非公開
                           </span>
                         )}
                         <TimeAgo dateString={comment.created_at} />
@@ -467,13 +477,23 @@ export default function CommentSection({ postId, initialComments, totalCount, po
                                 ) : (
                                   <span className="font-medium text-gray-600 text-sm">{replyUserName}</span>
                                 )}
-                                {replyUsers?.marriage && replyUsers.marriage !== 'private' && (
-                                  <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-orange-100 text-orange-800">
-                                    {replyUsers.marriage === 'single' && '独身'}
-                                    {replyUsers.marriage === 'dating' && '交際中'}
-                                    {replyUsers.marriage === 'married' && '既婚'}
-                                    {replyUsers.marriage === 'divorced' && '離婚経験'}
-                                    {replyUsers.marriage === 'other' && 'その他'}
+                                {replyUsers?.marriage ? (
+                                  replyUsers.marriage === 'private' ? (
+                                    <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-600">
+                                      非公開
+                                    </span>
+                                  ) : (
+                                    <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-orange-100 text-orange-800">
+                                      {replyUsers.marriage === 'single' && '独身'}
+                                      {replyUsers.marriage === 'dating' && '交際中'}
+                                      {replyUsers.marriage === 'married' && '既婚'}
+                                      {replyUsers.marriage === 'divorced' && '離婚経験'}
+                                      {replyUsers.marriage === 'other' && 'その他'}
+                                    </span>
+                                  )
+                                ) : (
+                                  <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-600">
+                                    非公開
                                   </span>
                                 )}
                                 <TimeAgo dateString={reply.created_at} />
