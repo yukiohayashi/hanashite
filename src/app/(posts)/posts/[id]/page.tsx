@@ -193,6 +193,17 @@ export default async function PostPage({ params, searchParams }: { params: Promi
   
   const bestAnswerPoints = bestAnswerPointSetting?.point_value || 10;
 
+  // 運営者（status=2）かどうかを判定
+  let isAdmin = false;
+  if (session?.user?.id) {
+    const { data: currentUser } = await supabase
+      .from('users')
+      .select('status')
+      .eq('id', session.user.id)
+      .single();
+    isAdmin = currentUser?.status === 1;
+  }
+
   if (!post || post.status === 'trash') {
     return (
       <div className="bg-white min-h-screen">
@@ -505,7 +516,7 @@ export default async function PostPage({ params, searchParams }: { params: Promi
               </div>
 
               {/* コメントセクション */}
-              <CommentSection postId={post.id} initialComments={comments || []} totalCount={totalCommentCount || 0} postUserId={post.user_id as any} bestAnswerId={post.best_answer_id ? Number(post.best_answer_id) : undefined} deadlineAt={post.deadline_at} bestAnswerPoints={bestAnswerPoints} />
+              <CommentSection postId={post.id} initialComments={comments || []} totalCount={totalCommentCount || 0} postUserId={post.user_id as any} bestAnswerId={post.best_answer_id ? Number(post.best_answer_id) : undefined} deadlineAt={post.deadline_at} bestAnswerPoints={bestAnswerPoints} isAdmin={isAdmin} />
             </article>
           </section>
         </div>

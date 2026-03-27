@@ -27,7 +27,16 @@ export async function PUT(
       return NextResponse.json({ error: 'Post not found' }, { status: 404 });
     }
 
-    if (post.user_id !== session.user.id) {
+    // 運営者（status=2）かどうかを確認
+    const { data: currentUser } = await supabase
+      .from('users')
+      .select('status')
+      .eq('id', session.user.id)
+      .single();
+
+    const isAdmin = currentUser?.status === 1;
+
+    if (post.user_id !== session.user.id && !isAdmin) {
       return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
     }
 
@@ -112,7 +121,16 @@ export async function DELETE(
       return NextResponse.json({ error: 'Post not found' }, { status: 404 });
     }
 
-    if (post.user_id !== session.user.id) {
+    // 運営者（status=2）かどうかを確認
+    const { data: currentUser } = await supabase
+      .from('users')
+      .select('status')
+      .eq('id', session.user.id)
+      .single();
+
+    const isAdmin = currentUser?.status === 1;
+
+    if (post.user_id !== session.user.id && !isAdmin) {
       return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
     }
 

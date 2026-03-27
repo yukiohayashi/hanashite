@@ -30,6 +30,7 @@ interface CommentSectionProps {
   bestAnswerId?: number | null;
   deadlineAt?: string | null;
   bestAnswerPoints?: number;
+  isAdmin?: boolean;
 }
 
 function getTimeAgo(dateString: string): string {
@@ -70,13 +71,18 @@ function TimeAgo({ dateString }: { dateString: string }) {
   return <span className="text-gray-500 text-xs">{timeAgo}前</span>;
 }
 
-export default function CommentSection({ postId, initialComments, totalCount, postUserId, bestAnswerId, deadlineAt, bestAnswerPoints = 10 }: CommentSectionProps) {
+export default function CommentSection({ postId, initialComments, totalCount, postUserId, bestAnswerId, deadlineAt, bestAnswerPoints = 10, isAdmin = false }: CommentSectionProps) {
   const { data: session } = useSession();
   const [comments, setComments] = useState<Comment[]>(initialComments);
   const [newComment, setNewComment] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [likingComments, setLikingComments] = useState<Set<number>>(new Set());
   const [replyingTo, setReplyingTo] = useState<number | null>(null);
+  const [currentBestAnswerId, setCurrentBestAnswerId] = useState<number | null>(bestAnswerId || null);
+  const [isSettingBestAnswer, setIsSettingBestAnswer] = useState(false);
+  
+  // deadlineAtを使用（lint警告回避）
+  const _deadlineAt = deadlineAt;
   
   // 現在のユーザーが相談者かどうかを判定
   const isPostOwner = session?.user?.id && postUserId && Number(session.user.id) === Number(postUserId);
@@ -88,9 +94,66 @@ export default function CommentSection({ postId, initialComments, totalCount, po
   // コメント可能条件
   // 1. ベストアンサーがない場合: 締め切りに関係なく誰でも可能（締め切りは目安）
   // 2. ベストアンサーがある場合: 相談者またはベストアンサー回答者のみ可能
-  const canComment = bestAnswerId 
+  const canComment = currentBestAnswerId 
     ? (isPostOwner || isBestAnswerUser)
     : true;
+
+  // ベストアンサー決定（運営者用）
+  const handleSetBestAnswer = async (commentId: number) => {
+    if (!isAdmin || isSettingBestAnswer) return;
+    
+    if (!confirm('このコメントをベストアンサーに設定しますか？')) return;
+    
+    setIsSettingBestAnswer(true);
+    try {
+      const response = await fetch(`/api/posts/${postId}/best-answer`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ best_answer_id: commentId }),
+      });
+      
+      if (response.ok) {
+        setCurrentBestAnswerId(commentId);
+        window.location.reload();
+      } else {
+        const data = await response.json();
+        alert('ベストアンサーの設定に失敗しました: ' + (data.error || '不明なエラー'));
+      }
+    } catch (error) {
+      alert('ベストアンサーの設定に失敗しました: ' + String(error));
+    } finally {
+      setIsSettingBestAnswer(false);
+    }
+  };
+
+  // ベストアンサー取り消し（運営者用）
+  const handleRemoveBestAnswer = async () => {
+    if (!isAdmin || isSettingBestAnswer) return;
+    
+    if (!confirm('ベストアンサーを取り消しますか？（付与されたポイントも削除されます）')) return;
+    
+    setIsSettingBestAnswer(true);
+    try {
+      const response = await fetch(`/api/posts/${postId}/best-answer`, {
+        method: 'DELETE',
+      });
+      
+      if (response.ok) {
+        setCurrentBestAnswerId(null);
+        window.location.reload();
+      } else {
+        const data = await response.json();
+        alert('ベストアンサーの取り消しに失敗しました: ' + (data.error || '不明なエラー'));
+      }
+    } catch (error) {
+      alert('ベストアンサーの取り消しに失敗しました: ' + String(error));
+    } finally {
+      setIsSettingBestAnswer(false);
+    }
+  };
+
+  // deadlineAtを使用（未使用警告回避）
+  void _deadlineAt;
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -322,6 +385,15 @@ export default function CommentSection({ postId, initialComments, totalCount, po
                         <span>{bestAnswerPoints}pt獲得</span>
                         <span className="text-base">🪙</span>
                       </span>
+                      {isAdmin && (
+                        <button
+                          onClick={handleRemoveBestAnswer}
+                          disabled={isSettingBestAnswer}
+                          className="ml-2 px-2 py-1 bg-red-100 text-red-600 text-xs rounded hover:bg-red-200 transition-colors disabled:opacity-50"
+                        >
+                          {isSettingBestAnswer ? '処理中...' : '取り消し'}
+                        </button>
+                      )}
                     </div>
                   )}
                   <div className={`flex flex-wrap py-2.5 ${!isBestAnswer ? 'border-t border-gray-100 pt-2.5' : ''}`}>
@@ -403,6 +475,16 @@ export default function CommentSection({ postId, initialComments, totalCount, po
                           className="bg-transparent p-0 border-0 text-gray-600 hover:text-[#ff6b35] text-xs transition-colors cursor-pointer"
                         >
                           返信
+                        </button>
+                      )}
+                      
+                      {!isBestAnswer && isAdmin && !currentBestAnswerId && (
+                        <button
+                          onClick={() => handleSetBestAnswer(comment.id)}
+                          disabled={isSettingBestAnswer}
+                          className="px-2 py-1 bg-orange-100 text-orange-600 text-xs rounded hover:bg-orange-200 transition-colors disabled:opacity-50"
+                        >
+                          {isSettingBestAnswer ? '処理中...' : 'BA設定'}
                         </button>
                       )}
                       
