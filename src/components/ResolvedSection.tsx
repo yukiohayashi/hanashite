@@ -85,7 +85,7 @@ export default function ResolvedSection({ bestAnswers, waitingPosts }: ResolvedS
             bestAnswers.map((answer) => {
               const contentPreview = stripHtmlTags(answer.content).substring(0, 80);
               return (
-                <div key={answer.id} className="relative bg-[#fffaf9] hover:shadow-md p-3 border border-[#ffe0d6] border-l-4 border-l-[#ffab91] rounded-md transition-all">
+                <div key={answer.id} className="relative bg-white hover:shadow-md p-3 border border-gray-200 border-l-4 border-l-[#ff6b6b] rounded-md transition-all">
                   <Link href={`/posts/${answer.post_id}`} className="block">
                     <div className="text-xs text-gray-500 mb-1">
                       <span className="font-medium text-gray-700">{answer.user_name}さんのベストアンサー</span>
@@ -115,7 +115,7 @@ export default function ResolvedSection({ bestAnswers, waitingPosts }: ResolvedS
               ? cleanContent.substring(0, 50) + (cleanContent.length > 50 ? '...' : '')
               : '';
             return (
-              <div key={post.id} className="relative bg-[#fffaf9] hover:shadow-md p-3 border border-[#ffe0d6] border-l-4 border-l-[#ffab91] rounded-md transition-all">
+              <div key={post.id} className="relative bg-white hover:shadow-md p-3 border border-gray-200 border-l-4 border-l-[#ff6b6b] rounded-md transition-all">
                 <Link href={`/posts/${post.id}`} className="block pr-16">
                   <h4 className="font-bold text-gray-900 text-sm leading-relaxed">
                     {post.title}

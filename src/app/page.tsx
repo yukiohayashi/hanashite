@@ -441,7 +441,7 @@ export default async function Home({ searchParams }: HomeProps) {
     .select('id, title, best_answer_id, category_id, categories(name)')
     .not('best_answer_id', 'is', null)
     .in('status', ['publish', 'published'])
-    .order('created_at', { ascending: false })
+    .order('best_answer_selected_at', { ascending: false, nullsFirst: false })
     .limit(3);
 
   let bestAnswersWithUsers: { id: number; content: string; created_at: string; post_id: number; post_title: string; user_name: string; user_id: string | null; avatar_url: string; category_name: string | null; category_id: number | null }[] = [];
@@ -462,8 +462,10 @@ export default async function Home({ searchParams }: HomeProps) {
         .select('id, name, avatar_seed, use_custom_image, image')
         .in('id', baUserIds);
 
-      bestAnswersWithUsers = bestComments.map(comment => {
-        const post = postsWithBestAnswer.find(p => p.best_answer_id === comment.id);
+      // postsWithBestAnswerの順序を維持してマッピング
+      bestAnswersWithUsers = postsWithBestAnswer.map(post => {
+        const comment = bestComments.find(c => c.id === post.best_answer_id);
+        if (!comment) return null as any;
         const user = baUsersData?.find(u => u.id === comment.user_id);
         
         // アバターURLを生成
@@ -491,7 +493,7 @@ export default async function Home({ searchParams }: HomeProps) {
           category_name: (post as any)?.categories?.name || null,
           category_id: post?.category_id || null
         };
-      });
+      }).filter(item => item !== null);
     }
   }
 

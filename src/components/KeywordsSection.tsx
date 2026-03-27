@@ -21,7 +21,7 @@ export default async function KeywordsSection() {
               <a
                 key={index}
                 href={`/?s=${encodeURIComponent(item.keyword)}`}
-                className="hover:bg-pink-50 px-3 py-1 border border-[#d32f2f] rounded-full text-[#d32f2f] text-sm font-semibold transition-colors"
+                className="hover:bg-pink-50 px-3 py-1 border border-[#ffab91] rounded-full text-gray-800 text-sm font-semibold transition-colors"
               >
                 {item.keyword}
               </a>
@@ -41,7 +41,7 @@ export default async function KeywordsSection() {
               <Link
                 key={keyword.id}
                 href={`/keyword/${keyword.id}`}
-                className="hover:bg-pink-50 px-3 py-1 border border-[#d32f2f] rounded-full text-[#d32f2f] text-sm font-semibold transition-colors"
+                className="hover:bg-pink-50 px-3 py-1 border border-[#ffab91] rounded-full text-gray-800 text-sm font-semibold transition-colors"
               >
                 {keyword.keyword}
               </Link>

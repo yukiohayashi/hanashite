@@ -176,6 +176,41 @@ export async function generateAnke(article: {
   };
 }
 
+// 体言止めのタイトルを修正する関数
+function fixTaigendomeTitles(title: string): string {
+  // 「〜に悩む私」→「〜に悩んでいます」
+  if (/に悩む私[。．.]?$/.test(title)) {
+    return title.replace(/に悩む私[。．.]?$/, 'に悩んでいます');
+  }
+
+  // 「〜を感じる私」→「〜を感じています」
+  if (/を感じる私[。．.]?$/.test(title)) {
+    return title.replace(/を感じる私[。．.]?$/, 'を感じています');
+  }
+
+  // 「〜する私」→「〜しています」
+  if (/する私[。．.]?$/.test(title)) {
+    return title.replace(/する私[。．.]?$/, 'しています');
+  }
+
+  // 「〜な私」→「〜で悩んでいます」
+  if (/な私[。．.]?$/.test(title)) {
+    return title.replace(/な私[。．.]?$/, 'で悩んでいます');
+  }
+
+  // 「〜の私」→「〜について相談です」
+  if (/の私[。．.]?$/.test(title)) {
+    return title.replace(/の私[。．.]?$/, 'について相談です');
+  }
+
+  // 「〜い私」→「〜くて悩んでいます」
+  if (/([いしくる])私[。．.]?$/.test(title)) {
+    return title.replace(/私[。．.]?$/, 'と感じています');
+  }
+
+  return title;
+}
+
 // Yahoo知恵袋の質問をハナシテ用の質問文に修正
 export async function refineYahooQuestion(originalTitle: string, originalContent: string): Promise<{ title: string; content: string }> {
   // api_settingsテーブルからアクティブなOpenAI APIキーを取得
@@ -248,8 +283,11 @@ export async function refineYahooQuestion(originalTitle: string, originalContent
   console.log('タイトルマッチ:', titleMatch ? titleMatch[1] : 'なし');
   console.log('本文マッチ:', contentMatch ? contentMatch[1].substring(0, 100) : 'なし');
 
-  const refinedTitle = titleMatch ? titleMatch[1].trim() : originalTitle;
+  let refinedTitle = titleMatch ? titleMatch[1].trim() : originalTitle;
   let refinedContent = contentMatch ? contentMatch[1].trim() : originalContent;
+
+  // 体言止めのタイトルを修正（「〜の私」「〜な私」などで終わる場合）
+  refinedTitle = fixTaigendomeTitles(refinedTitle);
 
   // 改行をランダムで自然にする処理
   // 既存の改行を一旦削除し、文を区切って再構築
