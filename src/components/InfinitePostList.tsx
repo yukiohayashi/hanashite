@@ -105,28 +105,6 @@ export default function InfinitePostList({ initialPosts, sortBy: initialSortBy }
 
   return (
     <div>
-      {/* タブメニュー */}
-      <div className="px-1 py-0 mb-2">
-        <ul className="flex justify-center m-0 p-0 w-full list-none">
-          <li className="m-0 mx-1.5 my-1.5 w-auto text-xs">
-            <button
-              onClick={() => setSortBy('top_post')}
-              className={`block w-full h-full underline ${sortBy === 'top_post' || sortBy === 'recommend' ? 'font-bold text-gray-900' : 'text-gray-600'}`}
-            >
-              最新順
-            </button>
-          </li>
-          <li className="m-0 mx-1.5 my-1.5 w-auto text-xs">
-            <button
-              onClick={() => setSortBy('deadline')}
-              className={`block w-full h-full underline ${sortBy === 'deadline' ? 'font-bold text-gray-900' : 'text-gray-600'}`}
-            >
-              締切が近い順
-            </button>
-          </li>
-        </ul>
-      </div>
-
       <div className="space-y-2 p-2">
         {sortedPosts.map((post) => {
         const cleanContent = stripHtmlTags(post.content || '');

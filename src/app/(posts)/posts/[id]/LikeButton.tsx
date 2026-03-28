@@ -6,9 +6,10 @@ import { supabase } from '@/lib/supabase';
 
 interface LikeButtonProps {
   postId: number;
+  isAdmin?: boolean;
 }
 
-export default function LikeButton({ postId }: LikeButtonProps) {
+export default function LikeButton({ postId, isAdmin = false }: LikeButtonProps) {
   const [likeCount, setLikeCount] = useState(0);
   const [isLiked, setIsLiked] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
@@ -57,6 +58,24 @@ export default function LikeButton({ postId }: LikeButtonProps) {
     setIsLoading(true);
 
     try {
+      // 運営者の場合は常にいいねを加算（重複チェックなし）
+      if (isAdmin) {
+        // いいねカウントを+1
+        const newCount = likeCount + 1;
+        await supabase
+          .from('like_counts')
+          .upsert({
+            target_id: postId,
+            like_type: 'post',
+            like_count: newCount,
+            updated_at: new Date().toISOString()
+          }, {
+            onConflict: 'target_id'
+          });
+        setLikeCount(newCount);
+        return;
+      }
+
       if (isLiked) {
         // いいねを削除
         await supabase

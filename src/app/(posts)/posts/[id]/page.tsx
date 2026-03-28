@@ -431,7 +431,7 @@ export default async function PostPage({ params, searchParams }: { params: Promi
 
                 {/* ハート・星・記事ID */}
                 <div className="mb-4 flex items-center justify-end gap-2">
-                  <LikeButton postId={post.id} />
+                  <LikeButton postId={post.id} isAdmin={isAdmin} />
                   <FavoriteButton postId={post.id} />
                   <span className="text-gray-400 text-sm">ID: {post.id}</span>
                 </div>

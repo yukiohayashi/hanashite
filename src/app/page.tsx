@@ -9,7 +9,6 @@ import HomeRightSidebar from '@/components/HomeRightSidebar';
 import SearchHistory from '@/components/SearchHistory';
 import SearchForm from '@/components/SearchForm';
 import KeywordsSection from '@/components/KeywordsSection';
-import InfinitePostList from '@/components/InfinitePostList';
 import AdSense from '@/components/AdSense';
 import ResolvedSection from '@/components/ResolvedSection';
 import SearchHistoryRecorder from '@/components/SearchHistoryRecorder';
@@ -291,67 +290,56 @@ export default async function Home({ searchParams }: HomeProps) {
     postsData = allPosts || [];
   }
 
-  // 注目の相談を取得（likesテーブルから投稿へのいいね数を集計）
+  // 注目の相談を取得（like_countsテーブルからいいね数を取得）
   let featuredPosts: any[] = [];
   
-  // likesテーブルから投稿へのいいね数を集計
-  const { data: likedPosts } = await supabase
-    .from('likes')
-    .select('target_id')
-    .eq('like_type', 'post');
+  // like_countsテーブルからいいね数が多い投稿を取得
+  const { data: topLikeCounts } = await supabase
+    .from('like_counts')
+    .select('target_id, like_count')
+    .eq('like_type', 'post')
+    .gt('like_count', 0)
+    .order('like_count', { ascending: false })
+    .limit(10);
 
-  if (likedPosts && likedPosts.length > 0) {
-    // target_idごとにいいね数をカウント
-    const likeCounts = likedPosts.reduce((acc: { [key: number]: number }, like) => {
-      const targetId = like.target_id;
-      if (targetId) {
-        acc[targetId] = (acc[targetId] || 0) + 1;
-      }
-      return acc;
-    }, {});
+  if (topLikeCounts && topLikeCounts.length > 0) {
+    const sortedPostIds = topLikeCounts.map(lc => lc.target_id);
 
-    // いいね数が多い順にソート
-    const sortedPostIds = Object.entries(likeCounts)
-      .sort(([, a], [, b]) => (b as number) - (a as number))
-      .slice(0, 3)
-      .map(([id]) => parseInt(id));
+    // 投稿情報を取得
+    const { data: topPosts } = await supabase
+      .from('posts')
+      .select('id, title, created_at, user_id, og_image, thumbnail_url, best_answer_id, category_id, categories(name), users!inner(status, name, avatar_seed, use_custom_image, image)')
+      .in('id', sortedPostIds)
+      .in('status', ['publish', 'published'])
+      .neq('user_id', '1')
+      .is('best_answer_id', null);
 
-    if (sortedPostIds.length > 0) {
-      // 投稿情報を取得
-      const { data: topPosts } = await supabase
-        .from('posts')
-        .select('id, title, created_at, user_id, og_image, thumbnail_url, best_answer_id, category_id, categories(name), users!inner(status, name, avatar_seed, use_custom_image, image)')
-        .in('id', sortedPostIds)
-        .in('status', ['publish', 'published'])
-        .neq('user_id', '1')
-        .is('best_answer_id', null);
+    if (topPosts && topPosts.length > 0) {
+      // いいね数の順序に従って並べ替え（最大3件）
+      const orderedPosts = sortedPostIds
+        .map(id => topPosts.find(post => post.id === id))
+        .filter((post): post is NonNullable<typeof post> => post !== undefined)
+        .slice(0, 3);
 
-      if (topPosts && topPosts.length > 0) {
-        // sortedPostIdsの順序に従って並べ替え
-        const orderedPosts = sortedPostIds
-          .map(id => topPosts.find(post => post.id === id))
-          .filter((post): post is NonNullable<typeof post> => post !== undefined);
-
-        featuredPosts = orderedPosts.map(post => {
-          const user = (post as any).users;
-          let avatarUrl: string;
-          if (user?.use_custom_image && user?.image) {
-            avatarUrl = user.image;
-          } else if (user?.avatar_seed && (user.avatar_seed.startsWith('f20_') || user.avatar_seed.startsWith('f30_') || user.avatar_seed.startsWith('f40_') || 
-                     user.avatar_seed.startsWith('m20_') || user.avatar_seed.startsWith('m30_') || user.avatar_seed.startsWith('m40_') ||
-                     user.avatar_seed.startsWith('cat_') || user.avatar_seed.startsWith('dog_') || user.avatar_seed.startsWith('rabbit_') ||
-                     user.avatar_seed.startsWith('bear_') || user.avatar_seed.startsWith('other_'))) {
-            avatarUrl = `/images/local-avatars/${user.avatar_seed}.webp`;
-          } else {
-            avatarUrl = '/images/local-avatars/default-avatar.webp';
-          }
-          return {
-            ...post,
-            user_name: user?.name || null,
-            avatar_url: avatarUrl
-          };
-        });
-      }
+      featuredPosts = orderedPosts.map(post => {
+        const user = (post as any).users;
+        let avatarUrl: string;
+        if (user?.use_custom_image && user?.image) {
+          avatarUrl = user.image;
+        } else if (user?.avatar_seed && (user.avatar_seed.startsWith('f20_') || user.avatar_seed.startsWith('f30_') || user.avatar_seed.startsWith('f40_') || 
+                   user.avatar_seed.startsWith('m20_') || user.avatar_seed.startsWith('m30_') || user.avatar_seed.startsWith('m40_') ||
+                   user.avatar_seed.startsWith('cat_') || user.avatar_seed.startsWith('dog_') || user.avatar_seed.startsWith('rabbit_') ||
+                   user.avatar_seed.startsWith('bear_') || user.avatar_seed.startsWith('other_'))) {
+          avatarUrl = `/images/local-avatars/${user.avatar_seed}.webp`;
+        } else {
+          avatarUrl = '/images/local-avatars/default-avatar.webp';
+        }
+        return {
+          ...post,
+          user_name: user?.name || null,
+          avatar_url: avatarUrl
+        };
+      });
     }
   }
 
@@ -376,17 +364,14 @@ export default async function Home({ searchParams }: HomeProps) {
     };
   });
 
-  // ベストアンサー待ちの投稿を取得（締め切りが過ぎてもベストアンサーがない投稿）
+  // 相談受付中の投稿を取得（ベストアンサーがない投稿）
   const { data: waitingPosts } = await supabase
     .from('posts')
-    .select('id, title, created_at, deadline_at, user_id, og_image, thumbnail_url, best_answer_id, best_answer_selected_at, category_id, categories(name), users!inner(status, name, avatar_seed, use_custom_image, image)')
+    .select('id, title, content, created_at, deadline_at, user_id, og_image, thumbnail_url, best_answer_id, best_answer_selected_at, category_id, categories(name), users!inner(status, name, avatar_seed, use_custom_image, image)')
     .in('status', ['publish', 'published'])
     .neq('user_id', 1)
     .is('best_answer_id', null)
-    .is('best_answer_selected_at', null)
-    .not('deadline_at', 'is', null)
-    .lt('deadline_at', new Date().toISOString())
-    .order('deadline_at', { ascending: false })
+    .order('created_at', { ascending: false })
     .limit(30);
 
   // ユーザー情報を結合
@@ -434,17 +419,17 @@ export default async function Home({ searchParams }: HomeProps) {
     }
   }
 
-  // 最新の解決済みを取得（直近3件）
+  // 最新の解決済みを取得
   // postsテーブルのbest_answer_idを使用
   const { data: postsWithBestAnswer, error: bestAnswerError } = await supabase
     .from('posts')
-    .select('id, title, best_answer_id, category_id, categories(name)')
+    .select('id, title, best_answer_id, best_answer_selected_at, category_id, categories(name)')
     .not('best_answer_id', 'is', null)
     .in('status', ['publish', 'published'])
     .order('best_answer_selected_at', { ascending: false, nullsFirst: false })
-    .limit(3);
+    .limit(30);
 
-  let bestAnswersWithUsers: { id: number; content: string; created_at: string; post_id: number; post_title: string; user_name: string; user_id: string | null; avatar_url: string; category_name: string | null; category_id: number | null }[] = [];
+  let bestAnswersWithUsers: { id: number; content: string; created_at: string; post_id: number; post_title: string; user_name: string; user_id: string | null; avatar_url: string; category_name: string | null; category_id: number | null; best_answer_selected_at: string | null }[] = [];
   if (postsWithBestAnswer && postsWithBestAnswer.length > 0) {
     const bestAnswerIds = postsWithBestAnswer.map(p => p.best_answer_id).filter(id => id !== null);
     
@@ -491,7 +476,8 @@ export default async function Home({ searchParams }: HomeProps) {
           user_id: comment.user_id,
           avatar_url: avatarUrl,
           category_name: (post as any)?.categories?.name || null,
-          category_id: post?.category_id || null
+          category_id: post?.category_id || null,
+          best_answer_selected_at: (post as any)?.best_answer_selected_at || null
         };
       }).filter(item => item !== null);
     }
@@ -637,47 +623,13 @@ export default async function Home({ searchParams }: HomeProps) {
             {/* カテゴリ */}
             {session && <InterestCategoriesSection userId={userId} />}
 
-         
-            {/* 解決済み */}
+            {/* Google広告・TOPページ中央コンテンツ部（カテゴリの下） */}
+            <GoogleAdTop />
+
+            {/* 相談受付中 / 最新の解決済み タブ */}
             <ResolvedSection 
               bestAnswers={bestAnswersWithUsers} 
               waitingPosts={waitingPostsFiltered}
-            />
-
-            {/* Google広告・TOPページ中央コンテンツ部 */}
-            <GoogleAdTop />
-
-            {/* 相談受付中見出し */}
-            <h3 className="m-1.5 mb-2 px-0 font-bold text-base text-[#ff6b6b]">
-              <i className="fas fa-comments mr-1"></i>相談受付中
-            </h3>
-
-            {/* 殿堂入りヘッダー（未使用） */}
-            {false && sortBy === 'statistics' && hallOfFamePosts.length > 0 && (
-              <div className="mb-4">
-                <div className="my-4 px-2 font-bold text-xl">
-                  <i className="text-yellow-500 fas fa-crown"></i>殿堂入り
-                </div>
-                <div className="mx-1.5 mb-2 text-gray-600 text-xs">
-                  50票以上獲得したら殿堂入り相談に認定！ハナシテで悩みを解決しましょう！
-                </div>
-              </div>
-            )}
-
-            {/* 投稿一覧 - 無限スクロール */}
-            <InfinitePostList 
-              initialPosts={posts?.map(post => ({
-                id: post.id,
-                title: post.title,
-                content: (post as any).content || '',
-                created_at: post.created_at,
-                deadline_at: (post as any).deadline_at || null,
-                user_name: (post as any).user_name || null,
-                avatar_url: (post as any).avatar_url || '/images/local-avatars/default-avatar.webp',
-                category_id: (post as any).category_id || null,
-                category_name: (post as any).categories?.name || null
-              })) || []}
-              sortBy={sortBy}
             />
               </>
             )}
@@ -686,7 +638,7 @@ export default async function Home({ searchParams }: HomeProps) {
           {/* スマホビュー: 最新のコメント */}
           <section className="md:hidden mt-6 px-2">
             <h3 className="mb-2 px-2 font-bold text-base text-[#ff6b6b]">
-              最新の回答<i className="fas fa-comment"></i>
+              最新のコメント<i className="fas fa-comment"></i>
             </h3>
             <LatestCommentsMobile />
           </section>
@@ -753,7 +705,7 @@ async function LatestCommentsMobile() {
           <Link href={`/posts/${comment.post_id}`} className="block hover:bg-gray-100 px-2 py-2 transition-colors">
             <span className="block text-gray-900 text-sm">{truncateText(comment.content, 26)}</span>
             <span className="block text-gray-500 text-xs">{comment.post_title}</span>
-            <span className="text-gray-400 text-xs">{comment.user_name}さん</span>
+            <span className="text-gray-400 text-xs">{comment.user_name}さん　{new Date(comment.created_at).toLocaleDateString('ja-JP', { year: '2-digit', month: 'numeric', day: 'numeric' })} {new Date(comment.created_at).toLocaleTimeString('ja-JP', { hour: '2-digit', minute: '2-digit' })}</span>
           </Link>
         </li>
       ))}
@@ -802,7 +754,7 @@ async function InterestCategoriesSection({ userId }: { userId: string | number |
         .in('status', ['publish', 'published'])
         .is('best_answer_id', null)
         .order('created_at', { ascending: false })
-        .limit(5);
+        .limit(2);
 
       return { category, posts: posts || [] };
     })
@@ -828,35 +780,19 @@ async function InterestCategoriesSection({ userId }: { userId: string | number |
   );
 
   return (
-    <div className="mb-4">
-      <h3 className="m-1.5 mb-2 px-0 font-bold text-base text-[#ff6b6b]">
-        カテゴリ
-        <Link href="/profileset/" className="ml-2 text-sm">
-          追加 <i className="fas fa-plus-square"></i>
-        </Link>
-      </h3>
-      <div className="space-y-2 px-2">
+    <div className="mx-1.5 mb-4">
+      <div className="grid grid-cols-2 gap-2">
         {allPosts.map((post: any, index: number) => (
-          <div key={`${post.id}-${index}`} className="relative bg-white hover:shadow-md p-2 border border-gray-300 rounded-md transition-all hover:-translate-y-1">
-            <Link href={`/posts/${post.id}`} className="block pr-16">
-              <h3 className="font-bold text-gray-900 text-base md:text-lg leading-relaxed">
+          <div key={`${post.id}-${index}`} className="relative bg-white hover:shadow-md p-2 border border-[#ffe0d6] rounded-md transition-all">
+            <Link href={`/posts/${post.id}`} className="block">
+              <h4 className="font-bold text-gray-900 text-sm leading-relaxed line-clamp-2">
                 {post.title}
-              </h3>
-              <div className="mt-2 flex items-center gap-1 text-gray-500 text-xs">
-                <div className="w-4 h-4 rounded-full overflow-hidden border border-gray-200 inline-block mr-1 shrink-0">
-                  <img
-                    src={post.avatar_url || '/images/local-avatars/default-avatar.webp'}
-                    alt="相談者"
-                    className="w-full h-full object-cover scale-125"
-                  />
-                </div>
-                <span className="truncate">{post.user_name || 'ゲスト'}さん</span>
-              </div>
+              </h4>
             </Link>
             {post.categories?.name && post.category_id && (
               <Link
                 href={`/category/${post.category_id}`}
-                className="absolute bottom-3 right-3 inline-block px-2 py-0.5 text-xs font-medium text-[#bf360c] bg-white border border-[#ffccbc] rounded whitespace-nowrap hover:bg-pink-50 transition-colors z-10"
+                className="mt-1 inline-block px-2 py-0.5 text-xs font-semibold text-[#d32f2f] bg-white border border-[#d32f2f] rounded whitespace-nowrap hover:bg-pink-50 transition-colors"
               >
                 {post.categories.name}
               </Link>
