@@ -76,11 +76,13 @@ export async function POST() {
       });
     }
 
-    // 未処理のソースを取得
+    // 未処理のソースを取得（同時実行防止のため、取得と同時にロック）
+    // まず未処理のソースを1件取得
     const { data: sources, error: sourcesError } = await supabase
       .from('auto_consultation_sources')
       .select('*')
       .eq('is_processed', false)
+      .is('processing_started_at', null) // 処理中でないもののみ
       .order('created_at', { ascending: true })
       .limit(1);
 
@@ -101,6 +103,26 @@ export async function POST() {
     }
 
     const source = sources[0];
+    
+    // 処理開始をマーク（同時実行防止のロック）
+    const lockTime = new Date().toISOString();
+    const { data: lockedSource, error: lockError } = await supabase
+      .from('auto_consultation_sources')
+      .update({ processing_started_at: lockTime })
+      .eq('id', source.id)
+      .is('processing_started_at', null) // まだロックされていない場合のみ
+      .select()
+      .single();
+
+    if (lockError || !lockedSource) {
+      console.log('ソースは既に他のプロセスで処理中です');
+      return NextResponse.json({
+        success: false,
+        message: 'ソースは既に他のプロセスで処理中です',
+        skipped: true,
+      });
+    }
+
     console.log(`ソースを処理: ${source.id} - ${source.source_title}`);
 
     // post-from-source APIを呼び出し
