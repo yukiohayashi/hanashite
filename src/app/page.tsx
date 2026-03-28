@@ -542,8 +542,8 @@ export default async function Home({ searchParams }: HomeProps) {
             {/* 注目の相談（最新順時のみ表示） */}
             {(sortBy === 'recommend' || sortBy === 'top_post') && featuredPosts.length > 0 && (
               <>
-                <h3 className="m-1.5 mb-2 px-0 font-bold text-base text-[#ff6b6b]">注目の相談</h3>
-                <div className="mx-1.5 mb-4">
+                <h3 className="m-1.5 mb-1 px-0 font-bold text-base text-[#ff6b6b]">注目の相談</h3>
+                <div className="mx-1.5 mb-2">
                   {(() => {
                     const post = featuredPosts[0];
                     const rawContent = (post as any).content || '';
@@ -584,7 +584,7 @@ export default async function Home({ searchParams }: HomeProps) {
 
             {/* 最新2列（最新順時のみ表示） */}
             {(sortBy === 'recommend' || sortBy === 'top_post') && featuredPosts.length > 1 && (
-              <div className="gap-2 grid grid-cols-2 mx-1.5 mb-4 w-auto">
+              <div className="gap-2 grid grid-cols-2 mx-1.5 mb-2 w-auto">
                 {featuredPosts.slice(1, 3).map((post) => {
                   const rawContent = (post as any).content || '';
                   const cleanContent = stripHtmlTags(rawContent);
@@ -780,7 +780,7 @@ async function InterestCategoriesSection({ userId }: { userId: string | number |
   );
 
   return (
-    <div className="mx-1.5 mb-4">
+    <div className="mx-1.5 mb-2">
       <div className="grid grid-cols-2 gap-2">
         {allPosts.map((post: any, index: number) => (
           <div key={`${post.id}-${index}`} className="relative bg-white hover:shadow-md p-2 border border-[#ffe0d6] rounded-md transition-all">
