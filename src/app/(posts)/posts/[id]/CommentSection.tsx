@@ -250,7 +250,7 @@ export default function CommentSection({ postId, initialComments, totalCount, po
         </h3>
       </div>
 
-      {!session && (
+      {!session && !bestAnswerId && (
         <div className="bg-[#fff0eb] mb-6 p-4 border border-[#ffab91] rounded-lg text-center">
           <p className="mb-2 text-[#d84315] text-sm">
             💡 <strong>ログインして回答すると</strong>

@@ -18,6 +18,11 @@ interface Category {
   icon?: string | null;
 }
 
+interface Keyword {
+  id: number;
+  keyword: string;
+}
+
 interface SidebarClientProps {
   categories: Category[];
 }
@@ -35,6 +40,7 @@ export default function SidebarClient({ categories }: SidebarClientProps) {
   const [commentLikesRanking, setCommentLikesRanking] = useState<RankingUser[]>([]);
   const [interestCategories, setInterestCategories] = useState<string[]>([]);
   const [interestCategoryObjects, setInterestCategoryObjects] = useState<Category[] | null>(null);
+  const [popularKeywords, setPopularKeywords] = useState<Keyword[]>([]);
 
   const fetchBestAnswerRanking = async () => {
     const { data: postsWithBestAnswer } = await supabase
@@ -144,9 +150,19 @@ export default function SidebarClient({ categories }: SidebarClientProps) {
   };
 
   useEffect(() => {
+    const fetchPopularKeywords = async () => {
+      const { data } = await supabase
+        .from('keywords')
+        .select('id, keyword')
+        .order('view_count', { ascending: false })
+        .limit(5);
+      if (data) setPopularKeywords(data);
+    };
+
     Promise.all([
       fetchBestAnswerRanking(),
-      fetchCommentLikesRanking()
+      fetchCommentLikesRanking(),
+      fetchPopularKeywords()
     ]).catch(err => console.error('Sidebar data fetch error:', err));
   }, []);
 
@@ -201,6 +217,26 @@ export default function SidebarClient({ categories }: SidebarClientProps) {
 
   return (
     <nav className="space-y-4">
+      {/* みんなの検索ワード */}
+      {popularKeywords.length > 0 && (
+        <div>
+          <h3 className="mb-2 px-0 font-bold text-[#ff6b6b] text-base">
+            🔥 みんなの検索ワード
+          </h3>
+          <div className="flex flex-wrap gap-2">
+            {popularKeywords.map((keyword) => (
+              <Link
+                key={keyword.id}
+                href={`/keyword/${keyword.id}`}
+                className="inline-block bg-white hover:bg-pink-50 px-3 py-1 border border-[#d32f2f] rounded-full text-[#d32f2f] text-sm font-semibold transition-colors"
+              >
+                {keyword.keyword}
+              </Link>
+            ))}
+          </div>
+        </div>
+      )}
+
       {/* カテゴリ */}
       <div>
         <h3 className="mb-2 px-0 font-bold text-[#ff6b6b] text-base">

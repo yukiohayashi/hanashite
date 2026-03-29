@@ -47,12 +47,12 @@ export default function MobileLeftSidebar({ isOpen, onClose }: MobileLeftSidebar
 
   useEffect(() => {
     const fetchData = async () => {
-      // 人気キーワード
+      // 人気キーワード（スマホビューは3件）
       const { data: popularData } = await supabase
         .from('keywords')
         .select('id, keyword')
         .order('view_count', { ascending: false })
-        .limit(7);
+        .limit(3);
       if (popularData) setPopularKeywords(popularData);
 
       // 最新キーワード

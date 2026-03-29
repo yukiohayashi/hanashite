@@ -53,7 +53,7 @@ export default function SearchForm({ userId: _userId }: SearchFormProps) {
           <input
             type="search"
             className="p-2.5 border border-gray-300 focus:border-transparent rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-400 w-full text-base"
-            placeholder="コメントも検索できます"
+            placeholder="同じ悩みを検索できます"
             name="s"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
