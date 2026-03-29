@@ -6,6 +6,7 @@ import Header from '@/components/Header';
 import Footer from '@/components/Footer';
 import Sidebar from '@/components/Sidebar';
 import MyPageMenu from '@/components/MyPageMenu';
+import RightSidebar from '@/components/RightSidebar';
 import { notFound } from 'next/navigation';
 
 export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }): Promise<Metadata> {
@@ -400,7 +401,7 @@ export default async function UserPage({ params }: { params: Promise<{ slug: str
 
         {/* 右サイドバー */}
         <aside className="hidden md:block w-[280px] bg-[#fff8f6] p-2 rounded-lg">
-          <MyPageMenu />
+          {session ? <MyPageMenu /> : <RightSidebar />}
         </aside>
       </main>
       

@@ -53,6 +53,20 @@ export default function AddKeywordButton({ postId, isAdmin }: AddKeywordButtonPr
         keywordId = newKeyword.id;
       }
 
+      // 既存の関連付けをチェック
+      const { data: existingLink } = await supabase
+        .from('post_keywords')
+        .select('id')
+        .eq('post_id', postId)
+        .eq('keyword_id', keywordId)
+        .single();
+
+      if (existingLink) {
+        alert('このキーワードは既に追加されています');
+        setLoading(false);
+        return;
+      }
+
       // 投稿とキーワードを関連付け
       const { error: linkError } = await supabase
         .from('post_keywords')
