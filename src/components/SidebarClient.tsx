@@ -41,6 +41,7 @@ export default function SidebarClient({ categories }: SidebarClientProps) {
   const [interestCategories, setInterestCategories] = useState<string[]>([]);
   const [interestCategoryObjects, setInterestCategoryObjects] = useState<Category[] | null>(null);
   const [popularKeywords, setPopularKeywords] = useState<Keyword[]>([]);
+  const [latestKeywords, setLatestKeywords] = useState<Keyword[]>([]);
 
   const fetchBestAnswerRanking = async () => {
     const { data: postsWithBestAnswer } = await supabase
@@ -159,10 +160,20 @@ export default function SidebarClient({ categories }: SidebarClientProps) {
       if (data) setPopularKeywords(data);
     };
 
+    const fetchLatestKeywords = async () => {
+      const { data } = await supabase
+        .from('keywords')
+        .select('id, keyword')
+        .order('created_at', { ascending: false })
+        .limit(5);
+      if (data) setLatestKeywords(data);
+    };
+
     Promise.all([
       fetchBestAnswerRanking(),
       fetchCommentLikesRanking(),
-      fetchPopularKeywords()
+      fetchPopularKeywords(),
+      fetchLatestKeywords()
     ]).catch(err => console.error('Sidebar data fetch error:', err));
   }, []);
 
@@ -225,6 +236,26 @@ export default function SidebarClient({ categories }: SidebarClientProps) {
           </h3>
           <div className="flex flex-wrap gap-2">
             {popularKeywords.map((keyword) => (
+              <Link
+                key={keyword.id}
+                href={`/keyword/${keyword.id}`}
+                className="inline-block bg-white hover:bg-pink-50 px-3 py-1 border border-[#d32f2f] rounded-full text-[#d32f2f] text-sm font-semibold transition-colors"
+              >
+                {keyword.keyword}
+              </Link>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* 最新キーワード */}
+      {latestKeywords.length > 0 && (
+        <div>
+          <h3 className="mb-2 px-0 font-bold text-[#ff6b6b] text-base">
+            <i className="fas fa-clock mr-1"></i> 最新キーワード
+          </h3>
+          <div className="flex flex-wrap gap-2">
+            {latestKeywords.map((keyword) => (
               <Link
                 key={keyword.id}
                 href={`/keyword/${keyword.id}`}

@@ -1,6 +1,11 @@
 import { NextResponse } from 'next/server';
 import { supabase } from '@/lib/supabase';
 
+// aiMemberProbability%の確率でAI会員、残りはゲスト投稿（user_id NULL）
+function shouldUseGuestPost(aiMemberProbability: number): boolean {
+  return Math.random() * 100 > aiMemberProbability;
+}
+
 export async function POST() {
   try {
     console.log('=== AI自動コメント 一括実行開始 ===');
@@ -307,13 +312,11 @@ export async function POST() {
       let postLikesAddedForThisPost = 0;
       if (Math.random() * 100 <= postLikeProbability) {
         try {
-          const useAiMember = Math.random() * 100 <= aiMemberProbability;
-          const status = useAiMember ? 4 : 2;
-
+          // AI会員（status: 4）のみを使用
           const { data: users } = await supabase
             .from('users')
             .select('id')
-            .eq('status', status)
+            .eq('status', 4)
             .limit(50);
 
           if (users && users.length > 0) {
@@ -493,12 +496,15 @@ export async function POST() {
               console.log(`生成されたコメント（処理後）: ${commentText}`);
 
               if (commentText) {
-                console.log('コメントをデータベースに挿入中...');
+                // aiMemberProbabilityに基づいてゲスト投稿かどうかを判定
+                const useGuestPost = shouldUseGuestPost(aiMemberProbability);
+                const finalUserId = useGuestPost ? null : randomUser.id;
+                console.log(`コメントをデータベースに挿入中... (${useGuestPost ? 'ゲスト投稿' : `ユーザーID: ${finalUserId}`})`);
                 const { data: comment, error: insertError } = await supabase
                   .from('comments')
                   .insert({
                     post_id: post.id,
-                    user_id: randomUser.id,
+                    user_id: finalUserId,
                     content: commentText,
                     status: 'approved',
                     created_at: new Date().toISOString(),
@@ -687,12 +693,15 @@ export async function POST() {
                 continue;
               }
 
-              console.log('コメントをデータベースに挿入中...');
+              // aiMemberProbabilityに基づいてゲスト投稿かどうかを判定
+              const useGuestPost2 = shouldUseGuestPost(aiMemberProbability);
+              const finalUserId2 = useGuestPost2 ? null : randomUser.id;
+              console.log(`コメントをデータベースに挿入中... (${useGuestPost2 ? 'ゲスト投稿' : `ユーザーID: ${finalUserId2}`})`);
               const { data: comment, error: insertError } = await supabase
                 .from('comments')
                 .insert({
                   post_id: post.id,
-                  user_id: randomUser.id,
+                  user_id: finalUserId2,
                   content: commentText,
                   status: 'approved',
                   created_at: new Date().toISOString(),
@@ -714,15 +723,13 @@ export async function POST() {
               }
             }
           } else if (selectedAction === 'user_reply') {
-            // コメント返信（一般ユーザー）
+            // コメント返信（AI会員のみ使用）
             const targetComment = parentComments[Math.floor(Math.random() * parentComments.length)];
-            const useAiMember = Math.random() * 100 <= aiMemberProbability;
-            const status = useAiMember ? 4 : 2;
 
             const { data: replyUsers } = await supabase
               .from('users')
               .select('id')
-              .eq('status', status)
+              .eq('status', 4)
               .limit(50);
 
             if (replyUsers && replyUsers.length > 0) {

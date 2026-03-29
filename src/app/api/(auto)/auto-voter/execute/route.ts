@@ -2,19 +2,26 @@ import { NextRequest, NextResponse } from 'next/server';
 import { supabase } from '@/lib/supabase';
 import OpenAI from 'openai';
 
-// ランダムなAI会員または編集者を取得
-async function getRandomUser(aiMemberProbability: number = 70): Promise<number> {
+// ランダムなAI会員またはゲスト（user_id NULL）を取得
+// aiMemberProbability: AI会員の確率（残りはゲスト投稿）
+async function getRandomUser(aiMemberProbability: number = 70): Promise<number | null> {
+  // aiMemberProbability%の確率でAI会員、残りはゲスト投稿（user_id NULL）
   const useAiMember = Math.random() * 100 <= aiMemberProbability;
-  const status = useAiMember ? 4 : 2; // 4: AI会員, 2: 編集者
+  
+  if (!useAiMember) {
+    // ゲスト投稿（user_id NULL）
+    return null;
+  }
 
   const { data } = await supabase
     .from('users')
     .select('id')
-    .eq('status', status)
+    .eq('status', 4) // AI会員のみ
     .limit(100);
 
   if (!data || data.length === 0) {
-    throw new Error('ユーザーが見つかりません');
+    // AI会員がいない場合はゲスト投稿にフォールバック
+    return null;
   }
 
   const randomIndex = Math.floor(Math.random() * data.length);
@@ -30,7 +37,7 @@ async function executeVote(_postId: number, _userId: number) {
 // コメント生成・投稿
 async function executeComment(
   postId: number, 
-  userId: number, 
+  userId: number | null, 
   openaiApiKey: string, 
   commentPrompt: string,
   settings: Record<string, string>
@@ -46,12 +53,16 @@ async function executeComment(
     throw new Error('投稿が見つかりません');
   }
 
-  // ユーザー情報を取得
-  const { data: user } = await supabase
-    .from('users')
-    .select('name, profile, status')
-    .eq('id', userId)
-    .single();
+  // ユーザー情報を取得（ゲスト投稿の場合はnull）
+  let user: { name: string; profile: string | null; status: number } | null = null;
+  if (userId !== null) {
+    const { data: userData } = await supabase
+      .from('users')
+      .select('name, profile, status')
+      .eq('id', userId)
+      .single();
+    user = userData;
+  }
 
   // コメント設定を取得
   const diversity = parseInt(settings.diversity || '30') / 100;
@@ -126,48 +137,53 @@ ${contentInstruction}
     throw new Error('コメント生成に失敗しました');
   }
 
-  // まず投票を実行
-  await executeVote(postId, userId);
+  let finalUserId: number | null = userId;
 
-  // 同じユーザーが同じ投稿に既に親コメントを投稿していないかチェック
-  const { data: existingParentComment } = await supabase
-    .from('comments')
-    .select('id')
-    .eq('post_id', postId)
-    .eq('user_id', userId)
-    .is('parent_id', null)
-    .single();
+  // ゲスト投稿（user_id NULL）の場合は重複チェックと投票をスキップ
+  if (userId !== null) {
+    // まず投票を実行
+    await executeVote(postId, userId);
 
-  let finalUserId = userId;
-
-  if (existingParentComment) {
-    console.log(`⚠️ ユーザーID: ${userId} は既に親コメントを投稿済み。他のユーザーIDを探します...`);
-    
-    // 既に親コメントを投稿したユーザーIDを取得
-    const { data: existingUserIds } = await supabase
+    // 同じユーザーが同じ投稿に既に親コメントを投稿していないかチェック
+    const { data: existingParentComment } = await supabase
       .from('comments')
-      .select('user_id')
-      .eq('post_id', postId)
-      .is('parent_id', null);
-
-    const usedUserIds = existingUserIds?.map(c => c.user_id) || [];
-    
-    // 利用可能なユーザーIDを取得（既に投稿していないユーザー）
-    const { data: availableUsers } = await supabase
-      .from('users')
       .select('id')
-      .not('id', 'in', `(${usedUserIds.join(',')})`)
-      .limit(100);
+      .eq('post_id', postId)
+      .eq('user_id', userId)
+      .is('parent_id', null)
+      .single();
 
-    if (!availableUsers || availableUsers.length === 0) {
-      console.log('❌ 利用可能なユーザーIDがありません');
-      throw new Error('このユーザーは既にこの投稿にコメントしています');
+    if (existingParentComment) {
+      console.log(`⚠️ ユーザーID: ${userId} は既に親コメントを投稿済み。他のユーザーIDを探します...`);
+      
+      // 既に親コメントを投稿したユーザーIDを取得
+      const { data: existingUserIds } = await supabase
+        .from('comments')
+        .select('user_id')
+        .eq('post_id', postId)
+        .is('parent_id', null);
+
+      const usedUserIds = existingUserIds?.map(c => c.user_id) || [];
+      
+      // 利用可能なユーザーIDを取得（既に投稿していないユーザー）
+      const { data: availableUsers } = await supabase
+        .from('users')
+        .select('id')
+        .not('id', 'in', `(${usedUserIds.join(',')})`)
+        .limit(100);
+
+      if (!availableUsers || availableUsers.length === 0) {
+        console.log('❌ 利用可能なユーザーIDがありません');
+        throw new Error('このユーザーは既にこの投稿にコメントしています');
+      }
+
+      // ランダムに1人選択
+      const randomUser = availableUsers[Math.floor(Math.random() * availableUsers.length)];
+      finalUserId = randomUser.id;
+      console.log(`✅ 新しいユーザーID: ${finalUserId} を使用します`);
     }
-
-    // ランダムに1人選択
-    const randomUser = availableUsers[Math.floor(Math.random() * availableUsers.length)];
-    finalUserId = randomUser.id;
-    console.log(`✅ 新しいユーザーID: ${finalUserId} を使用します`);
+  } else {
+    console.log('👤 ゲスト投稿（user_id NULL）としてコメントを投稿します');
   }
 
   // コメントを投稿
@@ -194,62 +210,65 @@ ${contentInstruction}
 
   console.log('コメント挿入成功:', comment);
   
-  // 自分のコメント以外のランダムなコメントにいいね（必ず実行）
-  try {
-    const { data: otherComments } = await supabase
-      .from('comments')
-      .select('id')
-      .eq('post_id', postId)
-      .eq('status', 'approved')
-      .neq('user_id', finalUserId)
-      .limit(100);
-
-    if (otherComments && otherComments.length > 0) {
-      const randomComment = otherComments[Math.floor(Math.random() * otherComments.length)];
-      
-      // 既にいいね済みかチェック
-      const { data: existingLike } = await supabase
-        .from('likes')
+  // ゲスト投稿の場合はいいね処理をスキップ
+  if (finalUserId !== null) {
+    // 自分のコメント以外のランダムなコメントにいいね（必ず実行）
+    try {
+      const { data: otherComments } = await supabase
+        .from('comments')
         .select('id')
-        .eq('user_id', finalUserId)
-        .eq('like_type', 'comment')
-        .eq('target_id', randomComment.id)
-        .single();
+        .eq('post_id', postId)
+        .eq('status', 'approved')
+        .neq('user_id', finalUserId)
+        .limit(100);
 
-      if (!existingLike) {
-        // いいねを追加
-        await supabase.from('likes').insert({
-          user_id: finalUserId,
-          like_type: 'comment',
-          target_id: randomComment.id,
-          created_at: new Date().toISOString(),
-        });
-
-        // like_countsテーブルを更新
-        const { data: currentCount } = await supabase
-          .from('like_counts')
-          .select('like_count')
-          .eq('target_id', randomComment.id)
+      if (otherComments && otherComments.length > 0) {
+        const randomComment = otherComments[Math.floor(Math.random() * otherComments.length)];
+        
+        // 既にいいね済みかチェック
+        const { data: existingLike } = await supabase
+          .from('likes')
+          .select('id')
+          .eq('user_id', finalUserId)
           .eq('like_type', 'comment')
+          .eq('target_id', randomComment.id)
           .single();
 
-        const newCount = (currentCount?.like_count || 0) + 1;
-
-        await supabase
-          .from('like_counts')
-          .upsert({
-            target_id: randomComment.id,
+        if (!existingLike) {
+          // いいねを追加
+          await supabase.from('likes').insert({
+            user_id: finalUserId,
             like_type: 'comment',
-            like_count: newCount,
-            updated_at: new Date().toISOString(),
+            target_id: randomComment.id,
+            created_at: new Date().toISOString(),
           });
-        
-        console.log(`💚 コメントにいいねしました（コメントID: ${randomComment.id}）`);
+
+          // like_countsテーブルを更新
+          const { data: currentCount } = await supabase
+            .from('like_counts')
+            .select('like_count')
+            .eq('target_id', randomComment.id)
+            .eq('like_type', 'comment')
+            .single();
+
+          const newCount = (currentCount?.like_count || 0) + 1;
+
+          await supabase
+            .from('like_counts')
+            .upsert({
+              target_id: randomComment.id,
+              like_type: 'comment',
+              like_count: newCount,
+              updated_at: new Date().toISOString(),
+            });
+          
+          console.log(`💚 コメントにいいねしました（コメントID: ${randomComment.id}）`);
+        }
       }
+    } catch (error) {
+      console.error('コメントいいねエラー:', error);
+      // エラーでもコメント投稿は成功しているので続行
     }
-  } catch (error) {
-    console.error('コメントいいねエラー:', error);
-    // エラーでもコメント投稿は成功しているので続行
   }
   
   return { commentId: comment?.id, commentText };
@@ -527,6 +546,9 @@ export async function POST(request: NextRequest) {
     // アクション実行
     switch (action_type) {
       case 'vote':
+        if (userId === null) {
+          throw new Error('投票にはユーザーIDが必要です');
+        }
         result = await executeVote(post_id, userId);
         message = `投票を実行しました（選択肢ID: ${result.choiceId}）`;
         break;
@@ -540,11 +562,17 @@ export async function POST(request: NextRequest) {
         break;
 
       case 'like_post':
+        if (userId === null) {
+          throw new Error('いいねにはユーザーIDが必要です');
+        }
         result = await executeLikePost(post_id, userId);
         message = '投稿にいいねしました';
         break;
 
       case 'like_comment':
+        if (userId === null) {
+          throw new Error('いいねにはユーザーIDが必要です');
+        }
         result = await executeLikeComment(post_id, userId);
         message = `コメントにいいねしました（コメントID: ${result.commentId}）`;
         break;

@@ -770,7 +770,7 @@ export default function AutoVoterSettings() {
                   max="100"
                 />
                 <p className="mt-1 text-xs text-gray-500">
-                  0%: 編集者のみ、100%: AI会員のみ
+                  0%: ゲスト投稿のみ、100%: AI会員のみ
                 </p>
               </div>
             </div>
@@ -836,7 +836,7 @@ export default function AutoVoterSettings() {
             <h3 className="text-sm font-medium text-yellow-800 mb-2">⚠️ 注意事項</h3>
             <ul className="text-sm text-yellow-700 space-y-1">
               <li>• 実行間隔は最短1分、最長24時間です</li>
-              <li>• AI会員確率は0%で編集者のみ、100%でAI会員のみ使用</li>
+              <li>• AI会員確率は0%でゲスト投稿のみ、100%でAI会員のみ使用</li>
               <li>• コメント数は1件推奨（自然な投稿間隔を保つため）</li>
               <li>• 自動実行はVPSのcrontabで動作します</li>
               <li>• 開始/停止ボタンでCRON実行を制御できます</li>
