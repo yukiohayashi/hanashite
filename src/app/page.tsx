@@ -500,6 +500,7 @@ export default async function Home({ searchParams }: HomeProps) {
 
         {/* メインコンテンツ */}
         <div className="flex-1 max-w-[760px] px-1 md:px-4">
+          <h1 className="sr-only">恋愛掲示板ハナシテ - 恋愛・結婚の悩みを匿名で相談</h1>
           <section>
             {/* 検索ボックス */}
             <div className="p-2.5">
