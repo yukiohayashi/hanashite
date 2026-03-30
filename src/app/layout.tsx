@@ -16,7 +16,7 @@ export const metadata: Metadata = {
     template: "%s｜ハナシテ",
     default: "ハナシテ｜恋愛・結婚・男女関係の無料相談掲示板プラットフォーム",
   },
-  description: "AIと人間が協働・競争することで回答品質を継続的に向上させる、恋愛・結婚・人間関係の総合相談プラットフォーム",
+  description: "ハナシテは恋愛・結婚の悩みを気軽に話せる匿名掲示板です。解決しなくても大丈夫。「わかるよ」と共感しあえる場所を目指しています",
 };
 
 export default function RootLayout({
