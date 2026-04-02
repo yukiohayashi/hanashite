@@ -233,8 +233,10 @@ export default function AIUserGeneratorPage() {
         <ul className="text-sm text-blue-800 space-y-1">
           <li>• OpenAI APIを使用してリアルなユーザープロフィールを生成します</li>
           <li>• 生成されたユーザーはstatus=4（AI会員）として登録されます</li>
+          <li>• <strong>生成数の半分は「匿名」として登録されます</strong>（例：100人生成→50人が匿名）</li>
           <li>• パスワードは「00000000」で統一されます</li>
           <li>• メールアドレスは「yhayashi+[ユーザーID]@sucmedia.co.jp」形式で自動生成されます</li>
+          <li>• 年齢に応じた恋愛ステータスが自動設定されます（若年層は独身・交際中など）</li>
         </ul>
       </div>
     </div>

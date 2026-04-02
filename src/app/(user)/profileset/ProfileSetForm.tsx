@@ -39,6 +39,7 @@ interface User {
   avatar_seed?: string;
   use_custom_image?: boolean;
   show_post_history?: boolean;
+  show_description?: boolean;
 }
 
 interface ProfileSetFormProps {
@@ -91,6 +92,7 @@ export default function ProfileSetForm({ user, categories, isFirstTime }: Profil
   const [mei, setMei] = useState(user.mei || '');
   const [emailSubscription, setEmailSubscription] = useState(user.email_subscription ?? true);
   const [showPostHistory, setShowPostHistory] = useState(user.show_post_history ?? false);
+  const [showDescription, setShowDescription] = useState(user.show_description ?? true);
   const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
   const [avatarFile, setAvatarFile] = useState<File | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -185,6 +187,7 @@ export default function ProfileSetForm({ user, categories, isFirstTime }: Profil
     if (job !== (user.job || '')) changedFields.push('職業');
     if (emailSubscription !== (user.email_subscription ?? true)) changedFields.push('メール配信');
     if (showPostHistory !== (user.show_post_history ?? false)) changedFields.push('相談・回答履歴の公開');
+    if (showDescription !== (user.show_description ?? true)) changedFields.push('自己紹介の公開');
     if (avatarFile) changedFields.push('プロフィール画像');
     if (imageMode !== (user.use_custom_image ? 'upload' : (user.avatar_seed ? 'avatar' : 'none'))) changedFields.push('アバター設定');
     
@@ -236,6 +239,7 @@ export default function ProfileSetForm({ user, categories, isFirstTime }: Profil
       formData.append('mei', mei);
       formData.append('emailSubscription', emailSubscription ? '1' : '0');
       formData.append('showPostHistory', showPostHistory ? '1' : '0');
+      formData.append('showDescription', showDescription ? '1' : '0');
       formData.append('interestCategories', JSON.stringify(selectedCategories));
       
       // ローカルアバター関連の情報を追加
@@ -373,6 +377,19 @@ export default function ProfileSetForm({ user, categories, isFirstTime }: Profil
             onChange={(e) => setProfile(e.target.value)}
             className="w-full min-h-[80px] resize-y"
           />
+        </div>
+        
+        {/* 自己紹介をプロフィールに公開する */}
+        <div className="mb-4">
+          <label className="flex items-center cursor-pointer">
+            <input
+              type="checkbox"
+              checked={showDescription}
+              onChange={(e) => setShowDescription(e.target.checked)}
+              className="mr-2 rounded focus:ring-orange-400 w-4 h-4 text-orange-500"
+            />
+            <span className="text-gray-700">自己紹介を<a href={profileSlug ? `/users/${profileSlug}` : `/users/${user.id}`} className="text-orange-500 hover:underline">プロフィール</a>に公開する</span>
+          </label>
         </div>
         
         {/* 相談・回答履歴をプロフィールに公開する */}

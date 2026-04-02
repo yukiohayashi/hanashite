@@ -41,6 +41,7 @@ interface User {
   avatar_seed: string | null;
   use_custom_image: boolean | null;
   show_post_history: boolean | null;
+  show_description: boolean | null;
 }
 
 interface Post {
@@ -295,7 +296,7 @@ export default async function UserPage({ params }: { params: Promise<{ slug: str
                   )}
                 </div>
                 <p className="text-gray-700 text-sm mt-2">
-                  {user.user_description || ''}
+                  {user.show_description !== false ? (user.user_description || '') : <span className="text-gray-400">（自己紹介は非公開です）</span>}
                   {isOwnProfile && (
                     <Link href="/profileset" className="text-orange-500 hover:underline ml-2">
                       【プロフィール編集】

@@ -244,7 +244,7 @@ export default function UsersTable({ users: initialUsers }: UsersTableProps) {
               </th>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100" onClick={() => handleSort('name')}>
                 <div className="flex items-center gap-1">
-                  ユーザー名
+                  ニックネーム
                   <ArrowUpDown className="w-3 h-3" />
                 </div>
               </th>
@@ -279,8 +279,12 @@ export default function UsersTable({ users: initialUsers }: UsersTableProps) {
           </thead>
           <tbody className="bg-white divide-y divide-gray-200">
             {sortedUsers.map((user) => (
-              <tr key={user.id} className="hover:bg-white">
-                <td className="px-6 py-4 whitespace-nowrap">
+              <tr 
+                key={user.id} 
+                className="hover:bg-gray-50 cursor-pointer"
+                onClick={() => handleSelectUser(user.id, !selectedUsers.includes(user.id))}
+              >
+                <td className="px-6 py-4 whitespace-nowrap" onClick={(e) => e.stopPropagation()}>
                   <input
                     type="checkbox"
                     checked={selectedUsers.includes(user.id)}
@@ -288,7 +292,7 @@ export default function UsersTable({ users: initialUsers }: UsersTableProps) {
                     className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
                   />
                 </td>
-                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900" onClick={(e) => e.stopPropagation()}>
                   <a
                     href={`/admin/users/${user.id}/edit`}
                     className="text-blue-600 hover:text-blue-800 hover:underline"
@@ -348,7 +352,7 @@ export default function UsersTable({ users: initialUsers }: UsersTableProps) {
                     {user.email}
                   </a>
                 </td>
-                <td className="px-6 py-4 whitespace-nowrap">
+                <td className="px-6 py-4 whitespace-nowrap" onClick={(e) => e.stopPropagation()}>
                   <select
                     value={user.status || 0}
                     onChange={(e) => handleChangeStatus(user.id, parseInt(e.target.value))}
@@ -362,7 +366,7 @@ export default function UsersTable({ users: initialUsers }: UsersTableProps) {
                     <option value="9">停止</option>
                   </select>
                 </td>
-                <td className="px-6 py-4 whitespace-nowrap">
+                <td className="px-6 py-4 whitespace-nowrap" onClick={(e) => e.stopPropagation()}>
                   <select
                     value={user.marriage || ''}
                     onChange={(e) => handleChangeMarriage(user.id, e.target.value || null)}
@@ -378,7 +382,7 @@ export default function UsersTable({ users: initialUsers }: UsersTableProps) {
                     <option value="other">その他</option>
                   </select>
                 </td>
-                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900" onClick={(e) => e.stopPropagation()}>
                   <a
                     href={`/admin/users/${user.id}/posts`}
                     className="text-blue-600 hover:text-blue-800 hover:underline font-medium"
@@ -389,7 +393,7 @@ export default function UsersTable({ users: initialUsers }: UsersTableProps) {
                 <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                   {new Date(user.created_at).toLocaleDateString('ja-JP')}
                 </td>
-                <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium" onClick={(e) => e.stopPropagation()}>
                   <button
                     onClick={() => handleDelete(user.id)}
                     disabled={loading === user.id}

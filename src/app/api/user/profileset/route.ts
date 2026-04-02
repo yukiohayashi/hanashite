@@ -32,6 +32,7 @@ export async function POST(request: Request) {
     const mei = formData.get('mei') as string;
     const emailSubscription = formData.get('emailSubscription') === '1';
     const showPostHistory = formData.get('showPostHistory') === '1';
+    const showDescription = formData.get('showDescription') === '1';
     const interestCategories = formData.get('interestCategories') as string;
     const avatarFile = formData.get('avatar') as File | null;
     
@@ -178,6 +179,7 @@ export async function POST(request: Request) {
       mei: mei || null,
       email_subscription: emailSubscription ? 1 : 0,
       show_post_history: showPostHistory ? 1 : 0,
+      show_description: showDescription,
       interest_categories: interestCategories || null,
       profile_registered: 1,
       updated_at: new Date().toISOString(),

@@ -16,31 +16,46 @@ export async function POST(request: NextRequest) {
     const generatedUsers = [];
     const errors = [];
 
+    // 半分を匿名にする
+    const anonymousCount = Math.floor(count / 2);
+    
     for (let i = 0; i < count; i++) {
       try {
         let userData;
+        const isAnonymous = i < anonymousCount; // 前半を匿名にする
 
-        if (use_ai) {
+        if (isAnonymous) {
+          // 匿名ユーザーを生成
+          userData = generateProfile();
+          userData.name = '匿名';
+        } else if (use_ai) {
           userData = await generateProfileWithAI();
         } else {
           userData = generateProfile();
         }
 
         if (userData) {
-          const userId = await insertUser(userData);
-          if (userId) {
-            generatedUsers.push(userData);
-            console.log(`User ${i + 1} created successfully:`, userData.name);
-          } else {
-            errors.push(`User ${i + 1}: Failed to insert into database`);
-            console.error(`User ${i + 1}: Failed to insert`);
+          try {
+            const userId = await insertUser(userData);
+            if (userId) {
+              generatedUsers.push(userData);
+              console.log(`User ${i + 1} created successfully:`, userData.name);
+            } else {
+              errors.push(`User ${i + 1}: insertUser returned null`);
+              console.error(`User ${i + 1}: insertUser returned null`);
+            }
+          } catch (insertError) {
+            const errMsg = insertError instanceof Error ? insertError.message : JSON.stringify(insertError);
+            errors.push(`User ${i + 1}: ${errMsg}`);
+            console.error(`User ${i + 1} insert error:`, insertError);
           }
         } else {
           errors.push(`User ${i + 1}: Failed to generate profile`);
           console.error(`User ${i + 1}: Failed to generate profile`);
         }
       } catch (userError) {
-        errors.push(`User ${i + 1}: ${userError instanceof Error ? userError.message : 'Unknown error'}`);
+        const errorMsg = userError instanceof Error ? userError.message : JSON.stringify(userError);
+        errors.push(`User ${i + 1}: ${errorMsg}`);
         console.error(`User ${i + 1} error:`, userError);
       }
     }
@@ -76,37 +91,87 @@ export async function POST(request: NextRequest) {
 function generateProfile() {
   const sex = Math.random() > 0.5 ? 'male' : 'female';
   const birthYear = Math.floor(Math.random() * (2005 - 1970 + 1)) + 1970;
+  const age = new Date().getFullYear() - birthYear;
 
   const prefectures = ['東京都', '神奈川県', '大阪府', '愛知県', '福岡県', '北海道', '埼玉県', '千葉県', '兵庫県', '京都府'];
-  const jobs = ['会社員', '主婦', 'フリーランス', '自営業', '公務員', '学生', 'パート', 'アルバイト', '無職', '経営者'];
-
-  const marriageStatus = ['single', 'married', 'divorced', 'not_specified'];
-  const marriage = marriageStatus[Math.floor(Math.random() * marriageStatus.length)];
-  const childCount = marriage === 'married' ? Math.floor(Math.random() * 4) : 0;
-
-  // シンプルなランダムニックネーム生成（70種類以上のプレフィックス + 4桁の数字）
-  const prefixes = [
-    // 英語
-    'user', 'member', 'guest', 'happy', 'lucky', 'smile', 'peace', 'dream', 'star', 'moon', 'sun', 'sky',
-    'love', 'hope', 'joy', 'kind', 'nice', 'cool', 'blue', 'green', 'red', 'pink',
-    // 食べ物（英語）
-    'apple', 'banana', 'orange', 'grape', 'melon', 'peach', 'cake', 'cookie', 'candy', 'chocolate', 'tea', 'coffee',
-    'bread', 'rice', 'pizza', 'pasta', 'salad', 'soup',
-    // 食べ物（日本語）
-    'りんご', 'みかん', 'いちご', 'すいか', 'おにぎり', 'すし', 'らーめん', 'うどん', 'たこやき',
-    'カレー', 'おでん', 'やきとり', 'てんぷら', 'そば', 'おちゃ',
-    // その他（日本語）
-    'ねこ', 'いぬ', 'うさぎ', 'はな', 'そら', 'うみ', 'やま', 'ほし', 'にじ',
-    'さくら', 'つき', 'ゆき', 'かぜ', 'ひかり', 'みどり', 'あお', 'あか'
-  ];
   
-  const prefix = prefixes[Math.floor(Math.random() * prefixes.length)];
-  const number = Math.floor(Math.random() * 9000) + 1000; // 1000〜9999
-  const userNicename = prefix + number;
+  // 年齢に応じた職業を設定
+  let jobs: string[];
+  if (age <= 22) {
+    // 若年層（18-22歳）は学生・アルバイト中心
+    jobs = ['学生', 'アルバイト', 'フリーター'];
+  } else if (age <= 30) {
+    // 20代後半は会社員・フリーランス中心
+    jobs = ['会社員', 'フリーランス', '公務員', 'アルバイト', '派遣社員'];
+  } else {
+    // 30代以上は多様な職業
+    jobs = ['会社員', '主婦', 'フリーランス', '自営業', '公務員', 'パート', '経営者'];
+  }
+
+  // 年齢に応じた恋愛ステータスを設定
+  let marriageStatus: string[];
+  let childCount = 0;
+  
+  if (age <= 24) {
+    // 24歳以下は独身のみ（結婚・離婚なし）
+    marriageStatus = ['single', 'not_specified'];
+  } else if (age <= 30) {
+    // 25-30歳は独身中心、一部既婚
+    marriageStatus = ['single', 'single', 'single', 'married', 'not_specified'];
+  } else if (age <= 40) {
+    // 31-40歳は既婚も増える
+    marriageStatus = ['single', 'married', 'married', 'divorced', 'not_specified'];
+  } else {
+    // 41歳以上は多様
+    marriageStatus = ['single', 'married', 'married', 'divorced', 'divorced', 'not_specified'];
+  }
+  
+  const marriage = marriageStatus[Math.floor(Math.random() * marriageStatus.length)];
+  
+  // 既婚者のみ子供あり（年齢に応じて）
+  if (marriage === 'married') {
+    if (age >= 30) {
+      childCount = Math.floor(Math.random() * 3) + 1; // 1-3人
+    } else if (age >= 26) {
+      childCount = Math.random() > 0.5 ? 1 : 0; // 0-1人
+    }
+  } else if (marriage === 'divorced' && age >= 35) {
+    childCount = Math.random() > 0.6 ? Math.floor(Math.random() * 2) + 1 : 0; // 40%で1-2人
+  }
+
+  // ニックネーム生成（半分はランダム英数4-8文字、半分は日本語風プレフィックス+数字）
+  let userNicename: string;
+  
+  if (Math.random() > 0.5) {
+    // ランダム英数4-8文字
+    const chars = 'abcdefghijklmnopqrstuvwxyz0123456789';
+    const nameLength = Math.floor(Math.random() * 5) + 4; // 4-8文字
+    userNicename = '';
+    for (let i = 0; i < nameLength; i++) {
+      userNicename += chars[Math.floor(Math.random() * chars.length)];
+    }
+  } else {
+    // 日本語風プレフィックス + 数字
+    const prefixes = [
+      // 食べ物（日本語）
+      'りんご', 'みかん', 'いちご', 'すいか', 'おにぎり', 'すし', 'らーめん', 'うどん', 'たこやき',
+      'カレー', 'おでん', 'やきとり', 'てんぷら', 'そば', 'おちゃ', 'カフェ', 'ケーキ', 'クッキー',
+      // 動物・自然（日本語）
+      'ねこ', 'いぬ', 'うさぎ', 'はな', 'そら', 'うみ', 'やま', 'ほし', 'にじ',
+      'さくら', 'つき', 'ゆき', 'かぜ', 'ひかり', 'みどり', 'あお', 'あか',
+      // 人名風
+      'ゆうちゃん', 'みーちゃん', 'あーちゃん', 'まーちゃん', 'ママ', 'パパ',
+      // 趣味・好き
+      'カフェ好き', '読書好き', '映画好き', '音楽好き', '旅行好き', '料理好き'
+    ];
+    
+    const prefix = prefixes[Math.floor(Math.random() * prefixes.length)];
+    const number = Math.floor(Math.random() * 9000) + 1000; // 1000〜9999
+    userNicename = prefix + number;
+  }
 
   const prefecture = prefectures[Math.floor(Math.random() * prefectures.length)];
   const job = jobs[Math.floor(Math.random() * jobs.length)];
-  const age = new Date().getFullYear() - birthYear;
 
   const descriptions = [
     `${prefecture}在住の${age}歳、${job}です。`,
@@ -123,7 +188,7 @@ function generateProfile() {
 
   return {
     name: userNicename,
-    status: 6,
+    status: 4, // AI会員
     user_description: description,
     birth_year: String(birthYear),
     sex,
@@ -133,7 +198,6 @@ function generateProfile() {
     prefecture,
     profile_registered: true,
     email_subscription: Math.random() > 0.5,
-    show_unvoted_surveys: true,
   };
 }
 
@@ -177,9 +241,35 @@ async function generateProfileWithAI() {
       if (jsonMatch) {
         const aiData = JSON.parse(jsonMatch[0]);
 
+        // ニックネーム生成（半分はランダム英数4-8文字、半分は日本語風プレフィックス+数字）
+        let randomName: string;
+        
+        if (Math.random() > 0.5) {
+          // ランダム英数4-8文字
+          const chars = 'abcdefghijklmnopqrstuvwxyz0123456789';
+          const nameLength = Math.floor(Math.random() * 5) + 4;
+          randomName = '';
+          for (let i = 0; i < nameLength; i++) {
+            randomName += chars[Math.floor(Math.random() * chars.length)];
+          }
+        } else {
+          // 日本語風プレフィックス + 数字
+          const prefixes = [
+            'りんご', 'みかん', 'いちご', 'すいか', 'おにぎり', 'すし', 'らーめん', 'うどん', 'たこやき',
+            'カレー', 'おでん', 'やきとり', 'てんぷら', 'そば', 'おちゃ', 'カフェ', 'ケーキ', 'クッキー',
+            'ねこ', 'いぬ', 'うさぎ', 'はな', 'そら', 'うみ', 'やま', 'ほし', 'にじ',
+            'さくら', 'つき', 'ゆき', 'かぜ', 'ひかり', 'みどり', 'あお', 'あか',
+            'ゆうちゃん', 'みーちゃん', 'あーちゃん', 'まーちゃん', 'ママ', 'パパ',
+            'カフェ好き', '読書好き', '映画好き', '音楽好き', '旅行好き', '料理好き'
+          ];
+          const prefix = prefixes[Math.floor(Math.random() * prefixes.length)];
+          const number = Math.floor(Math.random() * 9000) + 1000;
+          randomName = prefix + number;
+        }
+
         return {
-          name: aiData.name,
-          status: 6,
+          name: randomName,
+          status: 4, // AI会員
           user_description: aiData.user_description,
           birth_year: String(aiData.birth_year),
           sex: aiData.sex,
@@ -189,7 +279,6 @@ async function generateProfileWithAI() {
           prefecture: aiData.prefecture,
           profile_registered: true,
           email_subscription: Math.random() > 0.5,
-          show_unvoted_surveys: true,
         };
       }
     }
@@ -201,48 +290,18 @@ async function generateProfileWithAI() {
 }
 
 // ユーザーをデータベースに挿入
-async function insertUser(userData: any) {
+async function insertUser(userData: Record<string, unknown>) {
   try {
-    // 最新のIDを取得して自動採番
-    const { data: latestUser } = await supabase
-      .from('users')
-      .select('id')
-      .order('id', { ascending: false })
-      .limit(1)
-      .single();
-
-    let newUserId = '1';
-    if (latestUser && latestUser.id) {
-      const latestId = latestUser.id;
-      // 数値のIDの場合は+1、それ以外は新規採番
-      const numericId = parseInt(latestId);
-      if (!isNaN(numericId)) {
-        newUserId = String(numericId + 1);
-      } else {
-        // 数値IDの最大値を取得
-        const { data: maxNumericUser } = await supabase
-          .from('users')
-          .select('id')
-          .order('id', { ascending: false })
-          .limit(100);
-        
-        let maxId = 0;
-        if (maxNumericUser) {
-          for (const user of maxNumericUser) {
-            const id = parseInt(user.id);
-            if (!isNaN(id) && id > maxId) {
-              maxId = id;
-            }
-          }
-        }
-        newUserId = String(maxId + 1);
-      }
-    }
+    // UUIDを生成
+    const newUserId = crypto.randomUUID();
+    
+    console.log('Attempting to insert user with UUID:', newUserId);
 
     const tempEmail = `temp_${Math.floor(Math.random() * 900000) + 100000}@temp.local`;
     
     // profile_slugを生成（ニックネームをベースに）
-    const baseSlug = userData.name
+    const userName = String(userData.name || '');
+    const baseSlug = userName
       .toLowerCase()
       .replace(/[^a-z0-9\u3040-\u309F\u30A0-\u30FF\u4E00-\u9FAF]/g, '')
       .substring(0, 20);
@@ -266,15 +325,15 @@ async function insertUser(userData: any) {
         prefecture: userData.prefecture,
         profile_registered: userData.profile_registered ? 1 : 0,
         email_subscription: userData.email_subscription ? 1 : 0,
-        show_unvoted_surveys: userData.show_unvoted_surveys ? 1 : 0,
         profile_slug: profileSlug,
       })
       .select('id')
       .single();
 
     if (error) {
-      console.error('Insert error:', error);
-      return null;
+      console.error('Insert error details:', JSON.stringify(error, null, 2));
+      console.error('Insert data was:', { id: newUserId, name: userData.name, email: tempEmail });
+      throw new Error(`DB Insert failed: ${error.message || error.code || JSON.stringify(error)}`);
     }
 
     if (data) {
@@ -289,9 +348,9 @@ async function insertUser(userData: any) {
       return userId;
     }
 
-    return null;
+    throw new Error('Insert succeeded but no data returned');
   } catch (error) {
     console.error('Insert user error:', error);
-    return null;
+    throw error instanceof Error ? error : new Error(JSON.stringify(error));
   }
 }
