@@ -367,7 +367,7 @@ export default async function Home({ searchParams }: HomeProps) {
   // 相談受付中の投稿を取得（ベストアンサーがない投稿）
   const { data: waitingPosts } = await supabase
     .from('posts')
-    .select('id, title, content, created_at, deadline_at, user_id, og_image, thumbnail_url, best_answer_id, best_answer_selected_at, category_id, categories(name), users!inner(status, name, avatar_seed, use_custom_image, image)')
+    .select('id, title, content, created_at, deadline_at, user_id, og_image, thumbnail_url, best_answer_id, best_answer_selected_at, category_id, categories(name), users(status, name, avatar_seed, use_custom_image, image)')
     .in('status', ['publish', 'published'])
     .neq('user_id', 1)
     .is('best_answer_id', null)

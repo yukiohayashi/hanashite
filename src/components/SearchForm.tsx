@@ -1,17 +1,42 @@
 'use client';
 
-import { useState, FormEvent } from 'react';
+import { useState, useEffect, FormEvent } from 'react';
 import { useRouter } from 'next/navigation';
+import Link from 'next/link';
 import { checkNgWord } from '../lib/ngWordCheck';
+import { supabase } from '@/lib/supabase';
 
 interface SearchFormProps {
   userId: string | number | null;
+}
+
+interface Keyword {
+  id: number;
+  keyword: string;
 }
 
 export default function SearchForm({ userId: _userId }: SearchFormProps) {
   const router = useRouter();
   const [searchQuery, setSearchQuery] = useState('');
   const [errorMessage, setErrorMessage] = useState('');
+  const [randomKeywords, setRandomKeywords] = useState<Keyword[]>([]);
+
+  useEffect(() => {
+    const fetchRandomKeywords = async () => {
+      const { data } = await supabase
+        .from('keywords')
+        .select('id, keyword')
+        .order('created_at', { ascending: false })
+        .limit(20);
+      
+      if (data && data.length > 0) {
+        // ランダムに3件選択
+        const shuffled = [...data].sort(() => Math.random() - 0.5);
+        setRandomKeywords(shuffled.slice(0, 3));
+      }
+    };
+    fetchRandomKeywords();
+  }, []);
   
 
   const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
@@ -44,6 +69,20 @@ export default function SearchForm({ userId: _userId }: SearchFormProps) {
 
   return (
     <div className="inline-block relative w-full">
+      {/* 最新キーワード */}
+      {randomKeywords.length > 0 && (
+        <div className="flex flex-wrap gap-1.5 mb-2">
+          {randomKeywords.map((kw) => (
+            <Link
+              key={kw.id}
+              href={`/?s=${encodeURIComponent(kw.keyword)}`}
+              className="px-2 py-0.5 text-xs bg-pink-50 text-[#ff6b6b] border border-pink-200 rounded-full hover:bg-pink-100 transition-colors"
+            >
+              {kw.keyword}
+            </Link>
+          ))}
+        </div>
+      )}
       <form 
         role="search" 
         onSubmit={handleSubmit}
