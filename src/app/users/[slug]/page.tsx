@@ -191,6 +191,9 @@ export default async function UserPage({ params }: { params: Promise<{ slug: str
 
   // 自分のプロフィールかチェック
   const isOwnProfile = session?.user?.id?.toString() === user.id.toString();
+  
+  // 管理者かチェック（status === 1）
+  const isAdmin = session?.user?.status === 1;
 
   // 投稿とコメントを取得（user.idを使用）
   const [posts, comments] = await Promise.all([
@@ -235,7 +238,19 @@ export default async function UserPage({ params }: { params: Promise<{ slug: str
         {/* メインコンテンツ */}
         <div className="flex-1 max-w-[760px]">
           {/* ユーザープロフィール */}
-          <div className="bg-white shadow-md mb-4 p-6 border border-gray-200 rounded">
+          <div className="bg-white shadow-md mb-4 p-6 border border-gray-200 rounded relative">
+            {/* 管理者用編集ボタン */}
+            {isAdmin && !isOwnProfile && (
+              <Link 
+                href={`/admin/users/${user.id}/edit`}
+                className="absolute top-4 right-4 inline-flex items-center gap-1 px-3 py-1.5 bg-blue-500 hover:bg-blue-600 text-white text-sm font-medium rounded transition-colors"
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                </svg>
+                編集
+              </Link>
+            )}
             <div className="flex items-start gap-4">
               {/* アバター */}
               <div className="shrink-0">
