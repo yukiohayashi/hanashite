@@ -24,6 +24,8 @@ interface User {
   job?: string;
   prefecture?: string;
   sns_x?: string;
+  show_description?: boolean;
+  show_post_history?: boolean;
   created_at: string;
 }
 
@@ -49,6 +51,8 @@ export default function UserEditForm({ user }: UserEditFormProps) {
     job: user.job || '',
     prefecture: user.prefecture || '',
     sns_x: user.sns_x || '',
+    show_description: user.show_description !== false,
+    show_post_history: user.show_post_history !== false,
   });
   const [avatarFile, setAvatarFile] = useState<File | null>(null);
   const [avatarPreview, setAvatarPreview] = useState<string>(() => {
@@ -400,6 +404,37 @@ export default function UserEditForm({ user }: UserEditFormProps) {
               className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
             />
           </div>
+        </div>
+      </div>
+
+      {/* 公開設定 */}
+      <div className="bg-white rounded-lg shadow p-6">
+        <h2 className="text-lg font-semibold text-gray-900 mb-4">公開設定</h2>
+        
+        <div className="space-y-3">
+          <label className="flex items-center cursor-pointer">
+            <input
+              type="checkbox"
+              checked={formData.show_description}
+              onChange={(e) => setFormData({ ...formData, show_description: e.target.checked })}
+              className="mr-3 rounded focus:ring-blue-500 w-4 h-4 text-blue-600"
+            />
+            <span className="text-sm text-gray-700">
+              自己紹介を<span className="text-orange-500 font-medium">プロフィール</span>に公開する
+            </span>
+          </label>
+          
+          <label className="flex items-center cursor-pointer">
+            <input
+              type="checkbox"
+              checked={formData.show_post_history}
+              onChange={(e) => setFormData({ ...formData, show_post_history: e.target.checked })}
+              className="mr-3 rounded focus:ring-blue-500 w-4 h-4 text-blue-600"
+            />
+            <span className="text-sm text-gray-700">
+              相談・回答履歴を<span className="text-orange-500 font-medium">プロフィール</span>に公開する
+            </span>
+          </label>
         </div>
       </div>
 

@@ -44,6 +44,8 @@ export async function PATCH(
     job,
     prefecture,
     sns_x,
+    show_description,
+    show_post_history,
   } = body;
 
   const updateData: Record<string, any> = {};
@@ -67,6 +69,8 @@ export async function PATCH(
   if (job !== undefined) updateData.job = job || null;
   if (prefecture !== undefined) updateData.prefecture = prefecture || null;
   if (sns_x !== undefined) updateData.sns_x = sns_x || null;
+  if (typeof show_description === 'boolean') updateData.show_description = show_description;
+  if (typeof show_post_history === 'boolean') updateData.show_post_history = show_post_history;
 
   if (Object.keys(updateData).length === 0) {
     return NextResponse.json(
