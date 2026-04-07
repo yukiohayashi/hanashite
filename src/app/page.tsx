@@ -305,19 +305,32 @@ export default async function Home({ searchParams }: HomeProps) {
   if (topLikeCounts && topLikeCounts.length > 0) {
     const sortedPostIds = topLikeCounts.map(lc => lc.target_id);
 
-    // 投稿情報を取得
+    // 投稿情報を取得（締め切り期限を経過したものは除外）
+    const now = new Date().toISOString();
     const { data: topPosts } = await supabase
       .from('posts')
-      .select('id, title, created_at, user_id, og_image, thumbnail_url, best_answer_id, category_id, categories(name), users!inner(status, name, avatar_seed, use_custom_image, image)')
+      .select('id, title, created_at, user_id, og_image, thumbnail_url, best_answer_id, category_id, deadline_at, categories(name), users!inner(status, name, avatar_seed, use_custom_image, image)')
       .in('id', sortedPostIds)
-      .in('status', ['publish', 'published'])
+      .eq('status', 'published')
       .neq('user_id', '1')
       .is('best_answer_id', null);
 
-    if (topPosts && topPosts.length > 0) {
+    // 締め切り期限を経過したもの、または投稿から7日以上経過したものを除外
+    const sevenDaysAgo = new Date();
+    sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
+    
+    const filteredTopPosts = topPosts?.filter(post => {
+      // 投稿から7日以上経過したものは除外
+      if (new Date(post.created_at) < sevenDaysAgo) return false;
+      // 締め切りがある場合、締め切り前のみ表示
+      if (post.deadline_at && new Date(post.deadline_at) < new Date(now)) return false;
+      return true;
+    });
+
+    if (filteredTopPosts && filteredTopPosts.length > 0) {
       // いいね数の順序に従って並べ替え（最大3件）
       const orderedPosts = sortedPostIds
-        .map(id => topPosts.find(post => post.id === id))
+        .map(id => filteredTopPosts.find(post => post.id === id))
         .filter((post): post is NonNullable<typeof post> => post !== undefined)
         .slice(0, 3);
 

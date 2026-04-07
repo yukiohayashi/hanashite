@@ -27,6 +27,7 @@ interface CommentSectionProps {
   initialComments: Comment[];
   totalCount: number;
   postUserId?: number;
+  postUserName?: string;
   bestAnswerId?: number | null;
   deadlineAt?: string | null;
   bestAnswerPoints?: number;
@@ -71,7 +72,7 @@ function TimeAgo({ dateString }: { dateString: string }) {
   return <span className="text-gray-500 text-xs">{timeAgo}前</span>;
 }
 
-export default function CommentSection({ postId, initialComments, totalCount, postUserId, bestAnswerId, deadlineAt, bestAnswerPoints = 10, isAdmin = false }: CommentSectionProps) {
+export default function CommentSection({ postId, initialComments, totalCount, postUserId, postUserName, bestAnswerId, deadlineAt, bestAnswerPoints = 10, isAdmin = false }: CommentSectionProps) {
   const { data: session } = useSession();
   const [comments, setComments] = useState<Comment[]>(initialComments);
   const [newComment, setNewComment] = useState('');
@@ -80,6 +81,7 @@ export default function CommentSection({ postId, initialComments, totalCount, po
   const [replyingTo, setReplyingTo] = useState<number | null>(null);
   const [currentBestAnswerId, setCurrentBestAnswerId] = useState<number | null>(bestAnswerId || null);
   const [isSettingBestAnswer, setIsSettingBestAnswer] = useState(false);
+  const [commentAsPostOwner, setCommentAsPostOwner] = useState(false);
   
   // deadlineAtを使用（lint警告回避）
   const _deadlineAt = deadlineAt;
@@ -93,9 +95,9 @@ export default function CommentSection({ postId, initialComments, totalCount, po
   
   // コメント可能条件
   // 1. ベストアンサーがない場合: 締め切りに関係なく誰でも可能（締め切りは目安）
-  // 2. ベストアンサーがある場合: 相談者またはベストアンサー回答者のみ可能
+  // 2. ベストアンサーがある場合: 相談者、ベストアンサー回答者、または管理者のみ可能
   const canComment = currentBestAnswerId 
-    ? (isPostOwner || isBestAnswerUser)
+    ? (isPostOwner || isBestAnswerUser || isAdmin)
     : true;
 
   // ベストアンサー決定（運営者用）
@@ -163,6 +165,11 @@ export default function CommentSection({ postId, initialComments, totalCount, po
     setIsSubmitting(true);
 
     try {
+      // 管理者が相談者としてコメントする場合は、postUserIdを使用
+      const effectiveUserId = (isAdmin && commentAsPostOwner && postUserId) 
+        ? postUserId 
+        : (session?.user?.id || null);
+
       const response = await fetch('/api/comments', {
         method: 'POST',
         headers: {
@@ -172,7 +179,7 @@ export default function CommentSection({ postId, initialComments, totalCount, po
           postId,
           content: newComment,
           parentId: replyingTo,
-          userId: session?.user?.id || null,
+          userId: effectiveUserId,
         }),
       });
 
@@ -182,6 +189,7 @@ export default function CommentSection({ postId, initialComments, totalCount, po
         setComments([data.comment, ...comments]);
         setNewComment('');
         setReplyingTo(null);
+        setCommentAsPostOwner(false);
       } else {
         alert('コメントの投稿に失敗しました: ' + (data.error || '不明なエラー'));
       }
@@ -284,6 +292,52 @@ export default function CommentSection({ postId, initialComments, totalCount, po
               【受付終了】{comments.find(c => c.id === bestAnswerId)?.users?.name || 'ゲスト'}さんがベストアンサーに選ばれました！
             </span>
           </div>
+        </div>
+      )}
+
+      {/* ベストアンサー後の管理者用コメントフォーム */}
+      {bestAnswerId && canComment && isAdmin && (
+        <div className="mb-6">
+          <div className="mb-4 p-4 font-bold rounded-lg text-center">
+            <div className="flex items-center justify-center font-bol gap-2 text-[#f4511e]">
+              <span className="font-medium">
+                【受付終了】{comments.find(c => c.id === bestAnswerId)?.users?.name || 'ゲスト'}さんがベストアンサーに選ばれました！
+              </span>
+            </div>
+          </div>
+          <form onSubmit={handleSubmit}>
+            <div className="mb-3 p-3 bg-yellow-50 border border-yellow-200 rounded-lg">
+              <label className="flex items-center cursor-pointer">
+                <input
+                  type="checkbox"
+                  checked={commentAsPostOwner}
+                  onChange={(e) => setCommentAsPostOwner(e.target.checked)}
+                  className="mr-2 rounded focus:ring-orange-400 w-4 h-4 text-orange-500"
+                />
+                <span className="text-sm text-gray-700">
+                  <strong>{postUserName || '相談者'}</strong>としてコメントする（管理者機能）
+                </span>
+              </label>
+            </div>
+            <textarea
+              value={newComment}
+              onChange={(e) => setNewComment(e.target.value)}
+              placeholder={commentAsPostOwner ? `${postUserName || '相談者'}として返信を入力...` : "管理者として返信を入力..."}
+              className="px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 w-full"
+              rows={3}
+              disabled={isSubmitting}
+            />
+            <div className="flex justify-center mt-3">
+              <button
+                type="submit"
+                disabled={isSubmitting || !newComment.trim()}
+                className="inline-flex justify-center items-center bg-[#ff6b35] hover:bg-[#e58a2f] disabled:bg-gray-300 disabled:opacity-50 px-6 py-3 rounded font-bold text-white text-sm disabled:cursor-not-allowed transition-colors"
+                style={{ minWidth: '180px' }}
+              >
+                {isSubmitting ? '投稿中...' : (commentAsPostOwner ? `${postUserName || '相談者'}として返信` : '返信する')}
+              </button>
+            </div>
+          </form>
         </div>
       )}
       
