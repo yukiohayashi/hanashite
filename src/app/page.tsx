@@ -46,8 +46,7 @@ export async function generateMetadata({ searchParams }: HomeProps): Promise<Met
   }
   
   return {
-    title: `恋愛相談・恋愛掲示板ハナシテ｜匿名で悩みを相談できる恋愛掲示板`,
-    description: '恋愛相談・恋愛掲示板ハナシテは、恋愛・結婚の悩みを気軽に話せる匿名相談サイト。片思い、復縁、浮気、婚活など、誰にも言えない悩みを相談できます。解決しなくても大丈夫。「わかるよ」と共感しあえる場所です。',
+    title: catchphrase ? `${siteName} - ${catchphrase}` : siteName,
   };
 }
 

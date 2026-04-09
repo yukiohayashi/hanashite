@@ -210,25 +210,6 @@ export async function POST(request: Request) {
       );
     }
 
-    // 二重投稿防止: 先にis_processedをtrueに更新（楽観的ロック）
-    const { data: lockResult, error: lockError } = await supabase
-      .from('auto_consultation_sources')
-      .update({ 
-        is_processed: true,
-        processed_at: new Date().toISOString()
-      })
-      .eq('id', source_id)
-      .eq('is_processed', false)  // まだ処理されていない場合のみ更新
-      .select();
-
-    if (lockError || !lockResult || lockResult.length === 0) {
-      console.log('このソースは既に他のプロセスで処理中です:', source_id);
-      return NextResponse.json(
-        { success: false, error: 'このソースは既に処理中または処理済みです' },
-        { status: 409 }
-      );
-    }
-
     // AIでタイトルと本文を修正
     console.log('========================================');
     console.log('【リライト前】');
@@ -300,10 +281,12 @@ export async function POST(request: Request) {
 
     console.log('投稿作成成功:', { postId: post.id, title: post.title });
 
-    // ソースにpost_idを保存（is_processedは既に更新済み）
+    // ソースを処理済みに更新（post_idも保存）
     const { error: updateError } = await supabase
       .from('auto_consultation_sources')
       .update({ 
+        is_processed: true, 
+        processed_at: new Date().toISOString(),
         post_id: post.id
       })
       .eq('id', source_id);

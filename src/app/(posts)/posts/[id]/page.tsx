@@ -372,7 +372,7 @@ export default async function PostPage({ params, searchParams }: { params: Promi
                 {post.user_id.toString() === '1' ? (
                   // 管理者投稿：緑エリアなし、本文のみ表示
                   <div className="mb-1.5">
-                    <div className="font-normal text-gray-800 text-base leading-relaxed">
+                    <div className="font-normal text-gray-800 text-sm leading-relaxed">
                       <div dangerouslySetInnerHTML={{ __html: (post.content || '').replace(/\\n/g, '<br>').replace(/\n/g, '<br>') }} />
                     </div>
                   </div>
@@ -387,7 +387,7 @@ export default async function PostPage({ params, searchParams }: { params: Promi
                         loading="lazy"
                       />
                     </div>
-                    <div className="font-normal text-gray-800 text-base leading-relaxed">
+                    <div className="font-normal text-gray-800 text-sm leading-relaxed">
                       {post.content ? (
                         <div dangerouslySetInnerHTML={{ __html: (post.content || '').replace(/\\n/g, '<br>').replace(/\n/g, '<br>') }} />
                       ) : (
@@ -404,7 +404,7 @@ export default async function PostPage({ params, searchParams }: { params: Promi
                     // RSS自動投稿：シンプルな表示（緑背景・ボーダー・画像なし）
                     return (
                       <div className="mb-1.5">
-                        <div className="font-normal text-gray-800 text-base leading-relaxed">
+                        <div className="font-normal text-gray-800 text-sm leading-relaxed">
                           {post.content ? (
                             <div dangerouslySetInnerHTML={{ __html: (post.content || '').replace(/\\n/g, '<br>').replace(/\n/g, '<br>') }} />
                           ) : (
@@ -417,7 +417,7 @@ export default async function PostPage({ params, searchParams }: { params: Promi
                     // 通常の投稿：緑エリアなし、本文のみ表示
                     return (
                       <div className="mb-1.5">
-                        <div className="font-normal text-gray-800 text-base leading-relaxed">
+                        <div className="font-normal text-gray-800 text-sm leading-relaxed">
                           {post.content ? (
                             <div dangerouslySetInnerHTML={{ __html: (post.content || '').replace(/\\n/g, '<br>').replace(/\n/g, '<br>') }} />
                           ) : (

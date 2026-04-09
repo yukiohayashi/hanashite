@@ -38,22 +38,12 @@ export default async function UserEditPage({
           <h1 className="text-3xl font-bold text-gray-900">ユーザー編集 #{user.id}</h1>
           <p className="mt-2 text-gray-600">ユーザー情報を編集</p>
         </div>
-        <div className="flex items-center gap-3">
-          <a
-            href={`/users/${user.id}`}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="px-4 py-2 text-sm font-medium text-orange-600 bg-orange-50 border border-orange-200 rounded-md hover:bg-orange-100"
-          >
-            プロフィールを見る ↗
-          </a>
-          <a
-            href="/admin/users"
-            className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-white"
-          >
-            ← ユーザー一覧に戻る
-          </a>
-        </div>
+        <a
+          href="/admin/users"
+          className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-white"
+        >
+          ← ユーザー一覧に戻る
+        </a>
       </div>
 
       <UserEditForm user={user} />

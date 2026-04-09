@@ -13,8 +13,8 @@ const notoSansJP = Noto_Sans_JP({
 
 export const metadata: Metadata = {
   title: {
-    template: "%s｜恋愛掲示板ハナシテ",
-    default: "恋愛掲示板｜ハナシテ - 恋愛・結婚の悩みを匿名で相談",
+    template: "%s｜恋愛相談・恋愛掲示板ハナシテ",
+    default: "恋愛相談・恋愛掲示板ハナシテ - 恋愛・結婚の悩みを匿名で相談",
   },
   description: "恋愛掲示板ハナシテは、恋愛・結婚の悩みを気軽に話せる匿名相談サイト。解決しなくても大丈夫。「わかるよ」と共感しあえる場所です。",
 };
