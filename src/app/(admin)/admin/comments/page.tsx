@@ -6,7 +6,7 @@ import CommentTestSection from './CommentTestSection';
 async function getComments(limit: number = 100, searchQuery: string = '') {
   let query = supabase
     .from('comments')
-    .select('id, content, created_at, user_id, post_id');
+    .select('id, content, created_at, user_id, post_id, is_ai_comment');
 
   // 検索クエリがある場合はフィルタリング
   if (searchQuery) {
@@ -27,10 +27,10 @@ async function getComments(limit: number = 100, searchQuery: string = '') {
   const userIds = [...new Set(comments.map(c => c.user_id).filter(Boolean))];
   const postIds = [...new Set(comments.map(c => c.post_id).filter(Boolean))];
 
-  // ユーザー情報を一括取得
+  // ユーザー情報を一括取得（statusを含める）
   const { data: users } = await supabase
     .from('users')
-    .select('id, name')
+    .select('id, name, status')
     .in('id', userIds);
 
   const userMap = new Map(users?.map(u => [u.id, u]) || []);

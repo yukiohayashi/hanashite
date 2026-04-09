@@ -10,9 +10,11 @@ interface Comment {
   user_id: number | null;
   post_id: number;
   is_best_answer?: boolean;
+  is_ai_comment?: boolean;
   users: {
     id: number;
     name: string;
+    status?: number;
   } | null;
   posts: {
     id: number;
@@ -292,7 +294,24 @@ export default function CommentsTable({ comments: initialComments }: CommentsTab
                   </div>
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                  {comment.users?.name || 'ゲスト'}
+                  <div className="flex items-center gap-2">
+                    {comment.users?.name || 'ゲスト'}
+                    {comment.users?.status === 4 && (
+                      <span className="inline-flex items-center px-2 py-0.5 text-xs font-semibold bg-purple-100 text-purple-800 rounded">
+                        AI会員
+                      </span>
+                    )}
+                    {comment.is_ai_comment && !comment.user_id && (
+                      <span className="inline-flex items-center px-2 py-0.5 text-xs font-semibold bg-orange-100 text-orange-800 rounded">
+                        AIゲスト
+                      </span>
+                    )}
+                    {!comment.is_ai_comment && !comment.user_id && (
+                      <span className="inline-flex items-center px-2 py-0.5 text-xs font-semibold bg-gray-100 text-gray-600 rounded">
+                        ゲスト
+                      </span>
+                    )}
+                  </div>
                 </td>
                 <td className="px-6 py-4 text-sm text-gray-900 max-w-xs">
                   {comment.posts ? (

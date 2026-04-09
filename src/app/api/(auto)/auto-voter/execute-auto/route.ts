@@ -508,6 +508,7 @@ export async function POST() {
                     content: commentText,
                     status: 'approved',
                     created_at: new Date().toISOString(),
+                    is_ai_comment: true,
                   })
                   .select()
                   .single();
@@ -705,6 +706,7 @@ export async function POST() {
                   content: commentText,
                   status: 'approved',
                   created_at: new Date().toISOString(),
+                  is_ai_comment: true,
                 })
                 .select()
                 .single();
@@ -774,6 +776,7 @@ export async function POST() {
                     parent_id: targetComment.id,
                     content: replyText,
                     created_at: new Date().toISOString(),
+                    is_ai_comment: true,
                   });
                   totalComments++;
                   commentsAddedForThisPost++;
@@ -823,6 +826,7 @@ export async function POST() {
                   parent_id: targetComment.id,
                   content: authorReplyText,
                   created_at: new Date().toISOString(),
+                  is_ai_comment: true,
                 });
                 totalComments++;
                 commentsAddedForThisPost++;
