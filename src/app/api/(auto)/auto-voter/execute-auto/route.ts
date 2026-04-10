@@ -1,5 +1,7 @@
 import { NextResponse } from 'next/server';
 import { supabase } from '@/lib/supabase';
+import { generateStructuredPrompt, applyNaturalErrors } from '@/lib/commentPromptHelper';
+import OpenAI from 'openai';
 
 // aiMemberProbability%の確率でAI会員、残りはゲスト投稿（user_id NULL）
 function shouldUseGuestPost(aiMemberProbability: number): boolean {
@@ -105,12 +107,6 @@ export async function POST() {
     // 記事ごとの最大コメント数（定数管理）
     const MAX_COMMENTS_PER_POST = 50;
     const MAX_COMMENTS_VARIANCE = 20;
-    
-    const commentPrompt = settings.comment_prompt || '';
-    const replyPrompt = settings.reply_prompt || '';
-
-    console.log('コメントプロンプト:', commentPrompt ? `設定済み (${commentPrompt.length}文字)` : '未設定');
-    console.log('返信プロンプト:', replyPrompt ? `設定済み (${replyPrompt.length}文字)` : '未設定');
 
     // API設定を取得
     const { data: apiSettings, error: apiError } = await supabase
@@ -358,7 +354,6 @@ export async function POST() {
       const remainingComments = Math.max(0, maxCommentsForThisPost - (currentCommentCount || 0));
       
       console.log(`最大コメント数: ${maxCommentsForThisPost}, 残り: ${remainingComments}`);
-      console.log(`commentPrompt存在: ${!!commentPrompt}`);
       
       // コメントが存在しない場合: 新規コメント投稿 → コメントいいね
       // コメントが存在する場合: 新規コメント投稿 OR コメント返信 OR 投稿者返信 のいずれか1つ
@@ -366,7 +361,7 @@ export async function POST() {
       if (currentCommentCount === 0) {
         console.log('コメントがない場合の処理開始');
         // コメントがない場合: 新規コメント投稿のみ
-        if (remainingComments > 0 && commentPrompt) {
+        if (remainingComments > 0) {
           console.log('新規コメント投稿を実行');
           try {
             // この記事に既に親コメントを投稿したユーザーIDを取得
@@ -407,24 +402,25 @@ export async function POST() {
               const choicesText = voteChoices?.map(vc => `「${vc.choice}」`).join('、') || '';
               console.log(`投票選択肢: ${choicesText}`);
 
-              // ランダムな目標文字数を生成（短文寄り）
-              const targetLength = Math.random() < 0.7 
-                ? Math.floor(Math.random() * 30) + 10  // 70%の確率で10〜40文字
-                : Math.floor(Math.random() * 210) + 40; // 30%の確率で40〜250文字
+              // ユーザー情報を取得
+              const { data: userData } = await supabase
+                .from('users')
+                .select('gender, age, marriage')
+                .eq('id', randomUser.id)
+                .single();
 
-              console.log(`目標文字数: ${targetLength}文字`);
+              // 構造化プロンプトを生成
+              const { prompt: structuredPrompt, persona, pattern, targetLength } = generateStructuredPrompt(
+                post.title,
+                post.content || '',
+                userData ? {
+                  gender: userData.gender,
+                  age: userData.age,
+                  marriage: userData.marriage
+                } : undefined
+              );
 
-              // ChatGPTでコメント生成（投稿本文と選択肢を含める）
-              const prompt = commentPrompt
-                .replace('{$question}', post.title)
-                .replace('{$content}', post.content || '')
-                .replace('{$choices}', choicesText) + 
-                `\n\n【重要】コメントは${targetLength}文字前後で生成してください。`;
-              
-              console.log(`プロンプト生成完了 (${prompt.length}文字)`);
-              console.log('=== GPTへのプロンプト内容 ===');
-              console.log(prompt);
-              console.log('=== プロンプト終了 ===');
+              console.log(`🤖 構造化プロンプト: ペルソナ=${persona.name}, パターン=${pattern.name}, 目標=${targetLength}文字`);
               
               if (!openaiApiKey) {
                 const errorMsg = 'OpenAI APIキーが設定されていません';
@@ -433,39 +429,19 @@ export async function POST() {
               } else {
               console.log('OpenAI APIを呼び出し中...');
 
-              const response = await fetch('https://api.openai.com/v1/chat/completions', {
-                method: 'POST',
-                headers: {
-                  'Content-Type': 'application/json',
-                  'Authorization': `Bearer ${openaiApiKey}`,
-                },
-                body: JSON.stringify({
-                  model: 'gpt-4o-mini',
-                  messages: [{ role: 'user', content: prompt }],
-                  temperature: 0.9,
-                }),
+              const openai = new OpenAI({ apiKey: openaiApiKey });
+              const response = await openai.chat.completions.create({
+                model: 'gpt-4o-mini',
+                messages: [{ role: 'system', content: structuredPrompt }],
+                temperature: 1.0,
+                max_tokens: Math.max(200, targetLength * 3),
+                presence_penalty: 0.7,
+                frequency_penalty: 0.5,
               });
-
-              const data = await response.json();
               
-              console.log(`OpenAI APIレスポンス受信 (status: ${response.status})`);
+              console.log(`OpenAI APIレスポンス受信`);
               
-              // エラーチェック
-              if (!response.ok || data.error) {
-                const errorMsg = `OpenAI APIエラー (status: ${response.status}): ${JSON.stringify(data.error || data)}`;
-                console.error(errorMsg);
-                commentErrors.push(errorMsg);
-                continue;
-              }
-              
-              if (!data.choices || data.choices.length === 0) {
-                const errorMsg = `OpenAI APIレスポンスにchoicesがありません`;
-                console.error(errorMsg);
-                commentErrors.push(errorMsg);
-                continue;
-              }
-              
-              let commentText = data.choices[0]?.message?.content?.trim() || '';
+              let commentText = response.choices[0]?.message?.content?.trim() || '';
               console.log(`生成されたコメント（処理前）: ${commentText}`);
 
               if (!commentText) {
@@ -474,6 +450,10 @@ export async function POST() {
                 commentErrors.push(errorMsg);
                 continue;
               }
+
+              // 15%の確率で自然な誤り（ら抜き・い抜き等）を適用
+              commentText = applyNaturalErrors(commentText);
+              console.log(`生成されたコメント（処理後）: ${commentText}`);
 
               // 【絶対禁止】ルールの適用
               // 1. 投稿タイトルが含まれている場合は除去
