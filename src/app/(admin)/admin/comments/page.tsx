@@ -3,7 +3,7 @@ import CommentsTable from './CommentsTable';
 import SearchForm from './SearchForm';
 import CommentTestSection from './CommentTestSection';
 
-async function getComments(limit: number = 100, searchQuery: string = '') {
+async function getComments(limit: number = 100, searchQuery: string = '', userType?: string) {
   let query = supabase
     .from('comments')
     .select('id, content, created_at, user_id, post_id, is_ai_comment');
@@ -44,7 +44,7 @@ async function getComments(limit: number = 100, searchQuery: string = '') {
   const postMap = new Map(posts?.map(p => [p.id, p]) || []);
 
   // データをマッピング
-  const commentsWithDetails = comments.map(comment => {
+  let commentsWithDetails = comments.map(comment => {
     const post = postMap.get(comment.post_id);
     return {
       ...comment,
@@ -54,28 +54,52 @@ async function getComments(limit: number = 100, searchQuery: string = '') {
     };
   });
 
+  // userTypeフィルター
+  if (userType === 'real') {
+    commentsWithDetails = commentsWithDetails.filter(c => c.user_id && c.users?.status === 3);
+  } else if (userType === 'real_guest') {
+    commentsWithDetails = commentsWithDetails.filter(c => !c.user_id && !c.is_ai_comment);
+  } else if (userType === 'ai_guest') {
+    commentsWithDetails = commentsWithDetails.filter(c => !c.user_id && c.is_ai_comment);
+  } else if (userType === 'ai_member') {
+    commentsWithDetails = commentsWithDetails.filter(c => c.user_id && c.users?.status === 4);
+  }
+
   return commentsWithDetails;
 }
 
 async function getCommentCounts() {
-  const { count } = await supabase
+  const { data: allComments } = await supabase
     .from('comments')
-    .select('*', { count: 'exact', head: true });
-  
+    .select('user_id, is_ai_comment');
+
+  // ユーザーのstatusを取得
+  const userIds = [...new Set(allComments?.map(c => c.user_id).filter(Boolean) || [])];
+  const { data: users } = await supabase
+    .from('users')
+    .select('id, status')
+    .in('id', userIds);
+  const userStatusMap = new Map(users?.map(u => [u.id, u.status]) || []);
+
   return {
-    all: count || 0,
+    all: allComments?.length || 0,
+    real: allComments?.filter(c => c.user_id && userStatusMap.get(c.user_id) === 3).length || 0,
+    real_guest: allComments?.filter(c => !c.user_id && !c.is_ai_comment).length || 0,
+    ai_guest: allComments?.filter(c => !c.user_id && c.is_ai_comment).length || 0,
+    ai_member: allComments?.filter(c => c.user_id && userStatusMap.get(c.user_id) === 4).length || 0,
   };
 }
 
 export default async function CommentsManagementPage({
   searchParams,
 }: {
-  searchParams: Promise<{ limit?: string; q?: string }>;
+  searchParams: Promise<{ limit?: string; q?: string; userType?: string }>;
 }) {
   const params = await searchParams;
   const limit = params.limit ? parseInt(params.limit) : 100;
   const searchQuery = params.q || '';
-  const comments = await getComments(limit, searchQuery);
+  const userType = params.userType || '';
+  const comments = await getComments(limit, searchQuery, userType);
   const counts = await getCommentCounts();
 
   return (
@@ -121,9 +145,27 @@ export default async function CommentsManagementPage({
         </div>
       </div>
 
-      {/* コメント数表示 */}
+      {/* フィルター */}
       <div className="flex items-center gap-2 text-sm">
-        <span className="text-gray-600">すべて ({counts.all})</span>
+        <a href="/admin/comments" className={`hover:text-blue-600 ${!userType ? 'text-blue-600 font-semibold' : 'text-gray-600'}`}>
+          すべて ({counts.all})
+        </a>
+        <span className="text-gray-400">|</span>
+        <a href="/admin/comments?userType=real" className={`hover:text-green-600 font-semibold ${userType === 'real' ? 'text-green-600' : 'text-green-500'}`}>
+          リアル ({counts.real})
+        </a>
+        <span className="text-gray-400">|</span>
+        <a href="/admin/comments?userType=real_guest" className={`hover:text-blue-600 ${userType === 'real_guest' ? 'text-blue-600 font-semibold' : 'text-gray-600'}`}>
+          ゲスト ({counts.real_guest})
+        </a>
+        <span className="text-gray-400">|</span>
+        <a href="/admin/comments?userType=ai_member" className={`hover:text-purple-600 ${userType === 'ai_member' ? 'text-purple-600 font-semibold' : 'text-gray-600'}`}>
+          AI会員 ({counts.ai_member})
+        </a>
+        <span className="text-gray-400">|</span>
+        <a href="/admin/comments?userType=ai_guest" className={`hover:text-orange-600 ${userType === 'ai_guest' ? 'text-orange-600 font-semibold' : 'text-gray-600'}`}>
+          AIゲスト ({counts.ai_guest})
+        </a>
       </div>
 
       <CommentsTable comments={comments} />

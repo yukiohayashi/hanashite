@@ -296,19 +296,13 @@ export default function CommentsTable({ comments: initialComments }: CommentsTab
                 <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                   <div className="flex items-center gap-2">
                     {comment.users?.name || 'ゲスト'}
-                    {comment.users?.status === 4 && (
+                    {comment.is_ai_comment ? (
                       <span className="inline-flex items-center px-2 py-0.5 text-xs font-semibold bg-purple-100 text-purple-800 rounded">
-                        AI会員
+                        AI
                       </span>
-                    )}
-                    {comment.is_ai_comment && !comment.user_id && (
-                      <span className="inline-flex items-center px-2 py-0.5 text-xs font-semibold bg-orange-100 text-orange-800 rounded">
-                        AIゲスト
-                      </span>
-                    )}
-                    {!comment.is_ai_comment && !comment.user_id && (
-                      <span className="inline-flex items-center px-2 py-0.5 text-xs font-semibold bg-gray-100 text-gray-600 rounded">
-                        ゲスト
+                    ) : (
+                      <span className="inline-flex items-center px-2 py-0.5 text-xs font-semibold bg-green-100 text-green-800 rounded">
+                        リアル
                       </span>
                     )}
                   </div>
