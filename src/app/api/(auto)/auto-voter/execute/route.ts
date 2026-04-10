@@ -88,10 +88,24 @@ async function executeComment(
     } : undefined
   );
 
-  console.log(`📝 コメント生成: ${persona.name} / ${pattern.name} / 目標${targetLength}文字`);
+  console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
+  console.log('🤖 構造化プロンプトシステム');
+  console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
+  console.log(`📝 ペルソナ: ${persona.name}（${persona.age}）`);
+  console.log(`   口調: ${persona.tone}`);
+  console.log(`   特徴: ${persona.characteristic}`);
+  console.log(`📋 パターン: ${pattern.name}（${pattern.minLength}-${pattern.maxLength}文字）`);
+  console.log(`   構造: ${pattern.structure}`);
+  console.log(`🎯 目標文字数: ${targetLength}文字`);
   if (user) {
-    console.log(`👤 ユーザー情報: 性別=${user.gender || '未設定'}, 年齢=${user.age || '未設定'}, 身分=${user.marriage || '未設定'}`);
+    console.log(`👤 ユーザー情報:`);
+    console.log(`   性別: ${user.gender || '未設定'}`);
+    console.log(`   年齢: ${user.age || '未設定'}歳`);
+    console.log(`   身分: ${user.marriage || '未設定'}`);
+  } else {
+    console.log(`👤 ゲスト投稿（user_id: NULL）`);
   }
+  console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
 
   // 既存の親コメント数を取得（返信は除外）
   const { count: commentCount } = await supabase
@@ -123,8 +137,14 @@ async function executeComment(
     throw new Error('コメント生成に失敗しました');
   }
 
+  console.log(`\n💬 生成されたコメント（元）:\n${commentText}\n`);
+
   // 15%の確率で自然な誤り（ら抜き・い抜き等）を適用
+  const beforeError = commentText;
   commentText = applyNaturalErrors(commentText);
+  if (beforeError !== commentText) {
+    console.log(`🔤 自然な誤り適用: あり`);
+  }
 
   // 25%の確率で絵文字を追加
   if (shouldAddEmoji()) {
@@ -133,6 +153,9 @@ async function executeComment(
     commentText = `${commentText}${emoji}`;
     console.log(`✨ 絵文字追加: ${emoji} (感情: ${emotion})`);
   }
+
+  console.log(`\n💬 最終コメント:\n${commentText}\n`);
+  console.log(`📏 文字数: ${commentText.length}文字`);
 
   let finalUserId: number | null = userId;
 
