@@ -297,16 +297,26 @@ export default function CommentsTable({ comments: initialComments }: CommentsTab
                   <div className="flex items-center gap-2">
                     {comment.users?.name || 'ゲスト'}
                     {!comment.user_id ? (
-                      <span className="inline-flex items-center px-2 py-0.5 text-xs font-semibold bg-gray-100 text-gray-600 rounded">
-                        非ログイン
-                      </span>
-                    ) : (comment.is_ai_comment === true || (comment.is_ai_comment === null && comment.users?.status === 4)) ? (
+                      comment.is_ai_comment ? (
+                        <span className="inline-flex items-center px-2 py-0.5 text-xs font-semibold bg-orange-100 text-orange-800 rounded">
+                          AI投稿
+                        </span>
+                      ) : (
+                        <span className="inline-flex items-center px-2 py-0.5 text-xs font-semibold bg-gray-100 text-gray-600 rounded">
+                          非ログイン
+                        </span>
+                      )
+                    ) : comment.users?.status === 4 ? (
                       <span className="inline-flex items-center px-2 py-0.5 text-xs font-semibold bg-purple-100 text-purple-800 rounded">
                         AI会員
                       </span>
-                    ) : (
+                    ) : comment.users?.status === 3 ? (
                       <span className="inline-flex items-center px-2 py-0.5 text-xs font-semibold bg-green-100 text-green-800 rounded">
                         会員
+                      </span>
+                    ) : (
+                      <span className="inline-flex items-center px-2 py-0.5 text-xs font-semibold bg-blue-100 text-blue-800 rounded">
+                        その他
                       </span>
                     )}
                   </div>

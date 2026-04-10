@@ -4,13 +4,33 @@ import SearchForm from './SearchForm';
 import CommentTestSection from './CommentTestSection';
 
 async function getComments(limit: number = 100, searchQuery: string = '', userType?: string) {
+  // userTypeに応じてDB側で絞り込むためのuser_idリストを先取得
+  let filterUserIds: string[] | null = null;
+  let filterGuest = false;
+
+  if (userType === 'member') {
+    const { data } = await supabase.from('users').select('id').eq('status', 3);
+    filterUserIds = data?.map(u => u.id) || [];
+  } else if (userType === 'ai_member') {
+    const { data } = await supabase.from('users').select('id').eq('status', 4);
+    filterUserIds = data?.map(u => u.id) || [];
+  } else if (userType === 'guest') {
+    filterGuest = true;
+  }
+
   let query = supabase
     .from('comments')
     .select('id, content, created_at, user_id, post_id, is_ai_comment');
 
-  // 検索クエリがある場合はフィルタリング
   if (searchQuery) {
     query = query.ilike('content', `%${searchQuery}%`);
+  }
+
+  if (filterGuest) {
+    query = query.is('user_id', null);
+  } else if (filterUserIds !== null) {
+    if (filterUserIds.length === 0) return [];
+    query = query.in('user_id', filterUserIds);
   }
 
   query = query.order('created_at', { ascending: false }).limit(limit);
@@ -27,7 +47,6 @@ async function getComments(limit: number = 100, searchQuery: string = '', userTy
   const userIds = [...new Set(comments.map(c => c.user_id).filter(Boolean))];
   const postIds = [...new Set(comments.map(c => c.post_id).filter(Boolean))];
 
-  // ユーザー情報を一括取得（statusを含める）
   const { data: users } = await supabase
     .from('users')
     .select('id, name, status')
@@ -35,7 +54,6 @@ async function getComments(limit: number = 100, searchQuery: string = '', userTy
 
   const userMap = new Map(users?.map(u => [u.id, u]) || []);
 
-  // 投稿情報を一括取得（ベストアンサーIDも含む）
   const { data: posts } = await supabase
     .from('posts')
     .select('id, title, best_answer_id')
@@ -43,8 +61,7 @@ async function getComments(limit: number = 100, searchQuery: string = '', userTy
 
   const postMap = new Map(posts?.map(p => [p.id, p]) || []);
 
-  // データをマッピング
-  let commentsWithDetails = comments.map(comment => {
+  return comments.map(comment => {
     const post = postMap.get(comment.post_id);
     return {
       ...comment,
@@ -53,43 +70,36 @@ async function getComments(limit: number = 100, searchQuery: string = '', userTy
       is_best_answer: post?.best_answer_id === comment.id,
     };
   });
-
-  // userTypeフィルター（AI会員=status:4で判定）
-  if (userType === 'member') {
-    commentsWithDetails = commentsWithDetails.filter(c => c.user_id && c.users?.status !== 4);
-  } else if (userType === 'ai_member') {
-    commentsWithDetails = commentsWithDetails.filter(c => c.user_id && c.users?.status === 4);
-  } else if (userType === 'guest') {
-    commentsWithDetails = commentsWithDetails.filter(c => !c.user_id);
-  }
-
-  return commentsWithDetails;
 }
 
 async function getCommentCounts() {
   // status:3（会員）のuser_idを取得
   const { data: memberUsers } = await supabase
-    .from('users')
-    .select('id')
-    .eq('status', 3);
-  const memberUserIds = new Set(memberUsers?.map(u => u.id) || []);
+    .from('users').select('id').eq('status', 3);
+  const memberUserIds = memberUsers?.map(u => u.id) || [];
 
   // status:4（AI会員）のuser_idを取得
   const { data: aiUsers } = await supabase
-    .from('users')
-    .select('id')
-    .eq('status', 4);
-  const aiUserIds = new Set(aiUsers?.map(u => u.id) || []);
+    .from('users').select('id').eq('status', 4);
+  const aiUserIds = aiUsers?.map(u => u.id) || [];
 
-  const { data: allComments } = await supabase
-    .from('comments')
-    .select('user_id');
+  // 各カテゴリのコメント数をcountで取得
+  const [{ count: all }, { count: member }, { count: ai_member }, { count: guest }] = await Promise.all([
+    supabase.from('comments').select('*', { count: 'exact', head: true }),
+    memberUserIds.length > 0
+      ? supabase.from('comments').select('*', { count: 'exact', head: true }).in('user_id', memberUserIds)
+      : Promise.resolve({ count: 0 }),
+    aiUserIds.length > 0
+      ? supabase.from('comments').select('*', { count: 'exact', head: true }).in('user_id', aiUserIds)
+      : Promise.resolve({ count: 0 }),
+    supabase.from('comments').select('*', { count: 'exact', head: true }).is('user_id', null),
+  ]);
 
   return {
-    all: allComments?.length || 0,
-    member: allComments?.filter(c => c.user_id && memberUserIds.has(c.user_id)).length || 0,
-    ai_member: allComments?.filter(c => c.user_id && aiUserIds.has(c.user_id)).length || 0,
-    guest: allComments?.filter(c => !c.user_id).length || 0,
+    all: all || 0,
+    member: member || 0,
+    ai_member: ai_member || 0,
+    guest: guest || 0,
   };
 }
 
