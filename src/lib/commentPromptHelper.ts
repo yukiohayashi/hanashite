@@ -51,8 +51,15 @@ export const PERSONAS: Persona[] = [
 // コメントパターン定義
 export const COMMENT_PATTERNS: CommentPattern[] = [
   {
+    name: '超短文',
+    weight: 25,
+    minLength: 10,
+    maxLength: 30,
+    structure: '[一言] それ〜 / え〜 / うーん〜'
+  },
+  {
     name: '体験談ベース',
-    weight: 30,
+    weight: 20,
     minLength: 80,
     maxLength: 120,
     structure: '[導入] 私も/友達が/昔 → [体験] 〜だったんだけど → [結論] 結局〜だった → [アドバイス] だから〜した方がいいかも'
@@ -66,14 +73,14 @@ export const COMMENT_PATTERNS: CommentPattern[] = [
   },
   {
     name: '直球アドバイス',
-    weight: 30,
+    weight: 20,
     minLength: 40,
     maxLength: 80,
     structure: '[前置き] 正直/個人的には → [本音] 〜だと思う → [理由] だって〜じゃん'
   },
   {
     name: '共感+現実',
-    weight: 20,
+    weight: 15,
     minLength: 50,
     maxLength: 90,
     structure: '[共感] わかる/気持ちはわかるけど → [転換] でも/ただ → [現実] 〜だよね'
