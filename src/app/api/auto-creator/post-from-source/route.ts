@@ -210,7 +210,29 @@ export async function POST(request: Request) {
       );
     }
 
-    // AIでタイトルと本文を修正
+    // 記事内容からカテゴリを仮判定（ユーザー選択のため）
+    const tempCategoryId = detectCategory(
+      source.source_title,
+      source.source_content || source.source_title
+    );
+    
+    // 質問者を先に選択（仮カテゴリに基づく）
+    const questionerId = await selectQuestioner(source.source_title, source.source_content || source.source_title, tempCategoryId);
+    
+    // 選択されたユーザーの情報を取得
+    const { data: selectedUser } = await supabase
+      .from('users')
+      .select('birth_year, marriage')
+      .eq('id', questionerId)
+      .single();
+    
+    const currentYear = new Date().getFullYear();
+    const userAge = selectedUser?.birth_year ? currentYear - selectedUser.birth_year : null;
+    const userMarriage = selectedUser?.marriage || null;
+    
+    console.log(`選択されたユーザー: ID=${questionerId}, 年齢=${userAge}, 身分=${userMarriage}`);
+    
+    // AIでタイトルと本文を修正（ユーザー情報を渡す）
     console.log('========================================');
     console.log('【リライト前】');
     console.log('タイトル:', source.source_title);
@@ -219,7 +241,9 @@ export async function POST(request: Request) {
     
     const refined = await refineYahooQuestion(
       source.source_title,
-      source.source_content || source.source_title
+      source.source_content || source.source_title,
+      userAge,
+      userMarriage
     );
     
     console.log('========================================');
@@ -233,9 +257,6 @@ export async function POST(request: Request) {
       refined.title,
       refined.content
     );
-
-    // 質問者を選択（修正後の内容とカテゴリに適合したAI会員）
-    const questionerId = await selectQuestioner(refined.title, refined.content, detectedCategoryId);
     
     console.log(`カテゴリ自動判定: ${detectedCategoryId}`);
 

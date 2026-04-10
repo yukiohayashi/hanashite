@@ -212,7 +212,12 @@ function fixTaigendomeTitles(title: string): string {
 }
 
 // Yahoo知恵袋の質問をハナシテ用の質問文に修正
-export async function refineYahooQuestion(originalTitle: string, originalContent: string): Promise<{ title: string; content: string }> {
+export async function refineYahooQuestion(
+  originalTitle: string, 
+  originalContent: string,
+  userAge: number | null = null,
+  userMarriage: string | null = null
+): Promise<{ title: string; content: string }> {
   // api_settingsテーブルからアクティブなOpenAI APIキーを取得
   const { data: apiSettings } = await supabase
     .from('api_settings')
@@ -225,17 +230,28 @@ export async function refineYahooQuestion(originalTitle: string, originalContent
     throw new Error('OpenAI APIキーが設定されていません');
   }
 
-  // auto_creator_settingsからcreator_promptを取得
-  const { data: settingsData } = await supabase
-    .from('auto_creator_settings')
-    .select('*');
+  // 構造化プロンプトを生成
+  const { generatePostPrompt } = await import('./postPromptHelper');
+  const { prompt: structuredPrompt, persona, openingPattern, structurePattern, targetLength } = generatePostPrompt(
+    originalTitle,
+    originalContent,
+    userAge,
+    userMarriage
+  );
 
-  const settings: Record<string, string> = {};
-  settingsData?.forEach((item) => {
-    settings[item.setting_key] = item.setting_value;
-  });
-
-  const creatorPrompt = settings.creator_prompt || '';
+  console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
+  console.log('🤖 AI投稿記事：構造化プロンプトシステム');
+  console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
+  console.log(`📝 ペルソナ: ${persona.name}（${persona.ageRange}）`);
+  console.log(`   文体: ${persona.tone}`);
+  console.log(`   特徴: ${persona.characteristic}`);
+  console.log(`📋 冒頭パターン: ${openingPattern.name}`);
+  console.log(`   例: ${openingPattern.examples.join('、')}`);
+  console.log(`📐 本文構造: ${structurePattern.name}`);
+  console.log(`   ${structurePattern.structure}`);
+  console.log(`🎯 目標文字数: ${targetLength}文字`);
+  console.log(`✨ 絵文字: ${persona.emojiProbability * 100}%の確率で${persona.emojiCount[0]}-${persona.emojiCount[1]}個`);
+  console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
 
   const openai = new OpenAI({
     apiKey: apiSettings.api_key,
@@ -248,15 +264,11 @@ export async function refineYahooQuestion(originalTitle: string, originalContent
     messages: [
       {
         role: 'system',
-        content: creatorPrompt,
-      },
-      {
-        role: 'user',
-        content: `元のタイトル: ${originalTitle}\n\n元の本文: ${originalContent}`,
+        content: structuredPrompt,
       },
     ],
-    temperature: 0.7,
-    max_tokens: 500,
+    temperature: 0.8,
+    max_tokens: 600,
   });
 
   const responseText = response.choices[0]?.message?.content?.trim() || '';
