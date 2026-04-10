@@ -158,10 +158,6 @@ export default function AdminPanelLayout({
               </Link>
             </div>
           </div>
-
-        
-
-        
           {/* 自動コメント・いいね */}
           <div>
             <Link
@@ -174,11 +170,10 @@ export default function AdminPanelLayout({
             <div className="ml-11 space-y-1">
               
               <Link
-            href="/admin/comments"
+            href="/admin/comments?userType=guest"
            className={`block px-3 py-1 text-sm text-gray-400 ${hoverBgColor} hover:text-white transition-colors`}
           >
        コメント一覧・生成テスト
-           
           </Link>  
               <Link
                 href="/admin/auto-commenter-liker/settings"

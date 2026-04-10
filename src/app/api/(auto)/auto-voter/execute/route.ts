@@ -1,6 +1,13 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { supabase } from '@/lib/supabase';
 import OpenAI from 'openai';
+import { 
+  generateStructuredPrompt, 
+  shouldAddEmoji, 
+  selectEmoji, 
+  analyzeEmotion,
+  applyNaturalErrors
+} from '@/lib/commentPromptHelper';
 
 // ランダムなAI会員またはゲスト（user_id NULL）を取得
 // aiMemberProbability: AI会員の確率（残りはゲスト投稿）
@@ -38,9 +45,7 @@ async function executeVote(_postId: number, _userId: number) {
 async function executeComment(
   postId: number, 
   userId: number | null, 
-  openaiApiKey: string, 
-  commentPrompt: string,
-  settings: Record<string, string>
+  openaiApiKey: string
 ) {
   // 投稿情報を取得
   const { data: post } = await supabase
@@ -54,27 +59,39 @@ async function executeComment(
   }
 
   // ユーザー情報を取得（ゲスト投稿の場合はnull）
-  let user: { name: string; profile: string | null; status: number } | null = null;
+  let user: { 
+    name: string; 
+    profile: string | null; 
+    status: number;
+    gender: string | null;
+    age: number | null;
+    marriage: string | null;
+  } | null = null;
+  
   if (userId !== null) {
     const { data: userData } = await supabase
       .from('users')
-      .select('name, profile, status')
+      .select('name, profile, status, gender, age, marriage')
       .eq('id', userId)
       .single();
     user = userData;
   }
 
-  // コメント設定を取得
-  const diversity = parseInt(settings.diversity || '30') / 100;
-  const profileWeight = settings.profile_weight || 'medium';
-  const contentWeight = settings.content_weight || 'high';
+  // 構造化プロンプトを生成（ユーザープロフィールを渡す）
+  const { prompt: structuredPrompt, persona, pattern, targetLength } = generateStructuredPrompt(
+    post.title,
+    post.content || '',
+    user ? {
+      gender: user.gender,
+      age: user.age,
+      marriage: user.marriage
+    } : undefined
+  );
 
-  // ランダムな目標文字数を生成（短文寄り）
-  const targetLength = Math.random() < 0.7 
-    ? Math.floor(Math.random() * 30) + 10  // 70%の確率で10〜40文字
-    : Math.floor(Math.random() * 210) + 40; // 30%の確率で40〜250文字
-
-  console.log(`📝 コメント生成モード: 目標${targetLength}文字`);
+  console.log(`📝 コメント生成: ${persona.name} / ${pattern.name} / 目標${targetLength}文字`);
+  if (user) {
+    console.log(`👤 ユーザー情報: 性別=${user.gender || '未設定'}, 年齢=${user.age || '未設定'}, 身分=${user.marriage || '未設定'}`);
+  }
 
   // 既存の親コメント数を取得（返信は除外）
   const { count: commentCount } = await supabase
@@ -89,52 +106,32 @@ async function executeComment(
   // OpenAI APIでコメント生成
   const openai = new OpenAI({ apiKey: openaiApiKey });
 
-  // プロフィール考慮度に応じたプロンプト調整
-  let profileInstruction = '';
-  if (profileWeight === 'high') {
-    profileInstruction = 'ユーザーのプロフィールを強く考慮し、その人物像に合ったコメントを生成してください。';
-  } else if (profileWeight === 'medium') {
-    profileInstruction = 'ユーザーのプロフィールをある程度考慮してください。';
-  } else {
-    profileInstruction = 'プロフィールはあまり考慮せず、一般的なコメントを生成してください。';
-  }
-
-  // 記事内容考慮度に応じたプロンプト調整
-  let contentInstruction = '';
-  if (contentWeight === 'high') {
-    contentInstruction = '記事の内容を詳しく読み込み、具体的なアドバイスや共感を示してください。';
-  } else if (contentWeight === 'medium') {
-    contentInstruction = '記事の内容をある程度考慮してコメントしてください。';
-  } else {
-    contentInstruction = '記事のタイトルを中心に、簡潔なコメントを生成してください。';
-  }
-
-  // プロンプト内のプレースホルダーを置換
-  const systemPrompt = `${commentPrompt}
-
-${profileInstruction}
-${contentInstruction}
-
-【重要】コメントは${targetLength}文字前後で生成してください。`
-    .replace(/{?\$question}?/g, post.title)
-    .replace(/{?\$content}?/g, post.content || '');
-
   const response = await openai.chat.completions.create({
     model: 'gpt-4o-mini',
     messages: [
-      { role: 'system', content: systemPrompt },
-      { role: 'user', content: `ユーザー名: ${user?.name || '匿名'}\nプロフィール: ${user?.profile || 'なし'}` },
+      { role: 'system', content: structuredPrompt },
     ],
-    temperature: 0.9 + diversity,
+    temperature: 1.0,
     max_tokens: Math.max(200, targetLength * 3),
-    presence_penalty: 0.6,
-    frequency_penalty: 0.3,
+    presence_penalty: 0.7,
+    frequency_penalty: 0.5,
   });
 
-  const commentText = response.choices[0]?.message?.content?.trim() || '';
+  let commentText = response.choices[0]?.message?.content?.trim() || '';
 
   if (!commentText) {
     throw new Error('コメント生成に失敗しました');
+  }
+
+  // 15%の確率で自然な誤り（ら抜き・い抜き等）を適用
+  commentText = applyNaturalErrors(commentText);
+
+  // 25%の確率で絵文字を追加
+  if (shouldAddEmoji()) {
+    const emotion = analyzeEmotion(post.title, post.content || '');
+    const emoji = selectEmoji(emotion);
+    commentText = `${commentText}${emoji}`;
+    console.log(`✨ 絵文字追加: ${emoji} (感情: ${emotion})`);
   }
 
   let finalUserId: number | null = userId;
@@ -535,7 +532,6 @@ export async function POST(request: NextRequest) {
       .single();
 
     const openaiApiKey = apiSettings?.api_key || '';
-    const commentPrompt = settings.comment_prompt || '';
 
     // ランダムなAI会員を取得（手動実行時は常にAI会員を使用）
     const userId = await getRandomUser(100);
@@ -557,7 +553,7 @@ export async function POST(request: NextRequest) {
         if (!openaiApiKey) {
           throw new Error('OpenAI APIキーが設定されていません');
         }
-        result = await executeComment(post_id, userId, openaiApiKey, commentPrompt, settings);
+        result = await executeComment(post_id, userId, openaiApiKey);
         message = `コメントを投稿しました: ${result.commentText}`;
         break;
 
