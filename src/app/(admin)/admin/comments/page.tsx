@@ -54,39 +54,42 @@ async function getComments(limit: number = 100, searchQuery: string = '', userTy
     };
   });
 
-  // userTypeフィルター
-  if (userType === 'real') {
-    commentsWithDetails = commentsWithDetails.filter(c => c.user_id && c.users?.status === 3);
-  } else if (userType === 'real_guest') {
-    commentsWithDetails = commentsWithDetails.filter(c => !c.user_id && !c.is_ai_comment);
-  } else if (userType === 'ai_guest') {
-    commentsWithDetails = commentsWithDetails.filter(c => !c.user_id && c.is_ai_comment);
+  // userTypeフィルター（AI会員=status:4で判定）
+  if (userType === 'member') {
+    commentsWithDetails = commentsWithDetails.filter(c => c.user_id && c.users?.status !== 4);
   } else if (userType === 'ai_member') {
     commentsWithDetails = commentsWithDetails.filter(c => c.user_id && c.users?.status === 4);
+  } else if (userType === 'guest') {
+    commentsWithDetails = commentsWithDetails.filter(c => !c.user_id);
   }
 
   return commentsWithDetails;
 }
 
 async function getCommentCounts() {
+  // status:3（会員）のuser_idを取得
+  const { data: memberUsers } = await supabase
+    .from('users')
+    .select('id')
+    .eq('status', 3);
+  const memberUserIds = new Set(memberUsers?.map(u => u.id) || []);
+
+  // status:4（AI会員）のuser_idを取得
+  const { data: aiUsers } = await supabase
+    .from('users')
+    .select('id')
+    .eq('status', 4);
+  const aiUserIds = new Set(aiUsers?.map(u => u.id) || []);
+
   const { data: allComments } = await supabase
     .from('comments')
-    .select('user_id, is_ai_comment');
-
-  // ユーザーのstatusを取得
-  const userIds = [...new Set(allComments?.map(c => c.user_id).filter(Boolean) || [])];
-  const { data: users } = await supabase
-    .from('users')
-    .select('id, status')
-    .in('id', userIds);
-  const userStatusMap = new Map(users?.map(u => [u.id, u.status]) || []);
+    .select('user_id');
 
   return {
     all: allComments?.length || 0,
-    real: allComments?.filter(c => c.user_id && userStatusMap.get(c.user_id) === 3).length || 0,
-    real_guest: allComments?.filter(c => !c.user_id && !c.is_ai_comment).length || 0,
-    ai_guest: allComments?.filter(c => !c.user_id && c.is_ai_comment).length || 0,
-    ai_member: allComments?.filter(c => c.user_id && userStatusMap.get(c.user_id) === 4).length || 0,
+    member: allComments?.filter(c => c.user_id && memberUserIds.has(c.user_id)).length || 0,
+    ai_member: allComments?.filter(c => c.user_id && aiUserIds.has(c.user_id)).length || 0,
+    guest: allComments?.filter(c => !c.user_id).length || 0,
   };
 }
 
@@ -151,20 +154,16 @@ export default async function CommentsManagementPage({
           すべて ({counts.all})
         </a>
         <span className="text-gray-400">|</span>
-        <a href="/admin/comments?userType=real" className={`hover:text-green-600 font-semibold ${userType === 'real' ? 'text-green-600' : 'text-green-500'}`}>
-          リアル ({counts.real})
-        </a>
-        <span className="text-gray-400">|</span>
-        <a href="/admin/comments?userType=real_guest" className={`hover:text-blue-600 ${userType === 'real_guest' ? 'text-blue-600 font-semibold' : 'text-gray-600'}`}>
-          ゲスト ({counts.real_guest})
+        <a href="/admin/comments?userType=member" className={`hover:text-blue-600 ${userType === 'member' ? 'text-blue-600 font-semibold' : 'text-gray-600'}`}>
+          会員 ({counts.member})
         </a>
         <span className="text-gray-400">|</span>
         <a href="/admin/comments?userType=ai_member" className={`hover:text-purple-600 ${userType === 'ai_member' ? 'text-purple-600 font-semibold' : 'text-gray-600'}`}>
           AI会員 ({counts.ai_member})
         </a>
         <span className="text-gray-400">|</span>
-        <a href="/admin/comments?userType=ai_guest" className={`hover:text-orange-600 ${userType === 'ai_guest' ? 'text-orange-600 font-semibold' : 'text-gray-600'}`}>
-          AIゲスト ({counts.ai_guest})
+        <a href="/admin/comments?userType=guest" className={`hover:text-blue-600 ${userType === 'guest' ? 'text-blue-600 font-semibold' : 'text-gray-600'}`}>
+          ゲスト ({counts.guest})
         </a>
       </div>
 

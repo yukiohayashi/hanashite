@@ -154,11 +154,11 @@ export default async function UsersManagementPage({
           <span className="text-gray-400">|</span>
           <a
             href="/admin/users?status=3"
-            className={`hover:text-green-600 font-semibold ${
-              statusFilter === 3 ? 'text-green-600' : 'text-green-500'
+            className={`hover:text-blue-600 ${
+              statusFilter === 3 ? 'text-blue-600 font-semibold' : 'text-gray-600'
             }`}
           >
-            リアル ({counts.real_member})
+            会員 ({counts.real_member})
           </a>
           <span className="text-gray-400">|</span>
           <a
