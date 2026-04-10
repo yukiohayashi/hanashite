@@ -210,6 +210,24 @@ export async function POST(request: Request) {
       );
     }
 
+    // 重複防止: 先に処理中フラグを立てる
+    const { error: lockError } = await supabase
+      .from('auto_consultation_sources')
+      .update({ 
+        is_processed: true,
+        processed_at: new Date().toISOString()
+      })
+      .eq('id', source_id)
+      .eq('is_processed', false); // 未処理の場合のみ更新
+
+    if (lockError) {
+      console.error('ソースロックエラー:', lockError);
+      return NextResponse.json(
+        { success: false, error: 'このソースは既に処理中です' },
+        { status: 409 }
+      );
+    }
+
     // 記事内容からカテゴリを仮判定（ユーザー選択のため）
     const tempCategoryId = detectCategory(
       source.source_title,
@@ -302,20 +320,18 @@ export async function POST(request: Request) {
 
     console.log('投稿作成成功:', { postId: post.id, title: post.title });
 
-    // ソースを処理済みに更新（post_idも保存）
+    // post_idを保存
     const { error: updateError } = await supabase
       .from('auto_consultation_sources')
       .update({ 
-        is_processed: true, 
-        processed_at: new Date().toISOString(),
         post_id: post.id
       })
       .eq('id', source_id);
 
     if (updateError) {
-      console.error('ソース更新エラー:', updateError);
+      console.error('post_id更新エラー:', updateError);
     } else {
-      console.log('ソース更新成功:', { sourceId: source_id, postId: post.id });
+      console.log('post_id更新成功:', { sourceId: source_id, postId: post.id });
     }
 
     return NextResponse.json({
