@@ -508,7 +508,7 @@ export default function CommentSection({ postId, initialComments, totalCount, po
                       </span>
                     </div>
                     
-                    <div className="mb-2.5 text-gray-800 leading-relaxed">
+                    <div className="mb-2.5 text-gray-800 text-base leading-relaxed">
                       <div dangerouslySetInnerHTML={{ __html: comment.content.replace(/\\n/g, '<br>').replace(/\n/g, '<br>') }} />
                     </div>
                     
