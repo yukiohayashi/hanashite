@@ -844,7 +844,7 @@ export default function CommentSection({ postId, initialComments, totalCount, po
                           parentId={reply.id} 
                           allComments={comments} 
                           depth={2}
-                          bestAnswerId={bestAnswerId}
+                          bestAnswerId={bestAnswerId ?? null}
                           bestAnswerPoints={bestAnswerPoints}
                           postId={postId}
                           handleLike={handleLike}
