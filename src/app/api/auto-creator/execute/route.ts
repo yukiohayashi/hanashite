@@ -102,20 +102,20 @@ export async function POST() {
       });
     }
 
-    const source = sources[0];
-    
-    // 処理開始をマーク（同時実行防止のロック）
-    const lockTime = new Date().toISOString();
-    const { data: lockedSource, error: lockError } = await supabase
-      .from('auto_consultation_sources')
-      .update({ processing_started_at: lockTime })
-      .eq('id', source.id)
-      .is('processing_started_at', null) // まだロックされていない場合のみ
-      .select()
-      .single();
+    // アトミックなロック: RPC関数でSELECTとUPDATEを同時に実行（Race Condition対策）
+    const { data: lockedSources, error: rpcError } = await supabase
+      .rpc('get_next_unprocessed_source');
 
-    if (lockError || !lockedSource) {
-      console.log('ソースは既に他のプロセスで処理中です');
+    if (rpcError) {
+      console.error('RPCエラー:', rpcError);
+      return NextResponse.json({
+        success: false,
+        error: 'ソースのロックに失敗しました',
+      }, { status: 500 });
+    }
+
+    if (!lockedSources || lockedSources.length === 0) {
+      console.log('ロック可能な未処理ソースがありません（他のプロセスが処理中）');
       return NextResponse.json({
         success: false,
         message: 'ソースは既に他のプロセスで処理中です',
@@ -123,6 +123,7 @@ export async function POST() {
       });
     }
 
+    const source = lockedSources[0];
     console.log(`ソースを処理: ${source.id} - ${source.source_title}`);
 
     // post-from-source APIを呼び出し

@@ -230,6 +230,24 @@ async function executeComment(
 
   console.log('コメント挿入成功:', comment);
   
+  // ゲスト投稿の場合はいいね処理と個人成績更新をスキップ
+  if (finalUserId !== null) {
+    // 個人成績（points）に登板記録を追加
+    try {
+      await supabase.from('points').insert({
+        user_id: finalUserId,
+        type: 'comment_post',
+        points: 0,
+        amount: 0,
+        created_at: commentDate.toISOString(),
+      });
+      console.log(`📊 個人成績に登板記録を追加しました（ユーザーID: ${finalUserId}）`);
+    } catch (error) {
+      console.error('個人成績更新エラー:', error);
+      // エラーでもコメント投稿は成功しているので続行
+    }
+  }
+  
   // ゲスト投稿の場合はいいね処理をスキップ
   if (finalUserId !== null) {
     // 自分のコメント以外のランダムなコメントにいいね（必ず実行）

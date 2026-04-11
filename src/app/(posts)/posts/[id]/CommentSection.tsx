@@ -72,6 +72,166 @@ function TimeAgo({ dateString }: { dateString: string }) {
   return <span className="text-gray-500 text-xs">{timeAgo}前</span>;
 }
 
+// 再帰的な返信表示コンポーネント（深いネスト対応）
+interface RecursiveRepliesProps {
+  parentId: number;
+  allComments: Comment[];
+  depth: number;
+  bestAnswerId: number | null;
+  bestAnswerPoints: number;
+  postId: number;
+  handleLike: (commentId: number) => void;
+  likingComments: Set<number>;
+  setReplyingTo: (id: number | null) => void;
+  session: any;
+}
+
+function RecursiveReplies({ 
+  parentId, 
+  allComments, 
+  depth, 
+  bestAnswerId, 
+  bestAnswerPoints, 
+  postId,
+  handleLike,
+  likingComments,
+  setReplyingTo,
+  session
+}: RecursiveRepliesProps) {
+  const replies = allComments.filter(c => c.parent_id === parentId);
+  
+  if (replies.length === 0) return null;
+  
+  const maxDepth = 10; // 最大ネスト深度
+  const indentClass = depth <= maxDepth ? `ml-${Math.min(depth * 4, 48)}` : 'ml-48';
+  
+  return (
+    <>
+      {replies.map((reply) => {
+        const replyUsers = reply.users;
+        const replyUserName = replyUsers?.name || 'ゲスト';
+        const getReplyAvatarUrl = () => {
+          if (replyUsers?.use_custom_image && replyUsers?.image) {
+            return replyUsers.image;
+          }
+          if (replyUsers?.avatar_seed && (replyUsers.avatar_seed.startsWith('f20_') || replyUsers.avatar_seed.startsWith('f30_') || replyUsers.avatar_seed.startsWith('f40_') || 
+                     replyUsers.avatar_seed.startsWith('m20_') || replyUsers.avatar_seed.startsWith('m30_') || replyUsers.avatar_seed.startsWith('m40_') ||
+                     replyUsers.avatar_seed.startsWith('cat_') || replyUsers.avatar_seed.startsWith('dog_') || replyUsers.avatar_seed.startsWith('rabbit_') ||
+                     replyUsers.avatar_seed.startsWith('bear_') || replyUsers.avatar_seed.startsWith('other_'))) {
+            return `/images/local-avatars/${replyUsers.avatar_seed}.webp`;
+          }
+          return '/images/local-avatars/default-avatar.webp';
+        };
+        const replyAvatarUrl = getReplyAvatarUrl();
+        const isReplyBestAnswer = bestAnswerId === reply.id;
+        
+        return (
+          <div key={reply.id} id={`reply-${reply.id}`} className={`${indentClass} mt-2 ${isReplyBestAnswer ? 'border-2 border-[#f4511e] rounded-lg p-3 bg-[#fff8f6]' : ''}`}>
+            {isReplyBestAnswer && (
+              <div className="flex items-center justify-center gap-2 mb-3 pb-3 border-b border-[#f4511e]">
+                <span className="text-[#f4511e] text-lg">🏆</span>
+                <span className="font-bold text-[#f4511e] text-base">ベストアンサー</span>
+                <span className="inline-flex items-center gap-1 px-2 py-1 bg-yellow-100 text-yellow-800 rounded-full text-sm font-medium">
+                  <span>{bestAnswerPoints}pt獲得</span>
+                  <span className="text-base">🪙</span>
+                </span>
+              </div>
+            )}
+            <div className="flex flex-wrap py-2.5">
+              <div className="shrink-0 mr-1">
+                {reply.user_id ? (
+                  <Link href={`/users/${reply.user_id}`}>
+                    <div className="w-5 h-5 rounded-full overflow-hidden">
+                      <img 
+                        src={replyAvatarUrl} 
+                        alt={replyUserName} 
+                        className="rounded-full w-full h-full object-cover scale-125 hover:opacity-80 transition-opacity cursor-pointer"
+                      />
+                    </div>
+                  </Link>
+                ) : (
+                  <GuestAvatar size={20} />
+                )}
+              </div>
+              
+              <div className="flex-1 ml-0">
+                <div className="flex justify-between items-center gap-2 mb-2">
+                  <div className="flex items-center gap-2">
+                    {reply.user_id ? (
+                      <Link href={`/users/${reply.user_id}`} className="font-medium text-gray-600 text-sm hover:text-blue-600 transition-colors">
+                        {replyUserName}
+                      </Link>
+                    ) : (
+                      <span className="font-medium text-gray-600 text-sm">{replyUserName}</span>
+                    )}
+                    <TimeAgo dateString={reply.created_at} />
+                  </div>
+                  <span className="text-gray-400 hover:text-gray-600 text-xs transition-colors cursor-pointer" 
+                        onClick={() => {
+                          navigator.clipboard.writeText(String(reply.id));
+                          alert('IDをコピーしました!');
+                        }}
+                        title="クリックでコピー">
+                    ID: {reply.id}
+                  </span>
+                </div>
+                
+                <div className="mb-2.5 text-gray-800 text-base leading-relaxed">
+                  <div dangerouslySetInnerHTML={{ __html: reply.content.replace(/\\n/g, '<br>').replace(/\n/g, '<br>') }} />
+                </div>
+                
+                <div className="flex items-center gap-2">
+                  <button 
+                    onClick={() => handleLike(reply.id)}
+                    disabled={likingComments.has(reply.id)}
+                    className="inline-flex items-center gap-1 bg-transparent p-0 border-0 text-xl hover:scale-110 transition-all cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+                    style={{ color: '#ef4444' }}
+                  >
+                    <span className="text-xl">{reply.is_liked ? '♥' : '♡'}</span>
+                    <span className="text-sm" style={{ color: '#ef4444' }}>{reply.like_count || ''}</span>
+                  </button>
+                  
+                  {session && !bestAnswerId && (
+                    <button 
+                      onClick={() => setReplyingTo(reply.id)}
+                      className="bg-transparent p-0 border-0 text-gray-600 hover:text-[#ff6b35] text-xs transition-colors cursor-pointer"
+                    >
+                      返信
+                    </button>
+                  )}
+                  
+                  {!isReplyBestAnswer && (
+                    <Link
+                      href={`/report?url=${encodeURIComponent(`https://dokujo.com/posts/${postId}#comment-${reply.id}`)}`}
+                      className="text-gray-600 hover:text-red-600 text-xs transition-colors ml-auto"
+                    >
+                      通報する
+                    </Link>
+                  )}
+                </div>
+              </div>
+            </div>
+            
+            {/* さらに深い階層の返信を再帰的に表示 */}
+            <RecursiveReplies 
+              parentId={reply.id} 
+              allComments={allComments} 
+              depth={depth + 1}
+              bestAnswerId={bestAnswerId}
+              bestAnswerPoints={bestAnswerPoints}
+              postId={postId}
+              handleLike={handleLike}
+              likingComments={likingComments}
+              setReplyingTo={setReplyingTo}
+              session={session}
+            />
+          </div>
+        );
+      })}
+    </>
+  );
+}
+
 export default function CommentSection({ postId, initialComments, totalCount, postUserId, postUserName, bestAnswerId, deadlineAt, bestAnswerPoints = 10, isAdmin = false }: CommentSectionProps) {
   const { data: session } = useSession();
   const [comments, setComments] = useState<Comment[]>(initialComments);
@@ -571,7 +731,6 @@ export default function CommentSection({ postId, initialComments, totalCount, po
                       return '/images/local-avatars/default-avatar.webp';
                     };
                     const replyAvatarUrl = getReplyAvatarUrl();
-                    const nestedReplies = getReplies(reply.id);
                     const isReplyBestAnswer = bestAnswerId === reply.id;
                     
                     return (
@@ -680,114 +839,19 @@ export default function CommentSection({ postId, initialComments, totalCount, po
                           </div>
                         </div>
                         
-                        {/* さらにネストされた返信 */}
-                        {nestedReplies.map((nestedReply) => {
-                          const nestedUsers = nestedReply.users;
-                          const nestedUserName = nestedUsers?.name || 'ゲスト';
-                          const getNestedAvatarUrl = () => {
-                            if (nestedUsers?.use_custom_image && nestedUsers?.image) {
-                              return nestedUsers.image;
-                            }
-                            if (nestedUsers?.avatar_seed && (nestedUsers.avatar_seed.startsWith('f20_') || nestedUsers.avatar_seed.startsWith('f30_') || nestedUsers.avatar_seed.startsWith('f40_') || 
-                                       nestedUsers.avatar_seed.startsWith('m20_') || nestedUsers.avatar_seed.startsWith('m30_') || nestedUsers.avatar_seed.startsWith('m40_') ||
-                                       nestedUsers.avatar_seed.startsWith('cat_') || nestedUsers.avatar_seed.startsWith('dog_') || nestedUsers.avatar_seed.startsWith('rabbit_') ||
-                                       nestedUsers.avatar_seed.startsWith('bear_') || nestedUsers.avatar_seed.startsWith('other_'))) {
-                              return `/images/local-avatars/${nestedUsers.avatar_seed}.webp`;
-                            }
-                            return '/images/local-avatars/default-avatar.webp';
-                          };
-                          const nestedAvatarUrl = getNestedAvatarUrl();
-                          const isNestedBestAnswer = bestAnswerId === nestedReply.id;
-                          
-                          return (
-                            <div key={nestedReply.id} id={`reply-${nestedReply.id}`} className={`ml-12 mt-2 ${isNestedBestAnswer ? 'border-2 border-[#f4511e] rounded-lg p-3 bg-[#fff8f6]' : ''}`}>
-                              {isNestedBestAnswer && (
-                                <div className="flex items-center justify-center gap-2 mb-3 pb-3 border-b border-[#f4511e]">
-                                  <span className="text-[#f4511e] text-lg">🏆</span>
-                                  <span className="font-bold text-[#f4511e] text-base">ベストアンサー</span>
-                                  <span className="inline-flex items-center gap-1 px-2 py-1 bg-yellow-100 text-yellow-800 rounded-full text-sm font-medium">
-                                    <span>{bestAnswerPoints}pt獲得</span>
-                                
-                                  </span>
-                                </div>
-                              )}
-                              <div className="flex flex-wrap py-2.5">
-                                <div className="shrink-0 mr-1">
-                                  {nestedReply.user_id ? (
-                                    <Link href={`/users/${nestedReply.user_id}`}>
-                                      <div className="w-5 h-5 rounded-full overflow-hidden">
-                                        <img 
-                                          src={nestedAvatarUrl} 
-                                          alt={nestedUserName} 
-                                          className="rounded-full w-full h-full object-cover scale-125 hover:opacity-80 transition-opacity cursor-pointer"
-                                        />
-                                      </div>
-                                    </Link>
-                                  ) : (
-                                    <GuestAvatar size={20} />
-                                  )}
-                                </div>
-                                
-                                <div className="flex-1 ml-0">
-                                  <div className="flex justify-between items-center gap-2 mb-2">
-                                    <div className="flex items-center gap-2">
-                                      {nestedReply.user_id ? (
-                                        <Link href={`/users/${nestedReply.user_id}`} className="font-medium text-gray-600 text-sm hover:text-blue-600 transition-colors">
-                                          {nestedUserName}
-                                        </Link>
-                                      ) : (
-                                        <span className="font-medium text-gray-600 text-sm">{nestedUserName}</span>
-                                      )}
-                                      <TimeAgo dateString={nestedReply.created_at} />
-                                    </div>
-                                    <span className="text-gray-400 hover:text-gray-600 text-xs transition-colors cursor-pointer" 
-                                          onClick={() => {
-                                            navigator.clipboard.writeText(String(nestedReply.id));
-                                            alert('IDをコピーしました!');
-                                          }}
-                                          title="クリックでコピー">
-                                      ID: {nestedReply.id}
-                                    </span>
-                                  </div>
-                                  
-                                  <div className="mb-2.5 text-gray-800 leading-relaxed">
-                                    <div dangerouslySetInnerHTML={{ __html: nestedReply.content.replace(/\\n/g, '<br>').replace(/\n/g, '<br>') }} />
-                                  </div>
-                                  
-                                  <div className="flex items-center gap-2">
-                                    <button 
-                                      onClick={() => handleLike(nestedReply.id)}
-                                      disabled={likingComments.has(nestedReply.id)}
-                                      className="inline-flex items-center gap-1 bg-transparent p-0 border-0 text-xl hover:scale-110 transition-all cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
-                                      style={{ color: '#ef4444' }}
-                                    >
-                                      <span className="text-xl">{nestedReply.is_liked ? '♥' : '♡'}</span>
-                                      <span className="text-sm" style={{ color: '#ef4444' }}>{nestedReply.like_count || ''}</span>
-                                    </button>
-                                    
-                                    {session && !bestAnswerId && (
-                                      <button 
-                                        onClick={() => setReplyingTo(nestedReply.id)}
-                                        className="bg-transparent p-0 border-0 text-gray-600 hover:text-[#ff6b35] text-xs transition-colors cursor-pointer"
-                                      >
-                                        返信
-                                      </button>
-                                    )}
-                                    
-                                    {!isNestedBestAnswer && (
-                                      <Link
-                                        href={`/report?url=${encodeURIComponent(`https://dokujo.com/posts/${postId}#comment-${nestedReply.id}`)}`}
-                                        className="text-gray-600 hover:text-red-600 text-xs transition-colors ml-auto"
-                                      >
-                                        通報する
-                                      </Link>
-                                    )}
-                                  </div>
-                                </div>
-                              </div>
-                            </div>
-                          );
-                        })}
+                        {/* さらにネストされた返信（再帰的に表示） */}
+                        <RecursiveReplies 
+                          parentId={reply.id} 
+                          allComments={comments} 
+                          depth={2}
+                          bestAnswerId={bestAnswerId}
+                          bestAnswerPoints={bestAnswerPoints}
+                          postId={postId}
+                          handleLike={handleLike}
+                          likingComments={likingComments}
+                          setReplyingTo={setReplyingTo}
+                          session={session}
+                        />
                       </div>
                     );
                   })}

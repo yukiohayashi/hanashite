@@ -211,19 +211,52 @@ export async function POST(request: Request) {
     }
 
     // 重複防止: 先に処理中フラグを立てる
-    const { error: lockError } = await supabase
+    const { error: lockError, data: lockData } = await supabase
       .from('auto_consultation_sources')
       .update({ 
         is_processed: true,
         processed_at: new Date().toISOString()
       })
       .eq('id', source_id)
-      .eq('is_processed', false); // 未処理の場合のみ更新
+      .eq('is_processed', false) // 未処理の場合のみ更新
+      .select('id'); // 更新されたレコードを返す
 
     if (lockError) {
       console.error('ソースロックエラー:', lockError);
       return NextResponse.json(
         { success: false, error: 'このソースは既に処理中です' },
+        { status: 409 }
+      );
+    }
+
+    // ロックが成功したか確認（他のプロセスが先に更新していた場合は空配列）
+    if (!lockData || lockData.length === 0) {
+      console.log(`ソースID:${source_id} は他のプロセスに先にロックされました`);
+      return NextResponse.json(
+        { success: false, error: 'このソースは既に処理中です' },
+        { status: 409 }
+      );
+    }
+
+    // ダブルチェック: 同じソースURLで既に投稿が存在しないか確認
+    const { data: existingPost } = await supabase
+      .from('posts')
+      .select('id')
+      .eq('source_url', source.source_url)
+      .limit(1);
+
+    if (existingPost && existingPost.length > 0) {
+      console.log(`同じソースURLの投稿が既に存在します: post_id=${existingPost[0].id}`);
+      // ソースを未処理に戻す（重複を防ぐため）
+      await supabase
+        .from('auto_consultation_sources')
+        .update({ 
+          is_processed: false,
+          processed_at: null
+        })
+        .eq('id', source_id);
+      return NextResponse.json(
+        { success: false, error: '同じ内容の投稿が既に存在します' },
         { status: 409 }
       );
     }

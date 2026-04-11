@@ -14,6 +14,9 @@ import AddKeywordButton from './AddKeywordButton';
 // import GoogleAdPost from '@/components/GoogleAdPost'; // 一時的に非表示
 import type { Metadata } from 'next';
 
+// 動的レンダリングを強制（コメントの最新データを取得するため）
+export const dynamic = 'force-dynamic';
+
 interface Post {
   id: number;
   title: string;
