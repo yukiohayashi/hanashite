@@ -146,8 +146,8 @@ async function executeComment(
     console.log(`🔤 自然な誤り適用: あり`);
   }
 
-  // 25%の確率で絵文字を追加
-  if (shouldAddEmoji()) {
+  // 50%の確率で絵文字を追加
+  if (Math.random() < 0.5) {
     const emotion = analyzeEmotion(post.title, post.content || '');
     const emoji = selectEmoji(emotion);
     commentText = `${commentText}${emoji}`;

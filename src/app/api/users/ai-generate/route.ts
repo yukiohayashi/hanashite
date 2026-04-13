@@ -7,6 +7,27 @@ const supabase = createClient(
   process.env.SUPABASE_SERVICE_ROLE_KEY!
 );
 
+export async function GET(request: NextRequest) {
+  const { searchParams } = new URL(request.url);
+  const list = searchParams.get('list');
+
+  if (list === 'true') {
+    const { data: users, error } = await supabase
+      .from('users')
+      .select('id, name, birth_year')
+      .eq('status', 4)
+      .order('name', { ascending: true });
+
+    if (error) {
+      return NextResponse.json({ error: 'AI会員の取得に失敗しました' }, { status: 500 });
+    }
+
+    return NextResponse.json({ users: users || [] });
+  }
+
+  return NextResponse.json({ error: 'Invalid request' }, { status: 400 });
+}
+
 export async function POST(request: NextRequest) {
   try {
     const { count, use_ai } = await request.json();

@@ -174,23 +174,6 @@ CREATE INDEX idx_auto_consultation_logs_execution_time ON auto_consultation_logs
 CREATE INDEX idx_auto_consultation_logs_status ON auto_consultation_logs(status);
 ```
 
-#### 3.2.3 `google_trends_cache` テーブル
-
-Googleトレンドのキーワードをキャッシュするテーブル（API制限対策）。
-
-```sql
-CREATE TABLE google_trends_cache (
-  id SERIAL PRIMARY KEY,
-  keyword VARCHAR(255) NOT NULL,
-  trend_score INTEGER, -- トレンドスコア（0-100）
-  category VARCHAR(100), -- 恋愛関連カテゴリ
-  fetched_at TIMESTAMP DEFAULT NOW(),
-  expires_at TIMESTAMP, -- キャッシュ有効期限（24時間）
-  UNIQUE(keyword)
-);
-
-CREATE INDEX idx_google_trends_cache_expires ON google_trends_cache(expires_at);
-```
 
 ---
 
