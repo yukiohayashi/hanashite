@@ -692,21 +692,13 @@ export default function AutoCreatorSettings() {
             </div>
           </div>
 
-          {/* AI投稿プロンプト */}
-          <div className="bg-purple-50 border border-purple-200 rounded-lg p-4">
-            <h3 className="text-sm font-semibold text-purple-900 mb-2">🤖 AI投稿プロンプト</h3>
-            <textarea
-              value={settings?.creator_prompt || ''}
-              onChange={(e) => setSettings({ ...settings!, creator_prompt: e.target.value })}
-              className="w-full h-96 p-3 text-xs border border-purple-300 rounded-md focus:ring-2 focus:ring-purple-500 focus:border-transparent font-mono"
-              placeholder="AI投稿プロンプトを入力してください"
-            />
-          </div>
-
           {/* 注意事項 */}
           <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
             <h3 className="text-sm font-medium text-yellow-800 mb-2">⚠️ 注意事項</h3>
             <ul className="text-sm text-yellow-700 space-y-1">
+              <li>• <strong>AI投稿プロンプトはコードで管理されています</strong></li>
+              <li className="ml-4 text-xs">ファイル: <code className="bg-yellow-100 px-1 rounded">src/lib/postPromptHelper.ts</code> (generatePostPrompt関数)</li>
+              <li className="ml-4 text-xs">プロンプトの変更はコードを直接編集してください</li>
               <li>• 実行間隔は最短1分、最長24時間です</li>
               <li>• スクレイピングは各サイトの利用規約を遵守してください</li>
               <li>• 自動実行はVPSのcrontabで動作します</li>
