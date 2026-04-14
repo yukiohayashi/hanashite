@@ -584,6 +584,9 @@ export default function CommentSection({ postId, initialComments, totalCount, po
                 className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-400"
               >
                 <option value="">自分として投稿</option>
+                {postUserId && (
+                  <option value={postUserId}>{postUserName || '相談者'}として投稿</option>
+                )}
                 {aiUsers.map((u) => {
                   const currentYear = new Date().getFullYear();
                   const ageGroup = u.birth_year ? `${Math.floor((currentYear - u.birth_year) / 10) * 10}代` : '';
