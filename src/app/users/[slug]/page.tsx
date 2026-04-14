@@ -191,6 +191,9 @@ export default async function UserPage({ params }: { params: Promise<{ slug: str
 
   // 自分のプロフィールかチェック
   const isOwnProfile = session?.user?.id?.toString() === user.id.toString();
+  
+  // 管理者かチェック（status=1）
+  const isAdmin = session?.user?.status === 1;
 
   // 投稿とコメントを取得（user.idを使用）
   const [posts, comments] = await Promise.all([
@@ -235,7 +238,16 @@ export default async function UserPage({ params }: { params: Promise<{ slug: str
         {/* メインコンテンツ */}
         <div className="flex-1 max-w-[760px]">
           {/* ユーザープロフィール */}
-          <div className="bg-white shadow-md mb-4 p-6 border border-gray-200 rounded">
+          <div className="bg-white shadow-md mb-4 p-6 border border-gray-200 rounded relative">
+            {/* 管理者用編集ボタン */}
+            {isAdmin && (
+              <Link
+                href={`/admin/users/${user.id}/edit`}
+                className="absolute top-4 right-4 px-3 py-1 text-sm bg-blue-600 text-white rounded hover:bg-blue-700"
+              >
+                編集
+              </Link>
+            )}
             <div className="flex items-start gap-4">
               {/* アバター */}
               <div className="shrink-0">
