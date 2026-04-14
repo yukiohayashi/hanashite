@@ -373,11 +373,22 @@ export default async function PostPage({ params, searchParams }: { params: Promi
 
                 {/* 本文（管理者投稿は緑エリアなし、一般投稿は条件分岐） */}
                 {post.user_id.toString() === '1' ? (
-                  // 管理者投稿：緑エリアなし、本文のみ表示
+                  // 管理者投稿：緑エリアなし、画像がある場合は右寄せ回り込み
                   <div className="mb-1.5">
+                    {imageUrl && imageUrl !== '/images/noimage.webp' && (imageUrl.startsWith('data:image/') || imageUrl.startsWith('/uploads/') || imageUrl.includes('supabase.co/storage')) && (
+                      <div className="md:float-right md:ml-3 mb-2 w-full md:w-32">
+                        <ClickableImage
+                          src={imageUrl}
+                          alt={post.title}
+                          className="w-full rounded"
+                          loading="lazy"
+                        />
+                      </div>
+                    )}
                     <div className="font-normal text-gray-800 text-base leading-relaxed">
                       <div dangerouslySetInnerHTML={{ __html: (post.content || '').replace(/\\n/g, '<br>').replace(/\n/g, '<br>') }} />
                     </div>
+                    <div className="clear-both"></div>
                   </div>
                 ) : imageUrl && (imageUrl.startsWith('data:image/') || imageUrl.startsWith('/uploads/') || imageUrl.includes('supabase.co/storage')) ? (
                   // 手動画像アップロード：PC版は右寄せ回り込み、スマホ版は100%幅
