@@ -780,9 +780,9 @@ export default function CommentSection({ postId, initialComments, totalCount, po
                         <button
                           onClick={() => handleSetBestAnswer(comment.id)}
                           disabled={isSettingBestAnswer}
-                          className="px-2 py-1 bg-orange-100 text-orange-600 text-xs rounded hover:bg-orange-200 transition-colors disabled:opacity-50"
+                          className="px-2 py-1 bg-gray-200 text-gray-600 text-xs rounded hover:bg-gray-300 transition-colors disabled:opacity-50"
                         >
-                          {isSettingBestAnswer ? '処理中...' : 'ベストアンサー認定'}
+                          {isSettingBestAnswer ? '処理中...' : 'ベストアンサーにする'}
                         </button>
                       )}
                       
