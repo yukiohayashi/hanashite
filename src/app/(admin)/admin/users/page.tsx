@@ -2,6 +2,10 @@ import { supabase } from '@/lib/supabase';
 import UsersTable from './UsersTable';
 import Link from 'next/link';
 
+// 動的レンダリングを強制（ユーザーデータの最新状態を取得するため）
+export const dynamic = 'force-dynamic';
+export const revalidate = 0;
+
 async function getUsers(statusFilter?: number, hasImage?: boolean, page: number = 1, limit: number = 100) {
   console.log('getUsers - statusFilter:', statusFilter, 'hasImage:', hasImage, 'page:', page, 'limit:', limit);
   

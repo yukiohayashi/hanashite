@@ -4,7 +4,7 @@ import { useState, useMemo } from 'react';
 import { ArrowUpDown, Trash2 } from 'lucide-react';
 
 interface User {
-  id: number;
+  id: string | number;
   name: string;
   email: string;
   image: string | null;
@@ -27,13 +27,13 @@ type SortDirection = 'asc' | 'desc';
 
 export default function UsersTable({ users: initialUsers }: UsersTableProps) {
   const [users, setUsers] = useState(initialUsers);
-  const [loading, setLoading] = useState<number | null>(null);
+  const [loading, setLoading] = useState<string | number | null>(null);
   const [sortField, setSortField] = useState<SortField>('created_at');
   const [sortDirection, setSortDirection] = useState<SortDirection>('desc');
-  const [selectedUsers, setSelectedUsers] = useState<number[]>([]);
+  const [selectedUsers, setSelectedUsers] = useState<(string | number)[]>([]);
   const [bulkDeleting, setBulkDeleting] = useState(false);
 
-  const handleDelete = async (userId: number) => {
+  const handleDelete = async (userId: string | number) => {
     setLoading(userId);
     try {
       const response = await fetch(`/api/admin/users/${userId}`, {
@@ -60,16 +60,25 @@ export default function UsersTable({ users: initialUsers }: UsersTableProps) {
     }
   };
 
-  const handleChangeStatus = async (userId: number, newStatus: number) => {
+  const handleChangeStatus = async (userId: string | number, newStatus: number) => {
+    console.log('🔄 ステータス変更開始:', { userId, newStatus });
     setLoading(userId);
     try {
-      const response = await fetch(`/api/admin/users/${userId}`, {
+      const url = `/api/admin/users/${userId}`;
+      const body = { status: newStatus };
+      console.log('📤 リクエスト:', { url, body });
+      
+      const response = await fetch(url, {
         method: 'PATCH',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ status: newStatus }),
+        body: JSON.stringify(body),
       });
+
+      console.log('📥 レスポンス:', { status: response.status, ok: response.ok });
+      const data = await response.json();
+      console.log('📥 レスポンスボディ:', data);
 
       if (response.ok) {
         setUsers(users.map(u => 
@@ -77,17 +86,17 @@ export default function UsersTable({ users: initialUsers }: UsersTableProps) {
         ));
         alert('権限を変更しました');
       } else {
-        alert('権限変更に失敗しました');
+        alert(`権限変更に失敗しました: ${data.error || 'Unknown error'}`);
       }
     } catch (error) {
-      console.error('Error changing user status:', error);
+      console.error('❌ Error changing user status:', error);
       alert('権限変更に失敗しました');
     } finally {
       setLoading(null);
     }
   };
 
-  const handleChangeMarriage = async (userId: number, newMarriage: string | null) => {
+  const handleChangeMarriage = async (userId: string | number, newMarriage: string | null) => {
     setLoading(userId);
     try {
       const response = await fetch(`/api/admin/users/${userId}`, {
@@ -131,7 +140,7 @@ export default function UsersTable({ users: initialUsers }: UsersTableProps) {
     }
   };
 
-  const handleSelectUser = (userId: number, checked: boolean) => {
+  const handleSelectUser = (userId: string | number, checked: boolean) => {
     if (checked) {
       setSelectedUsers([...selectedUsers, userId]);
     } else {

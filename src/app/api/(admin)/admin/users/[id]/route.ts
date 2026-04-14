@@ -18,9 +18,11 @@ export async function PATCH(
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
 
-  const userId = parseInt(id);
+  const userId = id; // UUIDはそのまま使用
   const body = await request.json();
   const { is_banned, status, marriage } = body;
+
+  console.log('🔄 ユーザー更新リクエスト:', { userId, body });
 
   const updateData: any = {};
 
@@ -44,6 +46,15 @@ export async function PATCH(
   }
 
   try {
+    // 更新前のデータを取得
+    const { data: beforeData } = await supabase
+      .from('users')
+      .select('id, status, is_banned, marriage')
+      .eq('id', userId)
+      .single();
+    
+    console.log('📊 更新前:', beforeData);
+
     const { error } = await supabase
       .from('users')
       .update(updateData)
@@ -51,7 +62,16 @@ export async function PATCH(
 
     if (error) throw error;
 
-    return NextResponse.json({ success: true });
+    // 更新後のデータを取得
+    const { data: afterData } = await supabase
+      .from('users')
+      .select('id, status, is_banned, marriage')
+      .eq('id', userId)
+      .single();
+    
+    console.log('✅ 更新後:', afterData);
+
+    return NextResponse.json({ success: true, before: beforeData, after: afterData });
   } catch (error) {
     console.error('Error updating user:', error);
     return NextResponse.json(
