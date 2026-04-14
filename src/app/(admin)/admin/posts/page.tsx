@@ -31,7 +31,7 @@ async function getPosts(statusFilter?: string, limit: number = 100, sortBy: stri
   // ユーザー情報を一括取得
   const { data: users } = await supabase
     .from('users')
-    .select('id, name')
+    .select('id, name, status')
     .in('id', userIds);
 
   const userMap = new Map(users?.map(u => [u.id, u]) || []);

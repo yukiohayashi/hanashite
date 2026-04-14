@@ -21,6 +21,7 @@ interface Post {
   users: {
     id: number;
     name: string;
+    status?: number;
   } | null;
   categories?: { id: number; name: string }[] | { id: number; name: string } | null;
   keywords?: Array<{ id: number; keyword: string }>;
@@ -336,6 +337,9 @@ export default function PostsTable({ posts: initialPosts, initialCounts }: Posts
                 相談者
               </th>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                権限
+              </th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                 タイトル
               </th>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
@@ -414,6 +418,33 @@ export default function PostsTable({ posts: initialPosts, initialCounts }: Posts
                     </a>
                   ) : (
                     <span>{post.users?.name || 'ゲスト'}</span>
+                  )}
+                </td>
+                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                  {post.users?.status === 1 && (
+                    <span className="inline-flex px-2 py-0.5 text-xs font-semibold rounded-full bg-purple-100 text-purple-800">
+                      運営者
+                    </span>
+                  )}
+                  {post.users?.status === 2 && (
+                    <span className="inline-flex px-2 py-0.5 text-xs font-semibold rounded-full bg-blue-100 text-blue-800">
+                      編集者
+                    </span>
+                  )}
+                  {post.users?.status === 3 && (
+                    <span className="inline-flex px-2 py-0.5 text-xs font-semibold rounded-full bg-green-100 text-green-800">
+                      会員
+                    </span>
+                  )}
+                  {post.users?.status === 4 && (
+                    <span className="inline-flex px-2 py-0.5 text-xs font-semibold rounded-full bg-yellow-100 text-yellow-800">
+                      AI会員
+                    </span>
+                  )}
+                  {post.users?.status === 9 && (
+                    <span className="inline-flex px-2 py-0.5 text-xs font-semibold rounded-full bg-red-100 text-red-800">
+                      停止
+                    </span>
                   )}
                 </td>
                 <td className="px-6 py-4 text-sm text-gray-900">
