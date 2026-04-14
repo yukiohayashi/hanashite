@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { usePathname } from 'next/navigation';
 import Link from 'next/link';
 import { LayoutDashboard, FileText, Users, MessageSquare, Heart, Coins, Mail, Bot, Search, Trash2, Settings } from 'lucide-react';
@@ -15,6 +15,26 @@ export default function AdminPanelLayout({
   const sidebarBgColor = isProduction ? 'bg-gray-900' : 'bg-blue-900';
   const hoverBgColor = isProduction ? 'hover:bg-gray-800' : 'hover:bg-blue-800';
   const borderColor = isProduction ? 'border-gray-700' : 'border-blue-700';
+  const [currentModel, setCurrentModel] = useState<string>('');
+
+  // 現在のモデルを取得
+  useEffect(() => {
+    const fetchCurrentModel = async () => {
+      try {
+        const response = await fetch('/api/admin/api-settings');
+        if (response.ok) {
+          const data = await response.json();
+          const activeSettings = data.find((s: any) => s.is_active);
+          if (activeSettings?.model) {
+            setCurrentModel(activeSettings.model);
+          }
+        }
+      } catch (error) {
+        console.error('Error fetching model:', error);
+      }
+    };
+    fetchCurrentModel();
+  }, []);
 
   // ページタイトルを設定
   useEffect(() => {
@@ -106,7 +126,10 @@ export default function AdminPanelLayout({
             className={`flex items-center gap-2 px-3 py-1 text-gray-300 ${hoverBgColor} hover:text-white transition-colors`}
           >
             <Settings className="w-5 h-5" />
-            <span className="text-sm">API設定</span>
+            <span className="text-sm">
+              API設定
+              {currentModel && <span className="text-xs text-gray-400 ml-1">({currentModel})</span>}
+            </span>
           </Link>
 
           <div>
