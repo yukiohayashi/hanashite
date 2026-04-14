@@ -1,1 +1,11 @@
 @import "tailwindcss";
+
+/* 本文内のリンクスタイル */
+.leading-relaxed a {
+  color: #ff6b35;
+  text-decoration: underline;
+}
+
+.leading-relaxed a:hover {
+  color: #e55a2b;
+}
