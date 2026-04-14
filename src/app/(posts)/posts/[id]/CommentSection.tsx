@@ -23,7 +23,7 @@ interface Comment {
 }
 
 interface AIUser {
-  id: number;
+  id: string | number;
   name: string;
   birth_year: number | null;
 }
@@ -249,7 +249,7 @@ export default function CommentSection({ postId, initialComments, totalCount, po
   const [isSettingBestAnswer, setIsSettingBestAnswer] = useState(false);
   const [commentAsPostOwner, setCommentAsPostOwner] = useState(false);
   const [aiUsers, setAiUsers] = useState<AIUser[]>([]);
-  const [selectedAiUserId, setSelectedAiUserId] = useState<number | null>(null);
+  const [selectedAiUserId, setSelectedAiUserId] = useState<string | number | null>(null);
   
   // deadlineAtを使用（lint警告回避）
   const _deadlineAt = deadlineAt;
@@ -261,7 +261,9 @@ export default function CommentSection({ postId, initialComments, totalCount, po
       try {
         const res = await fetch('/api/users/ai-generate?list=true');
         const data = await res.json();
+        console.log('AI会員データ:', data);
         if (data.users) {
+          console.log('AI会員数:', data.users.length);
           setAiUsers(data.users);
         }
       } catch (e) {
@@ -353,7 +355,12 @@ export default function CommentSection({ postId, initialComments, totalCount, po
       // 管理者がAI会員としてコメントする場合
       let effectiveUserId: number | string | null = session?.user?.id || null;
       if (isAdmin && selectedAiUserId) {
-        effectiveUserId = selectedAiUserId;
+        // ゲストとして投稿する場合はuserIdをnullに
+        if (selectedAiUserId === 'guest') {
+          effectiveUserId = null;
+        } else {
+          effectiveUserId = selectedAiUserId;
+        }
       } else if (isAdmin && commentAsPostOwner && postUserId) {
         effectiveUserId = postUserId;
       }
@@ -514,21 +521,24 @@ export default function CommentSection({ postId, initialComments, totalCount, po
               <div className="mb-3 p-3 bg-blue-50 border border-blue-200 rounded-lg">
                 <label className="block text-sm text-gray-700 mb-1 font-medium">AI会員として投稿</label>
                 <select
-                  value={selectedAiUserId || ''}
+                  value={selectedAiUserId?.toString() || ''}
                   onChange={(e) => {
-                    const val = e.target.value ? Number(e.target.value) : null;
+                    console.log('選択された値:', e.target.value);
+                    const val = e.target.value === '' ? null : e.target.value;
+                    console.log('設定する値:', val);
                     setSelectedAiUserId(val);
                     if (val) setCommentAsPostOwner(false);
                   }}
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-400"
                 >
                   <option value="">自分として投稿</option>
-                  {aiUsers.map((u) => {
+                  <option value="guest">ゲストとして投稿</option>
+                  {aiUsers.filter(u => u.name !== '匿名').map((u) => {
                     const currentYear = new Date().getFullYear();
                     const ageGroup = u.birth_year ? `${Math.floor((currentYear - u.birth_year) / 10) * 10}代` : '';
                     return (
-                      <option key={u.id} value={u.id}>
-                        {u.name}{ageGroup ? ` (${ageGroup})` : ''}
+                      <option key={u.id} value={u.id.toString()}>
+                        {u.name}{ageGroup ? ` ${ageGroup}` : ''}
                       </option>
                     );
                   })}
@@ -575,24 +585,22 @@ export default function CommentSection({ postId, initialComments, totalCount, po
             <div className="mb-3 p-3 bg-blue-50 border border-blue-200 rounded-lg">
               <label className="block text-sm text-gray-700 mb-1 font-medium">AI会員として投稿（管理者機能）</label>
               <select
-                value={selectedAiUserId || ''}
+                value={selectedAiUserId?.toString() || ''}
                 onChange={(e) => {
-                  const val = e.target.value ? Number(e.target.value) : null;
+                  const val = e.target.value === '' ? null : e.target.value;
                   setSelectedAiUserId(val);
                   if (val) setCommentAsPostOwner(false);
                 }}
                 className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-400"
               >
                 <option value="">自分として投稿</option>
-                {postUserId && (
-                  <option value={postUserId}>{postUserName || '相談者'}として投稿</option>
-                )}
-                {aiUsers.map((u) => {
+                <option value="guest">ゲストとして投稿</option>
+                {aiUsers.filter(u => u.name !== '匿名').map((u) => {
                   const currentYear = new Date().getFullYear();
                   const ageGroup = u.birth_year ? `${Math.floor((currentYear - u.birth_year) / 10) * 10}代` : '';
                   return (
-                    <option key={u.id} value={u.id}>
-                      {u.name}{ageGroup ? ` (${ageGroup})` : ''}
+                    <option key={u.id} value={u.id.toString()}>
+                      {u.name}{ageGroup ? ` ${ageGroup}` : ''}
                     </option>
                   );
                 })}
