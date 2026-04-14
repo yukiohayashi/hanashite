@@ -76,9 +76,7 @@ async function getUserCounts() {
     editor: allUsers?.filter(u => u.status === 2).length || 0,
     suspended: allUsers?.filter(u => u.status === 9).length || 0,
     member: allUsers?.filter(u => u.status === 3).length || 0,
-    ai_editor: allUsers?.filter(u => u.status === 2).length || 0,
     ai_member: allUsers?.filter(u => u.status === 4).length || 0,
-    real_member: allUsers?.filter(u => u.status === 3).length || 0,
     with_image: allUsers?.filter(u => u.image).length || 0,
   };
 
@@ -140,7 +138,7 @@ export default async function UsersManagementPage({
               statusFilter === 2 ? 'text-blue-600 font-semibold' : 'text-gray-600'
             }`}
           >
-            編集者({counts.ai_editor})
+            編集者({counts.editor})
           </a>
           <span className="text-gray-400">|</span>
           <a
@@ -158,7 +156,7 @@ export default async function UsersManagementPage({
               statusFilter === 3 ? 'text-blue-600 font-semibold' : 'text-gray-600'
             }`}
           >
-            会員 ({counts.real_member})
+            会員 ({counts.member})
           </a>
           <span className="text-gray-400">|</span>
           <a
