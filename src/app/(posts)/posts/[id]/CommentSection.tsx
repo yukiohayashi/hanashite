@@ -782,7 +782,7 @@ export default function CommentSection({ postId, initialComments, totalCount, po
                           disabled={isSettingBestAnswer}
                           className="px-2 py-1 bg-orange-100 text-orange-600 text-xs rounded hover:bg-orange-200 transition-colors disabled:opacity-50"
                         >
-                          {isSettingBestAnswer ? '処理中...' : 'BA設定'}
+                          {isSettingBestAnswer ? '処理中...' : 'ベストアンサー認定'}
                         </button>
                       )}
                       
