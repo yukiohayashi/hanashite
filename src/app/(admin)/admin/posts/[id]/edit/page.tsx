@@ -22,7 +22,7 @@ async function getPost(id: string) {
   // ユーザー情報を取得
   const { data: user } = await supabase
     .from('users')
-    .select('id, name')
+    .select('id, name, slug')
     .eq('id', post.user_id)
     .single();
 

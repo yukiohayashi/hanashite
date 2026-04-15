@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
+import Link from 'next/link';
 
 interface Comment {
   id: number;
@@ -29,6 +30,7 @@ interface Post {
   users: {
     id: number;
     name: string;
+    slug: string | null;
   } | null;
   comments?: Comment[];
 }
@@ -248,12 +250,18 @@ export default function PostEditForm({ post, categories, allKeywords, postKeywor
             <label className="block text-sm font-medium text-gray-700 mb-1">
               投稿者
             </label>
-            <input
-              type="text"
-              value={post.users?.name || 'ゲスト'}
-              disabled
-              className="w-full px-3 py-2 border border-gray-300 rounded-md bg-white text-gray-500 text-sm"
-            />
+            {post.users?.slug ? (
+              <Link
+                href={`/admin/users/${post.users.slug}/edit`}
+                className="block w-full px-3 py-2 border border-gray-300 rounded-md bg-white text-blue-600 hover:text-blue-800 hover:underline text-sm truncate"
+              >
+                {post.users.name || 'ゲスト'}
+              </Link>
+            ) : (
+              <div className="w-full px-3 py-2 border border-gray-300 rounded-md bg-white text-gray-500 text-sm">
+                {post.users?.name || 'ゲスト'}
+              </div>
+            )}
           </div>
 
           <div className="w-52">

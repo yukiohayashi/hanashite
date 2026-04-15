@@ -95,6 +95,16 @@ export default async function PostPage({ params, searchParams }: { params: Promi
     return '70代以上';
   };
 
+  // 同じカテゴリの関連投稿を取得（現在の投稿を除く、最大5件）
+  const { data: relatedPosts } = await supabase
+    .from('posts')
+    .select('id, title, created_at, category_id, categories(name)')
+    .eq('status', 'published')
+    .eq('category_id', post?.category_id || 0)
+    .neq('id', id)
+    .order('created_at', { ascending: false })
+    .limit(5);
+
   const { data: voteChoices } = await supabase
     .from('vote_choices')
     .select('id, choice, vote_count')
@@ -531,6 +541,38 @@ export default async function PostPage({ params, searchParams }: { params: Promi
 
               {/* コメントセクション */}
               <CommentSection postId={post.id} initialComments={comments || []} totalCount={totalCommentCount || 0} postUserId={post.user_id as any} postUserName={userName} bestAnswerId={post.best_answer_id ? Number(post.best_answer_id) : undefined} deadlineAt={post.deadline_at} bestAnswerPoints={bestAnswerPoints} isAdmin={isAdmin} />
+
+              {/* 関連投稿セクション */}
+              {relatedPosts && relatedPosts.length > 0 && (
+                <div>
+                  <h2 className="text-xl font-bold text-gray-900 mb-4 flex items-center gap-2">
+               
+                    {category?.name || '同じカテゴリ'}に関する相談
+                  </h2>
+                  <div className="space-y-3">
+                    {relatedPosts.map((relatedPost: any) => (
+                      <Link
+                        key={relatedPost.id}
+                        href={`/posts/${relatedPost.id}`}
+                        className="block p-4 rounded-lg border border-gray-200 hover:border-[#ff6b35] hover:bg-[#fff5f2] transition-all group"
+                      >
+                        <div className="flex items-start gap-3">
+                         
+                          <div className="flex-1 min-w-0">
+                            <h3 className="font-medium text-gray-900 group-hover:text-[#ff6b35] transition-colors line-clamp-2">
+                              {relatedPost.title}
+                            </h3>
+                            <div className="mt-1 flex items-center gap-2 text-sm text-gray-500">
+                              <span>{new Date(relatedPost.created_at).toLocaleDateString('ja-JP')}</span>
+                              
+                            </div>
+                          </div>
+                        </div>
+                      </Link>
+                    ))}
+                  </div>
+                </div>
+              )}
             </article>
           </section>
         </div>
